@@ -5,15 +5,29 @@ import SwiftUI
 /// Plays Morse audio one character at a time, waits for single keypress response.
 @MainActor
 final class ReceiveTrainingViewModel: ObservableObject {
+    // MARK: - Session Phase
+
+    enum SessionPhase: Equatable {
+        case introduction(characterIndex: Int)  // Showing character intros
+        case training                           // Active training
+        case paused
+        case finished
+    }
+
     // MARK: - Published State
 
+    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
 
-    // Current character being tested
+    // Introduction state
+    @Published var introCharacters: [Character] = []
+    @Published var currentIntroCharacter: Character?
+
+    // Training state
     @Published var currentCharacter: Character?
     @Published var responseTimeRemaining: TimeInterval = 0
     @Published var lastFeedback: Feedback?
@@ -69,6 +83,13 @@ final class ReceiveTrainingViewModel: ObservableObject {
         return responseTimeRemaining / responseTimeout
     }
 
+    var introProgress: String {
+        if case .introduction(let index) = phase {
+            return "\(index + 1) of \(introCharacters.count)"
+        }
+        return ""
+    }
+
     // MARK: - Initialization
 
     init(audioEngine: AudioEngineProtocol = MorseAudioEngine()) {
@@ -81,21 +102,71 @@ final class ReceiveTrainingViewModel: ObservableObject {
         self.currentLevel = progressStore.progress.currentLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+
+        // Set up characters to introduce
+        introCharacters = MorseCode.characters(forLevel: currentLevel)
     }
 
-    // MARK: - Session Control
+    // MARK: - Introduction Phase
 
-    func startSession() {
-        guard !isPlaying else { return }
+    func startIntroduction() {
+        guard !introCharacters.isEmpty else {
+            startTraining()
+            return
+        }
 
+        phase = .introduction(characterIndex: 0)
+        showIntroCharacter(at: 0)
+    }
+
+    private func showIntroCharacter(at index: Int) {
+        guard index < introCharacters.count else {
+            startTraining()
+            return
+        }
+
+        currentIntroCharacter = introCharacters[index]
+        phase = .introduction(characterIndex: index)
+    }
+
+    func playCurrentIntroCharacter() {
+        guard let char = currentIntroCharacter else { return }
+
+        Task {
+            guard let engine = audioEngine as? MorseAudioEngine else { return }
+            engine.reset()
+            await engine.playCharacter(char)
+        }
+    }
+
+    func nextIntroCharacter() {
+        if case .introduction(let index) = phase {
+            let nextIndex = index + 1
+            if nextIndex < introCharacters.count {
+                showIntroCharacter(at: nextIndex)
+            } else {
+                startTraining()
+            }
+        }
+    }
+
+    // MARK: - Training Phase
+
+    private func startTraining() {
+        phase = .training
         sessionStartTime = Date()
         isPlaying = true
         startSessionTimer()
         playNextGroup()
     }
 
+    func startSession() {
+        startIntroduction()
+    }
+
     func pause() {
         isPlaying = false
+        phase = .paused
         sessionTimer?.invalidate()
         responseTimer?.invalidate()
         audioEngine.stop()
@@ -103,7 +174,8 @@ final class ReceiveTrainingViewModel: ObservableObject {
     }
 
     func resume() {
-        guard !isPlaying else { return }
+        guard phase == .paused else { return }
+        phase = .training
         isPlaying = true
         startSessionTimer()
         playNextGroup()
@@ -112,6 +184,7 @@ final class ReceiveTrainingViewModel: ObservableObject {
     func endSession() -> SessionResult? {
         pause()
         cleanup()
+        phase = .finished
 
         guard let startTime = sessionStartTime else { return nil }
 
