@@ -42,9 +42,14 @@ struct GroupGenerator {
     /// - Parameters:
     ///   - level: Current Koch level (determines available characters)
     ///   - groupLength: Number of characters in the group
+    ///   - availableCharacters: Optional custom character set (overrides level-based selection)
     /// - Returns: A string of characters to practice
-    static func generateLearningGroup(level: Int, groupLength: Int = 5) -> String {
-        let available = MorseCode.characters(forLevel: level)
+    static func generateLearningGroup(
+        level: Int,
+        groupLength: Int = 5,
+        availableCharacters: [Character]? = nil
+    ) -> String {
+        let available = availableCharacters ?? MorseCode.characters(forLevel: level)
         guard !available.isEmpty else { return "" }
 
         // The newest character (most recently unlocked)
@@ -83,14 +88,16 @@ struct GroupGenerator {
     ///   - characterStats: Per-character accuracy statistics
     ///   - sessionType: Training direction (receive or send)
     ///   - groupLength: Number of characters in the group
+    ///   - availableCharacters: Optional custom character set (overrides level-based selection)
     /// - Returns: A string of characters weighted by inverse accuracy
     static func generateRetentionGroup(
         level: Int,
         characterStats: [Character: CharacterStat],
         sessionType: SessionType,
-        groupLength: Int = 5
+        groupLength: Int = 5,
+        availableCharacters: [Character]? = nil
     ) -> String {
-        let available = MorseCode.characters(forLevel: level)
+        let available = availableCharacters ?? MorseCode.characters(forLevel: level)
         guard !available.isEmpty else { return "" }
 
         // Calculate weights: lower accuracy = higher weight (direction-specific)
@@ -112,22 +119,25 @@ struct GroupGenerator {
     ///   - characterStats: Per-character accuracy statistics
     ///   - sessionType: Training direction (receive or send)
     ///   - groupLength: Number of characters in the group
+    ///   - availableCharacters: Optional custom character set (overrides level-based selection)
     /// - Returns: A balanced practice group
     static func generateMixedGroup(
         level: Int,
         characterStats: [Character: CharacterStat],
         sessionType: SessionType,
-        groupLength: Int = 5
+        groupLength: Int = 5,
+        availableCharacters: [Character]? = nil
     ) -> String {
-        let available = MorseCode.characters(forLevel: level)
+        let available = availableCharacters ?? MorseCode.characters(forLevel: level)
         guard !available.isEmpty else { return "" }
 
-        // Check if we have direction-specific stats
+        // Check if we have direction-specific stats (uses base type for custom/vocabulary)
         let hasDirectionStats = available.contains { char in
             guard let stat = characterStats[char] else { return false }
-            switch sessionType {
+            switch sessionType.baseType {
             case .receive: return stat.receiveAttempts > 0
             case .send: return stat.sendAttempts > 0
+            default: return stat.totalAttempts > 0
             }
         }
 
@@ -136,10 +146,11 @@ struct GroupGenerator {
                 level: level,
                 characterStats: characterStats,
                 sessionType: sessionType,
-                groupLength: groupLength
+                groupLength: groupLength,
+                availableCharacters: availableCharacters
             )
         } else {
-            return generateLearningGroup(level: level, groupLength: groupLength)
+            return generateLearningGroup(level: level, groupLength: groupLength, availableCharacters: availableCharacters)
         }
     }
 
@@ -166,16 +177,19 @@ struct GroupGenerator {
                 return defaultWeight
             }
 
-            // Get direction-specific attempts and accuracy
+            // Get direction-specific attempts and accuracy (uses base type)
             let attempts: Int
             let accuracy: Double
-            switch sessionType {
+            switch sessionType.baseType {
             case .receive:
                 attempts = stat.receiveAttempts
                 accuracy = stat.receiveAccuracy
             case .send:
                 attempts = stat.sendAttempts
                 accuracy = stat.sendAccuracy
+            default:
+                attempts = stat.totalAttempts
+                accuracy = stat.combinedAccuracy
             }
 
             guard attempts >= minAttempts else {

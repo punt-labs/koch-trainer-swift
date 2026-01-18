@@ -10,7 +10,8 @@
       "Bash(make test:*)",
       "Bash(make build:*)",
       "Bash(xcodegen generate:*)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(echo:*)"
     ]
   }
 }

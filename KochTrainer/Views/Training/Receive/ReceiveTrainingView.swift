@@ -10,6 +10,13 @@ struct ReceiveTrainingView: View {
     @FocusState private var isKeyboardFocused: Bool
     @State private var hiddenInput: String = ""
 
+    /// Optional custom characters for practice mode
+    let customCharacters: [Character]?
+
+    init(customCharacters: [Character]? = nil) {
+        self.customCharacters = customCharacters
+    }
+
     var body: some View {
         ZStack {
             // Hidden text field for keyboard capture (only active during training)
@@ -56,7 +63,11 @@ struct ReceiveTrainingView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isTrainingActive)
         .onAppear {
-            viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
+            if let custom = customCharacters {
+                viewModel.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: custom)
+            } else {
+                viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
+            }
             viewModel.startSession()
         }
         .onDisappear {

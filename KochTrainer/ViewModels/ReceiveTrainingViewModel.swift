@@ -42,8 +42,12 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: - Configuration
 
     let responseTimeout: TimeInterval = 3.0
-    let minimumAttemptsForMastery: Int = 20
     let masteryThreshold: Double = 0.90
+
+    /// Minimum attempts scales with character count (5 per character, floor of 15)
+    var minimumAttemptsForMastery: Int {
+        max(15, 5 * introCharacters.count)
+    }
 
     // MARK: - Dependencies
 
@@ -60,6 +64,12 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     private var currentGroup: [Character] = []
     private var currentGroupIndex: Int = 0
+
+    /// Custom characters for practice mode (nil = use level-based characters)
+    private var customCharacters: [Character]?
+
+    /// Whether this is a custom practice session (no level advancement)
+    var isCustomSession: Bool { customCharacters != nil }
 
     // MARK: - Computed Properties
 
@@ -120,6 +130,19 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
 
         introCharacters = MorseCode.characters(forLevel: currentLevel)
+    }
+
+    /// Configure for custom practice with specific characters (no level advancement)
+    func configure(progressStore: ProgressStore, settingsStore: SettingsStore, customCharacters: [Character]) {
+        self.progressStore = progressStore
+        self.settingsStore = settingsStore
+        self.customCharacters = customCharacters
+        self.currentLevel = progressStore.progress.receiveLevel
+        audioEngine.setFrequency(settingsStore.settings.toneFrequency)
+        audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+
+        // For custom practice, use the selected characters as intro
+        introCharacters = customCharacters
     }
 
     // MARK: - Introduction Phase
@@ -216,15 +239,16 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
 
         let duration = Date().timeIntervalSince(startTime)
+        let sessionType: SessionType = isCustomSession ? .receiveCustom : .receive
         let result = SessionResult(
-            sessionType: .receive,
+            sessionType: sessionType,
             duration: duration,
             totalAttempts: totalAttempts,
             correctCount: correctCount,
             characterStats: characterStats
         )
 
-        // Record session and check for advancement
+        // Record session and check for advancement (custom sessions can't advance)
         let didAdvance = store.recordSession(result)
         let newCharacter: Character? = didAdvance ? store.progress.unlockedCharacters(for: .receive).last : nil
 
@@ -232,6 +256,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     func cleanup() {
+        isPlaying = false
         sessionTimer?.invalidate()
         sessionTimer = nil
         responseTimer?.invalidate()
@@ -371,13 +396,17 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         Task {
             if !wasCorrect {
-                try? await Task.sleep(nanoseconds: 300_000_000)
+                // Wait before playing correction to let visual feedback register
+                try? await Task.sleep(nanoseconds: 400_000_000)
                 if let engine = audioEngine as? MorseAudioEngine, isPlaying {
                     await engine.playCharacter(expected)
                 }
+                // Longer pause after correction so it doesn't blend into next trial
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
+            } else {
+                // Brief pause after correct answer before next character
+                try? await Task.sleep(nanoseconds: 500_000_000)
             }
-
-            try? await Task.sleep(nanoseconds: 500_000_000)
 
             // Check for mastery after each response
             checkForMastery()
@@ -404,7 +433,8 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
             level: currentLevel,
             characterStats: combinedStats,
             sessionType: .receive,
-            groupLength: Int.random(in: 3...5)
+            groupLength: Int.random(in: 3...5),
+            availableCharacters: customCharacters
         )
     }
 }

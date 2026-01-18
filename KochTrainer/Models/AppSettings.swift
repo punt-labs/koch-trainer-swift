@@ -20,16 +20,21 @@ struct AppSettings: Codable, Equatable {
     /// Notification preferences
     var notificationSettings: NotificationSettings
 
+    /// User's amateur radio callsign (for personalized vocabulary practice)
+    var userCallsign: String
+
     init(
         toneFrequency: Double = 600,
         effectiveSpeed: Int = 12,
         sendInputMode: SendInputMode = .paddle,
-        notificationSettings: NotificationSettings = NotificationSettings()
+        notificationSettings: NotificationSettings = NotificationSettings(),
+        userCallsign: String = ""
     ) {
         self.toneFrequency = max(400, min(800, toneFrequency))
         self.effectiveSpeed = max(10, min(18, effectiveSpeed))
         self.sendInputMode = sendInputMode
         self.notificationSettings = notificationSettings
+        self.userCallsign = userCallsign.uppercased()
     }
 }
 
@@ -37,7 +42,7 @@ struct AppSettings: Codable, Equatable {
 
 extension AppSettings {
     enum CodingKeys: String, CodingKey {
-        case toneFrequency, effectiveSpeed, sendInputMode, notificationSettings
+        case toneFrequency, effectiveSpeed, sendInputMode, notificationSettings, userCallsign
     }
 
     init(from decoder: Decoder) throws {
@@ -46,8 +51,9 @@ extension AppSettings {
         effectiveSpeed = try container.decode(Int.self, forKey: .effectiveSpeed)
         sendInputMode = try container.decode(SendInputMode.self, forKey: .sendInputMode)
 
-        // Migration: provide default if not present
+        // Migration: provide defaults if not present
         notificationSettings = try container.decodeIfPresent(NotificationSettings.self, forKey: .notificationSettings)
             ?? NotificationSettings()
+        userCallsign = try container.decodeIfPresent(String.self, forKey: .userCallsign) ?? ""
     }
 }

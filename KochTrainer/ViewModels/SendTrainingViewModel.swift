@@ -44,8 +44,12 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: - Configuration
 
     let inputTimeout: TimeInterval = 2.0  // Time to complete a character
-    let minimumAttemptsForMastery: Int = 20
     let masteryThreshold: Double = 0.90
+
+    /// Minimum attempts scales with character count (5 per character, floor of 15)
+    var minimumAttemptsForMastery: Int {
+        max(15, 5 * introCharacters.count)
+    }
 
     // MARK: - Dependencies
 
@@ -61,6 +65,12 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var sessionStartTime: Date?
     private var currentLevel: Int = 1
     private var lastInputTime: Date?
+
+    /// Custom characters for practice mode (nil = use level-based characters)
+    private var customCharacters: [Character]?
+
+    /// Whether this is a custom practice session (no level advancement)
+    var isCustomSession: Bool { customCharacters != nil }
 
     // MARK: - Computed Properties
 
@@ -121,6 +131,19 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
 
         introCharacters = MorseCode.characters(forLevel: currentLevel)
+    }
+
+    /// Configure for custom practice with specific characters (no level advancement)
+    func configure(progressStore: ProgressStore, settingsStore: SettingsStore, customCharacters: [Character]) {
+        self.progressStore = progressStore
+        self.settingsStore = settingsStore
+        self.customCharacters = customCharacters
+        self.currentLevel = progressStore.progress.sendLevel
+        audioEngine.setFrequency(settingsStore.settings.toneFrequency)
+        audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+
+        // For custom practice, use the selected characters as intro
+        introCharacters = customCharacters
     }
 
     // MARK: - Introduction Phase
@@ -217,14 +240,16 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
 
         let duration = Date().timeIntervalSince(startTime)
+        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
         let result = SessionResult(
-            sessionType: .send,
+            sessionType: sessionType,
             duration: duration,
             totalAttempts: totalAttempts,
             correctCount: correctCount,
             characterStats: characterStats
         )
 
+        // Record session and check for advancement (custom sessions can't advance)
         let didAdvance = store.recordSession(result)
         let newCharacter: Character? = didAdvance ? store.progress.unlockedCharacters(for: .send).last : nil
 
@@ -232,6 +257,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     func cleanup() {
+        isPlaying = false
         sessionTimer?.invalidate()
         sessionTimer = nil
         inputTimer?.invalidate()
@@ -369,15 +395,18 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         )
 
         Task {
-            // If wrong, play the correct character
             if !wasCorrect {
-                try? await Task.sleep(nanoseconds: 300_000_000)
+                // Wait before playing correction to let visual feedback register
+                try? await Task.sleep(nanoseconds: 400_000_000)
                 if let engine = audioEngine as? MorseAudioEngine, isPlaying {
                     await engine.playCharacter(expected)
                 }
+                // Longer pause after correction so it doesn't blend into next trial
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
+            } else {
+                // Brief pause after correct answer
+                try? await Task.sleep(nanoseconds: 500_000_000)
             }
-
-            try? await Task.sleep(nanoseconds: 500_000_000)
 
             checkForMastery()
 
@@ -402,7 +431,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
             level: currentLevel,
             characterStats: combinedStats,
             sessionType: .send,
-            groupLength: 1
+            groupLength: 1,
+            availableCharacters: customCharacters
         )
 
         if let char = group.first {

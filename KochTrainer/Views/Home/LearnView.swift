@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct HomeView: View {
+struct LearnView: View {
     @EnvironmentObject private var progressStore: ProgressStore
 
     private var schedule: PracticeSchedule {
@@ -86,14 +86,9 @@ struct HomeView: View {
             .cornerRadius(12)
 
             Spacer()
-
-            NavigationLink(destination: SettingsView()) {
-                Text("Settings")
-                    .font(Typography.body)
-            }
         }
         .padding(Theme.Spacing.lg)
-        .navigationTitle("Home")
+        .navigationTitle("Learn")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -136,7 +131,7 @@ struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView()
+        LearnView()
             .environmentObject(ProgressStore())
             .environmentObject(SettingsStore())
             .environmentObject(NotificationManager())

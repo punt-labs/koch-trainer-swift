@@ -8,6 +8,12 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Profile") {
+                TextField("Your Callsign", text: $settingsStore.settings.userCallsign)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+            }
+
             Section("Audio") {
                 VStack(alignment: .leading) {
                     Text("Tone Frequency: \(Int(settingsStore.settings.toneFrequency)) Hz")

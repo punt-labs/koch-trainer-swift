@@ -4,11 +4,35 @@ import Foundation
 enum SessionType: String, Codable {
     case receive
     case send
+    case receiveCustom
+    case sendCustom
+    case receiveVocabulary
+    case sendVocabulary
 
     var displayName: String {
         switch self {
         case .receive: return "Receive"
         case .send: return "Send"
+        case .receiveCustom: return "Custom Receive"
+        case .sendCustom: return "Custom Send"
+        case .receiveVocabulary: return "Vocabulary Receive"
+        case .sendVocabulary: return "Vocabulary Send"
+        }
+    }
+
+    /// Whether this session type can trigger level advancement
+    var canAdvanceLevel: Bool {
+        switch self {
+        case .receive, .send: return true
+        case .receiveCustom, .sendCustom, .receiveVocabulary, .sendVocabulary: return false
+        }
+    }
+
+    /// The base session type (receive or send direction)
+    var baseType: SessionType {
+        switch self {
+        case .receive, .receiveCustom, .receiveVocabulary: return .receive
+        case .send, .sendCustom, .sendVocabulary: return .send
         }
     }
 }

@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// Protocol for playing Morse code audio.
@@ -10,7 +11,7 @@ protocol AudioEngineProtocol {
 }
 
 /// Plays Morse code characters and groups with configurable timing.
-final class MorseAudioEngine: AudioEngineProtocol {
+final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     private let toneGenerator = ToneGenerator()
     private var frequency: Double = 600
     private var effectiveSpeed: Int = 12

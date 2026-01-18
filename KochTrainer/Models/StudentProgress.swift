@@ -20,13 +20,21 @@ struct StudentProgress: Codable, Equatable {
     /// Spaced repetition and streak tracking
     var schedule: PracticeSchedule
 
+    /// Per-word performance statistics for vocabulary training
+    var wordStats: [String: WordStat]
+
+    /// User-created vocabulary sets
+    var customVocabularySets: [VocabularySet]
+
     init(
         receiveLevel: Int = 1,
         sendLevel: Int = 1,
         characterStats: [Character: CharacterStat] = [:],
         sessionHistory: [SessionResult] = [],
         startDate: Date = Date(),
-        schedule: PracticeSchedule = PracticeSchedule()
+        schedule: PracticeSchedule = PracticeSchedule(),
+        wordStats: [String: WordStat] = [:],
+        customVocabularySets: [VocabularySet] = []
     ) {
         self.receiveLevel = max(1, min(receiveLevel, 26))
         self.sendLevel = max(1, min(sendLevel, 26))
@@ -34,13 +42,16 @@ struct StudentProgress: Codable, Equatable {
         self.sessionHistory = sessionHistory
         self.startDate = startDate
         self.schedule = schedule
+        self.wordStats = wordStats
+        self.customVocabularySets = customVocabularySets
     }
 
-    /// Get level for a specific session type
+    /// Get level for a specific session type (uses base type for custom/vocabulary)
     func level(for sessionType: SessionType) -> Int {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: return receiveLevel
         case .send: return sendLevel
+        default: return max(receiveLevel, sendLevel)
         }
     }
 
@@ -68,10 +79,10 @@ struct StudentProgress: Codable, Equatable {
         return Double(totalCorrect) / Double(totalAttempts)
     }
 
-    /// Overall accuracy for a specific session type
+    /// Overall accuracy for a specific session type (uses base type for custom/vocabulary)
     func overallAccuracy(for sessionType: SessionType) -> Double {
         let stats = characterStats.values
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive:
             let attempts = stats.reduce(0) { $0 + $1.receiveAttempts }
             let correct = stats.reduce(0) { $0 + $1.receiveCorrect }
@@ -82,6 +93,8 @@ struct StudentProgress: Codable, Equatable {
             let correct = stats.reduce(0) { $0 + $1.sendCorrect }
             guard attempts > 0 else { return 0 }
             return Double(correct) / Double(attempts)
+        default:
+            return overallAccuracy
         }
     }
 
@@ -91,17 +104,19 @@ struct StudentProgress: Codable, Equatable {
         sessionAccuracy >= 0.90 && level < 26
     }
 
-    /// Advance to next level for a session type if conditions are met
+    /// Advance to next level for a session type if conditions are met (uses base type)
     mutating func advanceIfEligible(sessionAccuracy: Double, sessionType: SessionType) -> Bool {
         let currentLvl = level(for: sessionType)
         guard Self.shouldAdvance(sessionAccuracy: sessionAccuracy, level: currentLvl) else {
             return false
         }
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive:
             receiveLevel += 1
         case .send:
             sendLevel += 1
+        default:
+            return false
         }
         return true
     }
@@ -146,9 +161,9 @@ struct CharacterStat: Codable, Equatable {
         self.lastPracticed = lastPracticed
     }
 
-    /// Convenience initializer for single-direction stats (used during sessions)
+    /// Convenience initializer for single-direction stats (used during sessions, uses base type)
     init(sessionType: SessionType, attempts: Int, correct: Int, lastPracticed: Date = Date()) {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive:
             self.receiveAttempts = attempts
             self.receiveCorrect = correct
@@ -159,6 +174,12 @@ struct CharacterStat: Codable, Equatable {
             self.receiveCorrect = 0
             self.sendAttempts = attempts
             self.sendCorrect = correct
+        default:
+            // Fallback: treat as receive
+            self.receiveAttempts = attempts
+            self.receiveCorrect = correct
+            self.sendAttempts = 0
+            self.sendCorrect = 0
         }
         self.lastPracticed = lastPracticed
     }
@@ -183,11 +204,12 @@ struct CharacterStat: Codable, Equatable {
         return Double(totalCorrect) / Double(totalAttempts)
     }
 
-    /// Get accuracy for a specific session type
+    /// Get accuracy for a specific session type (uses base type for custom/vocabulary)
     func accuracy(for sessionType: SessionType) -> Double {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: return receiveAccuracy
         case .send: return sendAccuracy
+        default: return combinedAccuracy
         }
     }
 
@@ -208,6 +230,7 @@ struct CharacterStat: Codable, Equatable {
 extension StudentProgress {
     enum CodingKeys: String, CodingKey {
         case receiveLevel, sendLevel, currentLevel, characterStats, sessionHistory, startDate, schedule
+        case wordStats, customVocabularySets
     }
 
     init(from decoder: Decoder) throws {
@@ -241,6 +264,10 @@ extension StudentProgress {
         } else {
             schedule = Self.calculateInitialSchedule(from: sessionHistory, startDate: startDate)
         }
+
+        // Migration: provide defaults for vocabulary fields if not present
+        wordStats = try container.decodeIfPresent([String: WordStat].self, forKey: .wordStats) ?? [:]
+        customVocabularySets = try container.decodeIfPresent([VocabularySet].self, forKey: .customVocabularySets) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
@@ -250,6 +277,8 @@ extension StudentProgress {
         try container.encode(sessionHistory, forKey: .sessionHistory)
         try container.encode(startDate, forKey: .startDate)
         try container.encode(schedule, forKey: .schedule)
+        try container.encode(wordStats, forKey: .wordStats)
+        try container.encode(customVocabularySets, forKey: .customVocabularySets)
 
         // Encode character stats with String keys
         var stringKeyedStats: [String: CharacterStat] = [:]

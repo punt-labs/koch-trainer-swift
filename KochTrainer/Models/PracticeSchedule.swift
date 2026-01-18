@@ -46,35 +46,39 @@ struct PracticeSchedule: Codable, Equatable {
         self.levelReviewDates = levelReviewDates
     }
 
-    /// Get next practice date for a session type
+    /// Get next practice date for a session type (uses base type for custom/vocabulary)
     func nextDate(for sessionType: SessionType) -> Date? {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: return receiveNextDate
         case .send: return sendNextDate
+        default: return nil
         }
     }
 
-    /// Get interval for a session type
+    /// Get interval for a session type (uses base type for custom/vocabulary)
     func interval(for sessionType: SessionType) -> Double {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: return receiveInterval
         case .send: return sendInterval
+        default: return 1.0
         }
     }
 
-    /// Set next practice date for a session type
+    /// Set next practice date for a session type (uses base type for custom/vocabulary)
     mutating func setNextDate(_ date: Date?, for sessionType: SessionType) {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: receiveNextDate = date
         case .send: sendNextDate = date
+        default: break
         }
     }
 
-    /// Set interval for a session type
+    /// Set interval for a session type (uses base type for custom/vocabulary)
     mutating func setInterval(_ interval: Double, for sessionType: SessionType) {
-        switch sessionType {
+        switch sessionType.baseType {
         case .receive: receiveInterval = interval
         case .send: sendInterval = interval
+        default: break
         }
     }
 }
