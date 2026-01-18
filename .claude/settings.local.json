@@ -6,7 +6,9 @@
       "Bash(DEVELOPER_DIR=\"\" /usr/bin/git add:*)",
       "Bash(DEVELOPER_DIR=\"\" /usr/bin/git commit -m \"$\\(cat <<''EOF''\nfeat\\(training\\): add adaptive group generation\n\nImplement two-mode character selection strategy:\n\n1. Pattern-based grouping for learning new characters:\n   - Groups characters by Morse structure \\(single/double/triple/quad elements\\)\n   - Emphasizes newest character with pattern-similar companions\n   - Helps learners recognize rhythmic similarities\n\n2. Accuracy-weighted selection for retention practice:\n   - Characters with lower accuracy get higher selection weight\n   - Combines historic stats with current session performance\n   - Minimum weight ensures mastered characters still appear\n\nPattern families:\n- Single element: E, T\n- Double element: I, M, A, N\n- Triple element: S, O, U, R, W, G, D, K\n- Quad element: H, V, F, L, P, J, B, X, C, Y, Q, Z\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(make test:*)",
+      "Bash(make build:*)"
     ]
   }
 }

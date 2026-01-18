@@ -2,18 +2,32 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for receive training sessions.
-/// Plays Morse audio, accepts text input, tracks accuracy.
+/// Plays Morse audio one character at a time, waits for single keypress response.
 @MainActor
 final class ReceiveTrainingViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes
-    @Published var currentInput: String = ""
-    @Published var currentGroup: String = ""
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+
+    // Current character being tested
+    @Published var currentCharacter: Character?
+    @Published var responseTimeRemaining: TimeInterval = 0
+    @Published var lastFeedback: Feedback?
+    @Published var isWaitingForResponse: Bool = false
+
+    struct Feedback: Equatable {
+        let wasCorrect: Bool
+        let expectedCharacter: Character
+        let userPressed: Character?
+    }
+
+    // MARK: - Configuration
+
+    let responseTimeout: TimeInterval = 3.0 // seconds to respond
 
     // MARK: - Dependencies
 
@@ -23,10 +37,14 @@ final class ReceiveTrainingViewModel: ObservableObject {
 
     // MARK: - Internal State
 
-    private var timer: Timer?
+    private var sessionTimer: Timer?
+    private var responseTimer: Timer?
     private var sessionStartTime: Date?
     private var currentLevel: Int = 1
-    private var playTask: Task<Void, Never>?
+
+    // Current group being played
+    private var currentGroup: [Character] = []
+    private var currentGroupIndex: Int = 0
 
     // MARK: - Computed Properties
 
@@ -44,6 +62,11 @@ final class ReceiveTrainingViewModel: ObservableObject {
     var accuracy: Double {
         guard totalAttempts > 0 else { return 0 }
         return Double(correctCount) / Double(totalAttempts)
+    }
+
+    var responseProgress: Double {
+        guard responseTimeout > 0 else { return 0 }
+        return responseTimeRemaining / responseTimeout
     }
 
     // MARK: - Initialization
@@ -67,29 +90,22 @@ final class ReceiveTrainingViewModel: ObservableObject {
 
         sessionStartTime = Date()
         isPlaying = true
-        startTimer()
+        startSessionTimer()
         playNextGroup()
-    }
-
-    func togglePlayPause() {
-        if isPlaying {
-            pause()
-        } else {
-            resume()
-        }
     }
 
     func pause() {
         isPlaying = false
-        timer?.invalidate()
+        sessionTimer?.invalidate()
+        responseTimer?.invalidate()
         audioEngine.stop()
-        playTask?.cancel()
+        isWaitingForResponse = false
     }
 
     func resume() {
         guard !isPlaying else { return }
         isPlaying = true
-        startTimer()
+        startSessionTimer()
         playNextGroup()
     }
 
@@ -112,64 +128,45 @@ final class ReceiveTrainingViewModel: ObservableObject {
     }
 
     func cleanup() {
-        timer?.invalidate()
-        timer = nil
+        sessionTimer?.invalidate()
+        sessionTimer = nil
+        responseTimer?.invalidate()
+        responseTimer = nil
         audioEngine.stop()
-        playTask?.cancel()
-        playTask = nil
     }
 
     // MARK: - Input Handling
 
-    func submitInput() {
-        let submitted = currentInput.uppercased().trimmingCharacters(in: .whitespaces)
-        let expected = currentGroup.uppercased()
+    /// Called when user presses a key
+    func handleKeyPress(_ key: Character) {
+        guard isWaitingForResponse, let expected = currentCharacter else { return }
 
-        guard !submitted.isEmpty else { return }
+        // Stop the response timer
+        responseTimer?.invalidate()
+        isWaitingForResponse = false
 
-        // Compare character by character
-        for (index, expectedChar) in expected.enumerated() {
-            let submittedChar: Character? = index < submitted.count
-                ? submitted[submitted.index(submitted.startIndex, offsetBy: index)]
-                : nil
+        // Check if correct
+        let pressedUpper = Character(key.uppercased())
+        let isCorrect = pressedUpper == expected
 
-            totalAttempts += 1
-            let isCorrect = submittedChar == expectedChar
+        recordResponse(expected: expected, wasCorrect: isCorrect, userPressed: pressedUpper)
 
-            if isCorrect {
-                correctCount += 1
-            }
-
-            // Update character stats (receive direction)
-            var stat = characterStats[expectedChar] ?? CharacterStat()
-            stat.receiveAttempts += 1
-            if isCorrect {
-                stat.receiveCorrect += 1
-            }
-            stat.lastPracticed = Date()
-            characterStats[expectedChar] = stat
-        }
-
-        currentInput = ""
-
-        // Play next group
-        if isPlaying && timeRemaining > 0 {
-            playNextGroup()
-        }
+        // Show feedback briefly, then continue
+        showFeedbackAndContinue(wasCorrect: isCorrect, expected: expected, userPressed: pressedUpper)
     }
 
     // MARK: - Private Methods
 
-    private func startTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+    private func startSessionTimer() {
+        sessionTimer?.invalidate()
+        sessionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                self?.tick()
+                self?.tickSession()
             }
         }
     }
 
-    private func tick() {
+    private func tickSession() {
         guard timeRemaining > 0 else {
             endSessionDueToTimeout()
             return
@@ -178,18 +175,116 @@ final class ReceiveTrainingViewModel: ObservableObject {
     }
 
     private func endSessionDueToTimeout() {
-        // Session ends when timer reaches 0
         pause()
     }
 
     private func playNextGroup() {
-        let group = generateGroup()
-        currentGroup = group
+        guard isPlaying else { return }
 
-        playTask = Task {
+        // Generate a new group
+        let group = generateGroup()
+        currentGroup = Array(group)
+        currentGroupIndex = 0
+
+        playNextCharacterInGroup()
+    }
+
+    private func playNextCharacterInGroup() {
+        guard isPlaying else { return }
+
+        if currentGroupIndex >= currentGroup.count {
+            // Group complete, start next group after brief pause
+            Task {
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second pause
+                if isPlaying {
+                    playNextGroup()
+                }
+            }
+            return
+        }
+
+        let char = currentGroup[currentGroupIndex]
+        currentCharacter = char
+        lastFeedback = nil
+
+        // Play the character audio
+        Task {
             guard let engine = audioEngine as? MorseAudioEngine else { return }
             engine.reset()
-            await engine.playGroup(group)
+            await engine.playCharacter(char)
+
+            // After audio finishes, start response timer
+            if isPlaying {
+                startResponseTimer()
+            }
+        }
+    }
+
+    private func startResponseTimer() {
+        isWaitingForResponse = true
+        responseTimeRemaining = responseTimeout
+
+        responseTimer?.invalidate()
+        responseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.tickResponse()
+            }
+        }
+    }
+
+    private func tickResponse() {
+        responseTimeRemaining -= 0.05
+
+        if responseTimeRemaining <= 0 {
+            // Timeout - count as wrong
+            responseTimer?.invalidate()
+            isWaitingForResponse = false
+
+            if let expected = currentCharacter {
+                recordResponse(expected: expected, wasCorrect: false, userPressed: nil)
+                showFeedbackAndContinue(wasCorrect: false, expected: expected, userPressed: nil)
+            }
+        }
+    }
+
+    private func recordResponse(expected: Character, wasCorrect: Bool, userPressed: Character?) {
+        totalAttempts += 1
+        if wasCorrect {
+            correctCount += 1
+        }
+
+        // Update character stats
+        var stat = characterStats[expected] ?? CharacterStat()
+        stat.receiveAttempts += 1
+        if wasCorrect {
+            stat.receiveCorrect += 1
+        }
+        stat.lastPracticed = Date()
+        characterStats[expected] = stat
+    }
+
+    private func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, userPressed: Character?) {
+        lastFeedback = Feedback(
+            wasCorrect: wasCorrect,
+            expectedCharacter: expected,
+            userPressed: userPressed
+        )
+
+        // Move to next character after showing feedback
+        Task {
+            // If wrong, replay the correct sound
+            if !wasCorrect {
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 sec
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
+                    await engine.playCharacter(expected)
+                }
+            }
+
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 sec pause
+            if isPlaying {
+                currentGroupIndex += 1
+                playNextCharacterInGroup()
+            }
         }
     }
 
