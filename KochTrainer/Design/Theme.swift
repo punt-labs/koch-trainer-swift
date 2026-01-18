@@ -3,12 +3,23 @@ import SwiftUI
 /// Design system colors and spacing constants.
 enum Theme {
     enum Colors {
+        /// Primary accent color - adapts to light/dark mode
         static let primary = Color.accentColor
-        static let background = Color(uiColor: .systemBackground)
-        static let secondaryBackground = Color(uiColor: .secondarySystemBackground)
-        static let success = Color.green
-        static let error = Color.red
-        static let warning = Color.orange
+
+        /// Main background - white in light mode, true black in dark mode (OLED-friendly)
+        static let background = Color("Background")
+
+        /// Secondary background for cards and sections
+        static let secondaryBackground = Color("SecondaryBackground")
+
+        /// Success state color - adapts to light/dark mode
+        static let success = Color("Success")
+
+        /// Error state color - adapts to light/dark mode
+        static let error = Color("Error")
+
+        /// Warning state color - adapts to light/dark mode
+        static let warning = Color("Warning")
     }
 
     enum Spacing {

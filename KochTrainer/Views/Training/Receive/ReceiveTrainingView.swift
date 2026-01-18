@@ -5,6 +5,7 @@ struct ReceiveTrainingView: View {
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var settingsStore: SettingsStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     @FocusState private var isKeyboardFocused: Bool
     @State private var hiddenInput: String = ""
@@ -60,6 +61,11 @@ struct ReceiveTrainingView: View {
         }
         .onDisappear {
             viewModel.cleanup()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background, case .training = viewModel.phase {
+                viewModel.pause()
+            }
         }
     }
 
@@ -321,7 +327,7 @@ struct TimeoutProgressBar: View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(Theme.Colors.secondaryBackground)
 
                 RoundedRectangle(cornerRadius: 4)
                     .fill(progressColor)
@@ -334,7 +340,7 @@ struct TimeoutProgressBar: View {
         if progress > 0.5 {
             return Theme.Colors.success
         } else if progress > 0.25 {
-            return .orange
+            return Theme.Colors.warning
         } else {
             return Theme.Colors.error
         }

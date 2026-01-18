@@ -28,7 +28,7 @@ struct ResultsView: View {
                 ResultRow(label: "Accuracy", value: "\(result.accuracyPercentage)%")
             }
             .padding()
-            .background(Theme.Colors.background.opacity(0.5))
+            .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
 
             if result.accuracy >= 0.90 {

@@ -5,6 +5,7 @@ struct SendTrainingView: View {
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var settingsStore: SettingsStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     @FocusState private var isKeyboardFocused: Bool
     @State private var hiddenInput: String = ""
@@ -60,6 +61,11 @@ struct SendTrainingView: View {
         }
         .onDisappear {
             viewModel.cleanup()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background, case .training = viewModel.phase {
+                viewModel.pause()
+            }
         }
     }
 
