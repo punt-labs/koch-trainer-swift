@@ -80,19 +80,20 @@ final class GroupGeneratorTests: XCTestCase {
         let group = GroupGenerator.generateRetentionGroup(
             level: 5,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 4
         )
         XCTAssertEqual(group.count, 4)
     }
 
-    func testRetentionGroupWeightsLowAccuracy() {
-        // K has 50% accuracy, others have 90%
+    func testRetentionGroupWeightsLowReceiveAccuracy() {
+        // K has 50% receive accuracy, others have 90%
         let stats: [Character: CharacterStat] = [
-            "K": CharacterStat(totalAttempts: 100, correctCount: 50),
-            "M": CharacterStat(totalAttempts: 100, correctCount: 90),
-            "R": CharacterStat(totalAttempts: 100, correctCount: 90),
-            "S": CharacterStat(totalAttempts: 100, correctCount: 90),
-            "U": CharacterStat(totalAttempts: 100, correctCount: 90)
+            "K": CharacterStat(receiveAttempts: 100, receiveCorrect: 50),
+            "M": CharacterStat(receiveAttempts: 100, receiveCorrect: 90),
+            "R": CharacterStat(receiveAttempts: 100, receiveCorrect: 90),
+            "S": CharacterStat(receiveAttempts: 100, receiveCorrect: 90),
+            "U": CharacterStat(receiveAttempts: 100, receiveCorrect: 90)
         ]
 
         var kCount = 0
@@ -102,6 +103,7 @@ final class GroupGeneratorTests: XCTestCase {
             let group = GroupGenerator.generateRetentionGroup(
                 level: 5,
                 characterStats: stats,
+                sessionType: .receive,
                 groupLength: 5
             )
             kCount += group.filter { $0 == "K" }.count
@@ -116,10 +118,85 @@ final class GroupGeneratorTests: XCTestCase {
         )
     }
 
+    func testRetentionGroupWeightsLowSendAccuracy() {
+        // K has 50% send accuracy, others have 90%
+        let stats: [Character: CharacterStat] = [
+            "K": CharacterStat(sendAttempts: 100, sendCorrect: 50),
+            "M": CharacterStat(sendAttempts: 100, sendCorrect: 90),
+            "R": CharacterStat(sendAttempts: 100, sendCorrect: 90),
+            "S": CharacterStat(sendAttempts: 100, sendCorrect: 90),
+            "U": CharacterStat(sendAttempts: 100, sendCorrect: 90)
+        ]
+
+        var kCount = 0
+        let iterations = 500
+
+        for _ in 0..<iterations {
+            let group = GroupGenerator.generateRetentionGroup(
+                level: 5,
+                characterStats: stats,
+                sessionType: .send,
+                groupLength: 5
+            )
+            kCount += group.filter { $0 == "K" }.count
+        }
+
+        // K should appear more than 1/5 of the time due to lower send accuracy
+        let expectedUniform = Double(iterations * 5) / 5.0
+        XCTAssertGreaterThan(
+            Double(kCount),
+            expectedUniform * 1.3,
+            "Low send accuracy character should be weighted higher"
+        )
+    }
+
+    func testRetentionGroupUsesCorrectDirection() {
+        // K has low receive accuracy but high send accuracy
+        let stats: [Character: CharacterStat] = [
+            "K": CharacterStat(
+                receiveAttempts: 100, receiveCorrect: 50,
+                sendAttempts: 100, sendCorrect: 95
+            ),
+            "M": CharacterStat(
+                receiveAttempts: 100, receiveCorrect: 90,
+                sendAttempts: 100, sendCorrect: 90
+            )
+        ]
+
+        // For receive mode, K should be weighted higher (low receive accuracy)
+        var kCountReceive = 0
+        for _ in 0..<200 {
+            let group = GroupGenerator.generateRetentionGroup(
+                level: 2,
+                characterStats: stats,
+                sessionType: .receive,
+                groupLength: 5
+            )
+            kCountReceive += group.filter { $0 == "K" }.count
+        }
+
+        // For send mode, M should be weighted higher (K has high send accuracy)
+        var kCountSend = 0
+        for _ in 0..<200 {
+            let group = GroupGenerator.generateRetentionGroup(
+                level: 2,
+                characterStats: stats,
+                sessionType: .send,
+                groupLength: 5
+            )
+            kCountSend += group.filter { $0 == "K" }.count
+        }
+
+        // K should appear MORE in receive mode than send mode
+        XCTAssertGreaterThan(kCountReceive, kCountSend,
+            "K should appear more in receive mode (where it has low accuracy)")
+    }
+
     func testRetentionGroupWithNoStats() {
         let group = GroupGenerator.generateRetentionGroup(
             level: 5,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 5
         )
 
@@ -131,14 +208,30 @@ final class GroupGeneratorTests: XCTestCase {
 
     // MARK: - Mixed Group Tests
 
-    func testMixedGroupWithStats() {
+    func testMixedGroupWithReceiveStats() {
         let stats: [Character: CharacterStat] = [
-            "K": CharacterStat(totalAttempts: 10, correctCount: 5)
+            "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 5)
         ]
 
         let group = GroupGenerator.generateMixedGroup(
             level: 5,
             characterStats: stats,
+            sessionType: .receive,
+            groupLength: 5
+        )
+
+        XCTAssertEqual(group.count, 5)
+    }
+
+    func testMixedGroupWithSendStats() {
+        let stats: [Character: CharacterStat] = [
+            "K": CharacterStat(sendAttempts: 10, sendCorrect: 5)
+        ]
+
+        let group = GroupGenerator.generateMixedGroup(
+            level: 5,
+            characterStats: stats,
+            sessionType: .send,
             groupLength: 5
         )
 
@@ -149,6 +242,7 @@ final class GroupGeneratorTests: XCTestCase {
         let group = GroupGenerator.generateMixedGroup(
             level: 5,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 5
         )
 
@@ -156,10 +250,28 @@ final class GroupGeneratorTests: XCTestCase {
         XCTAssertEqual(group.count, 5)
     }
 
+    func testMixedGroupFallsBackWhenNoDirectionStats() {
+        // Has receive stats but requesting send mode
+        let stats: [Character: CharacterStat] = [
+            "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 5)
+        ]
+
+        let group = GroupGenerator.generateMixedGroup(
+            level: 5,
+            characterStats: stats,
+            sessionType: .send,  // No send stats exist
+            groupLength: 5
+        )
+
+        // Should fall back to learning mode since no send stats
+        XCTAssertEqual(group.count, 5)
+    }
+
     func testMixedGroupEmptyLevel() {
         let group = GroupGenerator.generateMixedGroup(
             level: 0,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 5
         )
 
@@ -178,6 +290,7 @@ final class GroupGeneratorTests: XCTestCase {
         let group = GroupGenerator.generateRetentionGroup(
             level: 10,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 1
         )
         XCTAssertEqual(group.count, 1)
@@ -187,6 +300,7 @@ final class GroupGeneratorTests: XCTestCase {
         let group = GroupGenerator.generateMixedGroup(
             level: 26,
             characterStats: [:],
+            sessionType: .receive,
             groupLength: 5
         )
 

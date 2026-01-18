@@ -81,8 +81,8 @@ final class StudentProgressTests: XCTestCase {
 
     func testOverallAccuracyWithStats() {
         var progress = StudentProgress()
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 9)
-        progress.characterStats["M"] = CharacterStat(totalAttempts: 10, correctCount: 8)
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
+        progress.characterStats["M"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
 
         // (9 + 8) / (10 + 10) = 17/20 = 0.85
         XCTAssertEqual(progress.overallAccuracy, 0.85, accuracy: 0.001)
@@ -90,9 +90,20 @@ final class StudentProgressTests: XCTestCase {
 
     func testOverallAccuracyPerfect() {
         var progress = StudentProgress()
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 10)
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 10)
 
         XCTAssertEqual(progress.overallAccuracy, 1.0, accuracy: 0.001)
+    }
+
+    func testOverallAccuracyByDirection() {
+        var progress = StudentProgress()
+        progress.characterStats["K"] = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 9,
+            sendAttempts: 10, sendCorrect: 5
+        )
+
+        XCTAssertEqual(progress.overallAccuracy(for: .receive), 0.9, accuracy: 0.001)
+        XCTAssertEqual(progress.overallAccuracy(for: .send), 0.5, accuracy: 0.001)
     }
 
     // MARK: - Should Advance Tests
@@ -144,7 +155,7 @@ final class StudentProgressTests: XCTestCase {
 
     // MARK: - Update Stats Tests
 
-    func testUpdateStatsFromSession() {
+    func testUpdateStatsFromReceiveSession() {
         var progress = StudentProgress()
         let result = SessionResult(
             sessionType: .receive,
@@ -152,53 +163,81 @@ final class StudentProgressTests: XCTestCase {
             totalAttempts: 20,
             correctCount: 18,
             characterStats: [
-                "K": CharacterStat(totalAttempts: 10, correctCount: 9),
-                "M": CharacterStat(totalAttempts: 10, correctCount: 9)
+                "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 9),
+                "M": CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
             ]
         )
 
         progress.updateStats(from: result)
 
-        XCTAssertEqual(progress.characterStats["K"]?.totalAttempts, 10)
-        XCTAssertEqual(progress.characterStats["K"]?.correctCount, 9)
-        XCTAssertEqual(progress.characterStats["M"]?.totalAttempts, 10)
+        XCTAssertEqual(progress.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(progress.characterStats["K"]?.receiveCorrect, 9)
+        XCTAssertEqual(progress.characterStats["K"]?.sendAttempts, 0)
+        XCTAssertEqual(progress.characterStats["M"]?.receiveAttempts, 10)
         XCTAssertEqual(progress.sessionHistory.count, 1)
     }
 
-    func testUpdateStatsAccumulates() {
+    func testUpdateStatsFromSendSession() {
         var progress = StudentProgress()
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 8)
+        let result = SessionResult(
+            sessionType: .send,
+            duration: 300,
+            totalAttempts: 10,
+            correctCount: 8,
+            characterStats: [
+                "K": CharacterStat(sendAttempts: 10, sendCorrect: 8)
+            ]
+        )
+
+        progress.updateStats(from: result)
+
+        XCTAssertEqual(progress.characterStats["K"]?.sendAttempts, 10)
+        XCTAssertEqual(progress.characterStats["K"]?.sendCorrect, 8)
+        XCTAssertEqual(progress.characterStats["K"]?.receiveAttempts, 0)
+    }
+
+    func testUpdateStatsMergesBothDirections() {
+        var progress = StudentProgress()
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
 
         let result = SessionResult(
-            sessionType: .receive,
+            sessionType: .send,
             duration: 300,
             totalAttempts: 10,
             correctCount: 9,
             characterStats: [
-                "K": CharacterStat(totalAttempts: 10, correctCount: 9)
+                "K": CharacterStat(sendAttempts: 10, sendCorrect: 9)
             ]
         )
 
         progress.updateStats(from: result)
 
+        XCTAssertEqual(progress.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(progress.characterStats["K"]?.receiveCorrect, 8)
+        XCTAssertEqual(progress.characterStats["K"]?.sendAttempts, 10)
+        XCTAssertEqual(progress.characterStats["K"]?.sendCorrect, 9)
         XCTAssertEqual(progress.characterStats["K"]?.totalAttempts, 20)
-        XCTAssertEqual(progress.characterStats["K"]?.correctCount, 17)
     }
 
     // MARK: - Codable Tests
 
     func testEncodingDecoding() throws {
         var progress = StudentProgress(currentLevel: 5)
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 9)
-        progress.characterStats["M"] = CharacterStat(totalAttempts: 8, correctCount: 7)
+        progress.characterStats["K"] = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 9,
+            sendAttempts: 5, sendCorrect: 4
+        )
+        progress.characterStats["M"] = CharacterStat(receiveAttempts: 8, receiveCorrect: 7)
 
         let encoded = try JSONEncoder().encode(progress)
         let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
 
         XCTAssertEqual(decoded.currentLevel, 5)
-        XCTAssertEqual(decoded.characterStats["K"]?.totalAttempts, 10)
-        XCTAssertEqual(decoded.characterStats["K"]?.correctCount, 9)
-        XCTAssertEqual(decoded.characterStats["M"]?.totalAttempts, 8)
+        XCTAssertEqual(decoded.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(decoded.characterStats["K"]?.receiveCorrect, 9)
+        XCTAssertEqual(decoded.characterStats["K"]?.sendAttempts, 5)
+        XCTAssertEqual(decoded.characterStats["K"]?.sendCorrect, 4)
+        XCTAssertEqual(decoded.characterStats["M"]?.receiveAttempts, 8)
     }
 }
 
@@ -209,25 +248,98 @@ final class CharacterStatTests: XCTestCase {
     func testDefaultInitialization() {
         let stat = CharacterStat()
 
+        XCTAssertEqual(stat.receiveAttempts, 0)
+        XCTAssertEqual(stat.receiveCorrect, 0)
+        XCTAssertEqual(stat.sendAttempts, 0)
+        XCTAssertEqual(stat.sendCorrect, 0)
         XCTAssertEqual(stat.totalAttempts, 0)
-        XCTAssertEqual(stat.correctCount, 0)
     }
 
-    func testAccuracyWithNoAttempts() {
+    func testReceiveAccuracyWithNoAttempts() {
         let stat = CharacterStat()
 
-        XCTAssertEqual(stat.accuracy, 0)
+        XCTAssertEqual(stat.receiveAccuracy, 0)
     }
 
-    func testAccuracyCalculation() {
-        let stat = CharacterStat(totalAttempts: 10, correctCount: 8)
+    func testSendAccuracyWithNoAttempts() {
+        let stat = CharacterStat()
 
-        XCTAssertEqual(stat.accuracy, 0.8, accuracy: 0.001)
+        XCTAssertEqual(stat.sendAccuracy, 0)
     }
 
-    func testPerfectAccuracy() {
-        let stat = CharacterStat(totalAttempts: 10, correctCount: 10)
+    func testReceiveAccuracyCalculation() {
+        let stat = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
 
-        XCTAssertEqual(stat.accuracy, 1.0, accuracy: 0.001)
+        XCTAssertEqual(stat.receiveAccuracy, 0.8, accuracy: 0.001)
+    }
+
+    func testSendAccuracyCalculation() {
+        let stat = CharacterStat(sendAttempts: 10, sendCorrect: 6)
+
+        XCTAssertEqual(stat.sendAccuracy, 0.6, accuracy: 0.001)
+    }
+
+    func testCombinedAccuracy() {
+        let stat = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 9,
+            sendAttempts: 10, sendCorrect: 7
+        )
+
+        // (9 + 7) / (10 + 10) = 16/20 = 0.8
+        XCTAssertEqual(stat.combinedAccuracy, 0.8, accuracy: 0.001)
+    }
+
+    func testAccuracyForSessionType() {
+        let stat = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 9,
+            sendAttempts: 10, sendCorrect: 5
+        )
+
+        XCTAssertEqual(stat.accuracy(for: .receive), 0.9, accuracy: 0.001)
+        XCTAssertEqual(stat.accuracy(for: .send), 0.5, accuracy: 0.001)
+    }
+
+    func testTotalAttempts() {
+        let stat = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 9,
+            sendAttempts: 5, sendCorrect: 4
+        )
+
+        XCTAssertEqual(stat.totalAttempts, 15)
+        XCTAssertEqual(stat.totalCorrect, 13)
+    }
+
+    func testMerge() {
+        var stat1 = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
+        let stat2 = CharacterStat(sendAttempts: 5, sendCorrect: 4)
+
+        stat1.merge(stat2)
+
+        XCTAssertEqual(stat1.receiveAttempts, 10)
+        XCTAssertEqual(stat1.receiveCorrect, 8)
+        XCTAssertEqual(stat1.sendAttempts, 5)
+        XCTAssertEqual(stat1.sendCorrect, 4)
+    }
+
+    func testMergeAccumulatesSameDirection() {
+        var stat1 = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
+        let stat2 = CharacterStat(receiveAttempts: 5, receiveCorrect: 5)
+
+        stat1.merge(stat2)
+
+        XCTAssertEqual(stat1.receiveAttempts, 15)
+        XCTAssertEqual(stat1.receiveCorrect, 13)
+    }
+
+    func testSessionTypeInitializer() {
+        let receiveStat = CharacterStat(sessionType: .receive, attempts: 10, correct: 8)
+        XCTAssertEqual(receiveStat.receiveAttempts, 10)
+        XCTAssertEqual(receiveStat.receiveCorrect, 8)
+        XCTAssertEqual(receiveStat.sendAttempts, 0)
+
+        let sendStat = CharacterStat(sessionType: .send, attempts: 10, correct: 6)
+        XCTAssertEqual(sendStat.sendAttempts, 10)
+        XCTAssertEqual(sendStat.sendCorrect, 6)
+        XCTAssertEqual(sendStat.receiveAttempts, 0)
     }
 }

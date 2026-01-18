@@ -37,12 +37,29 @@ struct StudentProgress: Codable, Equatable {
         return MorseCode.kochOrder[currentLevel]
     }
 
-    /// Overall accuracy across all attempts
+    /// Overall accuracy across all attempts (both directions combined)
     var overallAccuracy: Double {
         let totalAttempts = characterStats.values.reduce(0) { $0 + $1.totalAttempts }
-        let totalCorrect = characterStats.values.reduce(0) { $0 + $1.correctCount }
+        let totalCorrect = characterStats.values.reduce(0) { $0 + $1.totalCorrect }
         guard totalAttempts > 0 else { return 0 }
         return Double(totalCorrect) / Double(totalAttempts)
+    }
+
+    /// Overall accuracy for a specific session type
+    func overallAccuracy(for sessionType: SessionType) -> Double {
+        let stats = characterStats.values
+        switch sessionType {
+        case .receive:
+            let attempts = stats.reduce(0) { $0 + $1.receiveAttempts }
+            let correct = stats.reduce(0) { $0 + $1.receiveCorrect }
+            guard attempts > 0 else { return 0 }
+            return Double(correct) / Double(attempts)
+        case .send:
+            let attempts = stats.reduce(0) { $0 + $1.sendAttempts }
+            let correct = stats.reduce(0) { $0 + $1.sendCorrect }
+            guard attempts > 0 else { return 0 }
+            return Double(correct) / Double(attempts)
+        }
     }
 
     /// Determines if the student should advance to the next level.
@@ -64,9 +81,7 @@ struct StudentProgress: Codable, Equatable {
     mutating func updateStats(from result: SessionResult) {
         for (char, stat) in result.characterStats {
             if var existing = characterStats[char] {
-                existing.totalAttempts += stat.totalAttempts
-                existing.correctCount += stat.correctCount
-                existing.lastPracticed = stat.lastPracticed
+                existing.merge(stat)
                 characterStats[char] = existing
             } else {
                 characterStats[char] = stat
@@ -76,21 +91,86 @@ struct StudentProgress: Codable, Equatable {
     }
 }
 
-/// Performance statistics for a single character.
+/// Performance statistics for a single character, tracked separately by direction.
 struct CharacterStat: Codable, Equatable {
-    var totalAttempts: Int
-    var correctCount: Int
+    /// Receive training stats (audio → text)
+    var receiveAttempts: Int
+    var receiveCorrect: Int
+
+    /// Send training stats (text → keying)
+    var sendAttempts: Int
+    var sendCorrect: Int
+
     var lastPracticed: Date
 
-    init(totalAttempts: Int = 0, correctCount: Int = 0, lastPracticed: Date = Date()) {
-        self.totalAttempts = totalAttempts
-        self.correctCount = correctCount
+    init(
+        receiveAttempts: Int = 0,
+        receiveCorrect: Int = 0,
+        sendAttempts: Int = 0,
+        sendCorrect: Int = 0,
+        lastPracticed: Date = Date()
+    ) {
+        self.receiveAttempts = receiveAttempts
+        self.receiveCorrect = receiveCorrect
+        self.sendAttempts = sendAttempts
+        self.sendCorrect = sendCorrect
         self.lastPracticed = lastPracticed
     }
 
-    var accuracy: Double {
+    /// Convenience initializer for single-direction stats (used during sessions)
+    init(sessionType: SessionType, attempts: Int, correct: Int, lastPracticed: Date = Date()) {
+        switch sessionType {
+        case .receive:
+            self.receiveAttempts = attempts
+            self.receiveCorrect = correct
+            self.sendAttempts = 0
+            self.sendCorrect = 0
+        case .send:
+            self.receiveAttempts = 0
+            self.receiveCorrect = 0
+            self.sendAttempts = attempts
+            self.sendCorrect = correct
+        }
+        self.lastPracticed = lastPracticed
+    }
+
+    // MARK: - Computed Properties
+
+    var totalAttempts: Int { receiveAttempts + sendAttempts }
+    var totalCorrect: Int { receiveCorrect + sendCorrect }
+
+    var receiveAccuracy: Double {
+        guard receiveAttempts > 0 else { return 0 }
+        return Double(receiveCorrect) / Double(receiveAttempts)
+    }
+
+    var sendAccuracy: Double {
+        guard sendAttempts > 0 else { return 0 }
+        return Double(sendCorrect) / Double(sendAttempts)
+    }
+
+    var combinedAccuracy: Double {
         guard totalAttempts > 0 else { return 0 }
-        return Double(correctCount) / Double(totalAttempts)
+        return Double(totalCorrect) / Double(totalAttempts)
+    }
+
+    /// Get accuracy for a specific session type
+    func accuracy(for sessionType: SessionType) -> Double {
+        switch sessionType {
+        case .receive: return receiveAccuracy
+        case .send: return sendAccuracy
+        }
+    }
+
+    /// Merge another stat into this one
+    mutating func merge(_ other: CharacterStat) {
+        receiveAttempts += other.receiveAttempts
+        receiveCorrect += other.receiveCorrect
+        sendAttempts += other.sendAttempts
+        sendCorrect += other.sendCorrect
+        if other.lastPracticed > lastPracticed {
+            lastPracticed = other.lastPracticed
+        }
     }
 }
 

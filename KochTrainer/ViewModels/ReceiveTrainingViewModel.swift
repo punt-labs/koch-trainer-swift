@@ -140,11 +140,11 @@ final class ReceiveTrainingViewModel: ObservableObject {
                 correctCount += 1
             }
 
-            // Update character stats
+            // Update character stats (receive direction)
             var stat = characterStats[expectedChar] ?? CharacterStat()
-            stat.totalAttempts += 1
+            stat.receiveAttempts += 1
             if isCorrect {
-                stat.correctCount += 1
+                stat.receiveCorrect += 1
             }
             stat.lastPracticed = Date()
             characterStats[expectedChar] = stat
@@ -198,8 +198,7 @@ final class ReceiveTrainingViewModel: ObservableObject {
         var combinedStats = progressStore?.progress.characterStats ?? [:]
         for (char, sessionStat) in characterStats {
             if var existing = combinedStats[char] {
-                existing.totalAttempts += sessionStat.totalAttempts
-                existing.correctCount += sessionStat.correctCount
+                existing.merge(sessionStat)
                 combinedStats[char] = existing
             } else {
                 combinedStats[char] = sessionStat
@@ -209,6 +208,7 @@ final class ReceiveTrainingViewModel: ObservableObject {
         return GroupGenerator.generateMixedGroup(
             level: currentLevel,
             characterStats: combinedStats,
+            sessionType: .receive,
             groupLength: Int.random(in: 3...5)
         )
     }

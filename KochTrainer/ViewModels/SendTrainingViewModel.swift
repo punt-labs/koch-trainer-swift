@@ -174,11 +174,11 @@ final class SendTrainingViewModel: ObservableObject {
             feedbackColor = Theme.Colors.error
         }
 
-        // Update character stats
+        // Update character stats (send direction)
         var stat = characterStats[targetCharacter] ?? CharacterStat()
-        stat.totalAttempts += 1
+        stat.sendAttempts += 1
         if isCorrect {
-            stat.correctCount += 1
+            stat.sendCorrect += 1
         }
         stat.lastPracticed = Date()
         characterStats[targetCharacter] = stat
@@ -197,8 +197,7 @@ final class SendTrainingViewModel: ObservableObject {
         var combinedStats = progressStore?.progress.characterStats ?? [:]
         for (char, sessionStat) in characterStats {
             if var existing = combinedStats[char] {
-                existing.totalAttempts += sessionStat.totalAttempts
-                existing.correctCount += sessionStat.correctCount
+                existing.merge(sessionStat)
                 combinedStats[char] = existing
             } else {
                 combinedStats[char] = sessionStat
@@ -209,6 +208,7 @@ final class SendTrainingViewModel: ObservableObject {
         let group = GroupGenerator.generateMixedGroup(
             level: currentLevel,
             characterStats: combinedStats,
+            sessionType: .send,
             groupLength: 1
         )
 

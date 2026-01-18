@@ -77,22 +77,24 @@ struct GroupGenerator {
     }
 
     /// Generate a group for retention practice.
-    /// Weights selection toward characters with lower accuracy.
+    /// Weights selection toward characters with lower accuracy for the specified direction.
     /// - Parameters:
     ///   - level: Current Koch level
     ///   - characterStats: Per-character accuracy statistics
+    ///   - sessionType: Training direction (receive or send)
     ///   - groupLength: Number of characters in the group
     /// - Returns: A string of characters weighted by inverse accuracy
     static func generateRetentionGroup(
         level: Int,
         characterStats: [Character: CharacterStat],
+        sessionType: SessionType,
         groupLength: Int = 5
     ) -> String {
         let available = MorseCode.characters(forLevel: level)
         guard !available.isEmpty else { return "" }
 
-        // Calculate weights: lower accuracy = higher weight
-        let weights = calculateWeights(for: available, stats: characterStats)
+        // Calculate weights: lower accuracy = higher weight (direction-specific)
+        let weights = calculateWeights(for: available, stats: characterStats, sessionType: sessionType)
 
         var group = ""
         for _ in 0..<groupLength {
@@ -108,24 +110,32 @@ struct GroupGenerator {
     /// - Parameters:
     ///   - level: Current Koch level
     ///   - characterStats: Per-character accuracy statistics
+    ///   - sessionType: Training direction (receive or send)
     ///   - groupLength: Number of characters in the group
     /// - Returns: A balanced practice group
     static func generateMixedGroup(
         level: Int,
         characterStats: [Character: CharacterStat],
+        sessionType: SessionType,
         groupLength: Int = 5
     ) -> String {
         let available = MorseCode.characters(forLevel: level)
         guard !available.isEmpty else { return "" }
 
-        // If we have stats, use retention weighting
-        // Otherwise, use learning mode
-        let hasStats = available.contains { characterStats[$0] != nil }
+        // Check if we have direction-specific stats
+        let hasDirectionStats = available.contains { char in
+            guard let stat = characterStats[char] else { return false }
+            switch sessionType {
+            case .receive: return stat.receiveAttempts > 0
+            case .send: return stat.sendAttempts > 0
+            }
+        }
 
-        if hasStats {
+        if hasDirectionStats {
             return generateRetentionGroup(
                 level: level,
                 characterStats: characterStats,
+                sessionType: sessionType,
                 groupLength: groupLength
             )
         } else {
@@ -135,11 +145,12 @@ struct GroupGenerator {
 
     // MARK: - Weight Calculation
 
-    /// Calculate selection weights based on inverse accuracy.
+    /// Calculate selection weights based on inverse accuracy for a specific direction.
     /// Characters with lower accuracy get higher weights.
     private static func calculateWeights(
         for characters: [Character],
-        stats: [Character: CharacterStat]
+        stats: [Character: CharacterStat],
+        sessionType: SessionType
     ) -> [Double] {
         // Minimum weight ensures even mastered characters appear occasionally
         let minWeight = 0.1
@@ -147,15 +158,33 @@ struct GroupGenerator {
         let maxWeight = 1.0
         // Default weight for unpracticed characters (treat as needing practice)
         let defaultWeight = 0.7
+        // Minimum attempts required before weighting by accuracy
+        let minAttempts = 3
 
         return characters.map { char in
-            guard let stat = stats[char], stat.totalAttempts >= 3 else {
-                // Not enough data; use default weight
+            guard let stat = stats[char] else {
+                return defaultWeight
+            }
+
+            // Get direction-specific attempts and accuracy
+            let attempts: Int
+            let accuracy: Double
+            switch sessionType {
+            case .receive:
+                attempts = stat.receiveAttempts
+                accuracy = stat.receiveAccuracy
+            case .send:
+                attempts = stat.sendAttempts
+                accuracy = stat.sendAccuracy
+            }
+
+            guard attempts >= minAttempts else {
+                // Not enough data for this direction; use default weight
                 return defaultWeight
             }
 
             // Inverse accuracy: 90% accuracy → 0.1 weight, 50% accuracy → 0.5 weight
-            let inverseAccuracy = 1.0 - stat.accuracy
+            let inverseAccuracy = 1.0 - accuracy
 
             // Clamp to range
             return max(minWeight, min(maxWeight, inverseAccuracy + minWeight))
