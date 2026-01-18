@@ -23,20 +23,22 @@ final class ProgressStoreTests: XCTestCase {
     func testInitializationWithEmptyDefaults() {
         let store = ProgressStore(defaults: testDefaults)
 
-        XCTAssertEqual(store.progress.currentLevel, 1)
+        XCTAssertEqual(store.progress.receiveLevel, 1)
+        XCTAssertEqual(store.progress.sendLevel, 1)
         XCTAssertTrue(store.progress.characterStats.isEmpty)
     }
 
     func testInitializationLoadsExistingData() {
         // Pre-save some progress
-        var progress = StudentProgress(currentLevel: 5)
+        var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
         progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
         let data = try! JSONEncoder().encode(progress)
         testDefaults.set(data, forKey: "studentProgress")
 
         let store = ProgressStore(defaults: testDefaults)
 
-        XCTAssertEqual(store.progress.currentLevel, 5)
+        XCTAssertEqual(store.progress.receiveLevel, 5)
+        XCTAssertEqual(store.progress.sendLevel, 3)
         XCTAssertEqual(store.progress.characterStats["K"]?.receiveAttempts, 10)
     }
 
@@ -44,7 +46,7 @@ final class ProgressStoreTests: XCTestCase {
 
     func testSaveProgress() {
         let store = ProgressStore(defaults: testDefaults)
-        var progress = StudentProgress(currentLevel: 10)
+        var progress = StudentProgress(receiveLevel: 10, sendLevel: 7)
         progress.characterStats["M"] = CharacterStat(receiveAttempts: 20, receiveCorrect: 18)
 
         store.save(progress)
@@ -52,7 +54,8 @@ final class ProgressStoreTests: XCTestCase {
         // Verify by loading
         let data = testDefaults.data(forKey: "studentProgress")!
         let loaded = try! JSONDecoder().decode(StudentProgress.self, from: data)
-        XCTAssertEqual(loaded.currentLevel, 10)
+        XCTAssertEqual(loaded.receiveLevel, 10)
+        XCTAssertEqual(loaded.sendLevel, 7)
         XCTAssertEqual(loaded.characterStats["M"]?.receiveAttempts, 20)
     }
 
@@ -60,13 +63,14 @@ final class ProgressStoreTests: XCTestCase {
 
     func testResetProgress() {
         let store = ProgressStore(defaults: testDefaults)
-        var progress = StudentProgress(currentLevel: 15)
+        var progress = StudentProgress(receiveLevel: 15, sendLevel: 10)
         progress.characterStats["K"] = CharacterStat(receiveAttempts: 100, receiveCorrect: 90)
         store.save(progress)
 
         store.resetProgress()
 
-        XCTAssertEqual(store.progress.currentLevel, 1)
+        XCTAssertEqual(store.progress.receiveLevel, 1)
+        XCTAssertEqual(store.progress.sendLevel, 1)
         XCTAssertTrue(store.progress.characterStats.isEmpty)
     }
 
@@ -92,7 +96,7 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertEqual(store.progress.sessionHistory.count, 1)
     }
 
-    func testRecordSessionAdvancesLevel() {
+    func testRecordReceiveSessionAdvancesReceiveLevel() {
         let store = ProgressStore(defaults: testDefaults)
         let result = SessionResult(
             sessionType: .receive,
@@ -105,7 +109,25 @@ final class ProgressStoreTests: XCTestCase {
         let didAdvance = store.recordSession(result)
 
         XCTAssertTrue(didAdvance)
-        XCTAssertEqual(store.progress.currentLevel, 2)
+        XCTAssertEqual(store.progress.receiveLevel, 2)
+        XCTAssertEqual(store.progress.sendLevel, 1) // Unchanged
+    }
+
+    func testRecordSendSessionAdvancesSendLevel() {
+        let store = ProgressStore(defaults: testDefaults)
+        let result = SessionResult(
+            sessionType: .send,
+            duration: 300,
+            totalAttempts: 100,
+            correctCount: 92, // 92% > 90%
+            characterStats: [:]
+        )
+
+        let didAdvance = store.recordSession(result)
+
+        XCTAssertTrue(didAdvance)
+        XCTAssertEqual(store.progress.sendLevel, 2)
+        XCTAssertEqual(store.progress.receiveLevel, 1) // Unchanged
     }
 
     func testRecordSessionDoesNotAdvanceBelowThreshold() {
@@ -121,7 +143,7 @@ final class ProgressStoreTests: XCTestCase {
         let didAdvance = store.recordSession(result)
 
         XCTAssertFalse(didAdvance)
-        XCTAssertEqual(store.progress.currentLevel, 1)
+        XCTAssertEqual(store.progress.receiveLevel, 1)
     }
 
     // MARK: - Overall Accuracy Tests

@@ -8,20 +8,61 @@ struct HomeView: View {
             Text("Koch Trainer")
                 .font(Typography.largeTitle)
 
-            Text("Level \(progressStore.progress.currentLevel) of 26")
-                .font(Typography.headline)
-
             Spacer()
 
-            NavigationLink(destination: ReceiveTrainingView()) {
-                Text("Receive Training")
-            }
-            .buttonStyle(PrimaryButtonStyle())
+            // Receive training section
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("Receive")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("Level \(progressStore.progress.receiveLevel)/26")
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                }
 
-            NavigationLink(destination: SendTrainingView()) {
-                Text("Send Training")
+                NavigationLink(destination: ReceiveTrainingView()) {
+                    HStack {
+                        Image(systemName: "ear")
+                        Text("Start Receive Training")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+
+                Text("Characters: \(progressStore.progress.unlockedCharacters(for: .receive).map { String($0) }.joined())")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
             }
-            .buttonStyle(PrimaryButtonStyle())
+            .padding(Theme.Spacing.md)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(12)
+
+            // Send training section
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("Send")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("Level \(progressStore.progress.sendLevel)/26")
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: SendTrainingView()) {
+                    HStack {
+                        Image(systemName: "hand.tap")
+                        Text("Start Send Training")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+
+                Text("Characters: \(progressStore.progress.unlockedCharacters(for: .send).map { String($0) }.joined())")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(12)
 
             Spacer()
 

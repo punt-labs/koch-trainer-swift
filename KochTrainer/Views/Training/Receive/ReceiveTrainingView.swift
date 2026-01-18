@@ -6,7 +6,6 @@ struct ReceiveTrainingView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @Environment(\.dismiss) private var dismiss
 
-    // For keyboard capture during training
     @FocusState private var isKeyboardFocused: Bool
     @State private var hiddenInput: String = ""
 
@@ -22,17 +21,17 @@ struct ReceiveTrainingView: View {
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }
-                        hiddenInput = "" // Clear after processing
+                        hiddenInput = ""
                     }
             }
 
             // Main content based on phase
             switch viewModel.phase {
             case .introduction:
-                IntroductionPhaseView(viewModel: viewModel)
+                CharacterIntroductionView(viewModel: viewModel, trainingType: "Training")
 
             case .training:
-                TrainingPhaseView(viewModel: viewModel, dismiss: dismiss)
+                TrainingPhaseView(viewModel: viewModel)
                     .onAppear {
                         isKeyboardFocused = true
                     }
@@ -41,15 +40,20 @@ struct ReceiveTrainingView: View {
                     }
 
             case .paused:
-                PausedView(viewModel: viewModel, dismiss: dismiss)
+                PausedView(viewModel: viewModel)
 
-            case .finished:
-                Text("Session Complete")
-                    .font(Typography.largeTitle)
+            case .completed(let didAdvance, let newCharacter):
+                CompletedView(
+                    viewModel: viewModel,
+                    didAdvance: didAdvance,
+                    newCharacter: newCharacter,
+                    dismiss: dismiss
+                )
             }
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(isTrainingActive)
         .onAppear {
             viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
             viewModel.startSession()
@@ -65,77 +69,14 @@ struct ReceiveTrainingView: View {
             return "Learn Characters"
         case .training, .paused:
             return "Receive Training"
-        case .finished:
-            return "Complete"
-        }
-    }
-}
-
-// MARK: - Introduction Phase View
-
-struct IntroductionPhaseView: View {
-    @ObservedObject var viewModel: ReceiveTrainingViewModel
-
-    var body: some View {
-        VStack(spacing: Theme.Spacing.xl) {
-            // Progress indicator
-            Text("Character \(viewModel.introProgress)")
-                .font(Typography.body)
-                .foregroundColor(.secondary)
-
-            Spacer()
-
-            if let char = viewModel.currentIntroCharacter {
-                // Character display
-                Text(String(char))
-                    .font(.system(size: 120, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.primary)
-
-                // Morse pattern
-                Text(MorseCode.pattern(for: char) ?? "")
-                    .font(.system(size: 36, weight: .medium, design: .monospaced))
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                // Play button
-                Button(action: {
-                    viewModel.playCurrentIntroCharacter()
-                }) {
-                    HStack {
-                        Image(systemName: "speaker.wave.2.fill")
-                        Text("Play Sound")
-                    }
-                    .font(Typography.headline)
-                }
-                .buttonStyle(PrimaryButtonStyle())
-
-                // Next button
-                Button(action: {
-                    viewModel.nextIntroCharacter()
-                }) {
-                    Text(isLastCharacter ? "Start Training" : "Next Character")
-                        .font(Typography.headline)
-                }
-                .buttonStyle(SecondaryButtonStyle())
-                .padding(.top, Theme.Spacing.sm)
-            }
-
-            Spacer()
-        }
-        .padding(Theme.Spacing.lg)
-        .onAppear {
-            // Auto-play when character appears
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                viewModel.playCurrentIntroCharacter()
-            }
+        case .completed:
+            return "Complete!"
         }
     }
 
-    var isLastCharacter: Bool {
-        if case .introduction(let index) = viewModel.phase {
-            return index == viewModel.introCharacters.count - 1
-        }
+    var isTrainingActive: Bool {
+        if case .training = viewModel.phase { return true }
+        if case .paused = viewModel.phase { return true }
         return false
     }
 }
@@ -144,20 +85,18 @@ struct IntroductionPhaseView: View {
 
 struct TrainingPhaseView: View {
     @ObservedObject var viewModel: ReceiveTrainingViewModel
-    let dismiss: DismissAction
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            // Timer display
-            Text(viewModel.formattedTime)
-                .font(Typography.largeTitle)
-                .monospacedDigit()
+            // Progress toward mastery
+            Text(viewModel.masteryProgress)
+                .font(Typography.body)
+                .foregroundColor(.secondary)
 
             Spacer()
 
             // Main display area
             VStack(spacing: Theme.Spacing.xl) {
-                // Current character or feedback
                 if let feedback = viewModel.lastFeedback {
                     FeedbackView(feedback: feedback)
                 } else if viewModel.isWaitingForResponse {
@@ -170,7 +109,6 @@ struct TrainingPhaseView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // Response timeout bar
                 if viewModel.isWaitingForResponse {
                     TimeoutProgressBar(progress: viewModel.responseProgress)
                         .frame(height: 8)
@@ -183,25 +121,17 @@ struct TrainingPhaseView: View {
 
             // Score display
             HStack {
-                Text("Correct: \(viewModel.correctCount)")
+                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
             }
             .font(Typography.body)
 
-            // Controls
-            HStack(spacing: Theme.Spacing.md) {
-                Button("Pause") {
-                    viewModel.pause()
-                }
-                .buttonStyle(SecondaryButtonStyle())
-
-                Button("Stop") {
-                    _ = viewModel.endSession()
-                    dismiss()
-                }
-                .buttonStyle(SecondaryButtonStyle())
+            // Pause button only
+            Button("Pause") {
+                viewModel.pause()
             }
+            .buttonStyle(SecondaryButtonStyle())
         }
         .padding(Theme.Spacing.lg)
     }
@@ -211,7 +141,6 @@ struct TrainingPhaseView: View {
 
 struct PausedView: View {
     @ObservedObject var viewModel: ReceiveTrainingViewModel
-    let dismiss: DismissAction
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -220,13 +149,6 @@ struct PausedView: View {
             Text("Paused")
                 .font(Typography.largeTitle)
 
-            Text("\(viewModel.formattedTime) remaining")
-                .font(Typography.headline)
-                .foregroundColor(.secondary)
-
-            Spacer()
-
-            // Score so far
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
                     .font(Typography.headline)
@@ -243,10 +165,92 @@ struct PausedView: View {
             .buttonStyle(PrimaryButtonStyle())
 
             Button("End Session") {
-                _ = viewModel.endSession()
-                dismiss()
+                viewModel.endSession()
             }
             .buttonStyle(SecondaryButtonStyle())
+
+            Spacer()
+        }
+        .padding(Theme.Spacing.lg)
+    }
+}
+
+// MARK: - Completed View
+
+struct CompletedView: View {
+    @ObservedObject var viewModel: ReceiveTrainingViewModel
+    let didAdvance: Bool
+    let newCharacter: Character?
+    let dismiss: DismissAction
+
+    var body: some View {
+        VStack(spacing: Theme.Spacing.xl) {
+            Spacer()
+
+            if didAdvance {
+                // Level up celebration
+                VStack(spacing: Theme.Spacing.md) {
+                    Text("Level Up!")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundColor(Theme.Colors.success)
+
+                    if let char = newCharacter {
+                        Text("New character unlocked:")
+                            .font(Typography.body)
+                            .foregroundColor(.secondary)
+
+                        Text(String(char))
+                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.Colors.primary)
+
+                        Text(MorseCode.pattern(for: char) ?? "")
+                            .font(.system(size: 24, weight: .medium, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else {
+                // Session complete without advancement
+                Text("Session Complete")
+                    .font(Typography.largeTitle)
+            }
+
+            Spacer()
+
+            // Stats
+            VStack(spacing: Theme.Spacing.sm) {
+                Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
+                    .font(Typography.headline)
+
+                Text("\(viewModel.accuracyPercentage)% accuracy")
+                    .font(Typography.body)
+                    .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
+
+                if !didAdvance && viewModel.accuracyPercentage < 90 {
+                    Text("Need 90% to advance")
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                        .padding(.top, Theme.Spacing.sm)
+                }
+            }
+
+            Spacer()
+
+            if didAdvance {
+                Button("Continue to Next Level") {
+                    dismiss()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+            } else {
+                Button("Try Again") {
+                    dismiss()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+
+                Button("Done") {
+                    dismiss()
+                }
+                .buttonStyle(SecondaryButtonStyle())
+            }
 
             Spacer()
         }
@@ -289,12 +293,10 @@ struct FeedbackView: View {
 
     var body: some View {
         VStack(spacing: Theme.Spacing.sm) {
-            // Show the correct character
             Text(String(feedback.expectedCharacter))
                 .font(.system(size: 80, weight: .bold, design: .rounded))
                 .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
 
-            // Show what user pressed (if anything)
             if feedback.wasCorrect {
                 Text("Correct!")
                     .font(Typography.headline)
@@ -318,11 +320,9 @@ struct TimeoutProgressBar: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))
 
-                // Progress
                 RoundedRectangle(cornerRadius: 4)
                     .fill(progressColor)
                     .frame(width: geometry.size.width * max(0, min(1, progress)))

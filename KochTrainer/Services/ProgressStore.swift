@@ -60,7 +60,7 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     func recordSession(_ result: SessionResult) -> Bool {
         var updated = progress
         updated.updateStats(from: result)
-        let didAdvance = updated.advanceIfEligible(sessionAccuracy: result.accuracy)
+        let didAdvance = updated.advanceIfEligible(sessionAccuracy: result.accuracy, sessionType: result.sessionType)
         save(updated)
         return didAdvance
     }

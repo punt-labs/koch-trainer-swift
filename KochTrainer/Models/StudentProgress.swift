@@ -2,8 +2,11 @@ import Foundation
 
 /// Tracks a student's overall progress in the Koch method training.
 struct StudentProgress: Codable, Equatable {
-    /// Current level (1-26). Each level unlocks one additional character.
-    var currentLevel: Int
+    /// Level for receive training (1-26). Each level unlocks one additional character.
+    var receiveLevel: Int
+
+    /// Level for send training (1-26). Each level unlocks one additional character.
+    var sendLevel: Int
 
     /// Per-character performance statistics
     var characterStats: [Character: CharacterStat]
@@ -15,27 +18,42 @@ struct StudentProgress: Codable, Equatable {
     var startDate: Date
 
     init(
-        currentLevel: Int = 1,
+        receiveLevel: Int = 1,
+        sendLevel: Int = 1,
         characterStats: [Character: CharacterStat] = [:],
         sessionHistory: [SessionResult] = [],
         startDate: Date = Date()
     ) {
-        self.currentLevel = max(1, min(currentLevel, 26))
+        self.receiveLevel = max(1, min(receiveLevel, 26))
+        self.sendLevel = max(1, min(sendLevel, 26))
         self.characterStats = characterStats
         self.sessionHistory = sessionHistory
         self.startDate = startDate
     }
 
-    /// Characters currently unlocked based on level
-    var unlockedCharacters: [Character] {
-        MorseCode.characters(forLevel: currentLevel)
+    /// Get level for a specific session type
+    func level(for sessionType: SessionType) -> Int {
+        switch sessionType {
+        case .receive: return receiveLevel
+        case .send: return sendLevel
+        }
     }
 
-    /// Next character to unlock, or nil if all unlocked
-    var nextCharacter: Character? {
-        guard currentLevel < 26 else { return nil }
-        return MorseCode.kochOrder[currentLevel]
+    /// Characters unlocked for a specific session type
+    func unlockedCharacters(for sessionType: SessionType) -> [Character] {
+        MorseCode.characters(forLevel: level(for: sessionType))
     }
+
+    /// Next character to unlock for a specific session type, or nil if all unlocked
+    func nextCharacter(for sessionType: SessionType) -> Character? {
+        let lvl = level(for: sessionType)
+        guard lvl < 26 else { return nil }
+        return MorseCode.kochOrder[lvl]
+    }
+
+    // Legacy computed properties for backward compatibility
+    var currentLevel: Int { max(receiveLevel, sendLevel) }
+    var unlockedCharacters: [Character] { MorseCode.characters(forLevel: currentLevel) }
 
     /// Overall accuracy across all attempts (both directions combined)
     var overallAccuracy: Double {
@@ -62,18 +80,24 @@ struct StudentProgress: Codable, Equatable {
         }
     }
 
-    /// Determines if the student should advance to the next level.
-    /// Requires ≥90% accuracy in a completed 5-minute session.
-    static func shouldAdvance(sessionAccuracy: Double, currentLevel: Int) -> Bool {
-        sessionAccuracy >= 0.90 && currentLevel < 26
+    /// Determines if the student should advance to the next level for a session type.
+    /// Requires ≥90% accuracy in a completed session.
+    static func shouldAdvance(sessionAccuracy: Double, level: Int) -> Bool {
+        sessionAccuracy >= 0.90 && level < 26
     }
 
-    /// Advance to next level if conditions are met
-    mutating func advanceIfEligible(sessionAccuracy: Double) -> Bool {
-        guard Self.shouldAdvance(sessionAccuracy: sessionAccuracy, currentLevel: currentLevel) else {
+    /// Advance to next level for a session type if conditions are met
+    mutating func advanceIfEligible(sessionAccuracy: Double, sessionType: SessionType) -> Bool {
+        let currentLvl = level(for: sessionType)
+        guard Self.shouldAdvance(sessionAccuracy: sessionAccuracy, level: currentLvl) else {
             return false
         }
-        currentLevel += 1
+        switch sessionType {
+        case .receive:
+            receiveLevel += 1
+        case .send:
+            sendLevel += 1
+        }
         return true
     }
 
@@ -178,12 +202,22 @@ struct CharacterStat: Codable, Equatable {
 
 extension StudentProgress {
     enum CodingKeys: String, CodingKey {
-        case currentLevel, characterStats, sessionHistory, startDate
+        case receiveLevel, sendLevel, currentLevel, characterStats, sessionHistory, startDate
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        currentLevel = try container.decode(Int.self, forKey: .currentLevel)
+
+        // Support migration from old single-level format
+        if let oldLevel = try container.decodeIfPresent(Int.self, forKey: .currentLevel) {
+            // Migrate: use old level for both directions
+            receiveLevel = try container.decodeIfPresent(Int.self, forKey: .receiveLevel) ?? oldLevel
+            sendLevel = try container.decodeIfPresent(Int.self, forKey: .sendLevel) ?? oldLevel
+        } else {
+            receiveLevel = try container.decode(Int.self, forKey: .receiveLevel)
+            sendLevel = try container.decode(Int.self, forKey: .sendLevel)
+        }
+
         sessionHistory = try container.decode([SessionResult].self, forKey: .sessionHistory)
         startDate = try container.decode(Date.self, forKey: .startDate)
 
@@ -199,7 +233,8 @@ extension StudentProgress {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(currentLevel, forKey: .currentLevel)
+        try container.encode(receiveLevel, forKey: .receiveLevel)
+        try container.encode(sendLevel, forKey: .sendLevel)
         try container.encode(sessionHistory, forKey: .sessionHistory)
         try container.encode(startDate, forKey: .startDate)
 

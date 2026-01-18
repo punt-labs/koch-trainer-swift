@@ -8,67 +8,78 @@ final class StudentProgressTests: XCTestCase {
     func testDefaultInitialization() {
         let progress = StudentProgress()
 
-        XCTAssertEqual(progress.currentLevel, 1)
+        XCTAssertEqual(progress.receiveLevel, 1)
+        XCTAssertEqual(progress.sendLevel, 1)
         XCTAssertTrue(progress.characterStats.isEmpty)
         XCTAssertTrue(progress.sessionHistory.isEmpty)
     }
 
-    func testInitializationWithCustomLevel() {
-        let progress = StudentProgress(currentLevel: 10)
+    func testInitializationWithCustomLevels() {
+        let progress = StudentProgress(receiveLevel: 10, sendLevel: 5)
+
+        XCTAssertEqual(progress.receiveLevel, 10)
+        XCTAssertEqual(progress.sendLevel, 5)
+    }
+
+    func testInitializationClampsLevelAbove26() {
+        let progress = StudentProgress(receiveLevel: 50, sendLevel: 30)
+
+        XCTAssertEqual(progress.receiveLevel, 26)
+        XCTAssertEqual(progress.sendLevel, 26)
+    }
+
+    func testInitializationClampsLevelBelowOne() {
+        let progress = StudentProgress(receiveLevel: -5, sendLevel: 0)
+
+        XCTAssertEqual(progress.receiveLevel, 1)
+        XCTAssertEqual(progress.sendLevel, 1)
+    }
+
+    func testCurrentLevelReturnsMax() {
+        let progress = StudentProgress(receiveLevel: 10, sendLevel: 5)
 
         XCTAssertEqual(progress.currentLevel, 10)
     }
 
-    func testInitializationClampsLevelAbove26() {
-        let progress = StudentProgress(currentLevel: 50)
+    // MARK: - Level For Session Type Tests
 
-        XCTAssertEqual(progress.currentLevel, 26)
-    }
+    func testLevelForSessionType() {
+        let progress = StudentProgress(receiveLevel: 8, sendLevel: 3)
 
-    func testInitializationClampsLevelBelowOne() {
-        let progress = StudentProgress(currentLevel: -5)
-
-        XCTAssertEqual(progress.currentLevel, 1)
+        XCTAssertEqual(progress.level(for: .receive), 8)
+        XCTAssertEqual(progress.level(for: .send), 3)
     }
 
     // MARK: - Unlocked Characters Tests
 
-    func testUnlockedCharactersAtLevel1() {
-        let progress = StudentProgress(currentLevel: 1)
+    func testUnlockedCharactersForReceive() {
+        let progress = StudentProgress(receiveLevel: 5, sendLevel: 1)
 
-        XCTAssertEqual(progress.unlockedCharacters, ["K"])
-    }
-
-    func testUnlockedCharactersAtLevel5() {
-        let progress = StudentProgress(currentLevel: 5)
-
-        XCTAssertEqual(progress.unlockedCharacters, ["K", "M", "R", "S", "U"])
+        XCTAssertEqual(progress.unlockedCharacters(for: .receive), ["K", "M", "R", "S", "U"])
+        XCTAssertEqual(progress.unlockedCharacters(for: .send), ["K"])
     }
 
     func testUnlockedCharactersAtLevel26() {
-        let progress = StudentProgress(currentLevel: 26)
+        let progress = StudentProgress(receiveLevel: 26, sendLevel: 26)
 
-        XCTAssertEqual(progress.unlockedCharacters.count, 26)
+        XCTAssertEqual(progress.unlockedCharacters(for: .receive).count, 26)
+        XCTAssertEqual(progress.unlockedCharacters(for: .send).count, 26)
     }
 
     // MARK: - Next Character Tests
 
-    func testNextCharacterAtLevel1() {
-        let progress = StudentProgress(currentLevel: 1)
+    func testNextCharacterForSessionType() {
+        let progress = StudentProgress(receiveLevel: 1, sendLevel: 5)
 
-        XCTAssertEqual(progress.nextCharacter, "M")
-    }
-
-    func testNextCharacterAtLevel25() {
-        let progress = StudentProgress(currentLevel: 25)
-
-        XCTAssertEqual(progress.nextCharacter, "X")
+        XCTAssertEqual(progress.nextCharacter(for: .receive), "M")
+        XCTAssertEqual(progress.nextCharacter(for: .send), "A")
     }
 
     func testNextCharacterAtLevel26() {
-        let progress = StudentProgress(currentLevel: 26)
+        let progress = StudentProgress(receiveLevel: 26, sendLevel: 26)
 
-        XCTAssertNil(progress.nextCharacter)
+        XCTAssertNil(progress.nextCharacter(for: .receive))
+        XCTAssertNil(progress.nextCharacter(for: .send))
     }
 
     // MARK: - Overall Accuracy Tests
@@ -109,48 +120,62 @@ final class StudentProgressTests: XCTestCase {
     // MARK: - Should Advance Tests
 
     func testShouldAdvanceAt90Percent() {
-        XCTAssertTrue(StudentProgress.shouldAdvance(sessionAccuracy: 0.90, currentLevel: 1))
+        XCTAssertTrue(StudentProgress.shouldAdvance(sessionAccuracy: 0.90, level: 1))
     }
 
     func testShouldAdvanceAbove90Percent() {
-        XCTAssertTrue(StudentProgress.shouldAdvance(sessionAccuracy: 0.95, currentLevel: 1))
+        XCTAssertTrue(StudentProgress.shouldAdvance(sessionAccuracy: 0.95, level: 1))
     }
 
     func testShouldNotAdvanceBelow90Percent() {
-        XCTAssertFalse(StudentProgress.shouldAdvance(sessionAccuracy: 0.89, currentLevel: 1))
+        XCTAssertFalse(StudentProgress.shouldAdvance(sessionAccuracy: 0.89, level: 1))
     }
 
     func testShouldNotAdvanceAtLevel26() {
-        XCTAssertFalse(StudentProgress.shouldAdvance(sessionAccuracy: 1.0, currentLevel: 26))
+        XCTAssertFalse(StudentProgress.shouldAdvance(sessionAccuracy: 1.0, level: 26))
     }
 
     // MARK: - Advance If Eligible Tests
 
-    func testAdvanceIfEligibleSucceeds() {
-        var progress = StudentProgress(currentLevel: 5)
+    func testAdvanceIfEligibleReceiveSucceeds() {
+        var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
 
-        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 0.92)
+        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 0.92, sessionType: .receive)
 
         XCTAssertTrue(didAdvance)
-        XCTAssertEqual(progress.currentLevel, 6)
+        XCTAssertEqual(progress.receiveLevel, 6)
+        XCTAssertEqual(progress.sendLevel, 3) // Unchanged
+    }
+
+    func testAdvanceIfEligibleSendSucceeds() {
+        var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
+
+        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 0.92, sessionType: .send)
+
+        XCTAssertTrue(didAdvance)
+        XCTAssertEqual(progress.sendLevel, 4)
+        XCTAssertEqual(progress.receiveLevel, 5) // Unchanged
     }
 
     func testAdvanceIfEligibleFailsBelowThreshold() {
-        var progress = StudentProgress(currentLevel: 5)
+        var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
 
-        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 0.85)
+        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 0.85, sessionType: .receive)
 
         XCTAssertFalse(didAdvance)
-        XCTAssertEqual(progress.currentLevel, 5)
+        XCTAssertEqual(progress.receiveLevel, 5)
     }
 
     func testAdvanceIfEligibleFailsAtMaxLevel() {
-        var progress = StudentProgress(currentLevel: 26)
+        var progress = StudentProgress(receiveLevel: 26, sendLevel: 26)
 
-        let didAdvance = progress.advanceIfEligible(sessionAccuracy: 1.0)
+        let didAdvanceReceive = progress.advanceIfEligible(sessionAccuracy: 1.0, sessionType: .receive)
+        let didAdvanceSend = progress.advanceIfEligible(sessionAccuracy: 1.0, sessionType: .send)
 
-        XCTAssertFalse(didAdvance)
-        XCTAssertEqual(progress.currentLevel, 26)
+        XCTAssertFalse(didAdvanceReceive)
+        XCTAssertFalse(didAdvanceSend)
+        XCTAssertEqual(progress.receiveLevel, 26)
+        XCTAssertEqual(progress.sendLevel, 26)
     }
 
     // MARK: - Update Stats Tests
@@ -222,7 +247,7 @@ final class StudentProgressTests: XCTestCase {
     // MARK: - Codable Tests
 
     func testEncodingDecoding() throws {
-        var progress = StudentProgress(currentLevel: 5)
+        var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
         progress.characterStats["K"] = CharacterStat(
             receiveAttempts: 10, receiveCorrect: 9,
             sendAttempts: 5, sendCorrect: 4
@@ -232,12 +257,32 @@ final class StudentProgressTests: XCTestCase {
         let encoded = try JSONEncoder().encode(progress)
         let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
 
-        XCTAssertEqual(decoded.currentLevel, 5)
+        XCTAssertEqual(decoded.receiveLevel, 5)
+        XCTAssertEqual(decoded.sendLevel, 3)
         XCTAssertEqual(decoded.characterStats["K"]?.receiveAttempts, 10)
         XCTAssertEqual(decoded.characterStats["K"]?.receiveCorrect, 9)
         XCTAssertEqual(decoded.characterStats["K"]?.sendAttempts, 5)
         XCTAssertEqual(decoded.characterStats["K"]?.sendCorrect, 4)
         XCTAssertEqual(decoded.characterStats["M"]?.receiveAttempts, 8)
+    }
+
+    func testMigrationFromOldFormat() throws {
+        // Simulate old format with single currentLevel
+        let oldJson = """
+        {
+            "currentLevel": 7,
+            "characterStats": {},
+            "sessionHistory": [],
+            "startDate": 0
+        }
+        """
+        let data = oldJson.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: data)
+
+        // Both levels should be migrated from old currentLevel
+        XCTAssertEqual(decoded.receiveLevel, 7)
+        XCTAssertEqual(decoded.sendLevel, 7)
     }
 }
 

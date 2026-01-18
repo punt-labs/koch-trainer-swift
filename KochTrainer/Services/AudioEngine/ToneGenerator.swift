@@ -8,7 +8,24 @@ final class ToneGenerator {
     private let sampleRate: Double = 44100
 
     private var currentPhase: Double = 0
-    private var isPlaying = false
+    private let stateLock = NSLock()
+    private var _isPlaying = false
+
+    private var isPlaying: Bool {
+        get {
+            stateLock.lock()
+            defer { stateLock.unlock() }
+            return _isPlaying
+        }
+        set {
+            stateLock.lock()
+            _isPlaying = newValue
+            stateLock.unlock()
+        }
+    }
+
+    // Serial queue to ensure tones play sequentially
+    private let audioQueue = DispatchQueue(label: "com.kochtrainer.audioQueue")
 
     init() {
         setupAudioSession()
@@ -25,22 +42,43 @@ final class ToneGenerator {
     }
 
     /// Play a tone at the specified frequency for the given duration.
+    /// Queues the request to ensure sequential playback when called rapidly.
     /// - Parameters:
     ///   - frequency: Tone frequency in Hz (typically 400-800)
     ///   - duration: Duration in seconds
     func playTone(frequency: Double, duration: TimeInterval) async {
-        await withCheckedContinuation { continuation in
-            startTone(frequency: frequency)
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            audioQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume()
+                    return
+                }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
-                self?.stopTone()
+                // If currently playing, wait for it to finish
+                while self.isPlaying {
+                    Thread.sleep(forTimeInterval: 0.005) // 5ms polling
+                }
+
+                // Start the tone on main thread (AVAudioEngine requirement)
+                DispatchQueue.main.sync {
+                    self.startToneInternal(frequency: frequency)
+                }
+
+                // Wait for the duration
+                Thread.sleep(forTimeInterval: duration)
+
+                // Stop the tone on main thread
+                DispatchQueue.main.sync {
+                    self.stopTone()
+                }
+
                 continuation.resume()
             }
         }
     }
 
-    /// Start continuous tone at the specified frequency.
-    func startTone(frequency: Double) {
+    /// Start continuous tone at the specified frequency (internal, called from queue).
+    private func startToneInternal(frequency: Double) {
         guard !isPlaying else { return }
 
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
@@ -77,6 +115,11 @@ final class ToneGenerator {
         } catch {
             print("Failed to start audio engine: \(error)")
         }
+    }
+
+    /// Start continuous tone at the specified frequency (public API for external use).
+    func startTone(frequency: Double) {
+        startToneInternal(frequency: frequency)
     }
 
     /// Stop the currently playing tone.

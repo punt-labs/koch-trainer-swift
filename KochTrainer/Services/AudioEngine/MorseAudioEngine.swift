@@ -75,6 +75,18 @@ final class MorseAudioEngine: AudioEngineProtocol {
         }
     }
 
+    /// Play a single dit (short tone).
+    func playDit() async {
+        guard !isStopped else { return }
+        await toneGenerator.playTone(frequency: frequency, duration: timing.ditDuration)
+    }
+
+    /// Play a single dah (long tone).
+    func playDah() async {
+        guard !isStopped else { return }
+        await toneGenerator.playTone(frequency: frequency, duration: timing.dahDuration)
+    }
+
     /// Play a group of characters (word or character group).
     func playGroup(_ group: String) async {
         let characters = Array(group.uppercased())
