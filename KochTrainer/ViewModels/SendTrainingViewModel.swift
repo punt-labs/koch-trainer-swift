@@ -193,8 +193,26 @@ final class SendTrainingViewModel: ObservableObject {
     }
 
     private func showNextCharacter() {
-        let availableChars = MorseCode.characters(forLevel: currentLevel)
-        if let char = availableChars.randomElement() {
+        // Combine historic stats with current session stats for weighting
+        var combinedStats = progressStore?.progress.characterStats ?? [:]
+        for (char, sessionStat) in characterStats {
+            if var existing = combinedStats[char] {
+                existing.totalAttempts += sessionStat.totalAttempts
+                existing.correctCount += sessionStat.correctCount
+                combinedStats[char] = existing
+            } else {
+                combinedStats[char] = sessionStat
+            }
+        }
+
+        // Generate a single-character "group" using weighted selection
+        let group = GroupGenerator.generateMixedGroup(
+            level: currentLevel,
+            characterStats: combinedStats,
+            groupLength: 1
+        )
+
+        if let char = group.first {
             targetCharacter = char
             feedbackText = MorseCode.pattern(for: char) ?? ""
             feedbackColor = .secondary

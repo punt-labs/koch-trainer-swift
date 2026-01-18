@@ -194,15 +194,22 @@ final class ReceiveTrainingViewModel: ObservableObject {
     }
 
     private func generateGroup() -> String {
-        let availableChars = MorseCode.characters(forLevel: currentLevel)
-        let groupLength = Int.random(in: 3...5)
-
-        var group = ""
-        for _ in 0..<groupLength {
-            if let char = availableChars.randomElement() {
-                group.append(char)
+        // Combine historic stats with current session stats for weighting
+        var combinedStats = progressStore?.progress.characterStats ?? [:]
+        for (char, sessionStat) in characterStats {
+            if var existing = combinedStats[char] {
+                existing.totalAttempts += sessionStat.totalAttempts
+                existing.correctCount += sessionStat.correctCount
+                combinedStats[char] = existing
+            } else {
+                combinedStats[char] = sessionStat
             }
         }
-        return group
+
+        return GroupGenerator.generateMixedGroup(
+            level: currentLevel,
+            characterStats: combinedStats,
+            groupLength: Int.random(in: 3...5)
+        )
     }
 }

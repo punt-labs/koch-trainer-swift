@@ -29,6 +29,7 @@
 		AA000020 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100020; };
 		AA000021 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100021; };
 		AA000022 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100022; };
+		AA000023 /* GroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100023; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		AA100020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		AA100021 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		AA100022 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
+		AA100023 /* GroupGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupGenerator.swift; sourceTree = "<group>"; };
 		AA200001 /* KochTrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -125,6 +127,7 @@
 				AA100008 /* ProgressStore.swift */,
 				AA100009 /* SettingsStore.swift */,
 				AA100012 /* MorseDecoder.swift */,
+				AA100023 /* GroupGenerator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				AA000020 /* Theme.swift in Sources */,
 				AA000021 /* Typography.swift in Sources */,
 				AA000022 /* ButtonStyles.swift in Sources */,
+				AA000023 /* GroupGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
