@@ -1,0 +1,537 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000001 /* KochTrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001; };
+		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002; };
+		AA000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA100003; };
+		AA000004 /* MorseCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004; };
+		AA000005 /* StudentProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100005; };
+		AA000006 /* SessionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100006; };
+		AA000007 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100007; };
+		AA000008 /* ProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100008; };
+		AA000009 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009; };
+		AA000010 /* ToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100010; };
+		AA000011 /* MorseAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100011; };
+		AA000012 /* MorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100012; };
+		AA000013 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100013; };
+		AA000014 /* ReceiveTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100014; };
+		AA000015 /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100015; };
+		AA000016 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100016; };
+		AA000017 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100017; };
+		AA000018 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100018; };
+		AA000019 /* SendTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100019; };
+		AA000020 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100020; };
+		AA000021 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100021; };
+		AA000022 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100022; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA100001 /* KochTrainerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KochTrainerApp.swift; sourceTree = "<group>"; };
+		AA100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA100003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA100004 /* MorseCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCode.swift; sourceTree = "<group>"; };
+		AA100005 /* StudentProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgress.swift; sourceTree = "<group>"; };
+		AA100006 /* SessionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResult.swift; sourceTree = "<group>"; };
+		AA100007 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		AA100008 /* ProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStore.swift; sourceTree = "<group>"; };
+		AA100009 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		AA100010 /* ToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneGenerator.swift; sourceTree = "<group>"; };
+		AA100011 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
+		AA100012 /* MorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoder.swift; sourceTree = "<group>"; };
+		AA100013 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		AA100014 /* ReceiveTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingView.swift; sourceTree = "<group>"; };
+		AA100015 /* SendTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingView.swift; sourceTree = "<group>"; };
+		AA100016 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA100017 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		AA100018 /* ReceiveTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingViewModel.swift; sourceTree = "<group>"; };
+		AA100019 /* SendTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModel.swift; sourceTree = "<group>"; };
+		AA100020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		AA100021 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		AA100022 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
+		AA200001 /* KochTrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA300001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA400001 = {
+			isa = PBXGroup;
+			children = (
+				AA400002 /* KochTrainer */,
+				AA400003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA400002 /* KochTrainer */ = {
+			isa = PBXGroup;
+			children = (
+				AA400004 /* App */,
+				AA400005 /* Models */,
+				AA400006 /* Services */,
+				AA400007 /* Views */,
+				AA400008 /* ViewModels */,
+				AA400009 /* Design */,
+				AA400010 /* Resources */,
+			);
+			path = KochTrainer;
+			sourceTree = "<group>";
+		};
+		AA400003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA200001 /* KochTrainer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA400004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AA100001 /* KochTrainerApp.swift */,
+				AA100002 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AA400005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA100004 /* MorseCode.swift */,
+				AA100005 /* StudentProgress.swift */,
+				AA100006 /* SessionResult.swift */,
+				AA100007 /* AppSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA400006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA400011 /* AudioEngine */,
+				AA100008 /* ProgressStore.swift */,
+				AA100009 /* SettingsStore.swift */,
+				AA100012 /* MorseDecoder.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA400007 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA400012 /* Home */,
+				AA400013 /* Training */,
+				AA400014 /* Results */,
+				AA400015 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA400008 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA100018 /* ReceiveTrainingViewModel.swift */,
+				AA100019 /* SendTrainingViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA400009 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				AA100020 /* Theme.swift */,
+				AA100021 /* Typography.swift */,
+				AA400016 /* Components */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		AA400010 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA100003 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AA400011 /* AudioEngine */ = {
+			isa = PBXGroup;
+			children = (
+				AA100010 /* ToneGenerator.swift */,
+				AA100011 /* MorseAudioEngine.swift */,
+			);
+			path = AudioEngine;
+			sourceTree = "<group>";
+		};
+		AA400012 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				AA100013 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		AA400013 /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				AA400017 /* Receive */,
+				AA400018 /* Send */,
+			);
+			path = Training;
+			sourceTree = "<group>";
+		};
+		AA400014 /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				AA100017 /* ResultsView.swift */,
+			);
+			path = Results;
+			sourceTree = "<group>";
+		};
+		AA400015 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AA100016 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		AA400016 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA100022 /* ButtonStyles.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA400017 /* Receive */ = {
+			isa = PBXGroup;
+			children = (
+				AA100014 /* ReceiveTrainingView.swift */,
+			);
+			path = Receive;
+			sourceTree = "<group>";
+		};
+		AA400018 /* Send */ = {
+			isa = PBXGroup;
+			children = (
+				AA100015 /* SendTrainingView.swift */,
+			);
+			path = Send;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA500001 /* KochTrainer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA600003 /* Build configuration list for PBXNativeTarget "KochTrainer" */;
+			buildPhases = (
+				AA500002 /* Sources */,
+				AA300001 /* Frameworks */,
+				AA500003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KochTrainer;
+			productName = KochTrainer;
+			productReference = AA200001 /* KochTrainer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA500004 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA500001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AA600001 /* Build configuration list for PBXProject "KochTrainer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA400001;
+			productRefGroup = AA400003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA500001 /* KochTrainer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA500003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000003 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA500002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001 /* KochTrainerApp.swift in Sources */,
+				AA000002 /* ContentView.swift in Sources */,
+				AA000004 /* MorseCode.swift in Sources */,
+				AA000005 /* StudentProgress.swift in Sources */,
+				AA000006 /* SessionResult.swift in Sources */,
+				AA000007 /* AppSettings.swift in Sources */,
+				AA000008 /* ProgressStore.swift in Sources */,
+				AA000009 /* SettingsStore.swift in Sources */,
+				AA000010 /* ToneGenerator.swift in Sources */,
+				AA000011 /* MorseAudioEngine.swift in Sources */,
+				AA000012 /* MorseDecoder.swift in Sources */,
+				AA000013 /* HomeView.swift in Sources */,
+				AA000014 /* ReceiveTrainingView.swift in Sources */,
+				AA000015 /* SendTrainingView.swift in Sources */,
+				AA000016 /* SettingsView.swift in Sources */,
+				AA000017 /* ResultsView.swift in Sources */,
+				AA000018 /* ReceiveTrainingViewModel.swift in Sources */,
+				AA000019 /* SendTrainingViewModel.swift in Sources */,
+				AA000020 /* Theme.swift in Sources */,
+				AA000021 /* Typography.swift in Sources */,
+				AA000022 /* ButtonStyles.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA600002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA600004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA600005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA600006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA600001 /* Build configuration list for PBXProject "KochTrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA600002 /* Debug */,
+				AA600004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA600003 /* Build configuration list for PBXNativeTarget "KochTrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA600005 /* Debug */,
+				AA600006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA500004 /* Project object */;
+}

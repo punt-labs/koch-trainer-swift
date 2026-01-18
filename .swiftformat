@@ -1,0 +1,36 @@
+# SwiftFormat configuration for Koch Trainer
+
+# Formatting options
+--indent 4
+--indentcase false
+--trimwhitespace always
+--voidtype tuple
+--maxwidth 120
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--funcattributes prev-line
+--typeattributes prev-line
+--varattributes prev-line
+--self remove
+--importgrouping alpha
+--semicolons never
+--commas always
+--stripunusedargs closure-only
+
+# Enable/disable rules
+--enable isEmpty
+--enable sortedImports
+--enable trailingCommas
+--enable wrapEnumCases
+--enable wrapSwitchCases
+--enable markTypes
+--enable organizeDeclarations
+
+--disable redundantReturn
+--disable blankLinesAtEndOfScope
+--disable blankLinesAtStartOfScope
+
+# Exclusions
+--exclude DerivedData,Pods,.build,Carthage
