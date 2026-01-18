@@ -17,18 +17,23 @@ struct StudentProgress: Codable, Equatable {
     /// Date when training started
     var startDate: Date
 
+    /// Spaced repetition and streak tracking
+    var schedule: PracticeSchedule
+
     init(
         receiveLevel: Int = 1,
         sendLevel: Int = 1,
         characterStats: [Character: CharacterStat] = [:],
         sessionHistory: [SessionResult] = [],
-        startDate: Date = Date()
+        startDate: Date = Date(),
+        schedule: PracticeSchedule = PracticeSchedule()
     ) {
         self.receiveLevel = max(1, min(receiveLevel, 26))
         self.sendLevel = max(1, min(sendLevel, 26))
         self.characterStats = characterStats
         self.sessionHistory = sessionHistory
         self.startDate = startDate
+        self.schedule = schedule
     }
 
     /// Get level for a specific session type
@@ -202,7 +207,7 @@ struct CharacterStat: Codable, Equatable {
 
 extension StudentProgress {
     enum CodingKeys: String, CodingKey {
-        case receiveLevel, sendLevel, currentLevel, characterStats, sessionHistory, startDate
+        case receiveLevel, sendLevel, currentLevel, characterStats, sessionHistory, startDate, schedule
     }
 
     init(from decoder: Decoder) throws {
@@ -229,6 +234,13 @@ extension StudentProgress {
                 characterStats[char] = value
             }
         }
+
+        // Migration: calculate schedule from session history if not present
+        if let existingSchedule = try container.decodeIfPresent(PracticeSchedule.self, forKey: .schedule) {
+            schedule = existingSchedule
+        } else {
+            schedule = Self.calculateInitialSchedule(from: sessionHistory, startDate: startDate)
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -237,6 +249,7 @@ extension StudentProgress {
         try container.encode(sendLevel, forKey: .sendLevel)
         try container.encode(sessionHistory, forKey: .sessionHistory)
         try container.encode(startDate, forKey: .startDate)
+        try container.encode(schedule, forKey: .schedule)
 
         // Encode character stats with String keys
         var stringKeyedStats: [String: CharacterStat] = [:]
@@ -244,5 +257,86 @@ extension StudentProgress {
             stringKeyedStats[String(char)] = stat
         }
         try container.encode(stringKeyedStats, forKey: .characterStats)
+    }
+
+    /// Calculate initial schedule from existing session history (for migration)
+    static func calculateInitialSchedule(from sessionHistory: [SessionResult], startDate: Date) -> PracticeSchedule {
+        guard !sessionHistory.isEmpty else {
+            return PracticeSchedule()
+        }
+
+        // Sort sessions by date
+        let sortedSessions = sessionHistory.sorted { $0.date < $1.date }
+
+        // Calculate streak by walking backwards from most recent session
+        let (currentStreak, longestStreak, lastStreakDate) = calculateStreakFromHistory(sortedSessions)
+
+        return PracticeSchedule(
+            receiveInterval: 1.0,
+            sendInterval: 1.0,
+            receiveNextDate: nil,
+            sendNextDate: nil,
+            currentStreak: currentStreak,
+            longestStreak: longestStreak,
+            lastStreakDate: lastStreakDate
+        )
+    }
+
+    /// Calculate streak from session history by checking consecutive days
+    private static func calculateStreakFromHistory(_ sortedSessions: [SessionResult]) -> (current: Int, longest: Int, lastDate: Date?) {
+        guard let lastSession = sortedSessions.last else {
+            return (0, 0, nil)
+        }
+
+        let calendar = Calendar.current
+        var currentStreak = 0
+        var longestStreak = 0
+        var streakDays: Set<Int> = []  // Days since start date
+
+        // Group sessions by calendar day
+        for session in sortedSessions {
+            let dayStart = calendar.startOfDay(for: session.date)
+            let daysSinceEpoch = Int(dayStart.timeIntervalSince1970 / 86400)
+            streakDays.insert(daysSinceEpoch)
+        }
+
+        // Sort unique days
+        let sortedDays = streakDays.sorted()
+
+        // Calculate longest streak
+        var tempStreak = 1
+        for i in 1..<sortedDays.count {
+            if sortedDays[i] == sortedDays[i - 1] + 1 {
+                tempStreak += 1
+            } else {
+                longestStreak = max(longestStreak, tempStreak)
+                tempStreak = 1
+            }
+        }
+        longestStreak = max(longestStreak, tempStreak)
+
+        // Calculate current streak (from most recent day backwards)
+        let todayStart = calendar.startOfDay(for: Date())
+        let todayDayNum = Int(todayStart.timeIntervalSince1970 / 86400)
+
+        // Check if most recent session was today or yesterday
+        guard let lastDayNum = sortedDays.last else {
+            return (0, longestStreak, nil)
+        }
+
+        if lastDayNum < todayDayNum - 1 {
+            // Last session was more than yesterday, streak broken
+            return (0, longestStreak, lastSession.date)
+        }
+
+        // Count backwards from most recent day
+        var checkDay = lastDayNum
+        currentStreak = 0
+        while streakDays.contains(checkDay) {
+            currentStreak += 1
+            checkDay -= 1
+        }
+
+        return (currentStreak, max(longestStreak, currentStreak), lastSession.date)
     }
 }

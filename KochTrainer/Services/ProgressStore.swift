@@ -61,7 +61,60 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         var updated = progress
         updated.updateStats(from: result)
         let didAdvance = updated.advanceIfEligible(sessionAccuracy: result.accuracy, sessionType: result.sessionType)
+
+        // Update schedule
+        updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+
         save(updated)
         return didAdvance
+    }
+
+    /// Update the practice schedule based on session result.
+    private func updateSchedule(for progress: inout StudentProgress, result: SessionResult, didAdvance: Bool) {
+        let sessionType = result.sessionType
+        let now = result.date
+
+        // Calculate days since start for interval cap
+        let daysSinceStart = Int(now.timeIntervalSince(progress.startDate) / 86400)
+
+        // Get current interval for this session type
+        var currentInterval = progress.schedule.interval(for: sessionType)
+
+        // Check if interval should reset due to missed practice
+        if let lastDate = progress.schedule.lastStreakDate {
+            if IntervalCalculator.shouldResetInterval(lastPractice: lastDate, interval: currentInterval, now: now) {
+                currentInterval = 1.0
+            }
+        }
+
+        // Calculate new interval based on session accuracy
+        let newInterval = IntervalCalculator.calculateNextInterval(
+            currentInterval: currentInterval,
+            accuracy: result.accuracy,
+            daysSinceStart: daysSinceStart
+        )
+
+        // Update interval and next practice date
+        progress.schedule.setInterval(newInterval, for: sessionType)
+        let nextDate = IntervalCalculator.nextPracticeDate(interval: newInterval, from: now)
+        progress.schedule.setNextDate(nextDate, for: sessionType)
+
+        // Update streak
+        let streakUpdate = StreakCalculator.updateStreak(
+            lastStreakDate: progress.schedule.lastStreakDate,
+            currentStreak: progress.schedule.currentStreak,
+            longestStreak: progress.schedule.longestStreak,
+            now: now
+        )
+        progress.schedule.currentStreak = streakUpdate.currentStreak
+        progress.schedule.longestStreak = streakUpdate.longestStreak
+        progress.schedule.lastStreakDate = streakUpdate.lastStreakDate
+
+        // If level advanced, schedule a review in 7 days
+        if didAdvance {
+            let newLevel = progress.level(for: sessionType)
+            let reviewDate = now.addingTimeInterval(7 * 86400)
+            progress.schedule.levelReviewDates[newLevel] = reviewDate
+        }
     }
 }

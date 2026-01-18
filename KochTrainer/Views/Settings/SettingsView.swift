@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var notificationManager: NotificationManager
     @State private var showResetConfirmation = false
 
     var body: some View {
@@ -30,6 +31,41 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Notifications") {
+                if notificationManager.authorizationStatus == .notDetermined {
+                    Button("Enable Notifications") {
+                        Task {
+                            await notificationManager.requestAuthorization()
+                        }
+                    }
+                } else if notificationManager.authorizationStatus == .denied {
+                    Text("Notifications are disabled. Enable them in Settings.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Toggle(
+                        "Practice Reminders",
+                        isOn: $settingsStore.settings.notificationSettings.practiceRemindersEnabled
+                    )
+
+                    Toggle(
+                        "Streak Reminders",
+                        isOn: $settingsStore.settings.notificationSettings.streakRemindersEnabled
+                    )
+
+                    DatePicker(
+                        "Preferred Time",
+                        selection: $settingsStore.settings.notificationSettings.preferredReminderTime,
+                        displayedComponents: .hourAndMinute
+                    )
+
+                    Toggle(
+                        "Quiet Hours (10 PM - 8 AM)",
+                        isOn: $settingsStore.settings.notificationSettings.quietHoursEnabled
+                    )
+                }
+            }
+
             Section("Progress") {
                 HStack {
                     Text("Current Level")
@@ -43,6 +79,22 @@ struct SettingsView: View {
                     Spacer()
                     Text("\(progressStore.overallAccuracyPercentage)%")
                         .foregroundColor(.secondary)
+                }
+
+                if progressStore.progress.schedule.currentStreak > 0 {
+                    HStack {
+                        Text("Current Streak")
+                        Spacer()
+                        Text("\(progressStore.progress.schedule.currentStreak) days")
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Text("Longest Streak")
+                        Spacer()
+                        Text("\(progressStore.progress.schedule.longestStreak) days")
+                            .foregroundColor(.secondary)
+                    }
                 }
 
                 Button("Reset All Progress", role: .destructive) {
@@ -76,5 +128,6 @@ struct SettingsView: View {
         SettingsView()
             .environmentObject(SettingsStore())
             .environmentObject(ProgressStore())
+            .environmentObject(NotificationManager())
     }
 }
