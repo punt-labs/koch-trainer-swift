@@ -119,8 +119,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: - Initialization
 
-    init(audioEngine: AudioEngineProtocol = MorseAudioEngine()) {
-        self.audioEngine = audioEngine
+    init(audioEngine: AudioEngineProtocol? = nil) {
+        self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {

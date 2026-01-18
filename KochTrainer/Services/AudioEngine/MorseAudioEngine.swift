@@ -2,6 +2,7 @@ import Combine
 import Foundation
 
 /// Protocol for playing Morse code audio.
+@MainActor
 protocol AudioEngineProtocol {
     func playCharacter(_ char: Character) async
     func playGroup(_ group: String) async
@@ -11,6 +12,7 @@ protocol AudioEngineProtocol {
 }
 
 /// Plays Morse code characters and groups with configurable timing.
+@MainActor
 final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     private let toneGenerator = ToneGenerator()
     private var frequency: Double = 600

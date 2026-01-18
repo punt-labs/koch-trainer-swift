@@ -103,11 +103,11 @@ final class VocabularyTrainingViewModel: ObservableObject {
     init(
         vocabularySet: VocabularySet,
         sessionType: SessionType,
-        audioEngine: AudioEngineProtocol = MorseAudioEngine()
+        audioEngine: AudioEngineProtocol? = nil
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
-        self.audioEngine = audioEngine
+        self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {

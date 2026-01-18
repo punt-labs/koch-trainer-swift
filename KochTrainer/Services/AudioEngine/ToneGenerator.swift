@@ -2,7 +2,8 @@ import AVFoundation
 import Foundation
 
 /// Generates sine wave audio tones using AVAudioEngine.
-final class ToneGenerator {
+/// Thread-safe: uses internal locking and serial queue for synchronization.
+final class ToneGenerator: @unchecked Sendable {
     private let audioEngine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
     private let sampleRate: Double = 44100

@@ -1,6 +1,7 @@
 import Foundation
 
 /// Protocol for progress persistence.
+@MainActor
 protocol ProgressStoreProtocol: AnyObject {
     var progress: StudentProgress { get set }
     func load() -> StudentProgress
