@@ -97,3 +97,6 @@ Thumbs.db
 # Environment
 .env
 *.xcconfig.local
+
+# Claude Code local settings
+.claude/
