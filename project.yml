@@ -1,0 +1,66 @@
+name: KochTrainer
+
+options:
+  bundleIdPrefix: com.kochtrainer
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"  # iPhone only
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  KochTrainer:
+    type: application
+    platform: iOS
+    sources:
+      - path: KochTrainer
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Koch Trainer"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  KochTrainerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: KochTrainerTests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: KochTrainer
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  KochTrainer:
+    build:
+      targets:
+        KochTrainer: all
+        KochTrainerTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - KochTrainerTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

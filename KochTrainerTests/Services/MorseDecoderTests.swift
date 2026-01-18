@@ -18,38 +18,42 @@ final class MorseDecoderTests: XCTestCase {
     // MARK: - Basic Decoding Tests
 
     func testDecodeE() {
-        // E = .
-        let result = decoder.processInput(.dit)
+        // E = . (has extensions like .., .- so needs explicit completion)
+        _ = decoder.processInput(.dit)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("E"))
     }
 
     func testDecodeT() {
-        // T = -
-        let result = decoder.processInput(.dah)
+        // T = - (has extensions like --, -. so needs explicit completion)
+        _ = decoder.processInput(.dah)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("T"))
     }
 
     func testDecodeM() {
-        // M = --
+        // M = -- (has extensions like ---, --. so needs explicit completion)
         _ = decoder.processInput(.dah)
-        let result = decoder.processInput(.dah)
+        _ = decoder.processInput(.dah)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("M"))
     }
 
     func testDecodeS() {
-        // S = ...
+        // S = ... (has extension .... = H so needs explicit completion)
         _ = decoder.processInput(.dit)
         _ = decoder.processInput(.dit)
-        let result = decoder.processInput(.dit)
+        _ = decoder.processInput(.dit)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("S"))
     }
 
     func testDecodeO() {
-        // O = ---
+        // O = --- (no valid extensions, should return immediately)
         _ = decoder.processInput(.dah)
         _ = decoder.processInput(.dah)
         let result = decoder.processInput(.dah)
@@ -58,23 +62,43 @@ final class MorseDecoderTests: XCTestCase {
     }
 
     func testDecodeK() {
-        // K = -.-
+        // K = -.- (has extension -.-. = C so needs explicit completion)
         _ = decoder.processInput(.dah)
         _ = decoder.processInput(.dit)
-        let result = decoder.processInput(.dah)
+        _ = decoder.processInput(.dah)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("K"))
+    }
+
+    // MARK: - Immediate Completion Tests
+
+    func testImmediateCompletionForO() {
+        // O = --- has no valid extensions, should complete immediately
+        _ = decoder.processInput(.dah)
+        _ = decoder.processInput(.dah)
+        let result = decoder.processInput(.dah)
+
+        XCTAssertEqual(result, .character("O"))
+        XCTAssertEqual(decoder.currentPattern, "") // Should be reset
+    }
+
+    func testImmediateCompletionForH() {
+        // H = .... has no valid extensions (5 dits would be invalid)
+        _ = decoder.processInput(.dit)
+        _ = decoder.processInput(.dit)
+        _ = decoder.processInput(.dit)
+        let result = decoder.processInput(.dit)
+
+        XCTAssertEqual(result, .character("H"))
     }
 
     // MARK: - Partial Pattern Tests
 
     func testPartialPatternReturnsNil() {
-        // I = .. but this could also be S (...)
+        // Single dit could extend to many patterns
         let result = decoder.processInput(.dit)
-        XCTAssertNil(result) // Could still extend to more characters
-
-        // Wait, actually E = . should complete immediately
-        // Let me check the logic... E is unique, so it should return immediately
+        XCTAssertNil(result) // Waiting for more input or timeout
     }
 
     func testCurrentPatternTracking() {
@@ -111,16 +135,17 @@ final class MorseDecoderTests: XCTestCase {
     }
 
     func testCompleteCharacterInvalidPattern() {
-        _ = decoder.processInput(.dah)
-        _ = decoder.processInput(.dah)
-        _ = decoder.processInput(.dah)
-        _ = decoder.processInput(.dah)
-        _ = decoder.processInput(.dah)
-        // Pattern is "-----" which is invalid
+        // Build pattern ".-.-" which is invalid (not a Morse letter)
+        // Each prefix has extensions so no early return:
+        // "." → has extensions, ".-" → has extensions (A), ".-." → has extensions (R→L)
+        _ = decoder.processInput(.dit)   // .
+        _ = decoder.processInput(.dah)   // .-
+        _ = decoder.processInput(.dit)   // .-.
+        _ = decoder.processInput(.dah)   // .-.-  (invalid pattern)
 
         let result = decoder.completeCharacter()
 
-        XCTAssertEqual(result, .invalid(pattern: "-----"))
+        XCTAssertEqual(result, .invalid(pattern: ".-.-"))
     }
 
     func testCompleteCharacterEmptyPattern() {

@@ -3,344 +3,454 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA000001 /* KochTrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001; };
-		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002; };
-		AA000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA100003; };
-		AA000004 /* MorseCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004; };
-		AA000005 /* StudentProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100005; };
-		AA000006 /* SessionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100006; };
-		AA000007 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100007; };
-		AA000008 /* ProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100008; };
-		AA000009 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009; };
-		AA000010 /* ToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100010; };
-		AA000011 /* MorseAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100011; };
-		AA000012 /* MorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100012; };
-		AA000013 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100013; };
-		AA000014 /* ReceiveTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100014; };
-		AA000015 /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100015; };
-		AA000016 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100016; };
-		AA000017 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100017; };
-		AA000018 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100018; };
-		AA000019 /* SendTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100019; };
-		AA000020 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100020; };
-		AA000021 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100021; };
-		AA000022 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100022; };
-		AA000023 /* GroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100023; };
+		0B0287382195C5F72752969F /* GroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA57C4635A10132B6514C82 /* GroupGenerator.swift */; };
+		144A002289DF894D11ACD74E /* KochTrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */; };
+		15BB7D719F088E992E2978C8 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */; };
+		18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */; };
+		1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB4886489BF491D3156CA3 /* SettingsView.swift */; };
+		2BBF8A4F8DF9913922139270 /* ReceiveTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */; };
+		2FE91C024BFA87E204D75206 /* MorseAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */; };
+		5383BF913CEE062CEB15B91D /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE61188FF7955447386AE139 /* ResultsView.swift */; };
+		5B1BB87C1A47AFDAE0B9B1E1 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42355AF5590EE366C95B2A0F /* Theme.swift */; };
+		5B2E346FFE9395107BB85CC8 /* MorseDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF316E778E239B8B9BEE15 /* MorseDecoderTests.swift */; };
+		6906226FBD5357293714E929 /* MorseCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */; };
+		697DFFC04EDF076B67779F07 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04550A9692A3474EC61070 /* HomeView.swift */; };
+		733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */; };
+		7BD10683E55559D3A00B0035 /* MorseCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8505513FAC9BA060C1AD4B2B /* MorseCode.swift */; };
+		7E8227D6BB6A5FFAC76CFF5B /* ToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */; };
+		82C5E485701143EDE9CA5456 /* ProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86594EFB29EB98D7D77B6E4 /* ProgressStore.swift */; };
+		871CC10C74706F8EDAB701DE /* GroupGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF77D0D40CEBBDF8D8DCAB /* GroupGeneratorTests.swift */; };
+		8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D7ADDFD818AD9C12165E74 /* SessionResult.swift */; };
+		8F969AC17120BCDA9814D527 /* SendTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */; };
+		A71FCBB659E9FACE9A047EBD /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D11D6C4D9790BEDD6F49A2 /* Typography.swift */; };
+		AF22771ABDED2406C7AEEDD2 /* StudentProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD09C44BCD391959078B978 /* StudentProgressTests.swift */; };
+		B23DA9930048CC728EE1644C /* MorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7798C72A68405B53C0541B1 /* MorseDecoder.swift */; };
+		B4B344A5F10DB214363B9606 /* SessionResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */; };
+		B9E21B960E5BE46794F9C698 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30E39178817F40F4AA07D72 /* AppSettings.swift */; };
+		C002EF687CC4BB4E49AAE21E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BC14AF6458B728B1D6F1580 /* Assets.xcassets */; };
+		C233FD0E9146D9F38934A581 /* ProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A89800850CEDA49637158DA /* ProgressStoreTests.swift */; };
+		C4B0F0A381BE4BF3F9CD7B36 /* StudentProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CD768AEED253F0A22D4D6B /* StudentProgress.swift */; };
+		CD0CAA1E13951AA0FCE43096 /* KochTrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9E80F76DFEAE1D76AC2CD3 /* KochTrainerTests.swift */; };
+		D6ED51A820293916C2EBB9B2 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F755CF48DC3CF38BEA8528EC /* SettingsStore.swift */; };
+		E4B9D745E40F369D1568D664 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96A88204D2AD8C5FD5D1932 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		63A927BDB5688A21FF439C1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FCD34FACB00CD1E80289A106 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB58D6BD5815BA97F7E2C290;
+			remoteInfo = KochTrainer;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		AA100001 /* KochTrainerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KochTrainerApp.swift; sourceTree = "<group>"; };
-		AA100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		AA100003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA100004 /* MorseCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCode.swift; sourceTree = "<group>"; };
-		AA100005 /* StudentProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgress.swift; sourceTree = "<group>"; };
-		AA100006 /* SessionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResult.swift; sourceTree = "<group>"; };
-		AA100007 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		AA100008 /* ProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStore.swift; sourceTree = "<group>"; };
-		AA100009 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
-		AA100010 /* ToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneGenerator.swift; sourceTree = "<group>"; };
-		AA100011 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
-		AA100012 /* MorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoder.swift; sourceTree = "<group>"; };
-		AA100013 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		AA100014 /* ReceiveTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingView.swift; sourceTree = "<group>"; };
-		AA100015 /* SendTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingView.swift; sourceTree = "<group>"; };
-		AA100016 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		AA100017 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
-		AA100018 /* ReceiveTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingViewModel.swift; sourceTree = "<group>"; };
-		AA100019 /* SendTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModel.swift; sourceTree = "<group>"; };
-		AA100020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		AA100021 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
-		AA100022 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
-		AA100023 /* GroupGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupGenerator.swift; sourceTree = "<group>"; };
-		AA200001 /* KochTrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KochTrainerApp.swift; sourceTree = "<group>"; };
+		03D7ADDFD818AD9C12165E74 /* SessionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResult.swift; sourceTree = "<group>"; };
+		119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCodeTests.swift; sourceTree = "<group>"; };
+		19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingView.swift; sourceTree = "<group>"; };
+		3A89800850CEDA49637158DA /* ProgressStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStoreTests.swift; sourceTree = "<group>"; };
+		3CBF316E778E239B8B9BEE15 /* MorseDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoderTests.swift; sourceTree = "<group>"; };
+		3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingViewModel.swift; sourceTree = "<group>"; };
+		3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingView.swift; sourceTree = "<group>"; };
+		42355AF5590EE366C95B2A0F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		6CA57C4635A10132B6514C82 /* GroupGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupGenerator.swift; sourceTree = "<group>"; };
+		6CD09C44BCD391959078B978 /* StudentProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgressTests.swift; sourceTree = "<group>"; };
+		77FF77D0D40CEBBDF8D8DCAB /* GroupGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupGeneratorTests.swift; sourceTree = "<group>"; };
+		7BC14AF6458B728B1D6F1580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModel.swift; sourceTree = "<group>"; };
+		83D11D6C4D9790BEDD6F49A2 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		8505513FAC9BA060C1AD4B2B /* MorseCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCode.swift; sourceTree = "<group>"; };
+		85CD768AEED253F0A22D4D6B /* StudentProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgress.swift; sourceTree = "<group>"; };
+		86C1C03CE8794BDE0AA76390 /* KochTrainerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KochTrainerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E04550A9692A3474EC61070 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
+		A7798C72A68405B53C0541B1 /* MorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoder.swift; sourceTree = "<group>"; };
+		BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
+		BF9E80F76DFEAE1D76AC2CD3 /* KochTrainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KochTrainerTests.swift; sourceTree = "<group>"; };
+		C96A88204D2AD8C5FD5D1932 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CE61188FF7955447386AE139 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneGenerator.swift; sourceTree = "<group>"; };
+		E4CB4886489BF491D3156CA3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EDE5C548190E477F2A1F215C /* KochTrainer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F30E39178817F40F4AA07D72 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResultTests.swift; sourceTree = "<group>"; };
+		F755CF48DC3CF38BEA8528EC /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		F86594EFB29EB98D7D77B6E4 /* ProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFrameworksBuildPhase section */
-		AA300001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
 /* Begin PBXGroup section */
-		AA400001 = {
+		105ECEA86374FC48C74DF58A /* Design */ = {
 			isa = PBXGroup;
 			children = (
-				AA400002 /* KochTrainer */,
-				AA400003 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		AA400002 /* KochTrainer */ = {
-			isa = PBXGroup;
-			children = (
-				AA400004 /* App */,
-				AA400005 /* Models */,
-				AA400006 /* Services */,
-				AA400007 /* Views */,
-				AA400008 /* ViewModels */,
-				AA400009 /* Design */,
-				AA400010 /* Resources */,
-			);
-			path = KochTrainer;
-			sourceTree = "<group>";
-		};
-		AA400003 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AA200001 /* KochTrainer.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		AA400004 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				AA100001 /* KochTrainerApp.swift */,
-				AA100002 /* ContentView.swift */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
-		AA400005 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				AA100004 /* MorseCode.swift */,
-				AA100005 /* StudentProgress.swift */,
-				AA100006 /* SessionResult.swift */,
-				AA100007 /* AppSettings.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		AA400006 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				AA400011 /* AudioEngine */,
-				AA100008 /* ProgressStore.swift */,
-				AA100009 /* SettingsStore.swift */,
-				AA100012 /* MorseDecoder.swift */,
-				AA100023 /* GroupGenerator.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		AA400007 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				AA400012 /* Home */,
-				AA400013 /* Training */,
-				AA400014 /* Results */,
-				AA400015 /* Settings */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		AA400008 /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-				AA100018 /* ReceiveTrainingViewModel.swift */,
-				AA100019 /* SendTrainingViewModel.swift */,
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
-		AA400009 /* Design */ = {
-			isa = PBXGroup;
-			children = (
-				AA100020 /* Theme.swift */,
-				AA100021 /* Typography.swift */,
-				AA400016 /* Components */,
+				8DB4AC2DA37E7227B2062B4E /* Components */,
+				42355AF5590EE366C95B2A0F /* Theme.swift */,
+				83D11D6C4D9790BEDD6F49A2 /* Typography.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
 		};
-		AA400010 /* Resources */ = {
+		171456171E035EA94ED1440A /* AudioEngine */ = {
 			isa = PBXGroup;
 			children = (
-				AA100003 /* Assets.xcassets */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		AA400011 /* AudioEngine */ = {
-			isa = PBXGroup;
-			children = (
-				AA100010 /* ToneGenerator.swift */,
-				AA100011 /* MorseAudioEngine.swift */,
+				93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */,
+				DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */,
 			);
 			path = AudioEngine;
 			sourceTree = "<group>";
 		};
-		AA400012 /* Home */ = {
+		19FC02BC19D18FD86BBECE31 = {
 			isa = PBXGroup;
 			children = (
-				AA100013 /* HomeView.swift */,
+				5A4C67945DC658C33C91F060 /* KochTrainer */,
+				F7E249D812687B025E41D870 /* KochTrainerTests */,
+				502598F156F5569B8CCDE77A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		23668595E5E745CC3F3C91F7 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				8E04550A9692A3474EC61070 /* HomeView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
 		};
-		AA400013 /* Training */ = {
+		3325110A307FDAB0785ED016 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				AA400017 /* Receive */,
-				AA400018 /* Send */,
+				7BC14AF6458B728B1D6F1580 /* Assets.xcassets */,
 			);
-			path = Training;
+			path = Resources;
 			sourceTree = "<group>";
 		};
-		AA400014 /* Results */ = {
+		3A12B56CFB1E692710B720E8 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				AA100017 /* ResultsView.swift */,
+				77FF77D0D40CEBBDF8D8DCAB /* GroupGeneratorTests.swift */,
+				3CBF316E778E239B8B9BEE15 /* MorseDecoderTests.swift */,
+				3A89800850CEDA49637158DA /* ProgressStoreTests.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3B571B79C561E9FB1363E361 /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				CE61188FF7955447386AE139 /* ResultsView.swift */,
 			);
 			path = Results;
 			sourceTree = "<group>";
 		};
-		AA400015 /* Settings */ = {
+		502598F156F5569B8CCDE77A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA100016 /* SettingsView.swift */,
+				EDE5C548190E477F2A1F215C /* KochTrainer.app */,
+				86C1C03CE8794BDE0AA76390 /* KochTrainerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5A4C67945DC658C33C91F060 /* KochTrainer */ = {
+			isa = PBXGroup;
+			children = (
+				BF620E607DDDF5D130637E12 /* App */,
+				105ECEA86374FC48C74DF58A /* Design */,
+				7FF0E12D87CA8ADFCDB02895 /* Models */,
+				3325110A307FDAB0785ED016 /* Resources */,
+				BAA5D62B8261DE21681B0FC8 /* Services */,
+				C52F8C38914F36332B79DE6E /* ViewModels */,
+				ED42486BF1C2F9F1ED999588 /* Views */,
+			);
+			path = KochTrainer;
+			sourceTree = "<group>";
+		};
+		5B9E17A113C835082D502FF2 /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				A7AA370D33A91E76B3D17823 /* Receive */,
+				62BDED251F0F408940DDC03D /* Send */,
+			);
+			path = Training;
+			sourceTree = "<group>";
+		};
+		5DB2C71C293C78C678EB405A /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		62BDED251F0F408940DDC03D /* Send */ = {
+			isa = PBXGroup;
+			children = (
+				3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */,
+			);
+			path = Send;
+			sourceTree = "<group>";
+		};
+		7CD2A5207FAFC2082E5B97BC /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E4CB4886489BF491D3156CA3 /* SettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
 		};
-		AA400016 /* Components */ = {
+		7F808D60CCE85AE39653B865 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				AA100022 /* ButtonStyles.swift */,
+				119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */,
+				F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */,
+				6CD09C44BCD391959078B978 /* StudentProgressTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7FF0E12D87CA8ADFCDB02895 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F30E39178817F40F4AA07D72 /* AppSettings.swift */,
+				8505513FAC9BA060C1AD4B2B /* MorseCode.swift */,
+				03D7ADDFD818AD9C12165E74 /* SessionResult.swift */,
+				85CD768AEED253F0A22D4D6B /* StudentProgress.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		8DB4AC2DA37E7227B2062B4E /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
 		};
-		AA400017 /* Receive */ = {
+		A7AA370D33A91E76B3D17823 /* Receive */ = {
 			isa = PBXGroup;
 			children = (
-				AA100014 /* ReceiveTrainingView.swift */,
+				19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */,
 			);
 			path = Receive;
 			sourceTree = "<group>";
 		};
-		AA400018 /* Send */ = {
+		BAA5D62B8261DE21681B0FC8 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				AA100015 /* SendTrainingView.swift */,
+				171456171E035EA94ED1440A /* AudioEngine */,
+				6CA57C4635A10132B6514C82 /* GroupGenerator.swift */,
+				A7798C72A68405B53C0541B1 /* MorseDecoder.swift */,
+				F86594EFB29EB98D7D77B6E4 /* ProgressStore.swift */,
+				F755CF48DC3CF38BEA8528EC /* SettingsStore.swift */,
 			);
-			path = Send;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BF620E607DDDF5D130637E12 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				C96A88204D2AD8C5FD5D1932 /* ContentView.swift */,
+				002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C52F8C38914F36332B79DE6E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */,
+				7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		ED42486BF1C2F9F1ED999588 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				23668595E5E745CC3F3C91F7 /* Home */,
+				3B571B79C561E9FB1363E361 /* Results */,
+				7CD2A5207FAFC2082E5B97BC /* Settings */,
+				5B9E17A113C835082D502FF2 /* Training */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F7E249D812687B025E41D870 /* KochTrainerTests */ = {
+			isa = PBXGroup;
+			children = (
+				7F808D60CCE85AE39653B865 /* Models */,
+				3A12B56CFB1E692710B720E8 /* Services */,
+				5DB2C71C293C78C678EB405A /* ViewModels */,
+				BF9E80F76DFEAE1D76AC2CD3 /* KochTrainerTests.swift */,
+			);
+			path = KochTrainerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA500001 /* KochTrainer */ = {
+		BB58D6BD5815BA97F7E2C290 /* KochTrainer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA600003 /* Build configuration list for PBXNativeTarget "KochTrainer" */;
+			buildConfigurationList = 7AD3B27DDF30867DA01B4AB0 /* Build configuration list for PBXNativeTarget "KochTrainer" */;
 			buildPhases = (
-				AA500002 /* Sources */,
-				AA300001 /* Frameworks */,
-				AA500003 /* Resources */,
+				4BDD013FDFCB594AC6A00FC6 /* Sources */,
+				E26505C21A620A88A4BB7265 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = KochTrainer;
+			packageProductDependencies = (
+			);
 			productName = KochTrainer;
-			productReference = AA200001 /* KochTrainer.app */;
+			productReference = EDE5C548190E477F2A1F215C /* KochTrainer.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C3754BE0CB04635A1C22733D /* KochTrainerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 36951EDB213496B3DB13DB60 /* Build configuration list for PBXNativeTarget "KochTrainerTests" */;
+			buildPhases = (
+				CC33BBAB886CBC42F1A00579 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0533F6A6F72120F39D956243 /* PBXTargetDependency */,
+			);
+			name = KochTrainerTests;
+			packageProductDependencies = (
+			);
+			productName = KochTrainerTests;
+			productReference = 86C1C03CE8794BDE0AA76390 /* KochTrainerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		AA500004 /* Project object */ = {
+		FCD34FACB00CD1E80289A106 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-					AA500001 = {
-						CreatedOnToolsVersion = 15.0;
-					};
-				};
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
 			};
-			buildConfigurationList = AA600001 /* Build configuration list for PBXProject "KochTrainer" */;
+			buildConfigurationList = 782BEFDBAAD39153839596EC /* Build configuration list for PBXProject "KochTrainer" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = AA400001;
-			productRefGroup = AA400003 /* Products */;
+			mainGroup = 19FC02BC19D18FD86BBECE31;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AA500001 /* KochTrainer */,
+				BB58D6BD5815BA97F7E2C290 /* KochTrainer */,
+				C3754BE0CB04635A1C22733D /* KochTrainerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		AA500003 /* Resources */ = {
+		E26505C21A620A88A4BB7265 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA000003 /* Assets.xcassets in Resources */,
+				C002EF687CC4BB4E49AAE21E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AA500002 /* Sources */ = {
+		4BDD013FDFCB594AC6A00FC6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA000001 /* KochTrainerApp.swift in Sources */,
-				AA000002 /* ContentView.swift in Sources */,
-				AA000004 /* MorseCode.swift in Sources */,
-				AA000005 /* StudentProgress.swift in Sources */,
-				AA000006 /* SessionResult.swift in Sources */,
-				AA000007 /* AppSettings.swift in Sources */,
-				AA000008 /* ProgressStore.swift in Sources */,
-				AA000009 /* SettingsStore.swift in Sources */,
-				AA000010 /* ToneGenerator.swift in Sources */,
-				AA000011 /* MorseAudioEngine.swift in Sources */,
-				AA000012 /* MorseDecoder.swift in Sources */,
-				AA000013 /* HomeView.swift in Sources */,
-				AA000014 /* ReceiveTrainingView.swift in Sources */,
-				AA000015 /* SendTrainingView.swift in Sources */,
-				AA000016 /* SettingsView.swift in Sources */,
-				AA000017 /* ResultsView.swift in Sources */,
-				AA000018 /* ReceiveTrainingViewModel.swift in Sources */,
-				AA000019 /* SendTrainingViewModel.swift in Sources */,
-				AA000020 /* Theme.swift in Sources */,
-				AA000021 /* Typography.swift in Sources */,
-				AA000022 /* ButtonStyles.swift in Sources */,
-				AA000023 /* GroupGenerator.swift in Sources */,
+				B9E21B960E5BE46794F9C698 /* AppSettings.swift in Sources */,
+				15BB7D719F088E992E2978C8 /* ButtonStyles.swift in Sources */,
+				E4B9D745E40F369D1568D664 /* ContentView.swift in Sources */,
+				0B0287382195C5F72752969F /* GroupGenerator.swift in Sources */,
+				697DFFC04EDF076B67779F07 /* HomeView.swift in Sources */,
+				144A002289DF894D11ACD74E /* KochTrainerApp.swift in Sources */,
+				2FE91C024BFA87E204D75206 /* MorseAudioEngine.swift in Sources */,
+				7BD10683E55559D3A00B0035 /* MorseCode.swift in Sources */,
+				B23DA9930048CC728EE1644C /* MorseDecoder.swift in Sources */,
+				82C5E485701143EDE9CA5456 /* ProgressStore.swift in Sources */,
+				2BBF8A4F8DF9913922139270 /* ReceiveTrainingView.swift in Sources */,
+				733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */,
+				5383BF913CEE062CEB15B91D /* ResultsView.swift in Sources */,
+				18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */,
+				8F969AC17120BCDA9814D527 /* SendTrainingViewModel.swift in Sources */,
+				8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */,
+				D6ED51A820293916C2EBB9B2 /* SettingsStore.swift in Sources */,
+				1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */,
+				C4B0F0A381BE4BF3F9CD7B36 /* StudentProgress.swift in Sources */,
+				5B1BB87C1A47AFDAE0B9B1E1 /* Theme.swift in Sources */,
+				7E8227D6BB6A5FFAC76CFF5B /* ToneGenerator.swift in Sources */,
+				A71FCBB659E9FACE9A047EBD /* Typography.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC33BBAB886CBC42F1A00579 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				871CC10C74706F8EDAB701DE /* GroupGeneratorTests.swift in Sources */,
+				CD0CAA1E13951AA0FCE43096 /* KochTrainerTests.swift in Sources */,
+				6906226FBD5357293714E929 /* MorseCodeTests.swift in Sources */,
+				5B2E346FFE9395107BB85CC8 /* MorseDecoderTests.swift in Sources */,
+				C233FD0E9146D9F38934A581 /* ProgressStoreTests.swift in Sources */,
+				B4B344A5F10DB214363B9606 /* SessionResultTests.swift in Sources */,
+				AF22771ABDED2406C7AEEDD2 /* StudentProgressTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		0533F6A6F72120F39D956243 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB58D6BD5815BA97F7E2C290 /* KochTrainer */;
+			targetProxy = 63A927BDB5688A21FF439C1A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
-		AA600002 /* Debug */ = {
+		3E15716F2AD9BA0DA58949CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		693526C85DDDC9F94C3399AF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -370,14 +480,14 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -385,25 +495,81 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
-		AA600004 /* Release */ = {
+		8529C18B713C6798B20D8714 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KochTrainer.app/KochTrainer";
+			};
+			name = Release;
+		};
+		B76C2D2E645738FBF6697938 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D7073AFCA3C2ECB4F13D9BA5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KochTrainer.app/KochTrainer";
+			};
+			name = Debug;
+		};
+		EC93A01BA674779FE773C8A4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -433,8 +599,8 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -442,73 +608,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		AA600005 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		AA600006 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -517,25 +625,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA600001 /* Build configuration list for PBXProject "KochTrainer" */ = {
+		36951EDB213496B3DB13DB60 /* Build configuration list for PBXNativeTarget "KochTrainerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA600002 /* Debug */,
-				AA600004 /* Release */,
+				D7073AFCA3C2ECB4F13D9BA5 /* Debug */,
+				8529C18B713C6798B20D8714 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		AA600003 /* Build configuration list for PBXNativeTarget "KochTrainer" */ = {
+		782BEFDBAAD39153839596EC /* Build configuration list for PBXProject "KochTrainer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA600005 /* Debug */,
-				AA600006 /* Release */,
+				693526C85DDDC9F94C3399AF /* Debug */,
+				EC93A01BA674779FE773C8A4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
+		};
+		7AD3B27DDF30867DA01B4AB0 /* Build configuration list for PBXNativeTarget "KochTrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E15716F2AD9BA0DA58949CD /* Debug */,
+				B76C2D2E645738FBF6697938 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = AA500004 /* Project object */;
+	rootObject = FCD34FACB00CD1E80289A106 /* Project object */;
 }

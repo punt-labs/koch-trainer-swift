@@ -140,8 +140,8 @@ final class SessionResultTests: XCTestCase {
             totalAttempts: 50,
             correctCount: 45,
             characterStats: [
-                "K": CharacterStat(totalAttempts: 10, correctCount: 9),
-                "M": CharacterStat(totalAttempts: 10, correctCount: 8)
+                "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 9),
+                "M": CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
             ]
         )
 
@@ -152,8 +152,8 @@ final class SessionResultTests: XCTestCase {
         XCTAssertEqual(decoded.duration, 300)
         XCTAssertEqual(decoded.totalAttempts, 50)
         XCTAssertEqual(decoded.correctCount, 45)
-        XCTAssertEqual(decoded.characterStats["K"]?.totalAttempts, 10)
-        XCTAssertEqual(decoded.characterStats["M"]?.correctCount, 8)
+        XCTAssertEqual(decoded.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(decoded.characterStats["M"]?.receiveCorrect, 8)
     }
 
     // MARK: - Identifiable Tests

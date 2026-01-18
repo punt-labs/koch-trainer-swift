@@ -30,14 +30,14 @@ final class ProgressStoreTests: XCTestCase {
     func testInitializationLoadsExistingData() {
         // Pre-save some progress
         var progress = StudentProgress(currentLevel: 5)
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 9)
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
         let data = try! JSONEncoder().encode(progress)
         testDefaults.set(data, forKey: "studentProgress")
 
         let store = ProgressStore(defaults: testDefaults)
 
         XCTAssertEqual(store.progress.currentLevel, 5)
-        XCTAssertEqual(store.progress.characterStats["K"]?.totalAttempts, 10)
+        XCTAssertEqual(store.progress.characterStats["K"]?.receiveAttempts, 10)
     }
 
     // MARK: - Save Tests
@@ -45,7 +45,7 @@ final class ProgressStoreTests: XCTestCase {
     func testSaveProgress() {
         let store = ProgressStore(defaults: testDefaults)
         var progress = StudentProgress(currentLevel: 10)
-        progress.characterStats["M"] = CharacterStat(totalAttempts: 20, correctCount: 18)
+        progress.characterStats["M"] = CharacterStat(receiveAttempts: 20, receiveCorrect: 18)
 
         store.save(progress)
 
@@ -53,7 +53,7 @@ final class ProgressStoreTests: XCTestCase {
         let data = testDefaults.data(forKey: "studentProgress")!
         let loaded = try! JSONDecoder().decode(StudentProgress.self, from: data)
         XCTAssertEqual(loaded.currentLevel, 10)
-        XCTAssertEqual(loaded.characterStats["M"]?.totalAttempts, 20)
+        XCTAssertEqual(loaded.characterStats["M"]?.receiveAttempts, 20)
     }
 
     // MARK: - Reset Tests
@@ -61,7 +61,7 @@ final class ProgressStoreTests: XCTestCase {
     func testResetProgress() {
         let store = ProgressStore(defaults: testDefaults)
         var progress = StudentProgress(currentLevel: 15)
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 100, correctCount: 90)
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 100, receiveCorrect: 90)
         store.save(progress)
 
         store.resetProgress()
@@ -80,15 +80,15 @@ final class ProgressStoreTests: XCTestCase {
             totalAttempts: 20,
             correctCount: 18,
             characterStats: [
-                "K": CharacterStat(totalAttempts: 10, correctCount: 9),
-                "M": CharacterStat(totalAttempts: 10, correctCount: 9)
+                "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 9),
+                "M": CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
             ]
         )
 
         store.recordSession(result)
 
-        XCTAssertEqual(store.progress.characterStats["K"]?.totalAttempts, 10)
-        XCTAssertEqual(store.progress.characterStats["M"]?.totalAttempts, 10)
+        XCTAssertEqual(store.progress.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(store.progress.characterStats["M"]?.receiveAttempts, 10)
         XCTAssertEqual(store.progress.sessionHistory.count, 1)
     }
 
@@ -129,8 +129,8 @@ final class ProgressStoreTests: XCTestCase {
     func testOverallAccuracyPercentage() {
         let store = ProgressStore(defaults: testDefaults)
         var progress = store.progress
-        progress.characterStats["K"] = CharacterStat(totalAttempts: 10, correctCount: 8)
-        progress.characterStats["M"] = CharacterStat(totalAttempts: 10, correctCount: 9)
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
+        progress.characterStats["M"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
         store.save(progress)
 
         // (8 + 9) / 20 = 0.85 = 85%
