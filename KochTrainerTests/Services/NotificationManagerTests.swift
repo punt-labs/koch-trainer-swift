@@ -2,23 +2,31 @@
 import UserNotifications
 import XCTest
 
+// MARK: - MockNotificationSettings
+
+/// Mock notification settings for testing.
+struct MockNotificationSettings: NotificationSettingsProtocol, Sendable {
+    var authorizationStatus: UNAuthorizationStatus
+}
+
 // MARK: - MockNotificationCenter
 
 /// Mock notification center for testing NotificationManager.
 final class MockNotificationCenter: NotificationCenterProtocol, @unchecked Sendable {
-    var authorizationStatus: UNAuthorizationStatus = .authorized
+    var authorizationStatus: UNAuthorizationStatus = .notDetermined
     var grantAuthorization = true
     var addedRequests: [UNNotificationRequest] = []
     var removedAllPending = false
 
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        if grantAuthorization {
+            authorizationStatus = .authorized
+        }
         return grantAuthorization
     }
 
-    func notificationSettings() async -> UNNotificationSettings {
-        // Create mock settings - we use a workaround since UNNotificationSettings can't be instantiated
-        // The test will set authorizationStatus directly on the manager
-        return await UNUserNotificationCenter.current().notificationSettings()
+    func notificationSettings() async -> NotificationSettingsProtocol {
+        return MockNotificationSettings(authorizationStatus: authorizationStatus)
     }
 
     func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: (@Sendable (Error?) -> Void)?) {

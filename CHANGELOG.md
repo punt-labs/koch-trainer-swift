@@ -12,9 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VoiceOver accessibility labels for proficiency percentages
 - **Morse QSO Training**: Practice QSO conversations by keying dit/dah responses while listening to AI transmissions with progressive text reveal
 - Configurable text reveal delay setting (0-2 seconds) for Morse QSO training
+- **Number support (0-9)**: Morse code patterns for digits, enabling callsigns (W5ABC) and RST reports (599) to play correctly
+- **Answer CQ mode**: AI calls CQ first, user responds—more realistic practice flow
+- **AI text hide toggle**: Hide received text during QSO to practice copying by ear
+- **Real-time WPM display**: See your keying speed during QSO training turns
+- **QSO style progression**: First Contact (beginner) → Signal Report → Contest → Rag Chew
+- **Session history view**: Review past practice sessions in Settings
+- **Acknowledgments view**: Third-party licenses and credits in Settings
+- **License view**: Full MIT license text in Settings
 
 ### Changed
 - Character grid cells now use circular backgrounds for visual consistency
+- QSO text reveal now syncs with audio playback (character appears as it plays)
 
 ### Fixed
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)

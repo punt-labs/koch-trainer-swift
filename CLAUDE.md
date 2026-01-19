@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-iOS app implementing the Koch method for learning Morse code. Single-user, letters only (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X).
+iOS app implementing the Koch method for learning Morse code. Single-user, supports 26 letters (Koch order: K M R S U A P T L O W I N J E F Y V G Q Z H B C D X) plus digits 0-9 for callsigns and RST reports.
 
 ## Build & Run
 
@@ -34,20 +34,28 @@ KochTrainer/
 │   ├── NotificationSettings.swift
 │   ├── SessionResult.swift
 │   ├── CharacterStat.swift
-│   └── MorseCode.swift
+│   ├── MorseCode.swift          # 26 letters + 10 digits
+│   └── QSO/
+│       ├── QSOState.swift       # QSO phase state machine
+│       ├── QSOTemplate.swift    # Message templates by style
+│       └── VirtualStation.swift # AI station generation
 ├── ViewModels/
 │   ├── ReceiveTrainingViewModel.swift
-│   └── SendTrainingViewModel.swift
+│   ├── SendTrainingViewModel.swift
+│   └── MorseQSOViewModel.swift  # QSO training with keying
 ├── Views/
 │   ├── Home/         # HomeView with streak card, practice due indicators
 │   ├── Training/
 │   │   ├── CharacterIntroductionView.swift
 │   │   ├── Receive/  # ReceiveTrainingView
 │   │   └── Send/     # SendTrainingView
+│   ├── QSO/          # MorseQSOView, QSOView
 │   ├── Results/
-│   └── Settings/     # SettingsView with notification toggles
+│   └── Settings/     # SettingsView, SessionHistoryView, AcknowledgmentsView
 ├── Services/
 │   ├── AudioEngine/  # MorseAudioEngine, ToneGenerator
+│   ├── QSO/
+│   │   └── QSOEngine.swift      # QSO state machine + AI responses
 │   ├── ProgressStore.swift
 │   ├── IntervalCalculator.swift  # Spaced repetition intervals
 │   ├── StreakCalculator.swift    # Consecutive day tracking
@@ -201,7 +209,7 @@ protocol CharacterIntroducing: ObservableObject {
 - Flaky tests must be fixed to be deterministic or use sufficient sample sizes for probabilistic assertions.
 - Run SwiftLint and fix all warnings before considering work complete.
 
-**Current Status:** 380 tests, 38.51% coverage (3403/8837 lines). Target: 80%.
+**Current Status:** 463 tests. Target: 80% coverage.
 
 ## SwiftFormat & SwiftLint Compliance
 
