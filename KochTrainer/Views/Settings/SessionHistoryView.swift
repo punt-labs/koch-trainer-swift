@@ -66,8 +66,8 @@ struct SessionHistoryView: View {
 
     private var sessionList: some View {
         List {
-            // Debug section - raw schedule data
-            Section("Schedule Debug") {
+            // Advanced schedule details
+            Section("Schedule Details") {
                 debugRow(label: "Last Streak Date", date: schedule.lastStreakDate)
                 debugRow(label: "Receive Next", date: schedule.receiveNextDate)
                 debugRow(label: "Send Next", date: schedule.sendNextDate)

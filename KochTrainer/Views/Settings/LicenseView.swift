@@ -5,6 +5,9 @@ import SwiftUI
 /// Displays the app's MIT license.
 struct LicenseView: View {
 
+    /// Copyright line - keep in sync with LICENSE file
+    static let copyrightLine = "Copyright (c) 2026 Punt Labs"
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
@@ -12,7 +15,7 @@ struct LicenseView: View {
                     .font(Typography.headline)
 
                 Text("""
-                Copyright (c) 2026 Punt Labs
+                \(Self.copyrightLine)
 
                 Permission is hereby granted, free of charge, to any person obtaining a copy \
                 of this software and associated documentation files (the "Software"), to deal \

@@ -248,9 +248,23 @@ struct SettingsView: View {
     @StateObject private var previewAudioEngine = MorseAudioEngine()
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(version) (\(build))"
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String
+        let build = info?["CFBundleVersion"] as? String
+
+        let hasVersion = version?.isEmpty == false
+        let hasBuild = build?.isEmpty == false
+
+        switch (hasVersion, hasBuild) {
+        case (true, true):
+            return "\(version ?? "") (\(build ?? ""))"
+        case (true, false):
+            return version ?? ""
+        case (false, true):
+            return "Build \(build ?? "")"
+        case (false, false):
+            return "Unknown version"
+        }
     }
 
     // MARK: - Band Conditions Helpers

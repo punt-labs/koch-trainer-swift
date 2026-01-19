@@ -5,15 +5,17 @@ import SwiftUI
 /// Displays the app's changelog/release notes.
 struct WhatsNewView: View {
 
+    // MARK: Internal
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 // Current version highlights
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                    Label("Version 1.0", systemImage: "app.badge")
+                    Label("Version \(appVersion)", systemImage: "app.badge")
                         .font(Typography.headline)
 
-                    Text("Initial release of Koch Trainer")
+                    Text("Koch Trainer for iOS")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
                 }
@@ -85,6 +87,12 @@ struct WhatsNewView: View {
         }
         .navigationTitle("What's New")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: Private
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 }
 

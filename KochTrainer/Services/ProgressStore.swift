@@ -62,7 +62,10 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     }
 
     /// Delete a specific session from history.
-    /// Note: This removes the session but does not recalculate intervals or streaks.
+    ///
+    /// - Warning: This removes the session but does not recalculate intervals or streaks.
+    ///   If the deleted session affected the schedule, call `recalculateScheduleFromHistory()`
+    ///   afterward to restore consistency.
     func deleteSession(id: UUID) {
         var updated = progress
         updated.sessionHistory.removeAll { $0.id == id }
