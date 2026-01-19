@@ -55,7 +55,9 @@ Practice realistic ham radio QSO exchanges by keying Morse code.
 - **Your Callsign** — For personalized vocabulary practice
 - **Tone Frequency** — Adjustable 400-800 Hz
 - **Effective Speed** — Farnsworth spacing 10-18 WPM (character speed fixed at 20 WPM)
+- **Band Conditions** — Simulate QRN (noise), QSB (fading), and QRM (interference)
 - **Notifications** — Practice reminders with streak protection
+- **Session History** — Review past practice sessions and statistics
 
 ### Streaks & Spaced Repetition
 
