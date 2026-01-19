@@ -55,7 +55,7 @@ final class VocabularyGroupGeneratorTests: XCTestCase {
         )
 
         XCTAssertNotNil(word)
-        if let word = word {
+        if let word {
             XCTAssertTrue(testSet.words.contains(word))
         }
     }
@@ -104,7 +104,7 @@ final class VocabularyGroupGeneratorTests: XCTestCase {
 
         // Should fall back to selecting from full set
         XCTAssertNotNil(word)
-        if let word = word {
+        if let word {
             XCTAssertTrue(testSet.words.contains(word))
         }
     }

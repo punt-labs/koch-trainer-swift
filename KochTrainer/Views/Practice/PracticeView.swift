@@ -16,6 +16,7 @@ struct PracticeView: View {
 
             CharacterGridView(
                 selectedCharacters: $selectedCharacters,
+                characterStats: progressStore.progress.characterStats,
                 onCharacterSelected: playCharacter
             )
 

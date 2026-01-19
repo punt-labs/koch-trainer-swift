@@ -14,6 +14,7 @@
 		144A002289DF894D11ACD74E /* KochTrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */; };
 		1480A9FC477063DF298C6FD4 /* QSOEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1564392CDE73E10F052C0DE2 /* QSOEngineTests.swift */; };
 		14CAB408E99A099B40BDD169 /* PracticeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9C5CC48B26ED90748F52F /* PracticeSchedule.swift */; };
+		15703CEB48034421653A52D1 /* ProficiencyRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098D25DA28567B0CE2C919DB /* ProficiencyRingView.swift */; };
 		15BB7D719F088E992E2978C8 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */; };
 		18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */; };
 		1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB4886489BF491D3156CA3 /* SettingsView.swift */; };
@@ -96,6 +97,7 @@
 		03D7ADDFD818AD9C12165E74 /* SessionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResult.swift; sourceTree = "<group>"; };
 		07F3F7690B4EEFE8F612EBF2 /* VocabularyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyView.swift; sourceTree = "<group>"; };
 		08E8DAD009FDD4DC117DB5CF /* CharacterGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterGridView.swift; sourceTree = "<group>"; };
+		098D25DA28567B0CE2C919DB /* ProficiencyRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProficiencyRingView.swift; sourceTree = "<group>"; };
 		0A4992367A37B216CCDDCDBC /* BandConditionsProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandConditionsProcessor.swift; sourceTree = "<group>"; };
 		1111BA0D5DEF631542D63644 /* TrainingTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingTiming.swift; sourceTree = "<group>"; };
 		119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCodeTests.swift; sourceTree = "<group>"; };
@@ -376,6 +378,14 @@
 			path = QSO;
 			sourceTree = "<group>";
 		};
+		9EE3BBA140778506A671351B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				098D25DA28567B0CE2C919DB /* ProficiencyRingView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		A7AA370D33A91E76B3D17823 /* Receive */ = {
 			isa = PBXGroup;
 			children = (
@@ -443,6 +453,7 @@
 		ED42486BF1C2F9F1ED999588 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				9EE3BBA140778506A671351B /* Components */,
 				23668595E5E745CC3F3C91F7 /* Home */,
 				8351DEB1827A2F072AE42F33 /* Practice */,
 				57D7B974D1167679B77E2497 /* QSO */,
@@ -567,6 +578,7 @@
 				F4707BCED852ABC5F468F3B2 /* NotificationSettings.swift in Sources */,
 				14CAB408E99A099B40BDD169 /* PracticeSchedule.swift in Sources */,
 				F1845A8517A1BF93FD2D0B0F /* PracticeView.swift in Sources */,
+				15703CEB48034421653A52D1 /* ProficiencyRingView.swift in Sources */,
 				82C5E485701143EDE9CA5456 /* ProgressStore.swift in Sources */,
 				DCDA194235BB09B4CA7B1ABA /* QSOCompletedView.swift in Sources */,
 				7BA86FFFC62FBCEFE6B59F40 /* QSOEngine.swift in Sources */,

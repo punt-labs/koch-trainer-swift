@@ -37,7 +37,7 @@ struct QSOSessionView: View {
         .navigationBarBackButtonHidden(viewModel.isSessionActive)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if viewModel.isSessionActive && !viewModel.isCompleted {
+                if viewModel.isSessionActive, !viewModel.isCompleted {
                     Button("End") {
                         viewModel.endSession()
                         dismiss()

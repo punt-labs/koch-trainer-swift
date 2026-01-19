@@ -58,11 +58,10 @@ enum GroupGenerator {
         let newestFamily = PatternFamily.family(for: newestChar)
 
         // Find pattern-similar characters from the available set
-        let similarChars: [Character]
-        if let family = newestFamily {
-            similarChars = available.filter { family.characters.contains($0) }
+        let similarChars: [Character] = if let family = newestFamily {
+            available.filter { family.characters.contains($0) }
         } else {
-            similarChars = [newestChar]
+            [newestChar]
         }
 
         var group = ""
@@ -70,7 +69,7 @@ enum GroupGenerator {
             // Include newest character at least twice for emphasis
             if i == 0 || i == groupLength / 2 {
                 group.append(newestChar)
-            } else if !similarChars.isEmpty && Bool.random() {
+            } else if !similarChars.isEmpty, Bool.random() {
                 // 50% chance to pick from pattern-similar characters
                 group.append(similarChars[Int.random(in: 0 ..< similarChars.count)])
             } else {

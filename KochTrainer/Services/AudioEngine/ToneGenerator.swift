@@ -28,13 +28,13 @@ final class ToneGenerator: @unchecked Sendable {
     func playTone(frequency: Double, duration: TimeInterval) async {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             audioQueue.async { [weak self] in
-                guard let self = self else {
+                guard let self else {
                     continuation.resume()
                     return
                 }
 
                 // If currently playing, wait for it to finish
-                while self.isPlaying {
+                while isPlaying {
                     Thread.sleep(forTimeInterval: 0.005) // 5ms polling
                 }
 
@@ -66,7 +66,7 @@ final class ToneGenerator: @unchecked Sendable {
         guard isPlaying else { return }
 
         audioEngine.stop()
-        if let sourceNode = sourceNode {
+        if let sourceNode {
             audioEngine.detach(sourceNode)
         }
         sourceNode = nil
@@ -125,14 +125,14 @@ final class ToneGenerator: @unchecked Sendable {
         let processor = bandConditionsProcessor
 
         sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
-            guard let self = self else { return noErr }
+            guard let self else { return noErr }
 
             let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
             for frame in 0 ..< Int(frameCount) {
-                var value = Float(sin(self.currentPhase))
-                self.currentPhase += phaseIncrement
-                if self.currentPhase >= twoPi {
-                    self.currentPhase -= twoPi
+                var value = Float(sin(currentPhase))
+                currentPhase += phaseIncrement
+                if currentPhase >= twoPi {
+                    currentPhase -= twoPi
                 }
 
                 // Apply base volume
@@ -152,7 +152,7 @@ final class ToneGenerator: @unchecked Sendable {
             return noErr
         }
 
-        guard let sourceNode = sourceNode else { return }
+        guard let sourceNode else { return }
 
         audioEngine.attach(sourceNode)
         audioEngine.connect(sourceNode, to: audioEngine.mainMixerNode, format: format)

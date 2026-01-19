@@ -12,6 +12,7 @@
 --wraparguments before-first
 --wrapparameters before-first
 --wrapcollections before-first
+--wrapconditions after-first
 --closingparen balanced
 --allman false
 --funcattributes prev-line
@@ -35,6 +36,7 @@
 --disable blankLinesAtEndOfScope
 --disable blankLinesAtStartOfScope
 --disable trailingCommas
+--disable wrapMultilineStatementBraces
 
 # Exclusions
 --exclude DerivedData,Pods,.build,Carthage

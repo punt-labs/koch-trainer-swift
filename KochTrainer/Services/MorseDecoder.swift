@@ -121,9 +121,9 @@ final class MorseDecoder {
 
     private func startTimeout() {
         timeoutTimer = Timer.scheduledTimer(withTimeInterval: timeoutDuration, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            if let result = self.completeCharacter() {
-                self.onCharacterDecoded?(result)
+            guard let self else { return }
+            if let result = completeCharacter() {
+                onCharacterDecoded?(result)
             }
         }
     }

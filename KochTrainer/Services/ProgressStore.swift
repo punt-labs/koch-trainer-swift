@@ -69,14 +69,13 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         updated.updateStats(from: result)
 
         // Only allow advancement for standard sessions (not custom or vocabulary)
-        let didAdvance: Bool
-        if result.sessionType.canAdvanceLevel {
-            didAdvance = updated.advanceIfEligible(
+        let didAdvance: Bool = if result.sessionType.canAdvanceLevel {
+            updated.advanceIfEligible(
                 sessionAccuracy: result.accuracy,
                 sessionType: result.sessionType.baseType
             )
         } else {
-            didAdvance = false
+            false
         }
 
         // Update schedule using base session type

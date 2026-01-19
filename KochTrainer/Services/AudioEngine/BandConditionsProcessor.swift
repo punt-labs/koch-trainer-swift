@@ -80,7 +80,7 @@ final class BandConditionsProcessor: @unchecked Sendable {
         }
 
         // Add interference (QRM)
-        if interferenceEnabled && interferenceLevel > 0 {
+        if interferenceEnabled, interferenceLevel > 0 {
             output = addInterference(to: output)
         }
 
@@ -172,7 +172,7 @@ final class BandConditionsProcessor: @unchecked Sendable {
         var output = sample
 
         // Handle ongoing interference
-        if interferenceActive && interferenceSamplesRemaining > 0 {
+        if interferenceActive, interferenceSamplesRemaining > 0 {
             let interferenceSignal = sin(interferencePhase)
             output += Float(interferenceSignal * interferenceLevel * 0.3)
 

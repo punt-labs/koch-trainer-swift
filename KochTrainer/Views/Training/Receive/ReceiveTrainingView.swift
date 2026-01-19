@@ -258,7 +258,7 @@ struct CompletedView: View {
                     .font(Typography.body)
                     .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
 
-                if !didAdvance && viewModel.accuracyPercentage < 90 {
+                if !didAdvance, viewModel.accuracyPercentage < 90 {
                     Text("Need 90% to advance")
                         .font(Typography.body)
                         .foregroundColor(.secondary)

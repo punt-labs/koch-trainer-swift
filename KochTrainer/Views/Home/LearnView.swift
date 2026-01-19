@@ -110,7 +110,7 @@ struct LearnView: View {
             Text("\(schedule.currentStreak) day streak")
                 .font(Typography.body)
             Spacer()
-            if schedule.currentStreak == schedule.longestStreak && schedule.longestStreak > 1 {
+            if schedule.currentStreak == schedule.longestStreak, schedule.longestStreak > 1 {
                 Text("Personal best!")
                     .font(Typography.caption)
                     .foregroundColor(.orange)

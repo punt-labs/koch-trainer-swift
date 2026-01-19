@@ -152,7 +152,7 @@ final class VirtualStationTests: XCTestCase {
         let rst = station.randomRST
 
         XCTAssertEqual(rst.count, 3)
-        XCTAssertTrue(rst.allSatisfy { $0.isNumber })
+        XCTAssertTrue(rst.allSatisfy(\.isNumber))
     }
 
     func testFormattedSerialNumber() {

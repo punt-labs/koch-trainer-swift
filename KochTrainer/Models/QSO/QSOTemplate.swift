@@ -112,7 +112,7 @@ enum QSOTemplate {
         case .idle,
              .callingCQ:
             // Should contain CQ and callsign
-            if cleaned.contains("CQ") && cleaned.contains(state.myCallsign) {
+            if cleaned.contains("CQ"), cleaned.contains(state.myCallsign) {
                 return .valid
             }
             return .invalid(hint: "Include 'CQ' and your callsign")

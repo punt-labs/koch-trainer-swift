@@ -220,10 +220,11 @@ make build     # Format + Lint + Build (recommended)
 SwiftFormat and SwiftLint must be aligned. Key settings in `.swiftformat`:
 
 ```
---voidtype void          # Use `Void` not `()` (matches SwiftLint void_return)
---commas inline          # No trailing commas (matches SwiftLint trailing_comma)
---allman false           # Braces on same line (matches SwiftLint opening_brace)
---disable trailingCommas # Don't add trailing commas
+--voidtype void                        # Use `Void` not `()` (matches SwiftLint void_return)
+--commas inline                        # No trailing commas (matches SwiftLint trailing_comma)
+--allman false                         # Braces on same line (matches SwiftLint opening_brace)
+--disable trailingCommas               # Don't add trailing commas
+--disable wrapMultilineStatementBraces # Keep brace on same line for multi-line conditions
 ```
 
 If SwiftFormat changes produce SwiftLint errors, the configs are misaligned. Fix the `.swiftformat` config, not by disabling SwiftLint rules.

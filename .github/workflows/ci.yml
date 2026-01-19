@@ -32,14 +32,14 @@ jobs:
         run: |
           xcodebuild build \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -quiet
 
       - name: Run Tests
         run: |
           xcodebuild test \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -resultBundlePath TestResults.xcresult \
             | xcpretty --color --report junit
 

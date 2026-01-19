@@ -229,7 +229,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
     func testStartIntroductionSetsFirstCharacter() {
         viewModel.startSession()
 
-        guard case .introduction(let index) = viewModel.phase else {
+        guard case let .introduction(index) = viewModel.phase else {
             XCTFail("Expected introduction phase")
             return
         }
@@ -241,7 +241,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
     func testNextIntroCharacterAdvances() {
         viewModel.startSession()
 
-        guard case .introduction(let indexBefore) = viewModel.phase else {
+        guard case let .introduction(indexBefore) = viewModel.phase else {
             XCTFail("Expected introduction phase")
             return
         }
@@ -249,7 +249,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         viewModel.nextIntroCharacter()
 
         if viewModel.introCharacters.count > 1 {
-            guard case .introduction(let indexAfter) = viewModel.phase else {
+            guard case let .introduction(indexAfter) = viewModel.phase else {
                 XCTFail("Expected introduction phase after advance")
                 return
             }

@@ -60,7 +60,7 @@ enum CallsignGenerator {
         let cleaned = callsign.uppercased().trimmingCharacters(in: .whitespaces)
 
         // Must be 3-7 characters
-        guard cleaned.count >= 3 && cleaned.count <= 7 else { return false }
+        guard cleaned.count >= 3, cleaned.count <= 7 else { return false }
 
         // Must contain at least one letter and one digit
         let hasLetter = cleaned.contains { $0.isLetter }
