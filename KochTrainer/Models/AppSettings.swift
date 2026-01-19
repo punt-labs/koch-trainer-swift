@@ -27,7 +27,8 @@ struct AppSettings: Codable, Equatable {
         fadingDepth: Double = 0.5,
         fadingRate: Double = 0.1,
         interferenceEnabled: Bool = false,
-        interferenceLevel: Double = 0.2
+        interferenceLevel: Double = 0.2,
+        morseQSORevealDelay: Double = 0.3
     ) {
         self.toneFrequency = max(400, min(800, toneFrequency))
         self.effectiveSpeed = max(10, min(18, effectiveSpeed))
@@ -41,6 +42,7 @@ struct AppSettings: Codable, Equatable {
         self.fadingRate = max(0.01, min(0.5, fadingRate))
         self.interferenceEnabled = interferenceEnabled
         self.interferenceLevel = max(0, min(1, interferenceLevel))
+        self.morseQSORevealDelay = max(0, min(2, morseQSORevealDelay))
     }
 
     // MARK: Internal
@@ -83,6 +85,12 @@ struct AppSettings: Codable, Equatable {
     /// Interference level, 0.0 - 1.0
     var interferenceLevel: Double
 
+    // MARK: - Morse QSO Training
+
+    /// Delay before revealing each character in Morse QSO training (0.0 - 2.0 seconds)
+    /// Default 0.3s reveals text roughly as the next character plays
+    var morseQSORevealDelay: Double
+
 }
 
 // MARK: - Codable with migration support
@@ -101,6 +109,7 @@ extension AppSettings {
         case fadingRate
         case interferenceEnabled
         case interferenceLevel
+        case morseQSORevealDelay
     }
 
     init(from decoder: Decoder) throws {
@@ -122,5 +131,8 @@ extension AppSettings {
         fadingRate = try container.decodeIfPresent(Double.self, forKey: .fadingRate) ?? 0.1
         interferenceEnabled = try container.decodeIfPresent(Bool.self, forKey: .interferenceEnabled) ?? false
         interferenceLevel = try container.decodeIfPresent(Double.self, forKey: .interferenceLevel) ?? 0.2
+
+        // Morse QSO training migration
+        morseQSORevealDelay = try container.decodeIfPresent(Double.self, forKey: .morseQSORevealDelay) ?? 0.3
     }
 }

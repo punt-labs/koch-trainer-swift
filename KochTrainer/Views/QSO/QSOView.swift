@@ -1,5 +1,31 @@
 import SwiftUI
 
+// MARK: - QSOInputMode
+
+/// Input mode for QSO simulation
+enum QSOInputMode: String, CaseIterable {
+    case text
+    case morse
+
+    // MARK: Internal
+
+    var displayName: String {
+        switch self {
+        case .text: return "Text"
+        case .morse: return "Morse"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .text: return "Type messages with keyboard"
+        case .morse: return "Key dit/dah with paddles"
+        }
+    }
+}
+
+// MARK: - QSOView
+
 /// Mode selection screen for QSO Simulation
 struct QSOView: View {
 
@@ -16,7 +42,28 @@ struct QSOView: View {
 
             Spacer()
 
-            // Mode selection cards
+            // Input mode picker
+            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+                Text("Input Mode")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+
+                Picker("Input Mode", selection: $inputMode) {
+                    ForEach(QSOInputMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text(inputMode.description)
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Colors.secondaryBackground)
+            .cornerRadius(12)
+
+            // QSO style selection cards
             VStack(spacing: Theme.Spacing.md) {
                 ForEach(QSOStyle.allCases, id: \.self) { style in
                     modeCard(for: style)
@@ -43,14 +90,24 @@ struct QSOView: View {
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
 
-            // Start button
-            NavigationLink(destination: QSOSessionView(style: selectedStyle, callsign: userCallsign)) {
-                HStack {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
-                    Text("Start QSO")
+            // Start button - destination varies by input mode
+            if inputMode == .text {
+                NavigationLink(destination: QSOSessionView(style: selectedStyle, callsign: userCallsign)) {
+                    HStack {
+                        Image(systemName: "keyboard")
+                        Text("Start Text QSO")
+                    }
                 }
+                .buttonStyle(PrimaryButtonStyle())
+            } else {
+                NavigationLink(destination: MorseQSOView(style: selectedStyle, callsign: userCallsign)) {
+                    HStack {
+                        Image(systemName: "waveform")
+                        Text("Start Morse QSO")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
             }
-            .buttonStyle(PrimaryButtonStyle())
 
             Spacer()
         }
@@ -63,7 +120,7 @@ struct QSOView: View {
 
     @EnvironmentObject private var settingsStore: SettingsStore
     @State private var selectedStyle: QSOStyle = .contest
-    @State private var isShowingSession = false
+    @State private var inputMode: QSOInputMode = .morse
 
     private var userCallsign: String {
         let callsign = settingsStore.settings.userCallsign

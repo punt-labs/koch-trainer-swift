@@ -93,6 +93,21 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Morse QSO Training") {
+                VStack(alignment: .leading) {
+                    let delayText = String(format: "%.1f", settingsStore.settings.morseQSORevealDelay)
+                    Text("Text Reveal Delay: \(delayText)s")
+                    Slider(
+                        value: $settingsStore.settings.morseQSORevealDelay,
+                        in: 0 ... 2,
+                        step: 0.1
+                    )
+                    Text("How long to wait before revealing each character of AI transmissions")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section("Notifications") {
                 if notificationManager.authorizationStatus == .notDetermined {
                     Button("Enable Notifications") {
@@ -168,8 +183,38 @@ struct SettingsView: View {
                 HStack {
                     Text("Version")
                     Spacer()
-                    Text("1.0.0")
+                    Text(appVersion)
                         .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: WhatsNewView()) {
+                    Label("What's New", systemImage: "sparkles")
+                }
+
+                NavigationLink(destination: LicenseView()) {
+                    Label("License", systemImage: "doc.text")
+                }
+
+                NavigationLink(destination: AcknowledgmentsView()) {
+                    Label("Acknowledgments", systemImage: "heart")
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/blob/main/PRIVACY.md") {
+                    Link(destination: url) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                    }
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift") {
+                    Link(destination: url) {
+                        Label("Source Code", systemImage: "chevron.left.forwardslash.chevron.right")
+                    }
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/issues") {
+                    Link(destination: url) {
+                        Label("Support & Feedback", systemImage: "bubble.left.and.exclamationmark.bubble.right")
+                    }
                 }
             }
         }
@@ -192,6 +237,12 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var isPreviewingBandConditions = false
     @StateObject private var previewAudioEngine = MorseAudioEngine()
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
 
     // MARK: - Band Conditions Helpers
 
