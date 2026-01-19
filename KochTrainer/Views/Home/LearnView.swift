@@ -85,6 +85,33 @@ struct LearnView: View {
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
 
+            // QSO Simulation section
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("QSO Simulation")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("On-Air Practice")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: QSOView()) {
+                    HStack {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                        Text("Start QSO")
+                    }
+                }
+                .buttonStyle(SecondaryButtonStyle())
+
+                Text("Practice realistic ham radio conversations")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Colors.secondaryBackground)
+            .cornerRadius(12)
+
             Spacer()
         }
         .padding(Theme.Spacing.lg)

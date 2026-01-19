@@ -55,6 +55,7 @@ struct PracticeView: View {
         .onAppear {
             audioEngine.setFrequency(settingsStore.settings.toneFrequency)
             audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+            audioEngine.configureBandConditions(from: settingsStore.settings)
         }
     }
 

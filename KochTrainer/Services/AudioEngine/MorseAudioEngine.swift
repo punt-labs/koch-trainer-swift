@@ -9,6 +9,7 @@ protocol AudioEngineProtocol {
     func stop()
     func setFrequency(_ frequency: Double)
     func setEffectiveSpeed(_ wpm: Int)
+    func configureBandConditions(from settings: AppSettings)
 }
 
 /// Plays Morse code characters and groups with configurable timing.
@@ -48,6 +49,10 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
     func setEffectiveSpeed(_ wpm: Int) {
         self.effectiveSpeed = max(10, min(18, wpm))
+    }
+
+    func configureBandConditions(from settings: AppSettings) {
+        toneGenerator.bandConditionsProcessor.configure(from: settings)
     }
 
     /// Play a single character in Morse code.

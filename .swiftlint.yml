@@ -25,9 +25,12 @@ opt_in_rules:
 excluded:
   - DerivedData
   - .build
+  - build
   - Pods
   - Carthage
   - vendor
+  - "*/DerivedSources/*"
+  - "**/*.generated.swift"
 
 identifier_name:
   min_length: 1

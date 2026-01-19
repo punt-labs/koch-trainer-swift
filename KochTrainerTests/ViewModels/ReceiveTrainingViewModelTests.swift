@@ -29,6 +29,10 @@ final class MockAudioEngine: AudioEngineProtocol {
         effectiveSpeedSet = wpm
     }
 
+    func configureBandConditions(from settings: AppSettings) {
+        // No-op for testing
+    }
+
     func reset() {
         playCharacterCalls = []
         playGroupCalls = []
@@ -39,10 +43,10 @@ final class MockAudioEngine: AudioEngineProtocol {
 @MainActor
 final class ReceiveTrainingViewModelTests: XCTestCase {
 
-    private var viewModel: ReceiveTrainingViewModel!
-    private var mockAudioEngine: MockAudioEngine!
-    private var progressStore: ProgressStore!
-    private var settingsStore: SettingsStore!
+    private var viewModel = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+    private var mockAudioEngine = MockAudioEngine()
+    private var progressStore = ProgressStore()
+    private var settingsStore = SettingsStore()
 
     override func setUp() async throws {
         mockAudioEngine = MockAudioEngine()
@@ -54,10 +58,6 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     override func tearDown() async throws {
         viewModel.cleanup()
-        viewModel = nil
-        mockAudioEngine = nil
-        progressStore = nil
-        settingsStore = nil
     }
 
     // MARK: - Pause Tests

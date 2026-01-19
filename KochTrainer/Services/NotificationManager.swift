@@ -49,83 +49,88 @@ final class NotificationManager: ObservableObject {
     }
 
     /// Schedule all notifications based on current schedule and settings.
-    func scheduleNotifications(
-        for schedule: PracticeSchedule,
-        settings: NotificationSettings
-    ) {
-        // Cancel existing notifications first
+    func scheduleNotifications(for schedule: PracticeSchedule, settings: NotificationSettings) {
         cancelAllNotifications()
-
         guard authorizationStatus == .authorized else { return }
 
         var scheduledTimes: [Date] = []
+        schedulePracticeReminders(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        scheduleStreakReminderIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        scheduleLevelReviews(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        scheduleWelcomeBackIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+    }
 
-        // Practice due notifications
-        if settings.practiceRemindersEnabled {
-            if let receiveDate = schedule.receiveNextDate {
-                let adjustedDate = adjustForQuietHours(receiveDate, settings: settings)
-                if shouldSchedule(at: adjustedDate, existingTimes: scheduledTimes, settings: settings) {
-                    schedulePracticeNotification(
-                        id: NotificationID.practiceReceive,
-                        date: adjustedDate,
-                        title: "Time to Practice",
-                        body: "Your receive training session is ready."
-                    )
-                    scheduledTimes.append(adjustedDate)
-                }
-            }
+    private func schedulePracticeReminders(
+        schedule: PracticeSchedule,
+        settings: NotificationSettings,
+        scheduledTimes: inout [Date]
+    ) {
+        guard settings.practiceRemindersEnabled else { return }
 
-            if let sendDate = schedule.sendNextDate {
-                let adjustedDate = adjustForQuietHours(sendDate, settings: settings)
-                if shouldSchedule(at: adjustedDate, existingTimes: scheduledTimes, settings: settings) {
-                    schedulePracticeNotification(
-                        id: NotificationID.practiceSend,
-                        date: adjustedDate,
-                        title: "Time to Practice",
-                        body: "Your send training session is ready."
-                    )
-                    scheduledTimes.append(adjustedDate)
-                }
+        if let receiveDate = schedule.receiveNextDate {
+            let adjusted = adjustForQuietHours(receiveDate, settings: settings)
+            if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
+                schedulePracticeNotification(id: NotificationID.practiceReceive, date: adjusted,
+                                             title: "Time to Practice", body: "Your receive training session is ready.")
+                scheduledTimes.append(adjusted)
             }
         }
 
-        // Streak reminder (8 PM if haven't practiced today and streak > 3)
-        if settings.streakRemindersEnabled && schedule.currentStreak >= 3 {
-            if !StreakCalculator.hasPracticedToday(lastStreakDate: schedule.lastStreakDate) {
-                let reminderDate = todayAt(hour: 20)
-                let adjustedDate = adjustForQuietHours(reminderDate, settings: settings)
-                if shouldSchedule(at: adjustedDate, existingTimes: scheduledTimes, settings: settings) {
-                    scheduleStreakReminder(
-                        date: adjustedDate,
-                        streak: schedule.currentStreak
-                    )
-                    scheduledTimes.append(adjustedDate)
-                }
+        if let sendDate = schedule.sendNextDate {
+            let adjusted = adjustForQuietHours(sendDate, settings: settings)
+            if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
+                schedulePracticeNotification(id: NotificationID.practiceSend, date: adjusted,
+                                             title: "Time to Practice", body: "Your send training session is ready.")
+                scheduledTimes.append(adjusted)
             }
         }
+    }
 
-        // Level review notifications
-        if settings.practiceRemindersEnabled {
-            for (level, reviewDate) in schedule.levelReviewDates {
-                let adjustedDate = adjustForQuietHours(reviewDate, settings: settings)
-                if shouldSchedule(at: adjustedDate, existingTimes: scheduledTimes, settings: settings) {
-                    scheduleLevelReviewNotification(level: level, date: adjustedDate)
-                    scheduledTimes.append(adjustedDate)
-                }
+    private func scheduleStreakReminderIfNeeded(
+        schedule: PracticeSchedule,
+        settings: NotificationSettings,
+        scheduledTimes: inout [Date]
+    ) {
+        guard settings.streakRemindersEnabled, schedule.currentStreak >= 3,
+              !StreakCalculator.hasPracticedToday(lastStreakDate: schedule.lastStreakDate) else { return }
+
+        let adjusted = adjustForQuietHours(todayAt(hour: 20), settings: settings)
+        if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
+            scheduleStreakReminder(date: adjusted, streak: schedule.currentStreak)
+            scheduledTimes.append(adjusted)
+        }
+    }
+
+    private func scheduleLevelReviews(
+        schedule: PracticeSchedule,
+        settings: NotificationSettings,
+        scheduledTimes: inout [Date]
+    ) {
+        guard settings.practiceRemindersEnabled else { return }
+
+        for (level, reviewDate) in schedule.levelReviewDates {
+            let adjusted = adjustForQuietHours(reviewDate, settings: settings)
+            if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
+                scheduleLevelReviewNotification(level: level, date: adjusted)
+                scheduledTimes.append(adjusted)
             }
         }
+    }
 
-        // Welcome back notification (if 7+ days inactive)
-        if settings.practiceRemindersEnabled,
-           let lastDate = schedule.lastStreakDate {
-            let daysSinceLast = Int(Date().timeIntervalSince(lastDate) / 86400)
-            if daysSinceLast >= 7 {
-                let welcomeDate = tomorrowAt(hour: Int(Calendar.current.component(.hour, from: settings.preferredReminderTime)))
-                let adjustedDate = adjustForQuietHours(welcomeDate, settings: settings)
-                if shouldSchedule(at: adjustedDate, existingTimes: scheduledTimes, settings: settings) {
-                    scheduleWelcomeBackNotification(date: adjustedDate)
-                }
-            }
+    private func scheduleWelcomeBackIfNeeded(
+        schedule: PracticeSchedule,
+        settings: NotificationSettings,
+        scheduledTimes: inout [Date]
+    ) {
+        guard settings.practiceRemindersEnabled, let lastDate = schedule.lastStreakDate else { return }
+
+        let daysSinceLast = Int(Date().timeIntervalSince(lastDate) / 86400)
+        guard daysSinceLast >= 7 else { return }
+
+        let hour = Calendar.current.component(.hour, from: settings.preferredReminderTime)
+        let adjusted = adjustForQuietHours(tomorrowAt(hour: hour), settings: settings)
+        if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
+            scheduleWelcomeBackNotification(date: adjusted)
         }
     }
 

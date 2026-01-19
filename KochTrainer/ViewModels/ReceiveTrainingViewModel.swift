@@ -42,10 +42,10 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: - Configuration
 
     let responseTimeout: TimeInterval = 3.0
-    let masteryThreshold: Double = 0.90
+    let proficiencyThreshold: Double = 0.90
 
     /// Minimum attempts scales with character count (5 per character, floor of 15)
-    var minimumAttemptsForMastery: Int {
+    var minimumAttemptsForProficiency: Int {
         max(15, 5 * introCharacters.count)
     }
 
@@ -108,11 +108,11 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         return false
     }
 
-    var masteryProgress: String {
-        if totalAttempts < minimumAttemptsForMastery {
-            return "\(totalAttempts)/\(minimumAttemptsForMastery) attempts"
+    var proficiencyProgress: String {
+        if totalAttempts < minimumAttemptsForProficiency {
+            return "\(totalAttempts)/\(minimumAttemptsForProficiency) attempts"
         } else {
-            return "\(accuracyPercentage)% (need \(Int(masteryThreshold * 100))%)"
+            return "\(accuracyPercentage)% (need \(Int(proficiencyThreshold * 100))%)"
         }
     }
 
@@ -128,6 +128,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         self.currentLevel = progressStore.progress.receiveLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+        audioEngine.configureBandConditions(from: settingsStore.settings)
 
         introCharacters = MorseCode.characters(forLevel: currentLevel)
     }
@@ -140,6 +141,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         self.currentLevel = progressStore.progress.receiveLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+        audioEngine.configureBandConditions(from: settingsStore.settings)
 
         // For custom practice, use the selected characters as intro
         introCharacters = customCharacters
@@ -168,7 +170,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // Auto-play after a short delay to let the UI update
         Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
             playCurrentIntroCharacter()
         }
     }
@@ -264,13 +266,13 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
     }
 
-    // MARK: - Mastery Check
+    // MARK: - Proficiency Check
 
-    private func checkForMastery() {
-        guard totalAttempts >= minimumAttemptsForMastery else { return }
-        guard accuracy >= masteryThreshold else { return }
+    private func checkForProficiency() {
+        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard accuracy >= proficiencyThreshold else { return }
 
-        // Mastery achieved! End session and advance
+        // Proficiency achieved! End session and advance
         endSession()
     }
 
@@ -289,32 +291,27 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         showFeedbackAndContinue(wasCorrect: isCorrect, expected: expected, userPressed: pressedUpper)
     }
 
-    // MARK: - Private Methods
+}
 
-    private func startSessionTimer() {
+// MARK: - Private Helpers
+
+extension ReceiveTrainingViewModel {
+    func startSessionTimer() {
         sessionTimer?.invalidate()
         sessionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.tickSession()
-            }
+            Task { @MainActor in self?.tickSession() }
         }
     }
 
     private func tickSession() {
-        guard timeRemaining > 0 else {
-            endSession()
-            return
-        }
+        guard timeRemaining > 0 else { endSession(); return }
         timeRemaining -= 1
     }
 
-    private func playNextGroup() {
+    func playNextGroup() {
         guard isPlaying else { return }
-
-        let group = generateGroup()
-        currentGroup = Array(group)
+        currentGroup = Array(generateGroup())
         currentGroupIndex = 0
-
         playNextCharacterInGroup()
     }
 
@@ -323,10 +320,8 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         if currentGroupIndex >= currentGroup.count {
             Task {
-                try? await Task.sleep(nanoseconds: 500_000_000)
-                if isPlaying {
-                    playNextGroup()
-                }
+                try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
+                if isPlaying { playNextGroup() }
             }
             return
         }
@@ -339,32 +334,25 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
             guard let engine = audioEngine as? MorseAudioEngine else { return }
             engine.reset()
             await engine.playCharacter(char)
-
-            if isPlaying {
-                startResponseTimer()
-            }
+            if isPlaying { startResponseTimer() }
         }
     }
 
-    private func startResponseTimer() {
+    func startResponseTimer() {
         isWaitingForResponse = true
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
         responseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.tickResponse()
-            }
+            Task { @MainActor in self?.tickResponse() }
         }
     }
 
     private func tickResponse() {
         responseTimeRemaining -= 0.05
-
         if responseTimeRemaining <= 0 {
             responseTimer?.invalidate()
             isWaitingForResponse = false
-
             if let expected = currentCharacter {
                 recordResponse(expected: expected, wasCorrect: false, userPressed: nil)
                 showFeedbackAndContinue(wasCorrect: false, expected: expected, userPressed: nil)
@@ -372,45 +360,30 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    private func recordResponse(expected: Character, wasCorrect: Bool, userPressed: Character?) {
+    func recordResponse(expected: Character, wasCorrect: Bool, userPressed: Character?) {
         totalAttempts += 1
-        if wasCorrect {
-            correctCount += 1
-        }
+        if wasCorrect { correctCount += 1 }
 
         var stat = characterStats[expected] ?? CharacterStat()
         stat.receiveAttempts += 1
-        if wasCorrect {
-            stat.receiveCorrect += 1
-        }
+        if wasCorrect { stat.receiveCorrect += 1 }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
 
-    private func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, userPressed: Character?) {
-        lastFeedback = Feedback(
-            wasCorrect: wasCorrect,
-            expectedCharacter: expected,
-            userPressed: userPressed
-        )
+    func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, userPressed: Character?) {
+        lastFeedback = Feedback(wasCorrect: wasCorrect, expectedCharacter: expected, userPressed: userPressed)
 
         Task {
             if !wasCorrect {
-                // Wait before playing correction to let visual feedback register
-                try? await Task.sleep(nanoseconds: 400_000_000)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
-                    await engine.playCharacter(expected)
-                }
-                // Longer pause after correction so it doesn't blend into next trial
-                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playCharacter(expected) }
+                try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
-                // Brief pause after correct answer before next character
-                try? await Task.sleep(nanoseconds: 500_000_000)
+                try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
-            // Check for mastery after each response
-            checkForMastery()
-
+            checkForProficiency()
             if isPlaying {
                 currentGroupIndex += 1
                 playNextCharacterInGroup()

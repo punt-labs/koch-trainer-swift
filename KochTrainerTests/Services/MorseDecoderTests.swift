@@ -3,16 +3,11 @@ import XCTest
 
 final class MorseDecoderTests: XCTestCase {
 
-    var decoder: MorseDecoder!
+    private var decoder = MorseDecoder()
 
     override func setUp() {
         super.setUp()
         decoder = MorseDecoder()
-    }
-
-    override func tearDown() {
-        decoder = nil
-        super.tearDown()
     }
 
     // MARK: - Basic Decoding Tests

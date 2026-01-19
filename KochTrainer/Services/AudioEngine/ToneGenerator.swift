@@ -28,6 +28,9 @@ final class ToneGenerator: @unchecked Sendable {
     // Serial queue to ensure tones play sequentially
     private let audioQueue = DispatchQueue(label: "com.kochtrainer.audioQueue")
 
+    /// Band conditions processor for simulating HF conditions (QRN, QSB, QRM)
+    let bandConditionsProcessor = BandConditionsProcessor()
+
     init() {
         setupAudioSession()
     }
@@ -82,24 +85,34 @@ final class ToneGenerator: @unchecked Sendable {
     private func startToneInternal(frequency: Double) {
         guard !isPlaying else { return }
 
-        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else { return }
         let twoPi = 2.0 * Double.pi
         let phaseIncrement = twoPi * frequency / sampleRate
+        let processor = bandConditionsProcessor
 
         sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
             guard let self = self else { return noErr }
 
             let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
             for frame in 0..<Int(frameCount) {
-                let value = Float(sin(self.currentPhase))
+                var value = Float(sin(self.currentPhase))
                 self.currentPhase += phaseIncrement
                 if self.currentPhase >= twoPi {
                     self.currentPhase -= twoPi
                 }
 
+                // Apply base volume
+                value *= 0.5
+
+                // Apply band conditions processing (QRN, QSB, QRM)
+                value = processor.processSample(value, at: frame)
+
+                // Clamp to prevent distortion
+                value = max(-1.0, min(1.0, value))
+
                 for buffer in ablPointer {
                     let buf = buffer.mData?.assumingMemoryBound(to: Float.self)
-                    buf?[frame] = value * 0.5 // 50% volume to avoid clipping
+                    buf?[frame] = value
                 }
             }
             return noErr

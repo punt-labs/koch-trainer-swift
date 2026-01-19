@@ -23,18 +23,55 @@ struct AppSettings: Codable, Equatable {
     /// User's amateur radio callsign (for personalized vocabulary practice)
     var userCallsign: String
 
+    // MARK: - Band Conditions
+
+    /// Whether band conditions simulation is enabled
+    var bandConditionsEnabled: Bool
+
+    /// Atmospheric noise level (QRN), 0.0 - 1.0
+    var noiseLevel: Double
+
+    /// Whether signal fading is enabled (QSB)
+    var fadingEnabled: Bool
+
+    /// How deep fades go, 0.0 - 1.0
+    var fadingDepth: Double
+
+    /// How fast the signal fades in Hz (0.05 - 0.2 typical)
+    var fadingRate: Double
+
+    /// Whether interference from other stations is enabled (QRM)
+    var interferenceEnabled: Bool
+
+    /// Interference level, 0.0 - 1.0
+    var interferenceLevel: Double
+
     init(
         toneFrequency: Double = 600,
         effectiveSpeed: Int = 12,
         sendInputMode: SendInputMode = .paddle,
         notificationSettings: NotificationSettings = NotificationSettings(),
-        userCallsign: String = ""
+        userCallsign: String = "",
+        bandConditionsEnabled: Bool = false,
+        noiseLevel: Double = 0.3,
+        fadingEnabled: Bool = true,
+        fadingDepth: Double = 0.5,
+        fadingRate: Double = 0.1,
+        interferenceEnabled: Bool = false,
+        interferenceLevel: Double = 0.2
     ) {
         self.toneFrequency = max(400, min(800, toneFrequency))
         self.effectiveSpeed = max(10, min(18, effectiveSpeed))
         self.sendInputMode = sendInputMode
         self.notificationSettings = notificationSettings
         self.userCallsign = userCallsign.uppercased()
+        self.bandConditionsEnabled = bandConditionsEnabled
+        self.noiseLevel = max(0, min(1, noiseLevel))
+        self.fadingEnabled = fadingEnabled
+        self.fadingDepth = max(0, min(1, fadingDepth))
+        self.fadingRate = max(0.01, min(0.5, fadingRate))
+        self.interferenceEnabled = interferenceEnabled
+        self.interferenceLevel = max(0, min(1, interferenceLevel))
     }
 }
 
@@ -43,6 +80,8 @@ struct AppSettings: Codable, Equatable {
 extension AppSettings {
     enum CodingKeys: String, CodingKey {
         case toneFrequency, effectiveSpeed, sendInputMode, notificationSettings, userCallsign
+        case bandConditionsEnabled, noiseLevel, fadingEnabled, fadingDepth, fadingRate
+        case interferenceEnabled, interferenceLevel
     }
 
     init(from decoder: Decoder) throws {
@@ -55,5 +94,14 @@ extension AppSettings {
         notificationSettings = try container.decodeIfPresent(NotificationSettings.self, forKey: .notificationSettings)
             ?? NotificationSettings()
         userCallsign = try container.decodeIfPresent(String.self, forKey: .userCallsign) ?? ""
+
+        // Band conditions migration
+        bandConditionsEnabled = try container.decodeIfPresent(Bool.self, forKey: .bandConditionsEnabled) ?? false
+        noiseLevel = try container.decodeIfPresent(Double.self, forKey: .noiseLevel) ?? 0.3
+        fadingEnabled = try container.decodeIfPresent(Bool.self, forKey: .fadingEnabled) ?? true
+        fadingDepth = try container.decodeIfPresent(Double.self, forKey: .fadingDepth) ?? 0.5
+        fadingRate = try container.decodeIfPresent(Double.self, forKey: .fadingRate) ?? 0.1
+        interferenceEnabled = try container.decodeIfPresent(Bool.self, forKey: .interferenceEnabled) ?? false
+        interferenceLevel = try container.decodeIfPresent(Double.self, forKey: .interferenceLevel) ?? 0.2
     }
 }

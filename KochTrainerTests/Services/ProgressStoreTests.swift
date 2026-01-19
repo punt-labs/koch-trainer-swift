@@ -4,16 +4,16 @@ import XCTest
 @MainActor
 final class ProgressStoreTests: XCTestCase {
 
-    var testDefaults: UserDefaults!
+    var testDefaults: UserDefaults?
 
     override func setUp() {
         super.setUp()
-        testDefaults = UserDefaults(suiteName: "TestProgressStore")!
-        testDefaults.removePersistentDomain(forName: "TestProgressStore")
+        testDefaults = UserDefaults(suiteName: "TestProgressStore")
+        testDefaults?.removePersistentDomain(forName: "TestProgressStore")
     }
 
     override func tearDown() {
-        testDefaults.removePersistentDomain(forName: "TestProgressStore")
+        testDefaults?.removePersistentDomain(forName: "TestProgressStore")
         testDefaults = nil
         super.tearDown()
     }
@@ -21,21 +21,29 @@ final class ProgressStoreTests: XCTestCase {
     // MARK: - Initialization Tests
 
     func testInitializationWithEmptyDefaults() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
 
         XCTAssertEqual(store.progress.receiveLevel, 1)
         XCTAssertEqual(store.progress.sendLevel, 1)
         XCTAssertTrue(store.progress.characterStats.isEmpty)
     }
 
-    func testInitializationLoadsExistingData() {
+    func testInitializationLoadsExistingData() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
         // Pre-save some progress
         var progress = StudentProgress(receiveLevel: 5, sendLevel: 3)
         progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)
-        let data = try! JSONEncoder().encode(progress)
-        testDefaults.set(data, forKey: "studentProgress")
+        let data = try JSONEncoder().encode(progress)
+        defaults.set(data, forKey: "studentProgress")
 
-        let store = ProgressStore(defaults: testDefaults)
+        let store = ProgressStore(defaults: defaults)
 
         XCTAssertEqual(store.progress.receiveLevel, 5)
         XCTAssertEqual(store.progress.sendLevel, 3)
@@ -44,16 +52,23 @@ final class ProgressStoreTests: XCTestCase {
 
     // MARK: - Save Tests
 
-    func testSaveProgress() {
-        let store = ProgressStore(defaults: testDefaults)
+    func testSaveProgress() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         var progress = StudentProgress(receiveLevel: 10, sendLevel: 7)
         progress.characterStats["M"] = CharacterStat(receiveAttempts: 20, receiveCorrect: 18)
 
         store.save(progress)
 
         // Verify by loading
-        let data = testDefaults.data(forKey: "studentProgress")!
-        let loaded = try! JSONDecoder().decode(StudentProgress.self, from: data)
+        guard let data = defaults.data(forKey: "studentProgress") else {
+            XCTFail("No data saved")
+            return
+        }
+        let loaded = try JSONDecoder().decode(StudentProgress.self, from: data)
         XCTAssertEqual(loaded.receiveLevel, 10)
         XCTAssertEqual(loaded.sendLevel, 7)
         XCTAssertEqual(loaded.characterStats["M"]?.receiveAttempts, 20)
@@ -62,7 +77,11 @@ final class ProgressStoreTests: XCTestCase {
     // MARK: - Reset Tests
 
     func testResetProgress() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         var progress = StudentProgress(receiveLevel: 15, sendLevel: 10)
         progress.characterStats["K"] = CharacterStat(receiveAttempts: 100, receiveCorrect: 90)
         store.save(progress)
@@ -77,7 +96,11 @@ final class ProgressStoreTests: XCTestCase {
     // MARK: - Record Session Tests
 
     func testRecordSessionUpdatesStats() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         let result = SessionResult(
             sessionType: .receive,
             duration: 300,
@@ -97,7 +120,11 @@ final class ProgressStoreTests: XCTestCase {
     }
 
     func testRecordReceiveSessionAdvancesReceiveLevel() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         let result = SessionResult(
             sessionType: .receive,
             duration: 300,
@@ -114,7 +141,11 @@ final class ProgressStoreTests: XCTestCase {
     }
 
     func testRecordSendSessionAdvancesSendLevel() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         let result = SessionResult(
             sessionType: .send,
             duration: 300,
@@ -131,7 +162,11 @@ final class ProgressStoreTests: XCTestCase {
     }
 
     func testRecordSessionDoesNotAdvanceBelowThreshold() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         let result = SessionResult(
             sessionType: .receive,
             duration: 300,
@@ -149,7 +184,11 @@ final class ProgressStoreTests: XCTestCase {
     // MARK: - Overall Accuracy Tests
 
     func testOverallAccuracyPercentage() {
-        let store = ProgressStore(defaults: testDefaults)
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
         var progress = store.progress
         progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
         progress.characterStats["M"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 9)

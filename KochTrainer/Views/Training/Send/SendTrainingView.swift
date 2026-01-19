@@ -105,8 +105,8 @@ struct SendTrainingPhaseView: View {
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            // Progress toward mastery
-            Text(viewModel.masteryProgress)
+            // Progress toward proficiency
+            Text(viewModel.proficiencyProgress)
                 .font(Typography.body)
                 .foregroundColor(.secondary)
 

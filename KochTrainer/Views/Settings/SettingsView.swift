@@ -5,6 +5,8 @@ struct SettingsView: View {
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var notificationManager: NotificationManager
     @State private var showResetConfirmation = false
+    @State private var isPreviewingBandConditions = false
+    @StateObject private var previewAudioEngine = MorseAudioEngine()
 
     var body: some View {
         Form {
@@ -34,6 +36,62 @@ struct SettingsView: View {
                         in: 10...18,
                         step: 1
                     )
+                }
+            }
+
+            Section("Band Conditions") {
+                Toggle("Enable Band Conditions", isOn: $settingsStore.settings.bandConditionsEnabled)
+
+                if settingsStore.settings.bandConditionsEnabled {
+                    VStack(alignment: .leading) {
+                        Text("Noise Level (QRN): \(Int(settingsStore.settings.noiseLevel * 100))%")
+                        Slider(value: $settingsStore.settings.noiseLevel, in: 0...1, step: 0.1)
+                    }
+
+                    Toggle("Signal Fading (QSB)", isOn: $settingsStore.settings.fadingEnabled)
+
+                    if settingsStore.settings.fadingEnabled {
+                        VStack(alignment: .leading) {
+                            Text("Fading Depth: \(Int(settingsStore.settings.fadingDepth * 100))%")
+                            Slider(value: $settingsStore.settings.fadingDepth, in: 0...1, step: 0.1)
+                        }
+
+                        VStack(alignment: .leading) {
+                            let rateText = String(format: "%.2f", settingsStore.settings.fadingRate)
+                            Text("Fading Rate: \(rateText) Hz")
+                            Slider(value: $settingsStore.settings.fadingRate, in: 0.02...0.3, step: 0.02)
+                        }
+                    }
+
+                    Toggle("Interference (QRM)", isOn: $settingsStore.settings.interferenceEnabled)
+
+                    if settingsStore.settings.interferenceEnabled {
+                        VStack(alignment: .leading) {
+                            Text("Interference Level: \(Int(settingsStore.settings.interferenceLevel * 100))%")
+                            Slider(value: $settingsStore.settings.interferenceLevel, in: 0...1, step: 0.1)
+                        }
+                    }
+
+                    Button(action: previewBandConditions) {
+                        HStack {
+                            Image(systemName: isPreviewingBandConditions ? "speaker.wave.2.fill" : "speaker.wave.2")
+                            Text(isPreviewingBandConditions ? "Playing..." : "Preview Sound")
+                        }
+                    }
+                    .disabled(isPreviewingBandConditions)
+
+                    // Presets
+                    Menu("Apply Preset") {
+                        Button("Good Conditions") {
+                            applyPreset(.goodConditions)
+                        }
+                        Button("Contest Pileup") {
+                            applyPreset(.contestPileup)
+                        }
+                        Button("Difficult") {
+                            applyPreset(.difficult)
+                        }
+                    }
                 }
             }
 
@@ -127,6 +185,53 @@ struct SettingsView: View {
             Text("This will delete all your progress and start over from Level 1. This cannot be undone.")
         }
     }
+
+    // MARK: - Band Conditions Helpers
+
+    private func previewBandConditions() {
+        isPreviewingBandConditions = true
+        previewAudioEngine.setFrequency(settingsStore.settings.toneFrequency)
+        previewAudioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+        previewAudioEngine.configureBandConditions(from: settingsStore.settings)
+        previewAudioEngine.reset()
+
+        Task {
+            // Play "CQ" to demonstrate band conditions
+            await previewAudioEngine.playGroup("CQ CQ")
+            isPreviewingBandConditions = false
+        }
+    }
+
+    private func applyPreset(_ preset: BandConditionPreset) {
+        switch preset {
+        case .goodConditions:
+            settingsStore.settings.noiseLevel = 0.1
+            settingsStore.settings.fadingEnabled = true
+            settingsStore.settings.fadingDepth = 0.2
+            settingsStore.settings.fadingRate = 0.05
+            settingsStore.settings.interferenceEnabled = false
+        case .contestPileup:
+            settingsStore.settings.noiseLevel = 0.3
+            settingsStore.settings.fadingEnabled = true
+            settingsStore.settings.fadingDepth = 0.4
+            settingsStore.settings.fadingRate = 0.1
+            settingsStore.settings.interferenceEnabled = true
+            settingsStore.settings.interferenceLevel = 0.4
+        case .difficult:
+            settingsStore.settings.noiseLevel = 0.5
+            settingsStore.settings.fadingEnabled = true
+            settingsStore.settings.fadingDepth = 0.7
+            settingsStore.settings.fadingRate = 0.15
+            settingsStore.settings.interferenceEnabled = true
+            settingsStore.settings.interferenceLevel = 0.3
+        }
+    }
+}
+
+enum BandConditionPreset {
+    case goodConditions
+    case contestPileup
+    case difficult
 }
 
 #Preview {

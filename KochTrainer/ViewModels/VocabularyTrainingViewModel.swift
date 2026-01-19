@@ -115,6 +115,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         self.settingsStore = settingsStore
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+        audioEngine.configureBandConditions(from: settingsStore.settings)
 
         // Merge existing word stats
         wordStats = progressStore.progress.wordStats
@@ -291,29 +292,23 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     private func tickInput() {
         inputTimeRemaining -= 0.05
-
         if inputTimeRemaining <= 0 {
             inputTimer?.invalidate()
             advanceToNextCharacter()
         }
     }
+}
 
-    // MARK: - Private Methods
+// MARK: - Private Helpers
 
-    private func showNextWord() {
+extension VocabularyTrainingViewModel {
+    func showNextWord() {
         guard isPlaying else { return }
 
         let combinedStats = mergeWordStats()
-
         guard let nextWord = VocabularyGroupGenerator.selectNextWord(
-            from: vocabularySet,
-            wordStats: combinedStats,
-            sessionType: sessionType,
-            avoiding: recentWords
-        ) else {
-            endSession()
-            return
-        }
+            from: vocabularySet, wordStats: combinedStats, sessionType: sessionType, avoiding: recentWords
+        ) else { endSession(); return }
 
         currentWord = nextWord
         userInput = ""
@@ -321,59 +316,45 @@ final class VocabularyTrainingViewModel: ObservableObject {
         currentCharIndex = 0
         lastFeedback = nil
 
-        // Track recent words to avoid immediate repeats
         recentWords.append(nextWord)
-        if recentWords.count > 3 {
-            recentWords.removeFirst()
-        }
+        if recentWords.count > 3 { recentWords.removeFirst() }
 
         if isReceiveMode {
-            // Play the word, then wait for response
             Task {
                 guard let engine = audioEngine as? MorseAudioEngine else { return }
                 engine.reset()
                 await engine.playGroup(currentWord)
-
-                if isPlaying {
-                    startResponseTimer()
-                }
+                if isPlaying { startResponseTimer() }
             }
         } else {
-            // Send mode: show word, wait for input
             isWaitingForResponse = true
-            inputTimeRemaining = 0  // No timer until first input
+            inputTimeRemaining = 0
         }
     }
 
-    private func startResponseTimer() {
+    func startResponseTimer() {
         isWaitingForResponse = true
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
         responseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.tickResponse()
-            }
+            Task { @MainActor in self?.tickResponse() }
         }
     }
 
     private func tickResponse() {
         responseTimeRemaining -= 0.05
-
         if responseTimeRemaining <= 0 {
             responseTimer?.invalidate()
             isWaitingForResponse = false
-
             recordResponse(expected: currentWord, wasCorrect: false, userAnswer: "")
             showFeedbackAndContinue(wasCorrect: false, expected: currentWord, userAnswer: "(timeout)")
         }
     }
 
-    private func recordResponse(expected: String, wasCorrect: Bool, userAnswer: String) {
+    func recordResponse(expected: String, wasCorrect: Bool, userAnswer: String) {
         totalAttempts += 1
-        if wasCorrect {
-            correctCount += 1
-        }
+        if wasCorrect { correctCount += 1 }
 
         var stat = wordStats[expected] ?? WordStat()
         if isReceiveMode {
@@ -387,29 +368,18 @@ final class VocabularyTrainingViewModel: ObservableObject {
         wordStats[expected] = stat
     }
 
-    private func showFeedbackAndContinue(wasCorrect: Bool, expected: String, userAnswer: String) {
-        lastFeedback = Feedback(
-            wasCorrect: wasCorrect,
-            expectedWord: expected,
-            userAnswer: userAnswer
-        )
+    func showFeedbackAndContinue(wasCorrect: Bool, expected: String, userAnswer: String) {
+        lastFeedback = Feedback(wasCorrect: wasCorrect, expectedWord: expected, userAnswer: userAnswer)
 
         Task {
-            // If wrong, play the correct word
             if !wasCorrect {
-                // Wait before playing correction to let visual feedback register
-                try? await Task.sleep(nanoseconds: 400_000_000)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
-                    await engine.playGroup(expected)
-                }
-                // Longer pause after correction so it doesn't blend into next word
-                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playGroup(expected) }
+                try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
-                // Brief pause after correct answer
-                try? await Task.sleep(nanoseconds: 500_000_000)
+                try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
-            // Check if session should end
             if totalAttempts >= minimumAttempts {
                 endSession()
             } else if isPlaying {

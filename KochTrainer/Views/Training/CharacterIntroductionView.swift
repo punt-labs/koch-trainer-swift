@@ -36,9 +36,9 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
 
                 Spacer()
 
-                Button(action: {
+                Button {
                     viewModel.playCurrentIntroCharacter()
-                }) {
+                } label: {
                     HStack {
                         Image(systemName: "speaker.wave.2.fill")
                         Text("Play Sound")
@@ -47,9 +47,9 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
 
-                Button(action: {
+                Button {
                     viewModel.nextIntroCharacter()
-                }) {
+                } label: {
                     Text(viewModel.isLastIntroCharacter ? "Start \(trainingType)" : "Next Character")
                         .font(Typography.headline)
                 }

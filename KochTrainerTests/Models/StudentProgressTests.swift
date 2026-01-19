@@ -276,7 +276,7 @@ final class StudentProgressTests: XCTestCase {
             "startDate": 0
         }
         """
-        let data = oldJson.data(using: .utf8)!
+        let data = try XCTUnwrap(oldJson.data(using: .utf8))
 
         let decoded = try JSONDecoder().decode(StudentProgress.self, from: data)
 

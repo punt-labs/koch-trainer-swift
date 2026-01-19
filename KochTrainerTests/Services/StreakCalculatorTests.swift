@@ -29,9 +29,9 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Consecutive Day Tests
 
-    func testConsecutiveDayExtendsStreak() {
+    func testConsecutiveDayExtendsStreak() throws {
         let now = Date()
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+        let yesterday = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: now))
 
         let result = StreakCalculator.updateStreak(
             lastStreakDate: yesterday,
@@ -44,9 +44,9 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.longestStreak, 5)
     }
 
-    func testConsecutiveDayUpdatesLongestIfExceeded() {
+    func testConsecutiveDayUpdatesLongestIfExceeded() throws {
         let now = Date()
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+        let yesterday = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: now))
 
         let result = StreakCalculator.updateStreak(
             lastStreakDate: yesterday,
@@ -61,15 +61,22 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Same Day Tests
 
-    func testSameDayPracticeMaintainsStreak() {
-        let now = Date()
-        let earlierToday = Calendar.current.date(byAdding: .hour, value: -3, to: now)!
+    func testSameDayPracticeMaintainsStreak() throws {
+        // Create a date that's definitely on the same day (use noon to avoid boundary issues)
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = 12
+        components.minute = 0
+        let noon = try XCTUnwrap(calendar.date(from: components))
+
+        components.hour = 8
+        let morning = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: earlierToday,
+            lastStreakDate: morning,
             currentStreak: 5,
             longestStreak: 10,
-            now: now
+            now: noon
         )
 
         XCTAssertEqual(result.currentStreak, 5)
@@ -78,9 +85,9 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Streak Break Tests
 
-    func testSkippedDayResetsStreak() {
+    func testSkippedDayResetsStreak() throws {
         let now = Date()
-        let twoDaysAgo = Calendar.current.date(byAdding: .day, value: -2, to: now)!
+        let twoDaysAgo = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -2, to: now))
 
         let result = StreakCalculator.updateStreak(
             lastStreakDate: twoDaysAgo,
@@ -93,9 +100,9 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.longestStreak, 10)  // Longest preserved
     }
 
-    func testWeekOffResetsStreak() {
+    func testWeekOffResetsStreak() throws {
         let now = Date()
-        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now)!
+        let weekAgo = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -7, to: now))
 
         let result = StreakCalculator.updateStreak(
             lastStreakDate: weekAgo,
@@ -110,18 +117,25 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Has Practiced Today Tests
 
-    func testHasPracticedTodayTrue() {
-        let now = Date()
-        let earlierToday = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
+    func testHasPracticedTodayTrue() throws {
+        // Create dates that are definitely on the same day
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = 14
+        components.minute = 0
+        let afternoon = try XCTUnwrap(calendar.date(from: components))
 
-        let result = StreakCalculator.hasPracticedToday(lastStreakDate: earlierToday, now: now)
+        components.hour = 9
+        let morning = try XCTUnwrap(calendar.date(from: components))
+
+        let result = StreakCalculator.hasPracticedToday(lastStreakDate: morning, now: afternoon)
 
         XCTAssertTrue(result)
     }
 
-    func testHasPracticedTodayFalseWhenYesterday() {
+    func testHasPracticedTodayFalseWhenYesterday() throws {
         let now = Date()
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+        let yesterday = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: now))
 
         let result = StreakCalculator.hasPracticedToday(lastStreakDate: yesterday, now: now)
 
@@ -136,27 +150,34 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Days Until Streak Breaks Tests
 
-    func testDaysUntilBreakWhenPracticedToday() {
-        let now = Date()
-        let earlierToday = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
+    func testDaysUntilBreakWhenPracticedToday() throws {
+        // Create dates that are definitely on the same day
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = 16
+        components.minute = 0
+        let afternoon = try XCTUnwrap(calendar.date(from: components))
 
-        let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: earlierToday, now: now)
+        components.hour = 10
+        let morning = try XCTUnwrap(calendar.date(from: components))
+
+        let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: morning, now: afternoon)
 
         XCTAssertEqual(result, 1)  // Safe through tomorrow
     }
 
-    func testDaysUntilBreakWhenPracticedYesterday() {
+    func testDaysUntilBreakWhenPracticedYesterday() throws {
         let now = Date()
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+        let yesterday = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: now))
 
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: yesterday, now: now)
 
         XCTAssertEqual(result, 0)  // Must practice today
     }
 
-    func testDaysUntilBreakWhenStreakBroken() {
+    func testDaysUntilBreakWhenStreakBroken() throws {
         let now = Date()
-        let twoDaysAgo = Calendar.current.date(byAdding: .day, value: -2, to: now)!
+        let twoDaysAgo = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -2, to: now))
 
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: twoDaysAgo, now: now)
 
@@ -171,18 +192,22 @@ final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - Edge Cases
 
-    func testMidnightBoundary() {
+    func testMidnightBoundary() throws {
         let calendar = Calendar.current
         var components = calendar.dateComponents([.year, .month, .day], from: Date())
         components.hour = 0
         components.minute = 1  // Just after midnight
 
-        let justAfterMidnight = calendar.date(from: components)!
+        let justAfterMidnight = try XCTUnwrap(calendar.date(from: components))
 
-        components.day! -= 1
+        guard let currentDay = components.day else {
+            XCTFail("Could not get day component")
+            return
+        }
+        components.day = currentDay - 1
         components.hour = 23
         components.minute = 59
-        let justBeforeMidnight = calendar.date(from: components)!
+        let justBeforeMidnight = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
             lastStreakDate: justBeforeMidnight,

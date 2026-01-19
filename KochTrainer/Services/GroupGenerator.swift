@@ -26,10 +26,8 @@ struct GroupGenerator {
         }
 
         static func family(for char: Character) -> PatternFamily? {
-            for family in allCases {
-                if family.characters.contains(char) {
-                    return family
-                }
+            for family in allCases where family.characters.contains(char) {
+                return family
             }
             return nil
         }
@@ -50,10 +48,9 @@ struct GroupGenerator {
         availableCharacters: [Character]? = nil
     ) -> String {
         let available = availableCharacters ?? MorseCode.characters(forLevel: level)
-        guard !available.isEmpty else { return "" }
+        guard !available.isEmpty, let newestChar = available.last else { return "" }
 
         // The newest character (most recently unlocked)
-        let newestChar = available.last!
         let newestFamily = PatternFamily.family(for: newestChar)
 
         // Find pattern-similar characters from the available set
@@ -71,10 +68,10 @@ struct GroupGenerator {
                 group.append(newestChar)
             } else if !similarChars.isEmpty && Bool.random() {
                 // 50% chance to pick from pattern-similar characters
-                group.append(similarChars.randomElement()!)
+                group.append(similarChars[Int.random(in: 0..<similarChars.count)])
             } else {
                 // Otherwise pick from all available
-                group.append(available.randomElement()!)
+                group.append(available[Int.random(in: 0..<available.count)])
             }
         }
 
@@ -220,7 +217,7 @@ struct GroupGenerator {
             }
         }
 
-        // Fallback (shouldn't reach here)
-        return characters.last!
+        // Fallback (shouldn't reach here, but safely return first character)
+        return characters.first ?? "K"
     }
 }

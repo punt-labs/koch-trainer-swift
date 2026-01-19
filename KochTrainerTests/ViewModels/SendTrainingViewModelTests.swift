@@ -4,10 +4,10 @@ import XCTest
 @MainActor
 final class SendTrainingViewModelTests: XCTestCase {
 
-    private var viewModel: SendTrainingViewModel!
-    private var mockAudioEngine: MockAudioEngine!
-    private var progressStore: ProgressStore!
-    private var settingsStore: SettingsStore!
+    private var viewModel = SendTrainingViewModel(audioEngine: MockAudioEngine())
+    private var mockAudioEngine = MockAudioEngine()
+    private var progressStore = ProgressStore()
+    private var settingsStore = SettingsStore()
 
     override func setUp() async throws {
         mockAudioEngine = MockAudioEngine()
@@ -19,10 +19,6 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     override func tearDown() async throws {
         viewModel.cleanup()
-        viewModel = nil
-        mockAudioEngine = nil
-        progressStore = nil
-        settingsStore = nil
     }
 
     // MARK: - Pause Tests

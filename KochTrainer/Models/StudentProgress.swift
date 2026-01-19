@@ -288,6 +288,13 @@ extension StudentProgress {
         try container.encode(stringKeyedStats, forKey: .characterStats)
     }
 
+    /// Result of calculating streak from session history
+    private struct StreakHistoryResult {
+        let currentStreak: Int
+        let longestStreak: Int
+        let lastDate: Date?
+    }
+
     /// Calculate initial schedule from existing session history (for migration)
     static func calculateInitialSchedule(from sessionHistory: [SessionResult], startDate: Date) -> PracticeSchedule {
         guard !sessionHistory.isEmpty else {
@@ -298,23 +305,23 @@ extension StudentProgress {
         let sortedSessions = sessionHistory.sorted { $0.date < $1.date }
 
         // Calculate streak by walking backwards from most recent session
-        let (currentStreak, longestStreak, lastStreakDate) = calculateStreakFromHistory(sortedSessions)
+        let streakResult = calculateStreakFromHistory(sortedSessions)
 
         return PracticeSchedule(
             receiveInterval: 1.0,
             sendInterval: 1.0,
             receiveNextDate: nil,
             sendNextDate: nil,
-            currentStreak: currentStreak,
-            longestStreak: longestStreak,
-            lastStreakDate: lastStreakDate
+            currentStreak: streakResult.currentStreak,
+            longestStreak: streakResult.longestStreak,
+            lastStreakDate: streakResult.lastDate
         )
     }
 
     /// Calculate streak from session history by checking consecutive days
-    private static func calculateStreakFromHistory(_ sortedSessions: [SessionResult]) -> (current: Int, longest: Int, lastDate: Date?) {
+    private static func calculateStreakFromHistory(_ sortedSessions: [SessionResult]) -> StreakHistoryResult {
         guard let lastSession = sortedSessions.last else {
-            return (0, 0, nil)
+            return StreakHistoryResult(currentStreak: 0, longestStreak: 0, lastDate: nil)
         }
 
         let calendar = Calendar.current
@@ -350,12 +357,12 @@ extension StudentProgress {
 
         // Check if most recent session was today or yesterday
         guard let lastDayNum = sortedDays.last else {
-            return (0, longestStreak, nil)
+            return StreakHistoryResult(currentStreak: 0, longestStreak: longestStreak, lastDate: nil)
         }
 
         if lastDayNum < todayDayNum - 1 {
             // Last session was more than yesterday, streak broken
-            return (0, longestStreak, lastSession.date)
+            return StreakHistoryResult(currentStreak: 0, longestStreak: longestStreak, lastDate: lastSession.date)
         }
 
         // Count backwards from most recent day
@@ -366,6 +373,10 @@ extension StudentProgress {
             checkDay -= 1
         }
 
-        return (currentStreak, max(longestStreak, currentStreak), lastSession.date)
+        return StreakHistoryResult(
+            currentStreak: currentStreak,
+            longestStreak: max(longestStreak, currentStreak),
+            lastDate: lastSession.date
+        )
     }
 }
