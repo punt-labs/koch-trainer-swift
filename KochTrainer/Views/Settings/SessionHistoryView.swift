@@ -164,7 +164,7 @@ struct SessionHistoryView: View {
             Text(label)
             Spacer()
             if let date {
-                Text(date, format: .dateTime.month().day().hour().minute().second())
+                Text(date, format: .dateTime.month().day().hour().minute())
                     .font(Typography.caption)
                     .foregroundColor(.secondary)
             } else {
