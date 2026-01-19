@@ -64,13 +64,6 @@ final class MorseQSOViewModel: ObservableObject {
 
     let inputTimeout: TimeInterval = 2.0
 
-    /// Text reveal delay setting from user preferences.
-    /// Note: Currently unused since text reveal is now synced with audio playback via callback.
-    /// Kept for potential future use (e.g., delayed reveal after audio completes).
-    var revealDelay: TimeInterval {
-        settingsStore?.settings.morseQSORevealDelay ?? 0.3
-    }
-
     var phase: QSOPhase {
         engine.state.phase
     }
@@ -190,7 +183,6 @@ final class MorseQSOViewModel: ObservableObject {
         isSessionActive = false
         turnState = .completed
         inputTimer?.invalidate()
-        revealTimer?.invalidate()
         audioEngine.stop()
         saveSession()
     }
@@ -198,8 +190,6 @@ final class MorseQSOViewModel: ObservableObject {
     func cleanup() {
         inputTimer?.invalidate()
         inputTimer = nil
-        revealTimer?.invalidate()
-        revealTimer = nil
         audioEngine.stop()
     }
 
@@ -256,8 +246,6 @@ final class MorseQSOViewModel: ObservableObject {
     private var sessionStartTime: Date?
     private var currentBlockStartTime: Date?
     private var inputTimer: Timer?
-    private var revealTimer: Timer?
-    private var revealIndex: Int = 0
 
     // MARK: - User Turn
 

@@ -93,21 +93,6 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Morse QSO Training") {
-                VStack(alignment: .leading) {
-                    let delayText = String(format: "%.1f", settingsStore.settings.morseQSORevealDelay)
-                    Text("Text Reveal Delay: \(delayText)s")
-                    Slider(
-                        value: $settingsStore.settings.morseQSORevealDelay,
-                        in: AppSettings.morseQSORevealDelayRange,
-                        step: 0.1
-                    )
-                    Text("How long to wait before revealing each character of AI transmissions")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
             Section("Notifications") {
                 if notificationManager.authorizationStatus == .notDetermined {
                     Button("Enable Notifications") {

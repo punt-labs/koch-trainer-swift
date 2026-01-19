@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Character proficiency indicators showing per-character accuracy as circular progress rings
 - VoiceOver accessibility labels for proficiency percentages
 - **Morse QSO Training**: Practice QSO conversations by keying dit/dah responses while listening to AI transmissions with progressive text reveal
-- Configurable text reveal delay setting (0-2 seconds) for Morse QSO training
 - **Number support (0-9)**: Morse code patterns for digits (ITU standard), enabling callsigns (e.g., W5ABC) and RST reports (e.g., 599) to play correctly
 - **Answer CQ mode**: AI calls CQ first, user responds—more realistic practice flow
 - **AI text hide toggle**: Hide received text during QSO to practice copying by ear
