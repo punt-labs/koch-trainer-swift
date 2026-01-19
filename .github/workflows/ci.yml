@@ -25,18 +25,21 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
+      - name: List Available Simulators
+        run: xcrun simctl list devices available | grep iPhone | head -10
+
       - name: Build
         run: |
           xcodebuild build \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             -quiet
 
       - name: Run Tests
         run: |
           xcodebuild test \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             -resultBundlePath TestResults.xcresult \
             | xcpretty --color --report junit
 
