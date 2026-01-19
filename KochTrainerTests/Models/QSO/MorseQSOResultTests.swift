@@ -194,4 +194,38 @@ final class MorseQSOResultTests: XCTestCase {
 
         XCTAssertEqual(result.style.displayName, "Rag Chew")
     }
+
+    func testFirstContactStyle() {
+        let result = MorseQSOResult(
+            style: .firstContact,
+            myCallsign: "W5ABC",
+            theirCallsign: "K0XYZ",
+            theirName: "Mike",
+            theirQTH: "Denver",
+            duration: 45,
+            totalCharactersKeyed: 20,
+            correctCharactersKeyed: 18,
+            exchangesCompleted: 2
+        )
+
+        XCTAssertEqual(result.style.displayName, "First Contact")
+        XCTAssertEqual(result.keyingAccuracy, 0.9, accuracy: 0.001)
+    }
+
+    func testSignalReportStyle() {
+        let result = MorseQSOResult(
+            style: .signalReport,
+            myCallsign: "W5ABC",
+            theirCallsign: "K0XYZ",
+            theirName: "Mike",
+            theirQTH: "Denver",
+            duration: 90,
+            totalCharactersKeyed: 30,
+            correctCharactersKeyed: 27,
+            exchangesCompleted: 3
+        )
+
+        XCTAssertEqual(result.style.displayName, "Signal Report")
+        XCTAssertEqual(result.keyingAccuracy, 0.9, accuracy: 0.001)
+    }
 }

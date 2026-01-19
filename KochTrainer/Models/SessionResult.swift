@@ -10,6 +10,7 @@ enum SessionType: String, Codable {
     case sendCustom
     case receiveVocabulary
     case sendVocabulary
+    case qso
 
     // MARK: Internal
 
@@ -21,6 +22,7 @@ enum SessionType: String, Codable {
         case .sendCustom: return "Custom Send"
         case .receiveVocabulary: return "Vocabulary Receive"
         case .sendVocabulary: return "Vocabulary Send"
+        case .qso: return "QSO"
         }
     }
 
@@ -32,7 +34,8 @@ enum SessionType: String, Codable {
         case .receiveCustom,
              .sendCustom,
              .receiveVocabulary,
-             .sendVocabulary: return false
+             .sendVocabulary,
+             .qso: return false
         }
     }
 
@@ -44,7 +47,8 @@ enum SessionType: String, Codable {
              .receiveVocabulary: return .receive
         case .send,
              .sendCustom,
-             .sendVocabulary: return .send
+             .sendVocabulary,
+             .qso: return .send
         }
     }
 }

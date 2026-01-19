@@ -66,37 +66,39 @@ struct SessionHistoryView: View {
 
     private var sessionList: some View {
         List {
-            // Advanced schedule details
-            Section("Schedule Details") {
-                debugRow(label: "Last Streak Date", date: schedule.lastStreakDate)
-                debugRow(label: "Receive Next", date: schedule.receiveNextDate)
-                debugRow(label: "Send Next", date: schedule.sendNextDate)
+            #if DEBUG
+                // Advanced schedule details (debug builds only)
+                Section("Schedule Details") {
+                    debugRow(label: "Last Streak Date", date: schedule.lastStreakDate)
+                    debugRow(label: "Receive Next", date: schedule.receiveNextDate)
+                    debugRow(label: "Send Next", date: schedule.sendNextDate)
 
-                HStack {
-                    Text("Receive Interval")
-                    Spacer()
-                    Text("\(String(format: "%.2f", schedule.receiveInterval)) days")
-                        .foregroundColor(.secondary)
-                }
+                    HStack {
+                        Text("Receive Interval")
+                        Spacer()
+                        Text("\(String(format: "%.2f", schedule.receiveInterval)) days")
+                            .foregroundColor(.secondary)
+                    }
 
-                HStack {
-                    Text("Send Interval")
-                    Spacer()
-                    Text("\(String(format: "%.2f", schedule.sendInterval)) days")
-                        .foregroundColor(.secondary)
-                }
+                    HStack {
+                        Text("Send Interval")
+                        Spacer()
+                        Text("\(String(format: "%.2f", schedule.sendInterval)) days")
+                            .foregroundColor(.secondary)
+                    }
 
-                HStack {
-                    Text("Current Streak")
-                    Spacer()
-                    Text("\(schedule.currentStreak) days")
-                        .foregroundColor(.secondary)
-                }
+                    HStack {
+                        Text("Current Streak")
+                        Spacer()
+                        Text("\(schedule.currentStreak) days")
+                            .foregroundColor(.secondary)
+                    }
 
-                if let lastSession = sessions.first {
-                    debugRow(label: "Most Recent Session", date: lastSession.date)
+                    if let lastSession = sessions.first {
+                        debugRow(label: "Most Recent Session", date: lastSession.date)
+                    }
                 }
-            }
+            #endif
 
             // Schedule info section
             Section("Next Practice") {

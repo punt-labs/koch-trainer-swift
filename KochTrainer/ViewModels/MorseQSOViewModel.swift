@@ -64,6 +64,9 @@ final class MorseQSOViewModel: ObservableObject {
 
     let inputTimeout: TimeInterval = 2.0
 
+    /// Text reveal delay setting from user preferences.
+    /// Note: Currently unused since text reveal is now synced with audio playback via callback.
+    /// Kept for potential future use (e.g., delayed reveal after audio completes).
     var revealDelay: TimeInterval {
         settingsStore?.settings.morseQSORevealDelay ?? 0.3
     }
@@ -137,13 +140,30 @@ final class MorseQSOViewModel: ObservableObject {
         engine.state.transcript
     }
 
-    func configure(settingsStore: SettingsStore) {
+    func configure(settingsStore: SettingsStore, progressStore: ProgressStore? = nil) {
         self.settingsStore = settingsStore
+        self.progressStore = progressStore
         engine.configureAudio(
             frequency: settingsStore.settings.toneFrequency,
             effectiveSpeed: settingsStore.settings.effectiveSpeed,
             settings: settingsStore.settings
         )
+    }
+
+    /// Save session result to progress history.
+    func saveSession() {
+        guard totalCharactersKeyed > 0 else { return }
+
+        let duration = sessionStartTime.map { Date().timeIntervalSince($0) } ?? 0
+        let result = SessionResult(
+            sessionType: .qso,
+            duration: duration,
+            totalAttempts: totalCharactersKeyed,
+            correctCount: correctCharactersKeyed,
+            characterStats: [:],
+            date: Date()
+        )
+        progressStore?.recordSession(result)
     }
 
     // MARK: - Session Control
@@ -231,6 +251,7 @@ final class MorseQSOViewModel: ObservableObject {
     private let engine: QSOEngine
     private let audioEngine: AudioEngineProtocol
     private var settingsStore: SettingsStore?
+    private var progressStore: ProgressStore?
     private var sessionStartTime: Date?
     private var currentBlockStartTime: Date?
     private var inputTimer: Timer?

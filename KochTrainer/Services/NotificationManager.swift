@@ -28,7 +28,11 @@ protocol NotificationCenterProtocol: Sendable {
 /// Default implementation using the real UNUserNotificationCenter.
 extension UNUserNotificationCenter: NotificationCenterProtocol {
     func notificationSettings() async -> NotificationSettingsProtocol {
-        await notificationSettings() as UNNotificationSettings
+        await withCheckedContinuation { continuation in
+            self.getNotificationSettings { settings in
+                continuation.resume(returning: settings)
+            }
+        }
     }
 }
 
