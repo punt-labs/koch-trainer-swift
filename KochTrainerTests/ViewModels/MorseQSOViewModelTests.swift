@@ -27,8 +27,8 @@ final class MorseQSOViewModelTests: XCTestCase {
 
     // MARK: - Session Control Tests
 
-    func testStartSession() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+    func testStartSessionUserInitiated() {
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         viewModel.startSession()
 
@@ -37,8 +37,17 @@ final class MorseQSOViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.phase, .callingCQ)
     }
 
+    func testStartSessionAIInitiated() {
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: true)
+
+        viewModel.startSession()
+
+        // AI turn starts asynchronously, so turnState transitions to aiTransmitting
+        XCTAssertTrue(viewModel.isSessionActive)
+    }
+
     func testEndSession() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.endSession()
@@ -58,7 +67,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testAccuracyPercentageCalculation() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         // Simulate accuracy tracking (normally done internally)
         // We'll test the result getter instead
@@ -81,7 +90,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Phase Tests
 
     func testPhaseDescription() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         XCTAssertEqual(viewModel.phase, .idle)
         XCTAssertEqual(viewModel.phaseDescription, "Start by sending CQ")
@@ -93,7 +102,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Turn State Tests
 
     func testTurnStateTransitions() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         XCTAssertEqual(viewModel.turnState, .idle)
 
@@ -107,7 +116,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Script Generation Tests
 
     func testCurrentScriptPopulatedOnUserTurn() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         viewModel.startSession()
 
@@ -120,7 +129,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Input Handling Tests
 
     func testInputDitAppendsToPattern() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         XCTAssertTrue(viewModel.currentPattern.isEmpty)
@@ -131,7 +140,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testInputDahAppendsToPattern() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.inputDah()
@@ -140,7 +149,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testInputDitDahSequence() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.inputDit()
@@ -150,7 +159,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testInputIgnoredWhenNotUserTurn() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         // Not started, so not user turn
         viewModel.inputDit()
@@ -159,7 +168,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressDit() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress(".")
@@ -168,7 +177,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressFForDit() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("f")
@@ -177,7 +186,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressDash() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("-")
@@ -186,7 +195,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressJForDah() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("j")
@@ -195,7 +204,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressUppercaseF() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("F")
@@ -204,7 +213,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressUppercaseJ() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("J")
@@ -213,7 +222,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressIgnoresOtherKeys() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("a")
@@ -226,7 +235,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Result Generation Tests
 
     func testGetResultContainsSessionInfo() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         let result = viewModel.getResult()
@@ -239,7 +248,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testGetResultRagChewStyle() {
-        let viewModel = MorseQSOViewModel(style: .ragChew, callsign: "K0XYZ")
+        let viewModel = MorseQSOViewModel(style: .ragChew, callsign: "K0XYZ", aiStarts: false)
         viewModel.startSession()
 
         let result = viewModel.getResult()
@@ -251,7 +260,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Expected Character Tests
 
     func testCurrentExpectedCharacterFromScript() {
-        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         // Script starts with "CQ", so first expected should be 'C'

@@ -303,6 +303,56 @@ let day = try XCTUnwrap(components.day)
 components.day = day + 1
 ```
 
+## Development Workflow
+
+### Feature Branch Workflow
+
+1. **Create feature branch** from `main`:
+   ```bash
+   git checkout -b feature/my-feature-name
+   ```
+
+2. **Develop with tests**:
+   - Write code with corresponding unit tests
+   - Run `make build` frequently (formats, lints, compiles)
+   - Run `make test` before considering work complete
+
+3. **Update CHANGELOG.md**:
+   - Add entry under `[Unreleased]` section
+   - Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
+   - Write user-facing descriptions, not technical jargon
+
+4. **Create Pull Request**:
+   ```bash
+   git push -u origin feature/my-feature-name
+   gh pr create --title "feat: description" --body "## Summary\n..."
+   ```
+
+5. **Merge after CI passes**:
+   - All tests must pass
+   - No linter warnings
+   - Squash merge to `main`
+
+### Release Workflow
+
+1. Move `[Unreleased]` entries to new version section in CHANGELOG.md
+2. Update version in `project.yml` and Info.plist
+3. Tag the release: `git tag v1.x.0`
+4. Push tag: `git push origin v1.x.0`
+
+### Commit Message Convention
+
+```
+type(scope): description
+
+feat:     New feature
+fix:      Bug fix
+docs:     Documentation
+refactor: Code change that neither fixes a bug nor adds a feature
+test:     Adding or updating tests
+chore:    Build process, dependencies, CI
+```
+
 ## Standards
 
 - Do not suggest skipping tests, lowering coverage targets, or ignoring failures.

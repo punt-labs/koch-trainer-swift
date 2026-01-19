@@ -8,8 +8,14 @@ struct MorseQSOView: View {
 
     // MARK: Lifecycle
 
-    init(style: QSOStyle, callsign: String) {
-        _viewModel = StateObject(wrappedValue: MorseQSOViewModel(style: style, callsign: callsign))
+    init(style: QSOStyle, callsign: String, startMode: QSOStartMode = .answerCQ) {
+        _viewModel = StateObject(
+            wrappedValue: MorseQSOViewModel(
+                style: style,
+                callsign: callsign,
+                aiStarts: startMode == .answerCQ
+            )
+        )
     }
 
     // MARK: Internal
@@ -175,13 +181,32 @@ private struct MorseQSOSessionView: View {
                 Text(viewModel.theirCallsign)
                     .font(Typography.caption)
                     .foregroundColor(.secondary)
+
+                Spacer()
+
+                // Show/hide toggle
+                Button {
+                    viewModel.isAITextVisible.toggle()
+                } label: {
+                    Image(systemName: viewModel.isAITextVisible ? "eye" : "eye.slash")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
             }
 
-            // Progressive reveal text
-            Text(viewModel.revealedText)
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(Theme.Colors.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            // Progressive reveal text (or hidden indicator)
+            if viewModel.isAITextVisible {
+                Text(viewModel.revealedText)
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(Theme.Colors.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text("Text hidden - listen to copy")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.primary.opacity(0.1))
@@ -192,15 +217,37 @@ private struct MorseQSOSessionView: View {
 
     private var userKeyingView: some View {
         VStack(spacing: Theme.Spacing.md) {
-            // Script to send
+            // Typed characters reveal
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                Text("Send:")
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
+                HStack {
+                    Text("Send:")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
 
-                Text(viewModel.currentScript)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundColor(.primary)
+                    Spacer()
+
+                    // Show WPM if characters have been keyed
+                    if viewModel.currentBlockWPM > 0 {
+                        Text("\(viewModel.currentBlockWPM) WPM")
+                            .font(Typography.caption)
+                            .foregroundColor(Theme.Colors.primary)
+                    }
+                }
+
+                // Show typed portion + cursor indicator
+                HStack(spacing: 0) {
+                    Text(viewModel.typedScript)
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundColor(Theme.Colors.success)
+
+                    if let expected = viewModel.currentExpectedCharacter {
+                        Text(String(expected))
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(Theme.Colors.primary)
+                            .background(Theme.Colors.primary.opacity(0.2))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.Spacing.md)

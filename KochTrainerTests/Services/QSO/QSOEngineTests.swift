@@ -18,6 +18,14 @@ final class QSOEngineTests: XCTestCase {
             playedGroups.append(group)
         }
 
+        func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
+            playedGroups.append(group)
+            // Call callback for each character to simulate playback
+            for (index, char) in group.enumerated() {
+                onCharacterPlayed?(char, index)
+            }
+        }
+
         func stop() {}
         func setFrequency(_ frequency: Double) {
             self.frequency = frequency

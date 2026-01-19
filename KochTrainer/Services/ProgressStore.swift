@@ -61,6 +61,80 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         save(fresh)
     }
 
+    /// Delete a specific session from history.
+    /// Note: This removes the session but does not recalculate intervals or streaks.
+    func deleteSession(id: UUID) {
+        var updated = progress
+        updated.sessionHistory.removeAll { $0.id == id }
+        save(updated)
+    }
+
+    /// Delete all sessions with zero attempts (invalid/cancelled sessions).
+    /// Returns the number of sessions deleted.
+    @discardableResult
+    func deleteInvalidSessions() -> Int {
+        var updated = progress
+        let before = updated.sessionHistory.count
+        updated.sessionHistory.removeAll { $0.totalAttempts == 0 }
+        let deleted = before - updated.sessionHistory.count
+        if deleted > 0 {
+            save(updated)
+        }
+        return deleted
+    }
+
+    /// Recalculate next practice dates based on most recent valid session for each type.
+    func recalculateScheduleFromHistory() {
+        var updated = progress
+
+        // Find most recent valid session for each type
+        let validSessions = updated.sessionHistory.filter { $0.totalAttempts > 0 }
+
+        let lastReceive = validSessions
+            .filter { $0.sessionType.baseType == .receive }
+            .max { $0.date < $1.date }
+
+        let lastSend = validSessions
+            .filter { $0.sessionType.baseType == .send }
+            .max { $0.date < $1.date }
+
+        // Recalculate receive schedule
+        if let session = lastReceive {
+            let daysSinceStart = Int(session.date.timeIntervalSince(updated.startDate) / 86400)
+            let newInterval = IntervalCalculator.calculateNextInterval(
+                currentInterval: updated.schedule.receiveInterval,
+                accuracy: session.accuracy,
+                daysSinceStart: daysSinceStart
+            )
+            updated.schedule.receiveInterval = newInterval
+            updated.schedule.receiveNextDate = IntervalCalculator.nextPracticeDate(
+                interval: newInterval,
+                from: session.date
+            )
+        } else {
+            updated.schedule.receiveNextDate = nil
+        }
+
+        // Recalculate send schedule
+        if let session = lastSend {
+            let daysSinceStart = Int(session.date.timeIntervalSince(updated.startDate) / 86400)
+            let newInterval = IntervalCalculator.calculateNextInterval(
+                currentInterval: updated.schedule.sendInterval,
+                accuracy: session.accuracy,
+                daysSinceStart: daysSinceStart
+            )
+            updated.schedule.sendInterval = newInterval
+            updated.schedule.sendNextDate = IntervalCalculator.nextPracticeDate(
+                interval: newInterval,
+                from: session.date
+            )
+        } else {
+            updated.schedule.sendNextDate = nil
+        }
+
+        save(updated)
+    }
+
     /// Update progress after a session and check for level advancement.
     /// Returns true if the student leveled up.
     @discardableResult

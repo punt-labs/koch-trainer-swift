@@ -174,6 +174,15 @@ struct SettingsView: View {
                     }
                 }
 
+                NavigationLink(destination: SessionHistoryView()) {
+                    HStack {
+                        Text("Session History")
+                        Spacer()
+                        Text("\(progressStore.progress.sessionHistory.count) sessions")
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Button("Reset All Progress", role: .destructive) {
                     showResetConfirmation = true
                 }

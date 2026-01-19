@@ -16,7 +16,9 @@ final class QSOStateTests: XCTestCase {
     }
 
     func testQSOStyleCaseIterable() {
-        XCTAssertEqual(QSOStyle.allCases.count, 2)
+        XCTAssertEqual(QSOStyle.allCases.count, 4)
+        XCTAssertTrue(QSOStyle.allCases.contains(.firstContact))
+        XCTAssertTrue(QSOStyle.allCases.contains(.signalReport))
         XCTAssertTrue(QSOStyle.allCases.contains(.contest))
         XCTAssertTrue(QSOStyle.allCases.contains(.ragChew))
     }

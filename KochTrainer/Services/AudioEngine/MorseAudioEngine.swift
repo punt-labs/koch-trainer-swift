@@ -8,6 +8,7 @@ import Foundation
 protocol AudioEngineProtocol {
     func playCharacter(_ char: Character) async
     func playGroup(_ group: String) async
+    func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async
     func stop()
     func setFrequency(_ frequency: Double)
     func setEffectiveSpeed(_ wpm: Int)
@@ -99,6 +100,12 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
     /// Play a group of characters (word or character group).
     func playGroup(_ group: String) async {
+        await playGroup(group, onCharacterPlayed: nil)
+    }
+
+    /// Play a group of characters with optional callback after each character.
+    /// The callback receives the character and its index in the string.
+    func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
         let characters = Array(group.uppercased())
 
         for (index, char) in characters.enumerated() {
@@ -107,8 +114,10 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
             if char == " " {
                 // Word gap (minus character gap already waited)
                 await toneGenerator.playSilence(duration: timing.wordGap - timing.characterGap)
+                onCharacterPlayed?(char, index)
             } else {
                 await playCharacter(char)
+                onCharacterPlayed?(char, index)
 
                 // Inter-character gap (except after last character or before space)
                 if index < characters.count - 1, characters[index + 1] != " " {

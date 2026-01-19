@@ -10,9 +10,10 @@ final class MorseQSOViewModel: ObservableObject {
 
     // MARK: Lifecycle
 
-    init(style: QSOStyle, callsign: String, audioEngine: AudioEngineProtocol? = nil) {
+    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: AudioEngineProtocol? = nil) {
         self.style = style
         myCallsign = callsign
+        self.aiStarts = aiStarts
         self.audioEngine = audioEngine ?? MorseAudioEngine()
         engine = QSOEngine(style: style, myCallsign: callsign, audioEngine: self.audioEngine)
     }
@@ -37,6 +38,7 @@ final class MorseQSOViewModel: ObservableObject {
     @Published private(set) var aiMessage: String = ""
     @Published private(set) var revealedText: String = ""
     @Published private(set) var isPlayingAudio: Bool = false
+    @Published var isAITextVisible: Bool = true
 
     // User turn state
     @Published private(set) var currentScript: String = ""
@@ -50,9 +52,13 @@ final class MorseQSOViewModel: ObservableObject {
     @Published private(set) var lastKeyedCharacter: Character?
     @Published private(set) var lastKeyedWasCorrect: Bool = false
 
+    // Speed tracking for current user turn
+    @Published private(set) var currentBlockCharactersKeyed: Int = 0
+
     // Session info
     let style: QSOStyle
     let myCallsign: String
+    let aiStarts: Bool
 
     // MARK: - Configuration
 
@@ -101,6 +107,28 @@ final class MorseQSOViewModel: ObservableObject {
         return currentScript[currentScript.index(currentScript.startIndex, offsetBy: scriptIndex)]
     }
 
+    /// The portion of the script the user has typed so far
+    var typedScript: String {
+        guard scriptIndex > 0, scriptIndex <= currentScript.count else { return "" }
+        let endIndex = currentScript.index(currentScript.startIndex, offsetBy: scriptIndex)
+        return String(currentScript[currentScript.startIndex ..< endIndex])
+    }
+
+    /// Computed WPM for the current user turn block
+    var currentBlockWPM: Int {
+        guard let startTime = currentBlockStartTime,
+              currentBlockCharactersKeyed > 0 else { return 0 }
+
+        let elapsed = Date().timeIntervalSince(startTime)
+        guard elapsed > 0 else { return 0 }
+
+        // Standard WPM calculation: (characters / 5) / minutes
+        // 5 characters = 1 word (PARIS standard)
+        let minutes = elapsed / 60.0
+        let words = Double(currentBlockCharactersKeyed) / 5.0
+        return Int(words / minutes)
+    }
+
     var isCompleted: Bool {
         turnState == .completed
     }
@@ -126,8 +154,16 @@ final class MorseQSOViewModel: ObservableObject {
         totalCharactersKeyed = 0
         correctCharactersKeyed = 0
 
-        engine.startQSO()
-        startUserTurn()
+        if aiStarts {
+            // AI calls CQ first, user responds
+            Task {
+                await startAITurnWithCQ()
+            }
+        } else {
+            // User calls CQ first
+            engine.startQSO()
+            startUserTurn()
+        }
     }
 
     func endSession() {
@@ -196,6 +232,7 @@ final class MorseQSOViewModel: ObservableObject {
     private let audioEngine: AudioEngineProtocol
     private var settingsStore: SettingsStore?
     private var sessionStartTime: Date?
+    private var currentBlockStartTime: Date?
     private var inputTimer: Timer?
     private var revealTimer: Timer?
     private var revealIndex: Int = 0
@@ -209,6 +246,9 @@ final class MorseQSOViewModel: ObservableObject {
         currentPattern = ""
         inputTimeRemaining = 0
         lastKeyedCharacter = nil
+        // Reset block speed tracking
+        currentBlockStartTime = nil
+        currentBlockCharactersKeyed = 0
     }
 
     private func generateUserScript() -> String {
@@ -238,7 +278,13 @@ final class MorseQSOViewModel: ObservableObject {
         let decoded = MorseCode.character(for: currentPattern)
         let isCorrect = decoded == expected
 
+        // Start block timer on first character
+        if currentBlockStartTime == nil {
+            currentBlockStartTime = Date()
+        }
+
         totalCharactersKeyed += 1
+        currentBlockCharactersKeyed += 1
         if isCorrect {
             correctCharactersKeyed += 1
         }
@@ -260,33 +306,50 @@ final class MorseQSOViewModel: ObservableObject {
 
         Task {
             // Submit the script to QSO engine (advances state machine)
-            await engine.processUserInput(currentScript)
+            // playAudio: false so we can handle audio with synced text reveal
+            let response = await engine.processUserInput(currentScript, playAudio: false)
 
             // Check if QSO completed
             if engine.state.phase == .completed {
                 turnState = .completed
+            } else if let response {
+                // Start AI turn with the response
+                await startAITurn(withResponse: response)
             } else {
-                // Start AI turn
-                await startAITurn()
+                // No AI response (e.g., rag chew continuation), start user turn
+                startUserTurn()
             }
         }
     }
 
     // MARK: - AI Turn
 
-    private func startAITurn() async {
+    /// Start QSO with AI calling CQ (Answer CQ mode)
+    private func startAITurnWithCQ() async {
         turnState = .aiTransmitting
         isPlayingAudio = true
         revealedText = ""
-        revealIndex = 0
 
-        // Wait for engine to play AI response (it does this internally after processUserInput)
-        // The engine already played the audio, we just need to reveal the text
-        // Get the last station message from transcript
-        if let lastMessage = engine.state.transcript.last, lastMessage.sender == .station {
-            aiMessage = lastMessage.text
-            await revealTextProgressively(aiMessage)
-        }
+        // Engine handles state setup and returns the CQ message
+        let cqCall = engine.startWithAICQ()
+        aiMessage = cqCall
+
+        // Play audio with synced text reveal
+        await playWithSyncedReveal(cqCall)
+
+        isPlayingAudio = false
+        startUserTurn()
+    }
+
+    /// Handle AI turn after user input (response text passed from completeUserTurn)
+    private func startAITurn(withResponse response: String) async {
+        turnState = .aiTransmitting
+        isPlayingAudio = true
+        revealedText = ""
+        aiMessage = response
+
+        // Play audio with synced text reveal
+        await playWithSyncedReveal(response)
 
         isPlayingAudio = false
 
@@ -298,17 +361,21 @@ final class MorseQSOViewModel: ObservableObject {
         }
     }
 
-    private func revealTextProgressively(_ text: String) async {
+    /// Play audio and reveal text character-by-character in sync
+    private func playWithSyncedReveal(_ text: String) async {
         revealedText = ""
-        for index in text.indices {
-            let prefixEnd = text.index(after: index)
-            revealedText = String(text[text.startIndex ..< prefixEnd])
 
-            // Wait for reveal delay (unless it's the last character)
-            if index < text.index(before: text.endIndex) {
-                try? await Task.sleep(nanoseconds: UInt64(revealDelay * 1_000_000_000))
+        if let morseEngine = audioEngine as? MorseAudioEngine {
+            await morseEngine.playGroup(text) { [weak self] _, index in
+                guard let self else { return }
+                // Reveal text up to and including the character just played
+                let endIndex = text.index(text.startIndex, offsetBy: index + 1)
+                revealedText = String(text[text.startIndex ..< endIndex])
             }
         }
+
+        // Ensure full text is revealed at the end
+        revealedText = text
     }
 
     // MARK: - Timer Management

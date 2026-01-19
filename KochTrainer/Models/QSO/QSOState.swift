@@ -2,15 +2,19 @@ import Foundation
 
 // MARK: - QSOStyle
 
-/// QSO conversation style
+/// QSO conversation style (ordered from easiest to hardest)
 enum QSOStyle: String, Codable, CaseIterable {
-    case contest // Short structured: RST + serial number
-    case ragChew // Casual: name, QTH, weather, rig, etc.
+    case firstContact // Beginner: CQ → Callsign → RST → 73
+    case signalReport // Intermediate: adds name exchange
+    case contest // Advanced: RST + serial number
+    case ragChew // Expert: name, QTH, weather, rig, etc.
 
     // MARK: Internal
 
     var displayName: String {
         switch self {
+        case .firstContact: return "First Contact"
+        case .signalReport: return "Signal Report"
         case .contest: return "Contest"
         case .ragChew: return "Rag Chew"
         }
@@ -18,10 +22,23 @@ enum QSOStyle: String, Codable, CaseIterable {
 
     var description: String {
         switch self {
+        case .firstContact:
+            return "Simple exchange: callsigns, signal report, 73"
+        case .signalReport:
+            return "Basic QSO: callsigns, signal report, names, 73"
         case .contest:
             return "Quick exchanges: signal report and serial number"
         case .ragChew:
             return "Casual conversation: names, locations, weather"
+        }
+    }
+
+    var difficulty: String {
+        switch self {
+        case .firstContact: return "Beginner"
+        case .signalReport: return "Intermediate"
+        case .contest: return "Advanced"
+        case .ragChew: return "Expert"
         }
     }
 }
