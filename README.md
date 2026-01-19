@@ -32,6 +32,24 @@ Practice real words and callsigns used in amateur radio.
 - **Your Callsign** — Enter your callsign in Settings to practice it
 - Tracks accuracy per word with weighted selection toward weak spots
 
+### QSO Training (Conversations)
+
+Practice realistic ham radio QSO exchanges by keying Morse code.
+
+- **Progressive Styles:**
+  - First Contact — Simple signal reports (beginner)
+  - Signal Report — Reports with names
+  - Contest — Fast serial number exchanges
+  - Rag Chew — Full conversational QSOs
+- **Two Modes:**
+  - Call CQ — You call, AI responds
+  - Answer CQ — AI calls, you respond
+- **Features:**
+  - Real-time WPM display while keying
+  - Text reveal synced with audio playback
+  - Hide AI text to practice copying by ear
+  - Full number support (0-9) for callsigns and RST reports
+
 ### Settings
 
 - **Your Callsign** — For personalized vocabulary practice

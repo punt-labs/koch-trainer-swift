@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-iOS app implementing the Koch method for learning Morse code. Single-user, letters only (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X).
+iOS app implementing the Koch method for learning Morse code. Single-user, supports 26 letters (Koch order: K M R S U A P T L O W I N J E F Y V G Q Z H B C D X) plus digits 0-9 for callsigns and RST reports.
 
 ## Build & Run
 
@@ -34,20 +34,28 @@ KochTrainer/
 │   ├── NotificationSettings.swift
 │   ├── SessionResult.swift
 │   ├── CharacterStat.swift
-│   └── MorseCode.swift
+│   ├── MorseCode.swift          # 26 letters + 10 digits
+│   └── QSO/
+│       ├── QSOState.swift       # QSO phase state machine
+│       ├── QSOTemplate.swift    # Message templates by style
+│       └── VirtualStation.swift # AI station generation
 ├── ViewModels/
 │   ├── ReceiveTrainingViewModel.swift
-│   └── SendTrainingViewModel.swift
+│   ├── SendTrainingViewModel.swift
+│   └── MorseQSOViewModel.swift  # QSO training with keying
 ├── Views/
 │   ├── Home/         # HomeView with streak card, practice due indicators
 │   ├── Training/
 │   │   ├── CharacterIntroductionView.swift
 │   │   ├── Receive/  # ReceiveTrainingView
 │   │   └── Send/     # SendTrainingView
+│   ├── QSO/          # MorseQSOView, QSOView
 │   ├── Results/
-│   └── Settings/     # SettingsView with notification toggles
+│   └── Settings/     # SettingsView, SessionHistoryView, AcknowledgmentsView
 ├── Services/
 │   ├── AudioEngine/  # MorseAudioEngine, ToneGenerator
+│   ├── QSO/
+│   │   └── QSOEngine.swift      # QSO state machine + AI responses
 │   ├── ProgressStore.swift
 │   ├── IntervalCalculator.swift  # Spaced repetition intervals
 │   ├── StreakCalculator.swift    # Consecutive day tracking
@@ -201,7 +209,7 @@ protocol CharacterIntroducing: ObservableObject {
 - Flaky tests must be fixed to be deterministic or use sufficient sample sizes for probabilistic assertions.
 - Run SwiftLint and fix all warnings before considering work complete.
 
-**Current Status:** 380 tests, 38.51% coverage (3403/8837 lines). Target: 80%.
+**Current Status:** 463 tests. Target: 80% coverage.
 
 ## SwiftFormat & SwiftLint Compliance
 
@@ -301,6 +309,56 @@ components.day! += 1
 // GOOD
 let day = try XCTUnwrap(components.day)
 components.day = day + 1
+```
+
+## Development Workflow
+
+### Feature Branch Workflow
+
+1. **Create feature branch** from `main`:
+   ```bash
+   git checkout -b feature/my-feature-name
+   ```
+
+2. **Develop with tests**:
+   - Write code with corresponding unit tests
+   - Run `make build` frequently (formats, lints, compiles)
+   - Run `make test` before considering work complete
+
+3. **Update CHANGELOG.md**:
+   - Add entry under `[Unreleased]` section
+   - Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
+   - Write user-facing descriptions, not technical jargon
+
+4. **Create Pull Request**:
+   ```bash
+   git push -u origin feature/my-feature-name
+   gh pr create --title "feat: description" --body "## Summary\n..."
+   ```
+
+5. **Merge after CI passes**:
+   - All tests must pass
+   - No linter warnings
+   - Squash merge to `main`
+
+### Release Workflow
+
+1. Move `[Unreleased]` entries to new version section in CHANGELOG.md
+2. Update version in `project.yml` and Info.plist
+3. Tag the release: `git tag v1.x.0`
+4. Push tag: `git push origin v1.x.0`
+
+### Commit Message Convention
+
+```
+type(scope): description
+
+feat:     New feature
+fix:      Bug fix
+docs:     Documentation
+refactor: Code change that neither fixes a bug nor adds a feature
+test:     Adding or updating tests
+chore:    Build process, dependencies, CI
 ```
 
 ## Standards

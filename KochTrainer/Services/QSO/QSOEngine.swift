@@ -47,9 +47,14 @@ final class QSOEngine: ObservableObject {
     }
 
     /// Process user input and advance the state machine
-    func processUserInput(_ input: String) async {
+    /// - Parameters:
+    ///   - input: The user's input text
+    ///   - playAudio: If true, engine plays AI response audio. If false, caller handles audio.
+    /// - Returns: The AI response text (if any) when playAudio is false, nil otherwise
+    @discardableResult
+    func processUserInput(_ input: String, playAudio: Bool = true) async -> String? {
         let trimmed = input.uppercased().trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty else { return nil }
 
         // Validate input
         lastValidationResult = QSOTemplate.validateUserInput(trimmed, for: state)
@@ -61,32 +66,34 @@ final class QSOEngine: ObservableObject {
         switch state.phase {
         case .callingCQ:
             state.phase = .awaitingResponse
-            await generateAndPlayAIResponse()
+            return await generateAIResponse(playAudio: playAudio)
 
         case .receivedCall:
             state.phase = .awaitingExchange
             state.exchangeCount += 1
-            await generateAndPlayAIResponse()
+            return await generateAIResponse(playAudio: playAudio)
 
         case .sendingExchange:
             state.phase = .awaitingExchange
             state.exchangeCount += 1
-            await generateAndPlayAIResponse()
+            return await generateAIResponse(playAudio: playAudio)
 
         case .exchangeReceived:
             if state.style == .contest || state.exchangeCount >= 2 {
                 state.phase = .signing
-                await generateAndPlayAIResponse()
+                return await generateAIResponse(playAudio: playAudio)
             } else {
                 // More exchanges in rag chew
                 state.phase = .sendingExchange
+                return nil
             }
 
         case .signing:
             state.phase = .completed
+            return nil
 
         default:
-            break
+            return nil
         }
     }
 
@@ -100,6 +107,32 @@ final class QSOEngine: ObservableObject {
         state = QSOState(style: state.style, myCallsign: state.myCallsign)
         station = VirtualStation.randomOrPreset()
         lastValidationResult = .valid
+    }
+
+    /// Start QSO with AI calling CQ (Answer CQ mode)
+    /// Returns the CQ call text for display/audio coordination
+    func startWithAICQ() -> String {
+        state = QSOState(style: state.style, myCallsign: state.myCallsign)
+        station = VirtualStation.randomOrPreset()
+
+        // Set station info
+        state.theirCallsign = station.callsign
+        state.theirName = station.name
+        state.theirQTH = station.qth
+
+        // Generate CQ call
+        let cqCall = QSOTemplate.aiCQCall(station: station)
+        state.addMessage(from: .station, text: cqCall)
+
+        // User needs to respond to the CQ
+        state.phase = .receivedCall
+
+        return cqCall
+    }
+
+    /// Add a message to the transcript (for external coordination)
+    func addTranscriptMessage(from sender: QSOSender, text: String) {
+        state.addMessage(from: sender, text: text)
     }
 
     /// Stop any ongoing audio playback
@@ -121,12 +154,13 @@ final class QSOEngine: ObservableObject {
 
     // MARK: - AI Response Generation
 
-    private func generateAndPlayAIResponse() async {
+    /// Generate AI response, optionally play audio, and return the response text
+    private func generateAIResponse(playAudio: Bool) async -> String? {
         // Small delay to simulate the other station listening/responding
         try? await Task.sleep(nanoseconds: UInt64(aiResponseDelay * 1_000_000_000))
 
         let response = QSOTemplate.aiResponse(for: state, station: station)
-        guard !response.isEmpty else { return }
+        guard !response.isEmpty else { return nil }
 
         // Update state with AI info
         state.theirCallsign = station.callsign
@@ -138,11 +172,16 @@ final class QSOEngine: ObservableObject {
         // Add to transcript
         state.addMessage(from: .station, text: response)
 
-        // Play audio
-        await playMessage(response)
+        if playAudio {
+            // Engine plays audio
+            await playMessage(response)
+        }
 
         // Advance to next phase after AI responds
         advancePhaseAfterAIResponse()
+
+        // Return response for caller to handle audio if needed
+        return playAudio ? nil : response
     }
 
     private func advancePhaseAfterAIResponse() {

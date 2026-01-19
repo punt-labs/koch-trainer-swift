@@ -48,10 +48,11 @@ final class MorseDecoderTests: XCTestCase {
     }
 
     func testDecodeO() {
-        // O = --- (no valid extensions, should return immediately)
+        // O = --- (has extensions like ---. = 9, so needs explicit completion)
         _ = decoder.processInput(.dah)
         _ = decoder.processInput(.dah)
-        let result = decoder.processInput(.dah)
+        _ = decoder.processInput(.dah)
+        let result = decoder.completeCharacter()
 
         XCTAssertEqual(result, .character("O"))
     }
@@ -68,24 +69,25 @@ final class MorseDecoderTests: XCTestCase {
 
     // MARK: - Immediate Completion Tests
 
-    func testImmediateCompletionForO() {
-        // O = --- has no valid extensions, should complete immediately
+    func testImmediateCompletionForX() {
+        // X = -..- has no valid extensions, should complete immediately
         _ = decoder.processInput(.dah)
-        _ = decoder.processInput(.dah)
+        _ = decoder.processInput(.dit)
+        _ = decoder.processInput(.dit)
         let result = decoder.processInput(.dah)
 
-        XCTAssertEqual(result, .character("O"))
+        XCTAssertEqual(result, .character("X"))
         XCTAssertEqual(decoder.currentPattern, "") // Should be reset
     }
 
-    func testImmediateCompletionForH() {
-        // H = .... has no valid extensions (5 dits would be invalid)
+    func testImmediateCompletionForQ() {
+        // Q = --.- has no valid extensions, should complete immediately
+        _ = decoder.processInput(.dah)
+        _ = decoder.processInput(.dah)
         _ = decoder.processInput(.dit)
-        _ = decoder.processInput(.dit)
-        _ = decoder.processInput(.dit)
-        let result = decoder.processInput(.dit)
+        let result = decoder.processInput(.dah)
 
-        XCTAssertEqual(result, .character("H"))
+        XCTAssertEqual(result, .character("Q"))
     }
 
     // MARK: - Partial Pattern Tests

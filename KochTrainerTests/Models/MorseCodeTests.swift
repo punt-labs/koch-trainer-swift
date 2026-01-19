@@ -24,11 +24,14 @@ final class MorseCodeTests: XCTestCase {
 
     func testEncodingAllLetters() {
         // Verify all 26 letters have encodings
-        XCTAssertEqual(MorseCode.encoding.count, 26)
-
         for char in MorseCode.kochOrder {
             XCTAssertNotNil(MorseCode.encoding[char], "Missing encoding for \(char)")
         }
+    }
+
+    func testEncodingAllCharacters() {
+        // Verify all 36 characters (26 letters + 10 digits) have encodings
+        XCTAssertEqual(MorseCode.encoding.count, 36)
     }
 
     func testKnownEncodings() {
@@ -47,9 +50,37 @@ final class MorseCodeTests: XCTestCase {
     }
 
     func testPatternForInvalidCharacter() {
-        XCTAssertNil(MorseCode.pattern(for: "1"))
         XCTAssertNil(MorseCode.pattern(for: "?"))
         XCTAssertNil(MorseCode.pattern(for: " "))
+        XCTAssertNil(MorseCode.pattern(for: "@"))
+    }
+
+    // MARK: - Number Encoding Tests
+
+    func testNumberEncodings() {
+        XCTAssertEqual(MorseCode.pattern(for: "0"), "-----")
+        XCTAssertEqual(MorseCode.pattern(for: "1"), ".----")
+        XCTAssertEqual(MorseCode.pattern(for: "2"), "..---")
+        XCTAssertEqual(MorseCode.pattern(for: "3"), "...--")
+        XCTAssertEqual(MorseCode.pattern(for: "4"), "....-")
+        XCTAssertEqual(MorseCode.pattern(for: "5"), ".....")
+        XCTAssertEqual(MorseCode.pattern(for: "6"), "-....")
+        XCTAssertEqual(MorseCode.pattern(for: "7"), "--...")
+        XCTAssertEqual(MorseCode.pattern(for: "8"), "---..")
+        XCTAssertEqual(MorseCode.pattern(for: "9"), "----.")
+    }
+
+    func testNumberDecodings() {
+        XCTAssertEqual(MorseCode.character(for: "-----"), "0")
+        XCTAssertEqual(MorseCode.character(for: ".----"), "1")
+        XCTAssertEqual(MorseCode.character(for: "..---"), "2")
+        XCTAssertEqual(MorseCode.character(for: "...--"), "3")
+        XCTAssertEqual(MorseCode.character(for: "....-"), "4")
+        XCTAssertEqual(MorseCode.character(for: "....."), "5")
+        XCTAssertEqual(MorseCode.character(for: "-...."), "6")
+        XCTAssertEqual(MorseCode.character(for: "--..."), "7")
+        XCTAssertEqual(MorseCode.character(for: "---.."), "8")
+        XCTAssertEqual(MorseCode.character(for: "----."), "9")
     }
 
     // MARK: - Decoding Tests
@@ -72,7 +103,7 @@ final class MorseCodeTests: XCTestCase {
     }
 
     func testDecodingInvalidPattern() {
-        XCTAssertNil(MorseCode.character(for: "-----"))
+        XCTAssertNil(MorseCode.character(for: "------"))
         XCTAssertNil(MorseCode.character(for: ""))
         XCTAssertNil(MorseCode.character(for: "abc"))
     }

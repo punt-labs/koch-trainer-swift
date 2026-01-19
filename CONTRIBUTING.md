@@ -59,18 +59,37 @@ KochTrainerTests/  # Unit tests
 
 ### Adding New Features
 
-1. Create a new branch from `main`
+1. Create a feature branch from `main`:
+   ```bash
+   git checkout -b feature/my-feature-name
+   ```
 2. Implement your feature with tests
-3. Update documentation if needed
-4. Submit a pull request
+3. Run `make build` to format, lint, and compile
+4. Run `make test` to verify all tests pass
+5. Update CHANGELOG.md under `[Unreleased]`
+6. Submit a pull request
+
+### Updating the Changelog
+
+All user-facing changes must be documented in `CHANGELOG.md`. Add entries under the `[Unreleased]` section using these categories:
+
+- **Added** — New features
+- **Changed** — Changes to existing functionality
+- **Deprecated** — Features that will be removed
+- **Removed** — Features that were removed
+- **Fixed** — Bug fixes
+- **Security** — Security-related changes
+
+Write descriptions from the user's perspective, not technical implementation details.
 
 ## Pull Request Guidelines
 
 - Keep PRs focused on a single feature or fix
-- Write clear commit messages
+- Write clear commit messages following conventional commits (`feat:`, `fix:`, `docs:`, etc.)
 - Include tests for new functionality
+- Update CHANGELOG.md for user-facing changes
 - Update the README if adding user-facing features
-- Ensure all tests pass before submitting
+- Ensure all tests pass and linting is clean before submitting
 
 ## Reporting Issues
 

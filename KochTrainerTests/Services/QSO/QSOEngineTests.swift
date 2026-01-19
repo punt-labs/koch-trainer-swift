@@ -18,6 +18,14 @@ final class QSOEngineTests: XCTestCase {
             playedGroups.append(group)
         }
 
+        func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
+            playedGroups.append(group)
+            // Call callback for each character to simulate playback
+            for (index, char) in group.enumerated() {
+                onCharacterPlayed?(char, index)
+            }
+        }
+
         func stop() {}
         func setFrequency(_ frequency: Double) {
             self.frequency = frequency
@@ -81,6 +89,58 @@ final class QSOEngineTests: XCTestCase {
 
         XCTAssertTrue(hint.contains("CQ"))
         XCTAssertTrue(hint.contains("W5ABC"))
+    }
+
+    // MARK: - startWithAICQ Tests
+
+    func testStartWithAICQSetsReceivedCallPhase() {
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC")
+
+        _ = engine.startWithAICQ()
+
+        XCTAssertEqual(engine.state.phase, .receivedCall)
+    }
+
+    func testStartWithAICQReturnsCQCallText() {
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC")
+
+        let cqCall = engine.startWithAICQ()
+
+        XCTAssertTrue(cqCall.contains("CQ"))
+        XCTAssertTrue(cqCall.contains(engine.station.callsign))
+    }
+
+    func testStartWithAICQAddsMessageToTranscript() {
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC")
+
+        let cqCall = engine.startWithAICQ()
+
+        XCTAssertEqual(engine.state.transcript.count, 1)
+        XCTAssertEqual(engine.state.transcript.first?.sender, .station)
+        XCTAssertEqual(engine.state.transcript.first?.text, cqCall)
+    }
+
+    func testStartWithAICQSetsStationInfo() {
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC")
+
+        _ = engine.startWithAICQ()
+
+        XCTAssertEqual(engine.state.theirCallsign, engine.station.callsign)
+        XCTAssertEqual(engine.state.theirName, engine.station.name)
+        XCTAssertEqual(engine.state.theirQTH, engine.station.qth)
+    }
+
+    func testStartWithAICQResetsState() {
+        let engine = QSOEngine(style: .ragChew, myCallsign: "K1ABC")
+        engine.startQSO()
+        // Simulate some state changes
+        engine.state.exchangeCount = 5
+
+        _ = engine.startWithAICQ()
+
+        // State should be fresh except for phase and transcript
+        XCTAssertEqual(engine.state.exchangeCount, 0)
+        XCTAssertEqual(engine.state.phase, .receivedCall)
     }
 }
 

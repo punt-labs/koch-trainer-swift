@@ -159,6 +159,15 @@ struct SettingsView: View {
                     }
                 }
 
+                NavigationLink(destination: SessionHistoryView()) {
+                    HStack {
+                        Text("Session History")
+                        Spacer()
+                        Text("\(progressStore.progress.sessionHistory.count) sessions")
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Button("Reset All Progress", role: .destructive) {
                     showResetConfirmation = true
                 }
@@ -168,8 +177,38 @@ struct SettingsView: View {
                 HStack {
                     Text("Version")
                     Spacer()
-                    Text("1.0.0")
+                    Text(appVersion)
                         .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: WhatsNewView()) {
+                    Label("What's New", systemImage: "sparkles")
+                }
+
+                NavigationLink(destination: LicenseView()) {
+                    Label("License", systemImage: "doc.text")
+                }
+
+                NavigationLink(destination: AcknowledgmentsView()) {
+                    Label("Acknowledgments", systemImage: "heart")
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/blob/main/PRIVACY.md") {
+                    Link(destination: url) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                    }
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift") {
+                    Link(destination: url) {
+                        Label("Source Code", systemImage: "chevron.left.forwardslash.chevron.right")
+                    }
+                }
+
+                if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/issues") {
+                    Link(destination: url) {
+                        Label("Support & Feedback", systemImage: "bubble.left.and.exclamationmark.bubble.right")
+                    }
                 }
             }
         }
@@ -192,6 +231,26 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var isPreviewingBandConditions = false
     @StateObject private var previewAudioEngine = MorseAudioEngine()
+
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String
+        let build = info?["CFBundleVersion"] as? String
+
+        let hasVersion = version?.isEmpty == false
+        let hasBuild = build?.isEmpty == false
+
+        switch (hasVersion, hasBuild) {
+        case (true, true):
+            return "\(version ?? "") (\(build ?? ""))"
+        case (true, false):
+            return version ?? ""
+        case (false, true):
+            return "Build \(build ?? "")"
+        case (false, false):
+            return "Unknown version"
+        }
+    }
 
     // MARK: - Band Conditions Helpers
 

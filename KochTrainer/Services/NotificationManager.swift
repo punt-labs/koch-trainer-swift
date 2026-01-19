@@ -1,12 +1,24 @@
 import Foundation
 import UserNotifications
 
+// MARK: - NotificationSettingsProtocol
+
+/// Protocol for abstracting UNNotificationSettings for testability.
+protocol NotificationSettingsProtocol: Sendable {
+    var authorizationStatus: UNAuthorizationStatus { get }
+}
+
+// MARK: - UNNotificationSettings + NotificationSettingsProtocol
+
+/// Make UNNotificationSettings conform to our protocol.
+extension UNNotificationSettings: NotificationSettingsProtocol {}
+
 // MARK: - NotificationCenterProtocol
 
 /// Protocol for abstracting UNUserNotificationCenter for testability.
 protocol NotificationCenterProtocol: Sendable {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
-    func notificationSettings() async -> UNNotificationSettings
+    func notificationSettings() async -> NotificationSettingsProtocol
     func add(_ request: UNNotificationRequest, withCompletionHandler: (@Sendable (Error?) -> Void)?)
     func removeAllPendingNotificationRequests()
 }
@@ -14,7 +26,15 @@ protocol NotificationCenterProtocol: Sendable {
 // MARK: - UNUserNotificationCenter + NotificationCenterProtocol
 
 /// Default implementation using the real UNUserNotificationCenter.
-extension UNUserNotificationCenter: NotificationCenterProtocol {}
+extension UNUserNotificationCenter: NotificationCenterProtocol {
+    func notificationSettings() async -> NotificationSettingsProtocol {
+        await withCheckedContinuation { continuation in
+            self.getNotificationSettings { settings in
+                continuation.resume(returning: settings)
+            }
+        }
+    }
+}
 
 // MARK: - NotificationManager
 
@@ -50,8 +70,8 @@ final class NotificationManager: ObservableObject {
 
     /// Refresh the current authorization status.
     func refreshAuthorizationStatus() async {
-        let settings = await notificationCenter.notificationSettings()
-        authorizationStatus = settings.authorizationStatus
+        let settingsProtocol = await notificationCenter.notificationSettings()
+        authorizationStatus = settingsProtocol.authorizationStatus
     }
 
     /// Schedule all notifications based on current schedule and settings.

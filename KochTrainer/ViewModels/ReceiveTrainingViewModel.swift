@@ -200,6 +200,12 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
             return
         }
 
+        // Don't record sessions with no attempts (e.g., immediately cancelled)
+        guard totalAttempts > 0 else {
+            phase = .completed(didAdvance: false, newCharacter: nil)
+            return
+        }
+
         let duration = Date().timeIntervalSince(startTime)
         let sessionType: SessionType = isCustomSession ? .receiveCustom : .receive
         let result = SessionResult(

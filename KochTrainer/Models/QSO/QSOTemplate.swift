@@ -20,33 +20,16 @@ enum QSOTemplate {
             return "Waiting for a station to respond..."
 
         case .receivedCall:
-            if state.style == .contest {
-                return "\(state.theirCallsign) \(state.myRST) \(formatSerial(state.mySerialNumber)) K"
-            } else {
-                return "\(state.theirCallsign) DE \(state.myCallsign) GM TNX FER CALL UR RST \(state.myRST) NAME HR IS [YOUR NAME] QTH [YOUR QTH] K"
-            }
+            return receivedCallHint(for: state)
 
         case .sendingExchange:
-            if state.style == .contest {
-                return "\(state.myRST) \(formatSerial(state.mySerialNumber)) K"
-            } else {
-                return "UR RST \(state.myRST) NAME HR IS [NAME] QTH [LOCATION] K"
-            }
+            return sendingExchangeHint(for: state)
 
         case .awaitingExchange:
             return "Waiting for their exchange..."
 
         case .exchangeReceived:
-            if state.style == .contest {
-                return "TU 73 DE \(state.myCallsign) SK"
-            } else {
-                // In rag chew, might have more exchanges
-                if state.exchangeCount < 2 {
-                    return "RIG HR IS [YOUR RIG] WX [WEATHER] HW? K"
-                } else {
-                    return "TNX FER QSO 73 DE \(state.myCallsign) SK"
-                }
-            }
+            return exchangeReceivedHint(for: state)
 
         case .signing:
             return "73 DE \(state.myCallsign) SK"
@@ -58,15 +41,25 @@ enum QSOTemplate {
 
     // MARK: - AI Station Responses
 
+    /// Generate AI station CQ call (for Answer CQ mode)
+    static func aiCQCall(station: VirtualStation) -> String {
+        let formats = [
+            "CQ CQ CQ DE \(station.callsign) \(station.callsign) K",
+            "CQ CQ DE \(station.callsign) \(station.callsign) K",
+            "CQ CQ CQ DE \(station.callsign) K"
+        ]
+        return formats[Int.random(in: 0 ..< formats.count)]
+    }
+
     /// Generate AI station response for the given state
     static func aiResponse(for state: QSOState, station: VirtualStation) -> String {
         switch state.phase {
         case .idle:
-            return "" // AI doesn't initiate
+            return "" // AI doesn't initiate in Call CQ mode
 
         case .callingCQ,
              .awaitingResponse:
-            // AI calls in response to CQ
+            // AI calls in response to user's CQ
             return "\(state.myCallsign) DE \(station.callsign) \(station.callsign) K"
 
         case .receivedCall:
@@ -75,24 +68,12 @@ enum QSOTemplate {
 
         case .sendingExchange,
              .awaitingExchange:
-            // AI sends their exchange
-            if state.style == .contest {
-                return contestExchange(station: station)
-            } else {
-                return ragChewExchange(state: state, station: station)
-            }
+            // AI sends their exchange based on style
+            return aiExchange(for: state, station: station)
 
         case .exchangeReceived:
             // AI acknowledges and may send more in rag chew
-            if state.style == .contest {
-                return "TU \(station.callsign)"
-            } else {
-                if state.exchangeCount < 2 {
-                    return ragChewSecondExchange(station: station)
-                } else {
-                    return "TNX FER QSO \(state.myCallsign) 73 DE \(station.callsign) SK"
-                }
-            }
+            return aiAcknowledgment(for: state, station: station)
 
         case .signing:
             return "73 DE \(station.callsign) SK"
@@ -144,6 +125,97 @@ enum QSOTemplate {
     }
 
     // MARK: Private
+
+    // MARK: - User Hint Helpers
+
+    private static func receivedCallHint(for state: QSOState) -> String {
+        switch state.style {
+        case .firstContact:
+            return "\(state.theirCallsign) DE \(state.myCallsign) UR RST \(state.myRST) K"
+        case .signalReport:
+            return "\(state.theirCallsign) DE \(state.myCallsign) UR RST \(state.myRST) NAME [NAME] K"
+        case .contest:
+            return "\(state.theirCallsign) \(state.myRST) \(formatSerial(state.mySerialNumber)) K"
+        case .ragChew:
+            return "\(state.theirCallsign) DE \(state.myCallsign) GM TNX FER CALL UR RST \(state.myRST) NAME HR IS [YOUR NAME] QTH [YOUR QTH] K"
+        }
+    }
+
+    private static func sendingExchangeHint(for state: QSOState) -> String {
+        switch state.style {
+        case .firstContact:
+            return "UR RST \(state.myRST) K"
+        case .signalReport:
+            return "UR RST \(state.myRST) NAME [NAME] K"
+        case .contest:
+            return "\(state.myRST) \(formatSerial(state.mySerialNumber)) K"
+        case .ragChew:
+            return "UR RST \(state.myRST) NAME HR IS [NAME] QTH [LOCATION] K"
+        }
+    }
+
+    private static func exchangeReceivedHint(for state: QSOState) -> String {
+        switch state.style {
+        case .firstContact:
+            return "TNX 73 DE \(state.myCallsign) SK"
+        case .signalReport:
+            return "TNX FER QSO 73 DE \(state.myCallsign) SK"
+        case .contest:
+            return "TU 73 DE \(state.myCallsign) SK"
+        case .ragChew:
+            if state.exchangeCount < 2 {
+                return "RIG HR IS [YOUR RIG] WX [WEATHER] HW? K"
+            } else {
+                return "TNX FER QSO 73 DE \(state.myCallsign) SK"
+            }
+        }
+    }
+
+    // MARK: - AI Exchange Helpers
+
+    private static func aiExchange(for state: QSOState, station: VirtualStation) -> String {
+        switch state.style {
+        case .firstContact:
+            return firstContactExchange(state: state, station: station)
+        case .signalReport:
+            return signalReportExchange(state: state, station: station)
+        case .contest:
+            return contestExchange(station: station)
+        case .ragChew:
+            return ragChewExchange(state: state, station: station)
+        }
+    }
+
+    private static func aiAcknowledgment(for state: QSOState, station: VirtualStation) -> String {
+        switch state.style {
+        case .firstContact:
+            return "TNX 73 DE \(station.callsign) SK"
+        case .signalReport:
+            return "TNX FER QSO 73 DE \(station.callsign) SK"
+        case .contest:
+            return "TU \(station.callsign)"
+        case .ragChew:
+            if state.exchangeCount < 2 {
+                return ragChewSecondExchange(station: station)
+            } else {
+                return "TNX FER QSO \(state.myCallsign) 73 DE \(station.callsign) SK"
+            }
+        }
+    }
+
+    // MARK: - First Contact Templates (Beginner)
+
+    private static func firstContactExchange(state: QSOState, station: VirtualStation) -> String {
+        let rst = station.randomRST
+        return "R \(state.myCallsign) UR RST \(rst) K"
+    }
+
+    // MARK: - Signal Report Templates (Intermediate)
+
+    private static func signalReportExchange(state: QSOState, station: VirtualStation) -> String {
+        let rst = station.randomRST
+        return "R \(state.myCallsign) UR RST \(rst) NAME IS \(station.name) K"
+    }
 
     // MARK: - Contest Templates
 

@@ -19,6 +19,13 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
         playGroupCalls.append(group)
     }
 
+    func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
+        playGroupCalls.append(group)
+        for (index, char) in group.enumerated() {
+            onCharacterPlayed?(char, index)
+        }
+    }
+
     func stop() {
         stopCalled = true
     }
