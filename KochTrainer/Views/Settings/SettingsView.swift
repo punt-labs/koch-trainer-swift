@@ -99,7 +99,7 @@ struct SettingsView: View {
                     Text("Text Reveal Delay: \(delayText)s")
                     Slider(
                         value: $settingsStore.settings.morseQSORevealDelay,
-                        in: 0 ... 2,
+                        in: AppSettings.morseQSORevealDelayRange,
                         step: 0.1
                     )
                     Text("How long to wait before revealing each character of AI transmissions")

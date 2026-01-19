@@ -192,6 +192,7 @@ final class MorseQSOViewModel: ObservableObject {
         inputTimer?.invalidate()
         revealTimer?.invalidate()
         audioEngine.stop()
+        saveSession()
     }
 
     func cleanup() {

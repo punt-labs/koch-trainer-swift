@@ -42,10 +42,18 @@ struct AppSettings: Codable, Equatable {
         self.fadingRate = max(0.01, min(0.5, fadingRate))
         self.interferenceEnabled = interferenceEnabled
         self.interferenceLevel = max(0, min(1, interferenceLevel))
-        self.morseQSORevealDelay = max(0, min(2, morseQSORevealDelay))
+        self.morseQSORevealDelay = max(
+            Self.morseQSORevealDelayRange.lowerBound,
+            min(Self.morseQSORevealDelayRange.upperBound, morseQSORevealDelay)
+        )
     }
 
     // MARK: Internal
+
+    // MARK: - Range Constants
+
+    /// Valid range for Morse QSO reveal delay (in seconds).
+    static let morseQSORevealDelayRange: ClosedRange<Double> = 0.0 ... 2.0
 
     /// Tone frequency in Hz (400-800)
     var toneFrequency: Double
