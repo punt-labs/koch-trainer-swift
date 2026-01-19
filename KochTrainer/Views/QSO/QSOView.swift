@@ -2,14 +2,8 @@ import SwiftUI
 
 /// Mode selection screen for QSO Simulation
 struct QSOView: View {
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @State private var selectedStyle: QSOStyle = .contest
-    @State private var isShowingSession = false
 
-    private var userCallsign: String {
-        let callsign = settingsStore.settings.userCallsign
-        return callsign.isEmpty ? "W5ABC" : callsign
-    }
+    // MARK: Internal
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -63,6 +57,17 @@ struct QSOView: View {
         .padding(Theme.Spacing.lg)
         .navigationTitle("QSO")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: Private
+
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @State private var selectedStyle: QSOStyle = .contest
+    @State private var isShowingSession = false
+
+    private var userCallsign: String {
+        let callsign = settingsStore.settings.userCallsign
+        return callsign.isEmpty ? "W5ABC" : callsign
     }
 
     // MARK: - Subviews

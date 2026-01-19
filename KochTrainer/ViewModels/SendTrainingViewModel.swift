@@ -1,10 +1,23 @@
 import Foundation
 import SwiftUI
 
+// MARK: - SendTrainingViewModel
+
 /// ViewModel for send training sessions.
 /// Displays characters, accepts paddle/keyboard input, decodes Morse patterns with audio feedback.
 @MainActor
 final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
+
+    // MARK: Lifecycle
+
+    // MARK: - Initialization
+
+    init(audioEngine: AudioEngineProtocol? = nil) {
+        self.audioEngine = audioEngine ?? MorseAudioEngine()
+    }
+
+    // MARK: Internal
+
     // MARK: - Session Phase
 
     enum SessionPhase: Equatable {
@@ -12,6 +25,13 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         case training
         case paused
         case completed(didAdvance: Bool, newCharacter: Character?)
+    }
+
+    struct Feedback: Equatable {
+        let wasCorrect: Bool
+        let expectedCharacter: Character
+        let sentPattern: String
+        let decodedCharacter: Character?
     }
 
     // MARK: - Published State
@@ -34,16 +54,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var isWaitingForInput: Bool = true
     @Published var inputTimeRemaining: TimeInterval = 0
 
-    struct Feedback: Equatable {
-        let wasCorrect: Bool
-        let expectedCharacter: Character
-        let sentPattern: String
-        let decodedCharacter: Character?
-    }
-
     // MARK: - Configuration
 
-    let inputTimeout: TimeInterval = 2.0  // Time to complete a character
+    let inputTimeout: TimeInterval = 2.0 // Time to complete a character
     let proficiencyThreshold: Double = 0.90
 
     /// Minimum attempts scales with character count (5 per character, floor of 15)
@@ -51,28 +64,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         max(15, 5 * introCharacters.count)
     }
 
-    // MARK: - Dependencies
-
-    private let audioEngine: AudioEngineProtocol
-    private let decoder = MorseDecoder()
-    private var progressStore: ProgressStore?
-    private var settingsStore: SettingsStore?
-
-    // MARK: - Internal State
-
-    private var sessionTimer: Timer?
-    private var inputTimer: Timer?
-    private var sessionStartTime: Date?
-    private var currentLevel: Int = 1
-    private var lastInputTime: Date?
-
-    /// Custom characters for practice mode (nil = use level-based characters)
-    private var customCharacters: [Character]?
-
     /// Whether this is a custom practice session (no level advancement)
     var isCustomSession: Bool { customCharacters != nil }
-
-    // MARK: - Computed Properties
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -96,14 +89,14 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var introProgress: String {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             return "\(index + 1) of \(introCharacters.count)"
         }
         return ""
     }
 
     var isLastIntroCharacter: Bool {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             return index == introCharacters.count - 1
         }
         return false
@@ -117,16 +110,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    // MARK: - Initialization
-
-    init(audioEngine: AudioEngineProtocol? = nil) {
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
-    }
-
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
-        self.currentLevel = progressStore.progress.sendLevel
+        currentLevel = progressStore.progress.sendLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         audioEngine.configureBandConditions(from: settingsStore.settings)
@@ -139,7 +126,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
         self.customCharacters = customCharacters
-        self.currentLevel = progressStore.progress.sendLevel
+        currentLevel = progressStore.progress.sendLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         audioEngine.configureBandConditions(from: settingsStore.settings)
@@ -160,22 +147,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         showIntroCharacter(at: 0)
     }
 
-    private func showIntroCharacter(at index: Int) {
-        guard index < introCharacters.count else {
-            startTraining()
-            return
-        }
-
-        currentIntroCharacter = introCharacters[index]
-        phase = .introduction(characterIndex: index)
-
-        // Auto-play after a short delay
-        Task {
-            try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
-            playCurrentIntroCharacter()
-        }
-    }
-
     func playCurrentIntroCharacter() {
         guard let char = currentIntroCharacter else { return }
 
@@ -187,7 +158,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     func nextIntroCharacter() {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             let nextIndex = index + 1
             if nextIndex < introCharacters.count {
                 showIntroCharacter(at: nextIndex)
@@ -195,16 +166,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
                 startTraining()
             }
         }
-    }
-
-    // MARK: - Training Phase
-
-    private func startTraining() {
-        phase = .training
-        sessionStartTime = Date()
-        isPlaying = true
-        startSessionTimer()
-        showNextCharacter()
     }
 
     func startSession() {
@@ -267,15 +228,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
     }
 
-    // MARK: - Proficiency Check
-
-    private func checkForProficiency() {
-        guard totalAttempts >= minimumAttemptsForProficiency else { return }
-        guard accuracy >= proficiencyThreshold else { return }
-
-        endSession()
-    }
-
     // MARK: - Input Handling
 
     func handleKeyPress(_ key: Character) {
@@ -307,6 +259,61 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         resetInputTimer()
     }
 
+    // MARK: Private
+
+    // MARK: - Dependencies
+
+    private let audioEngine: AudioEngineProtocol
+    private let decoder = MorseDecoder()
+    private var progressStore: ProgressStore?
+    private var settingsStore: SettingsStore?
+
+    // MARK: - Internal State
+
+    private var sessionTimer: Timer?
+    private var inputTimer: Timer?
+    private var sessionStartTime: Date?
+    private var currentLevel: Int = 1
+    private var lastInputTime: Date?
+
+    /// Custom characters for practice mode (nil = use level-based characters)
+    private var customCharacters: [Character]?
+
+    private func showIntroCharacter(at index: Int) {
+        guard index < introCharacters.count else {
+            startTraining()
+            return
+        }
+
+        currentIntroCharacter = introCharacters[index]
+        phase = .introduction(characterIndex: index)
+
+        // Auto-play after a short delay
+        Task {
+            try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
+            playCurrentIntroCharacter()
+        }
+    }
+
+    // MARK: - Training Phase
+
+    private func startTraining() {
+        phase = .training
+        sessionStartTime = Date()
+        isPlaying = true
+        startSessionTimer()
+        showNextCharacter()
+    }
+
+    // MARK: - Proficiency Check
+
+    private func checkForProficiency() {
+        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard accuracy >= proficiencyThreshold else { return }
+
+        endSession()
+    }
+
     private func playDit() {
         Task {
             guard let engine = audioEngine as? MorseAudioEngine else { return }
@@ -333,7 +340,9 @@ extension SendTrainingViewModel {
     }
 
     private func tickSession() {
-        guard timeRemaining > 0 else { endSession(); return }
+        guard timeRemaining > 0 else { endSession()
+            return
+        }
         timeRemaining -= 1
     }
 
@@ -360,7 +369,12 @@ extension SendTrainingViewModel {
         let decodedChar = MorseCode.character(for: currentPattern)
         let isCorrect = decodedChar == targetCharacter
         recordResponse(expected: targetCharacter, wasCorrect: isCorrect, pattern: currentPattern, decoded: decodedChar)
-        showFeedbackAndContinue(wasCorrect: isCorrect, expected: targetCharacter, pattern: currentPattern, decoded: decodedChar)
+        showFeedbackAndContinue(
+            wasCorrect: isCorrect,
+            expected: targetCharacter,
+            pattern: currentPattern,
+            decoded: decodedChar
+        )
     }
 
     func recordResponse(expected: Character, wasCorrect: Bool, pattern: String, decoded: Character?) {
@@ -375,7 +389,12 @@ extension SendTrainingViewModel {
     }
 
     func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, pattern: String, decoded: Character?) {
-        lastFeedback = Feedback(wasCorrect: wasCorrect, expectedCharacter: expected, sentPattern: pattern, decodedCharacter: decoded)
+        lastFeedback = Feedback(
+            wasCorrect: wasCorrect,
+            expectedCharacter: expected,
+            sentPattern: pattern,
+            decodedCharacter: decoded
+        )
 
         Task {
             if !wasCorrect {

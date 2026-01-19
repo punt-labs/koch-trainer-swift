@@ -2,7 +2,9 @@ import Foundation
 
 /// Generates word selections for vocabulary training sessions.
 /// Weights selection toward words with lower accuracy (like GroupGenerator for characters).
-struct VocabularyGroupGenerator {
+enum VocabularyGroupGenerator {
+
+    // MARK: Internal
 
     /// Select words from a vocabulary set weighted by inverse accuracy.
     /// Words with lower accuracy get selected more often.
@@ -27,7 +29,7 @@ struct VocabularyGroupGenerator {
         var remainingWords = words
         var remainingWeights = weights
 
-        for _ in 0..<min(count, words.count) {
+        for _ in 0 ..< min(count, words.count) {
             let word = weightedRandomSelection(from: remainingWords, weights: remainingWeights)
             selected.append(word)
 
@@ -68,6 +70,8 @@ struct VocabularyGroupGenerator {
         let weights = calculateWeights(for: words, stats: wordStats, sessionType: sessionType)
         return weightedRandomSelection(from: words, weights: weights)
     }
+
+    // MARK: Private
 
     // MARK: - Weight Calculation
 
@@ -130,7 +134,7 @@ struct VocabularyGroupGenerator {
             return words.randomElement() ?? ""
         }
 
-        var random = Double.random(in: 0..<totalWeight)
+        var random = Double.random(in: 0 ..< totalWeight)
 
         for (index, weight) in weights.enumerated() {
             random -= weight

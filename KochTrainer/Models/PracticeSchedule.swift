@@ -2,6 +2,31 @@ import Foundation
 
 /// Tracks spaced repetition intervals and streak data for practice sessions.
 struct PracticeSchedule: Codable, Equatable {
+
+    // MARK: Lifecycle
+
+    init(
+        receiveInterval: Double = 1.0,
+        sendInterval: Double = 1.0,
+        receiveNextDate: Date? = nil,
+        sendNextDate: Date? = nil,
+        currentStreak: Int = 0,
+        longestStreak: Int = 0,
+        lastStreakDate: Date? = nil,
+        levelReviewDates: [Int: Date] = [:]
+    ) {
+        self.receiveInterval = receiveInterval
+        self.sendInterval = sendInterval
+        self.receiveNextDate = receiveNextDate
+        self.sendNextDate = sendNextDate
+        self.currentStreak = currentStreak
+        self.longestStreak = longestStreak
+        self.lastStreakDate = lastStreakDate
+        self.levelReviewDates = levelReviewDates
+    }
+
+    // MARK: Internal
+
     /// Days until next receive practice (starts at 1, grows with accuracy)
     var receiveInterval: Double
 
@@ -25,26 +50,6 @@ struct PracticeSchedule: Codable, Equatable {
 
     /// Level -> date when that level should be reviewed (refresher sessions)
     var levelReviewDates: [Int: Date]
-
-    init(
-        receiveInterval: Double = 1.0,
-        sendInterval: Double = 1.0,
-        receiveNextDate: Date? = nil,
-        sendNextDate: Date? = nil,
-        currentStreak: Int = 0,
-        longestStreak: Int = 0,
-        lastStreakDate: Date? = nil,
-        levelReviewDates: [Int: Date] = [:]
-    ) {
-        self.receiveInterval = receiveInterval
-        self.sendInterval = sendInterval
-        self.receiveNextDate = receiveNextDate
-        self.sendNextDate = sendNextDate
-        self.currentStreak = currentStreak
-        self.longestStreak = longestStreak
-        self.lastStreakDate = lastStreakDate
-        self.levelReviewDates = levelReviewDates
-    }
 
     /// Get next practice date for a session type (uses base type for custom/vocabulary)
     func nextDate(for sessionType: SessionType) -> Date? {

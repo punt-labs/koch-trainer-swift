@@ -2,10 +2,11 @@ import SwiftUI
 
 /// Summary view shown after completing a QSO
 struct QSOCompletedView: View {
+
+    // MARK: Internal
+
     let result: QSOResult
     let onDismiss: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -94,6 +95,10 @@ struct QSOCompletedView: View {
             }
         }
     }
+
+    // MARK: Private
+
+    @Environment(\.dismiss) private var dismiss
 
     private func detailRow(label: String, value: String) -> some View {
         HStack {

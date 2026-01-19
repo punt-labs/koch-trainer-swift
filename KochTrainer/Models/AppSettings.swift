@@ -1,13 +1,50 @@
 import Foundation
 
+// MARK: - SendInputMode
+
 /// Input mode for send training.
 enum SendInputMode: String, Codable {
     case paddle
     // Future: case straightKey
 }
 
+// MARK: - AppSettings
+
 /// Application settings persisted to UserDefaults.
 struct AppSettings: Codable, Equatable {
+
+    // MARK: Lifecycle
+
+    init(
+        toneFrequency: Double = 600,
+        effectiveSpeed: Int = 12,
+        sendInputMode: SendInputMode = .paddle,
+        notificationSettings: NotificationSettings = NotificationSettings(),
+        userCallsign: String = "",
+        bandConditionsEnabled: Bool = false,
+        noiseLevel: Double = 0.3,
+        fadingEnabled: Bool = true,
+        fadingDepth: Double = 0.5,
+        fadingRate: Double = 0.1,
+        interferenceEnabled: Bool = false,
+        interferenceLevel: Double = 0.2
+    ) {
+        self.toneFrequency = max(400, min(800, toneFrequency))
+        self.effectiveSpeed = max(10, min(18, effectiveSpeed))
+        self.sendInputMode = sendInputMode
+        self.notificationSettings = notificationSettings
+        self.userCallsign = userCallsign.uppercased()
+        self.bandConditionsEnabled = bandConditionsEnabled
+        self.noiseLevel = max(0, min(1, noiseLevel))
+        self.fadingEnabled = fadingEnabled
+        self.fadingDepth = max(0, min(1, fadingDepth))
+        self.fadingRate = max(0.01, min(0.5, fadingRate))
+        self.interferenceEnabled = interferenceEnabled
+        self.interferenceLevel = max(0, min(1, interferenceLevel))
+    }
+
+    // MARK: Internal
+
     /// Tone frequency in Hz (400-800)
     var toneFrequency: Double
 
@@ -46,42 +83,24 @@ struct AppSettings: Codable, Equatable {
     /// Interference level, 0.0 - 1.0
     var interferenceLevel: Double
 
-    init(
-        toneFrequency: Double = 600,
-        effectiveSpeed: Int = 12,
-        sendInputMode: SendInputMode = .paddle,
-        notificationSettings: NotificationSettings = NotificationSettings(),
-        userCallsign: String = "",
-        bandConditionsEnabled: Bool = false,
-        noiseLevel: Double = 0.3,
-        fadingEnabled: Bool = true,
-        fadingDepth: Double = 0.5,
-        fadingRate: Double = 0.1,
-        interferenceEnabled: Bool = false,
-        interferenceLevel: Double = 0.2
-    ) {
-        self.toneFrequency = max(400, min(800, toneFrequency))
-        self.effectiveSpeed = max(10, min(18, effectiveSpeed))
-        self.sendInputMode = sendInputMode
-        self.notificationSettings = notificationSettings
-        self.userCallsign = userCallsign.uppercased()
-        self.bandConditionsEnabled = bandConditionsEnabled
-        self.noiseLevel = max(0, min(1, noiseLevel))
-        self.fadingEnabled = fadingEnabled
-        self.fadingDepth = max(0, min(1, fadingDepth))
-        self.fadingRate = max(0.01, min(0.5, fadingRate))
-        self.interferenceEnabled = interferenceEnabled
-        self.interferenceLevel = max(0, min(1, interferenceLevel))
-    }
 }
 
 // MARK: - Codable with migration support
 
 extension AppSettings {
     enum CodingKeys: String, CodingKey {
-        case toneFrequency, effectiveSpeed, sendInputMode, notificationSettings, userCallsign
-        case bandConditionsEnabled, noiseLevel, fadingEnabled, fadingDepth, fadingRate
-        case interferenceEnabled, interferenceLevel
+        case toneFrequency
+        case effectiveSpeed
+        case sendInputMode
+        case notificationSettings
+        case userCallsign
+        case bandConditionsEnabled
+        case noiseLevel
+        case fadingEnabled
+        case fadingDepth
+        case fadingRate
+        case interferenceEnabled
+        case interferenceLevel
     }
 
     init(from decoder: Decoder) throws {

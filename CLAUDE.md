@@ -192,3 +192,119 @@ protocol CharacterIntroducing: ObservableObject {
 - Portrait only
 - No external dependencies
 - XcodeGen for project configuration
+
+## Testing Requirements
+
+- **All tests must pass.** No exceptions for "pre-existing failures."
+- If a test fails, fix it. Do not skip, ignore, or work around failing tests.
+- Run `make test` before considering any task complete.
+- Flaky tests must be fixed to be deterministic or use sufficient sample sizes for probabilistic assertions.
+- Run SwiftLint and fix all warnings before considering work complete.
+
+**Current Status:** 380 tests, 38.51% coverage (3403/8837 lines). Target: 80%.
+
+## SwiftFormat & SwiftLint Compliance
+
+Both tools must pass with zero warnings. The build cycle runs them automatically: `make build` runs format → lint → compile.
+
+### Build Commands
+
+```bash
+make format    # Run SwiftFormat
+make lint      # Run SwiftLint
+make build     # Format + Lint + Build (recommended)
+```
+
+### Configuration Alignment
+
+SwiftFormat and SwiftLint must be aligned. Key settings in `.swiftformat`:
+
+```
+--voidtype void          # Use `Void` not `()` (matches SwiftLint void_return)
+--commas inline          # No trailing commas (matches SwiftLint trailing_comma)
+--allman false           # Braces on same line (matches SwiftLint opening_brace)
+--disable trailingCommas # Don't add trailing commas
+```
+
+If SwiftFormat changes produce SwiftLint errors, the configs are misaligned. Fix the `.swiftformat` config, not by disabling SwiftLint rules.
+
+### File & Type Limits
+
+| Metric | Warning | Error |
+|--------|---------|-------|
+| File length | 500 lines | 1000 lines |
+| Type body length | 300 lines | 500 lines |
+| Function body length | 60 lines | 100 lines |
+| Cyclomatic complexity | 15 | 25 |
+
+When approaching limits, split into multiple files or extract helper types/functions.
+
+### Force Unwrapping — NEVER Use
+
+**Banned:**
+```swift
+let value = optionalValue!           // force_unwrapping
+let date = Calendar.current.date(...)!
+```
+
+**Required patterns:**
+```swift
+// In production code - use guard/if let
+guard let value = optionalValue else { return }
+if let value = optionalValue { ... }
+
+// In tests - use XCTUnwrap
+let value = try XCTUnwrap(optionalValue)
+```
+
+### Implicitly Unwrapped Optionals — NEVER Use
+
+**Banned:**
+```swift
+private var manager: NotificationManager!  // implicitly_unwrapped_optional
+```
+
+**Required patterns:**
+```swift
+// Use lazy initialization
+private lazy var manager = NotificationManager()
+
+// Or use regular optional with setUp()
+private var manager: NotificationManager?
+```
+
+### Test File Patterns
+
+Always use `throws` for tests that unwrap optionals:
+```swift
+func testSomething() throws {
+    let value = try XCTUnwrap(optionalValue)
+    // ...
+}
+```
+
+For date arithmetic in tests:
+```swift
+// BAD
+let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+
+// GOOD
+let tomorrow = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 1, to: Date()))
+```
+
+For DateComponents manipulation:
+```swift
+// BAD
+components.day! += 1
+
+// GOOD
+let day = try XCTUnwrap(components.day)
+components.day = day + 1
+```
+
+## Standards
+
+- Do not suggest skipping tests, lowering coverage targets, or ignoring failures.
+- Do not present "workarounds" for failing tests—fix the actual problem.
+- Do not filter or cherry-pick results to make metrics look better.
+- Report complete, unfiltered data. If coverage is low, report the actual numbers.

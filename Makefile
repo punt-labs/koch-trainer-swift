@@ -4,22 +4,33 @@
 SCHEME = KochTrainer
 DESTINATION = platform=iOS Simulator,name=iPhone 17 Pro
 
-.PHONY: help generate build test clean run lint coverage
+.PHONY: help generate build test clean run lint format coverage
 
 help:
 	@echo "Available commands:"
 	@echo "  make generate  - Regenerate Xcode project from project.yml"
+	@echo "  make format    - Run SwiftFormat to auto-format code"
 	@echo "  make lint      - Run SwiftLint on source files"
-	@echo "  make build     - Build the app"
+	@echo "  make build     - Build the app (runs format + lint first)"
 	@echo "  make test      - Run all tests"
 	@echo "  make coverage  - Run tests with code coverage report"
 	@echo "  make clean     - Clean build artifacts"
 	@echo "  make run       - Build and run in simulator"
-	@echo "  make all       - Generate, lint, build, and test"
+	@echo "  make all       - Generate, format, lint, build, and test"
 
 generate:
 	@echo "Generating Xcode project..."
 	xcodegen generate
+
+format:
+	@echo "Running SwiftFormat..."
+	@if command -v swiftformat >/dev/null 2>&1; then \
+		swiftformat . --quiet; \
+		echo "SwiftFormat: Complete."; \
+	else \
+		echo "SwiftFormat not installed. Install with: brew install swiftformat"; \
+		exit 1; \
+	fi
 
 lint:
 	@echo "Running SwiftLint..."
@@ -31,7 +42,7 @@ lint:
 		exit 1; \
 	fi
 
-build: generate lint
+build: generate format lint
 	@echo "Building $(SCHEME)..."
 	xcodebuild build \
 		-scheme $(SCHEME) \
@@ -76,5 +87,5 @@ coverage: generate
 		cov=targets[0].get('lineCoverage',0)*100 if targets else 0; \
 		print(f'Line Coverage: {cov:.1f}%')" 2>/dev/null || echo "Could not parse coverage report."
 
-all: generate lint build test
+all: generate format lint build test
 	@echo "All steps complete."

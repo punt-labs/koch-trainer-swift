@@ -6,6 +6,16 @@ import GameplayKit
 /// Thread-safe for use in audio render callbacks.
 final class BandConditionsProcessor: @unchecked Sendable {
 
+    // MARK: Lifecycle
+
+    // MARK: - Initialization
+
+    init(sampleRate: Double = 44100) {
+        self.sampleRate = sampleRate
+    }
+
+    // MARK: Internal
+
     // MARK: - Configuration
 
     /// Whether band conditions processing is active
@@ -28,35 +38,6 @@ final class BandConditionsProcessor: @unchecked Sendable {
 
     /// Interference signal level, 0.0 - 1.0
     var interferenceLevel: Double = 0.2
-
-    // MARK: - Internal State
-
-    private var fadingPhase: Double = 0
-    private var sampleRate: Double = 44100
-
-    // Noise generation using GameplayKit for reproducible Gaussian distribution
-    private let randomSource = GKMersenneTwisterRandomSource(seed: 12345)
-    private lazy var gaussianDistribution = GKGaussianDistribution(
-        randomSource: randomSource,
-        mean: 0,
-        deviation: 100
-    )
-
-    // Interference state
-    private var interferenceActive: Bool = false
-    private var interferenceFrequency: Double = 0
-    private var interferencePhase: Double = 0
-    private var interferenceSamplesRemaining: Int = 0
-
-    // Static crash state for QRN
-    private var crashSamplesRemaining: Int = 0
-    private var crashAmplitude: Float = 0
-
-    // MARK: - Initialization
-
-    init(sampleRate: Double = 44100) {
-        self.sampleRate = sampleRate
-    }
 
     /// Update configuration from AppSettings
     func configure(from settings: AppSettings) {
@@ -107,6 +88,31 @@ final class BandConditionsProcessor: @unchecked Sendable {
         return max(-1.0, min(1.0, output))
     }
 
+    // MARK: Private
+
+    // MARK: - Internal State
+
+    private var fadingPhase: Double = 0
+    private var sampleRate: Double = 44100
+
+    // Noise generation using GameplayKit for reproducible Gaussian distribution
+    private let randomSource = GKMersenneTwisterRandomSource(seed: 12345)
+    private lazy var gaussianDistribution = GKGaussianDistribution(
+        randomSource: randomSource,
+        mean: 0,
+        deviation: 100
+    )
+
+    // Interference state
+    private var interferenceActive: Bool = false
+    private var interferenceFrequency: Double = 0
+    private var interferencePhase: Double = 0
+    private var interferenceSamplesRemaining: Int = 0
+
+    // Static crash state for QRN
+    private var crashSamplesRemaining: Int = 0
+    private var crashAmplitude: Float = 0
+
     // MARK: - Fading (QSB)
 
     /// Apply sinusoidal amplitude fading to simulate QSB.
@@ -147,11 +153,11 @@ final class BandConditionsProcessor: @unchecked Sendable {
         } else {
             // Occasional static crashes (probability increases with noise level)
             let crashProbability = 0.00005 * noiseLevel
-            if Double.random(in: 0...1) < crashProbability {
+            if Double.random(in: 0 ... 1) < crashProbability {
                 // Start a new crash: 10-50ms duration
-                let crashDurationMs = Double.random(in: 10...50)
+                let crashDurationMs = Double.random(in: 10 ... 50)
                 crashSamplesRemaining = Int(crashDurationMs * sampleRate / 1000)
-                crashAmplitude = Float(noiseLevel * Double.random(in: 0.3...0.8))
+                crashAmplitude = Float(noiseLevel * Double.random(in: 0.3 ... 0.8))
             }
         }
 
@@ -184,14 +190,14 @@ final class BandConditionsProcessor: @unchecked Sendable {
         } else {
             // Random chance to start interference
             let startProbability = 0.00002 * interferenceLevel
-            if Double.random(in: 0...1) < startProbability {
+            if Double.random(in: 0 ... 1) < startProbability {
                 interferenceActive = true
                 // Nearby frequency: base ± 50-200 Hz
-                interferenceFrequency = 600 + Double.random(in: -200...200)
+                interferenceFrequency = 600 + Double.random(in: -200 ... 200)
                 interferencePhase = 0
 
                 // Duration: 0.3-2.0 seconds
-                let durationSeconds = Double.random(in: 0.3...2.0)
+                let durationSeconds = Double.random(in: 0.3 ... 2.0)
                 interferenceSamplesRemaining = Int(durationSeconds * sampleRate)
             }
         }

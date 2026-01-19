@@ -2,10 +2,8 @@ import SwiftUI
 
 /// View for custom character practice with selectable character grid.
 struct PracticeView: View {
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @State private var selectedCharacters: Set<Character> = []
-    @StateObject private var audioEngine = MorseAudioEngine()
+
+    // MARK: Internal
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -58,6 +56,13 @@ struct PracticeView: View {
             audioEngine.configureBandConditions(from: settingsStore.settings)
         }
     }
+
+    // MARK: Private
+
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @State private var selectedCharacters: Set<Character> = []
+    @StateObject private var audioEngine = MorseAudioEngine()
 
     private func playCharacter(_ character: Character) {
         Task {

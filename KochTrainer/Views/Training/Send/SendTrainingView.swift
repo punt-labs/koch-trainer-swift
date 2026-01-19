@@ -1,20 +1,36 @@
 import SwiftUI
 
-struct SendTrainingView: View {
-    @StateObject private var viewModel = SendTrainingViewModel()
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+// MARK: - SendTrainingView
 
-    @FocusState private var isKeyboardFocused: Bool
-    @State private var hiddenInput: String = ""
+struct SendTrainingView: View {
+
+    // MARK: Lifecycle
+
+    init(customCharacters: [Character]? = nil) {
+        self.customCharacters = customCharacters
+    }
+
+    // MARK: Internal
 
     /// Optional custom characters for practice mode
     let customCharacters: [Character]?
 
-    init(customCharacters: [Character]? = nil) {
-        self.customCharacters = customCharacters
+    var navigationTitle: String {
+        switch viewModel.phase {
+        case .introduction:
+            return "Learn Characters"
+        case .training,
+             .paused:
+            return "Send Training"
+        case .completed:
+            return "Complete!"
+        }
+    }
+
+    var isTrainingActive: Bool {
+        if case .training = viewModel.phase { return true }
+        if case .paused = viewModel.phase { return true }
+        return false
     }
 
     var body: some View {
@@ -50,7 +66,7 @@ struct SendTrainingView: View {
             case .paused:
                 SendPausedView(viewModel: viewModel)
 
-            case .completed(let didAdvance, let newCharacter):
+            case let .completed(didAdvance, newCharacter):
                 SendCompletedView(
                     viewModel: viewModel,
                     didAdvance: didAdvance,
@@ -64,7 +80,11 @@ struct SendTrainingView: View {
         .navigationBarBackButtonHidden(isTrainingActive)
         .onAppear {
             if let custom = customCharacters {
-                viewModel.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: custom)
+                viewModel.configure(
+                    progressStore: progressStore,
+                    settingsStore: settingsStore,
+                    customCharacters: custom
+                )
             } else {
                 viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
             }
@@ -80,25 +100,20 @@ struct SendTrainingView: View {
         }
     }
 
-    var navigationTitle: String {
-        switch viewModel.phase {
-        case .introduction:
-            return "Learn Characters"
-        case .training, .paused:
-            return "Send Training"
-        case .completed:
-            return "Complete!"
-        }
-    }
+    // MARK: Private
 
-    var isTrainingActive: Bool {
-        if case .training = viewModel.phase { return true }
-        if case .paused = viewModel.phase { return true }
-        return false
-    }
+    @StateObject private var viewModel = SendTrainingViewModel()
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
+
+    @FocusState private var isKeyboardFocused: Bool
+    @State private var hiddenInput: String = ""
+
 }
 
-// MARK: - Training Phase View
+// MARK: - SendTrainingPhaseView
 
 struct SendTrainingPhaseView: View {
     @ObservedObject var viewModel: SendTrainingViewModel
@@ -193,7 +208,7 @@ struct SendTrainingPhaseView: View {
     }
 }
 
-// MARK: - Paused View
+// MARK: - SendPausedView
 
 struct SendPausedView: View {
     @ObservedObject var viewModel: SendTrainingViewModel
@@ -231,10 +246,11 @@ struct SendPausedView: View {
     }
 }
 
-// MARK: - Completed View
+// MARK: - SendCompletedView
 
 struct SendCompletedView: View {
     @ObservedObject var viewModel: SendTrainingViewModel
+
     let didAdvance: Bool
     let newCharacter: Character?
     let dismiss: DismissAction
@@ -314,7 +330,7 @@ struct SendCompletedView: View {
     }
 }
 
-// MARK: - Feedback View
+// MARK: - SendFeedbackView
 
 struct SendFeedbackView: View {
     let feedback: SendTrainingViewModel.Feedback

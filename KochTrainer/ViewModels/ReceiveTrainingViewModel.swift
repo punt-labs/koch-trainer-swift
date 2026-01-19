@@ -1,10 +1,23 @@
 import Foundation
 import SwiftUI
 
+// MARK: - ReceiveTrainingViewModel
+
 /// ViewModel for receive training sessions.
 /// Plays Morse audio one character at a time, waits for single keypress response.
 @MainActor
 final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
+
+    // MARK: Lifecycle
+
+    // MARK: - Initialization
+
+    init(audioEngine: AudioEngineProtocol? = nil) {
+        self.audioEngine = audioEngine ?? MorseAudioEngine()
+    }
+
+    // MARK: Internal
+
     // MARK: - Session Phase
 
     enum SessionPhase: Equatable {
@@ -12,6 +25,12 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         case training
         case paused
         case completed(didAdvance: Bool, newCharacter: Character?)
+    }
+
+    struct Feedback: Equatable {
+        let wasCorrect: Bool
+        let expectedCharacter: Character
+        let userPressed: Character?
     }
 
     // MARK: - Published State
@@ -33,12 +52,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForResponse: Bool = false
 
-    struct Feedback: Equatable {
-        let wasCorrect: Bool
-        let expectedCharacter: Character
-        let userPressed: Character?
-    }
-
     // MARK: - Configuration
 
     let responseTimeout: TimeInterval = 3.0
@@ -49,29 +62,8 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         max(15, 5 * introCharacters.count)
     }
 
-    // MARK: - Dependencies
-
-    private let audioEngine: AudioEngineProtocol
-    private var progressStore: ProgressStore?
-    private var settingsStore: SettingsStore?
-
-    // MARK: - Internal State
-
-    private var sessionTimer: Timer?
-    private var responseTimer: Timer?
-    private var sessionStartTime: Date?
-    private var currentLevel: Int = 1
-
-    private var currentGroup: [Character] = []
-    private var currentGroupIndex: Int = 0
-
-    /// Custom characters for practice mode (nil = use level-based characters)
-    private var customCharacters: [Character]?
-
     /// Whether this is a custom practice session (no level advancement)
     var isCustomSession: Bool { customCharacters != nil }
-
-    // MARK: - Computed Properties
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -95,14 +87,14 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var introProgress: String {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             return "\(index + 1) of \(introCharacters.count)"
         }
         return ""
     }
 
     var isLastIntroCharacter: Bool {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             return index == introCharacters.count - 1
         }
         return false
@@ -116,16 +108,10 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    // MARK: - Initialization
-
-    init(audioEngine: AudioEngineProtocol? = nil) {
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
-    }
-
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
-        self.currentLevel = progressStore.progress.receiveLevel
+        currentLevel = progressStore.progress.receiveLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         audioEngine.configureBandConditions(from: settingsStore.settings)
@@ -138,7 +124,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
         self.customCharacters = customCharacters
-        self.currentLevel = progressStore.progress.receiveLevel
+        currentLevel = progressStore.progress.receiveLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         audioEngine.configureBandConditions(from: settingsStore.settings)
@@ -159,22 +145,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         showIntroCharacter(at: 0)
     }
 
-    private func showIntroCharacter(at index: Int) {
-        guard index < introCharacters.count else {
-            startTraining()
-            return
-        }
-
-        currentIntroCharacter = introCharacters[index]
-        phase = .introduction(characterIndex: index)
-
-        // Auto-play after a short delay to let the UI update
-        Task {
-            try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
-            playCurrentIntroCharacter()
-        }
-    }
-
     func playCurrentIntroCharacter() {
         guard let char = currentIntroCharacter else { return }
 
@@ -186,7 +156,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     func nextIntroCharacter() {
-        if case .introduction(let index) = phase {
+        if case let .introduction(index) = phase {
             let nextIndex = index + 1
             if nextIndex < introCharacters.count {
                 showIntroCharacter(at: nextIndex)
@@ -194,16 +164,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
                 startTraining()
             }
         }
-    }
-
-    // MARK: - Training Phase
-
-    private func startTraining() {
-        phase = .training
-        sessionStartTime = Date()
-        isPlaying = true
-        startSessionTimer()
-        playNextGroup()
     }
 
     func startSession() {
@@ -266,16 +226,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
     }
 
-    // MARK: - Proficiency Check
-
-    private func checkForProficiency() {
-        guard totalAttempts >= minimumAttemptsForProficiency else { return }
-        guard accuracy >= proficiencyThreshold else { return }
-
-        // Proficiency achieved! End session and advance
-        endSession()
-    }
-
     // MARK: - Input Handling
 
     func handleKeyPress(_ key: Character) {
@@ -291,6 +241,63 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         showFeedbackAndContinue(wasCorrect: isCorrect, expected: expected, userPressed: pressedUpper)
     }
 
+    // MARK: Private
+
+    // MARK: - Dependencies
+
+    private let audioEngine: AudioEngineProtocol
+    private var progressStore: ProgressStore?
+    private var settingsStore: SettingsStore?
+
+    // MARK: - Internal State
+
+    private var sessionTimer: Timer?
+    private var responseTimer: Timer?
+    private var sessionStartTime: Date?
+    private var currentLevel: Int = 1
+
+    private var currentGroup: [Character] = []
+    private var currentGroupIndex: Int = 0
+
+    /// Custom characters for practice mode (nil = use level-based characters)
+    private var customCharacters: [Character]?
+
+    private func showIntroCharacter(at index: Int) {
+        guard index < introCharacters.count else {
+            startTraining()
+            return
+        }
+
+        currentIntroCharacter = introCharacters[index]
+        phase = .introduction(characterIndex: index)
+
+        // Auto-play after a short delay to let the UI update
+        Task {
+            try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
+            playCurrentIntroCharacter()
+        }
+    }
+
+    // MARK: - Training Phase
+
+    private func startTraining() {
+        phase = .training
+        sessionStartTime = Date()
+        isPlaying = true
+        startSessionTimer()
+        playNextGroup()
+    }
+
+    // MARK: - Proficiency Check
+
+    private func checkForProficiency() {
+        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard accuracy >= proficiencyThreshold else { return }
+
+        // Proficiency achieved! End session and advance
+        endSession()
+    }
+
 }
 
 // MARK: - Private Helpers
@@ -304,7 +311,9 @@ extension ReceiveTrainingViewModel {
     }
 
     private func tickSession() {
-        guard timeRemaining > 0 else { endSession(); return }
+        guard timeRemaining > 0 else { endSession()
+            return
+        }
         timeRemaining -= 1
     }
 
@@ -406,7 +415,7 @@ extension ReceiveTrainingViewModel {
             level: currentLevel,
             characterStats: combinedStats,
             sessionType: .receive,
-            groupLength: Int.random(in: 3...5),
+            groupLength: Int.random(in: 3 ... 5),
             availableCharacters: customCharacters
         )
     }

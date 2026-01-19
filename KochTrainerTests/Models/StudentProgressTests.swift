@@ -1,5 +1,7 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
+
+// MARK: - StudentProgressTests
 
 final class StudentProgressTests: XCTestCase {
 
@@ -286,7 +288,7 @@ final class StudentProgressTests: XCTestCase {
     }
 }
 
-// MARK: - CharacterStat Tests
+// MARK: - CharacterStatTests
 
 final class CharacterStatTests: XCTestCase {
 

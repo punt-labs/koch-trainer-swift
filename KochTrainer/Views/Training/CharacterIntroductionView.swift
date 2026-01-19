@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - CharacterIntroducing
+
 /// Protocol for view models that support character introduction
 @MainActor
 protocol CharacterIntroducing: ObservableObject {
@@ -12,9 +14,12 @@ protocol CharacterIntroducing: ObservableObject {
     func nextIntroCharacter()
 }
 
+// MARK: - CharacterIntroductionView
+
 /// Shared character introduction view used by both receive and send training
 struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
     @ObservedObject var viewModel: ViewModel
+
     let trainingType: String
 
     var body: some View {

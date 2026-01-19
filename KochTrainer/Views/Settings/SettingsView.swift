@@ -1,12 +1,10 @@
 import SwiftUI
 
+// MARK: - SettingsView
+
 struct SettingsView: View {
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var notificationManager: NotificationManager
-    @State private var showResetConfirmation = false
-    @State private var isPreviewingBandConditions = false
-    @StateObject private var previewAudioEngine = MorseAudioEngine()
+
+    // MARK: Internal
 
     var body: some View {
         Form {
@@ -21,7 +19,7 @@ struct SettingsView: View {
                     Text("Tone Frequency: \(Int(settingsStore.settings.toneFrequency)) Hz")
                     Slider(
                         value: $settingsStore.settings.toneFrequency,
-                        in: 400...800,
+                        in: 400 ... 800,
                         step: 25
                     )
                 }
@@ -33,7 +31,7 @@ struct SettingsView: View {
                             get: { Double(settingsStore.settings.effectiveSpeed) },
                             set: { settingsStore.settings.effectiveSpeed = Int($0) }
                         ),
-                        in: 10...18,
+                        in: 10 ... 18,
                         step: 1
                     )
                 }
@@ -45,7 +43,7 @@ struct SettingsView: View {
                 if settingsStore.settings.bandConditionsEnabled {
                     VStack(alignment: .leading) {
                         Text("Noise Level (QRN): \(Int(settingsStore.settings.noiseLevel * 100))%")
-                        Slider(value: $settingsStore.settings.noiseLevel, in: 0...1, step: 0.1)
+                        Slider(value: $settingsStore.settings.noiseLevel, in: 0 ... 1, step: 0.1)
                     }
 
                     Toggle("Signal Fading (QSB)", isOn: $settingsStore.settings.fadingEnabled)
@@ -53,13 +51,13 @@ struct SettingsView: View {
                     if settingsStore.settings.fadingEnabled {
                         VStack(alignment: .leading) {
                             Text("Fading Depth: \(Int(settingsStore.settings.fadingDepth * 100))%")
-                            Slider(value: $settingsStore.settings.fadingDepth, in: 0...1, step: 0.1)
+                            Slider(value: $settingsStore.settings.fadingDepth, in: 0 ... 1, step: 0.1)
                         }
 
                         VStack(alignment: .leading) {
                             let rateText = String(format: "%.2f", settingsStore.settings.fadingRate)
                             Text("Fading Rate: \(rateText) Hz")
-                            Slider(value: $settingsStore.settings.fadingRate, in: 0.02...0.3, step: 0.02)
+                            Slider(value: $settingsStore.settings.fadingRate, in: 0.02 ... 0.3, step: 0.02)
                         }
                     }
 
@@ -68,7 +66,7 @@ struct SettingsView: View {
                     if settingsStore.settings.interferenceEnabled {
                         VStack(alignment: .leading) {
                             Text("Interference Level: \(Int(settingsStore.settings.interferenceLevel * 100))%")
-                            Slider(value: $settingsStore.settings.interferenceLevel, in: 0...1, step: 0.1)
+                            Slider(value: $settingsStore.settings.interferenceLevel, in: 0 ... 1, step: 0.1)
                         }
                     }
 
@@ -186,6 +184,15 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: Private
+
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var notificationManager: NotificationManager
+    @State private var showResetConfirmation = false
+    @State private var isPreviewingBandConditions = false
+    @StateObject private var previewAudioEngine = MorseAudioEngine()
+
     // MARK: - Band Conditions Helpers
 
     private func previewBandConditions() {
@@ -227,6 +234,8 @@ struct SettingsView: View {
         }
     }
 }
+
+// MARK: - BandConditionPreset
 
 enum BandConditionPreset {
     case goodConditions

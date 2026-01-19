@@ -2,9 +2,8 @@ import SwiftUI
 
 @main
 struct KochTrainerApp: App {
-    @StateObject private var progressStore = ProgressStore()
-    @StateObject private var settingsStore = SettingsStore()
-    @StateObject private var notificationManager = NotificationManager()
+
+    // MARK: Internal
 
     var body: some Scene {
         WindowGroup {
@@ -23,6 +22,12 @@ struct KochTrainerApp: App {
                 }
         }
     }
+
+    // MARK: Private
+
+    @StateObject private var progressStore = ProgressStore()
+    @StateObject private var settingsStore = SettingsStore()
+    @StateObject private var notificationManager = NotificationManager()
 
     private func rescheduleNotifications(schedule: PracticeSchedule) {
         notificationManager.scheduleNotifications(

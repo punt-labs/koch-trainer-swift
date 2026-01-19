@@ -3,20 +3,27 @@ import Foundation
 /// Manages persistence of application settings to UserDefaults.
 @MainActor
 final class SettingsStore: ObservableObject {
+
+    // MARK: Lifecycle
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        settings = AppSettings()
+        settings = load()
+    }
+
+    // MARK: Internal
+
     @Published var settings: AppSettings {
         didSet {
             save(settings)
         }
     }
 
+    // MARK: Private
+
     private let key = "appSettings"
     private let defaults: UserDefaults
-
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        self.settings = AppSettings()
-        self.settings = load()
-    }
 
     private func load() -> AppSettings {
         guard let data = defaults.data(forKey: key) else {

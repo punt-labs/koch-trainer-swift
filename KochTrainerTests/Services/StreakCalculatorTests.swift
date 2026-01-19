@@ -1,5 +1,5 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class StreakCalculatorTests: XCTestCase {
 
@@ -20,7 +20,7 @@ final class StreakCalculatorTests: XCTestCase {
         let result = StreakCalculator.updateStreak(
             lastStreakDate: nil,
             currentStreak: 0,
-            longestStreak: 5  // From previous data migration
+            longestStreak: 5 // From previous data migration
         )
 
         XCTAssertEqual(result.currentStreak, 1)
@@ -97,7 +97,7 @@ final class StreakCalculatorTests: XCTestCase {
         )
 
         XCTAssertEqual(result.currentStreak, 1)
-        XCTAssertEqual(result.longestStreak, 10)  // Longest preserved
+        XCTAssertEqual(result.longestStreak, 10) // Longest preserved
     }
 
     func testWeekOffResetsStreak() throws {
@@ -163,7 +163,7 @@ final class StreakCalculatorTests: XCTestCase {
 
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: morning, now: afternoon)
 
-        XCTAssertEqual(result, 1)  // Safe through tomorrow
+        XCTAssertEqual(result, 1) // Safe through tomorrow
     }
 
     func testDaysUntilBreakWhenPracticedYesterday() throws {
@@ -172,7 +172,7 @@ final class StreakCalculatorTests: XCTestCase {
 
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: yesterday, now: now)
 
-        XCTAssertEqual(result, 0)  // Must practice today
+        XCTAssertEqual(result, 0) // Must practice today
     }
 
     func testDaysUntilBreakWhenStreakBroken() throws {
@@ -181,13 +181,13 @@ final class StreakCalculatorTests: XCTestCase {
 
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: twoDaysAgo, now: now)
 
-        XCTAssertEqual(result, -1)  // Already broken
+        XCTAssertEqual(result, -1) // Already broken
     }
 
     func testDaysUntilBreakWhenNoHistory() {
         let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: nil)
 
-        XCTAssertEqual(result, 0)  // No streak to break, but indicates action needed
+        XCTAssertEqual(result, 0) // No streak to break, but indicates action needed
     }
 
     // MARK: - Edge Cases
@@ -196,7 +196,7 @@ final class StreakCalculatorTests: XCTestCase {
         let calendar = Calendar.current
         var components = calendar.dateComponents([.year, .month, .day], from: Date())
         components.hour = 0
-        components.minute = 1  // Just after midnight
+        components.minute = 1 // Just after midnight
 
         let justAfterMidnight = try XCTUnwrap(calendar.date(from: components))
 

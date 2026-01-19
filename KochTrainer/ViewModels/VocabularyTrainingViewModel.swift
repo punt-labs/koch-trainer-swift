@@ -1,16 +1,41 @@
 import Foundation
 import SwiftUI
 
+// MARK: - VocabularyTrainingViewModel
+
 /// ViewModel for vocabulary (word/callsign) training sessions.
 /// Supports both receive (audio → text) and send (text → keying) modes.
 @MainActor
 final class VocabularyTrainingViewModel: ObservableObject {
+
+    // MARK: Lifecycle
+
+    // MARK: - Initialization
+
+    init(
+        vocabularySet: VocabularySet,
+        sessionType: SessionType,
+        audioEngine: AudioEngineProtocol? = nil
+    ) {
+        self.vocabularySet = vocabularySet
+        self.sessionType = sessionType
+        self.audioEngine = audioEngine ?? MorseAudioEngine()
+    }
+
+    // MARK: Internal
+
     // MARK: - Session Phase
 
     enum SessionPhase: Equatable {
         case training
         case paused
         case completed
+    }
+
+    struct Feedback: Equatable {
+        let wasCorrect: Bool
+        let expectedWord: String
+        let userAnswer: String
     }
 
     // MARK: - Published State
@@ -32,43 +57,20 @@ final class VocabularyTrainingViewModel: ObservableObject {
     @Published var currentPattern: String = ""
     @Published var inputTimeRemaining: TimeInterval = 0
 
-    struct Feedback: Equatable {
-        let wasCorrect: Bool
-        let expectedWord: String
-        let userAnswer: String
-    }
-
     // MARK: - Configuration
 
     let vocabularySet: VocabularySet
     let sessionType: SessionType
     let minimumAttempts: Int = 10
 
+    /// Input timeout for send mode (time to complete keying)
+    let inputTimeout: TimeInterval = 2.0
+
     /// Response timeout scales with word length
     var responseTimeout: TimeInterval {
         // Base 3 seconds + 1 second per character
         3.0 + Double(currentWord.count)
     }
-
-    /// Input timeout for send mode (time to complete keying)
-    let inputTimeout: TimeInterval = 2.0
-
-    // MARK: - Dependencies
-
-    private let audioEngine: AudioEngineProtocol
-    private let decoder = MorseDecoder()
-    private var progressStore: ProgressStore?
-    private var settingsStore: SettingsStore?
-
-    // MARK: - Internal State
-
-    private var responseTimer: Timer?
-    private var inputTimer: Timer?
-    private var sessionStartTime: Date?
-    private var recentWords: [String] = []
-    private var currentCharIndex: Int = 0
-
-    // MARK: - Computed Properties
 
     var accuracyPercentage: Int {
         guard totalAttempts > 0 else { return 0 }
@@ -96,18 +98,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     var progressText: String {
         "\(totalAttempts)/\(minimumAttempts) words"
-    }
-
-    // MARK: - Initialization
-
-    init(
-        vocabularySet: VocabularySet,
-        sessionType: SessionType,
-        audioEngine: AudioEngineProtocol? = nil
-    ) {
-        self.vocabularySet = vocabularySet
-        self.sessionType = sessionType
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
@@ -236,6 +226,23 @@ final class VocabularyTrainingViewModel: ObservableObject {
         resetInputTimer()
     }
 
+    // MARK: Private
+
+    // MARK: - Dependencies
+
+    private let audioEngine: AudioEngineProtocol
+    private let decoder = MorseDecoder()
+    private var progressStore: ProgressStore?
+    private var settingsStore: SettingsStore?
+
+    // MARK: - Internal State
+
+    private var responseTimer: Timer?
+    private var inputTimer: Timer?
+    private var sessionStartTime: Date?
+    private var recentWords: [String] = []
+    private var currentCharIndex: Int = 0
+
     private func playDit() {
         Task {
             guard let engine = audioEngine as? MorseAudioEngine else { return }
@@ -308,7 +315,9 @@ extension VocabularyTrainingViewModel {
         let combinedStats = mergeWordStats()
         guard let nextWord = VocabularyGroupGenerator.selectNextWord(
             from: vocabularySet, wordStats: combinedStats, sessionType: sessionType, avoiding: recentWords
-        ) else { endSession(); return }
+        ) else { endSession()
+            return
+        }
 
         currentWord = nextWord
         userInput = ""

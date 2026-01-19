@@ -1,9 +1,13 @@
 import Foundation
 
+// MARK: - QSOStyle
+
 /// QSO conversation style
 enum QSOStyle: String, Codable, CaseIterable {
-    case contest    // Short structured: RST + serial number
-    case ragChew    // Casual: name, QTH, weather, rig, etc.
+    case contest // Short structured: RST + serial number
+    case ragChew // Casual: name, QTH, weather, rig, etc.
+
+    // MARK: Internal
 
     var displayName: String {
         switch self {
@@ -22,17 +26,21 @@ enum QSOStyle: String, Codable, CaseIterable {
     }
 }
 
+// MARK: - QSOPhase
+
 /// Phase of the QSO conversation
 enum QSOPhase: String, Codable, Equatable {
-    case idle               // Not started
-    case callingCQ          // User sending CQ
-    case awaitingResponse   // Waiting for AI station to respond
-    case receivedCall       // AI station has called us
-    case sendingExchange    // User sending their exchange
-    case awaitingExchange   // Waiting for AI exchange
-    case exchangeReceived   // AI sent their exchange
-    case signing            // Sign-off phase (73/SK)
-    case completed          // QSO finished
+    case idle // Not started
+    case callingCQ // User sending CQ
+    case awaitingResponse // Waiting for AI station to respond
+    case receivedCall // AI station has called us
+    case sendingExchange // User sending their exchange
+    case awaitingExchange // Waiting for AI exchange
+    case exchangeReceived // AI sent their exchange
+    case signing // Sign-off phase (73/SK)
+    case completed // QSO finished
+
+    // MARK: Internal
 
     var userAction: String {
         switch self {
@@ -49,12 +57,12 @@ enum QSOPhase: String, Codable, Equatable {
     }
 }
 
+// MARK: - QSOMessage
+
 /// A single message in the QSO transcript
 struct QSOMessage: Identifiable, Codable, Equatable {
-    let id: UUID
-    let sender: QSOSender
-    let text: String
-    let timestamp: Date
+
+    // MARK: Lifecycle
 
     init(id: UUID = UUID(), sender: QSOSender, text: String, timestamp: Date = Date()) {
         self.id = id
@@ -62,16 +70,55 @@ struct QSOMessage: Identifiable, Codable, Equatable {
         self.text = text
         self.timestamp = timestamp
     }
+
+    // MARK: Internal
+
+    let id: UUID
+    let sender: QSOSender
+    let text: String
+    let timestamp: Date
+
 }
+
+// MARK: - QSOSender
 
 /// Who sent the message
 enum QSOSender: String, Codable, Equatable {
-    case user       // The user/operator
-    case station    // The AI virtual station
+    case user // The user/operator
+    case station // The AI virtual station
 }
+
+// MARK: - QSOState
 
 /// Complete state of an ongoing QSO
 struct QSOState: Codable, Equatable {
+
+    // MARK: Lifecycle
+
+    init(
+        style: QSOStyle,
+        myCallsign: String,
+        theirCallsign: String = "",
+        theirName: String = "",
+        theirQTH: String = ""
+    ) {
+        phase = .idle
+        self.style = style
+        self.myCallsign = myCallsign.uppercased()
+        self.theirCallsign = theirCallsign.uppercased()
+        self.theirName = theirName
+        self.theirQTH = theirQTH
+        mySerialNumber = 1
+        theirSerialNumber = 0
+        myRST = "599"
+        theirRST = ""
+        transcript = []
+        startTime = Date()
+        exchangeCount = 0
+    }
+
+    // MARK: Internal
+
     var phase: QSOPhase
     var style: QSOStyle
     var myCallsign: String
@@ -86,26 +133,9 @@ struct QSOState: Codable, Equatable {
     var startTime: Date
     var exchangeCount: Int
 
-    init(
-        style: QSOStyle,
-        myCallsign: String,
-        theirCallsign: String = "",
-        theirName: String = "",
-        theirQTH: String = ""
-    ) {
-        self.phase = .idle
-        self.style = style
-        self.myCallsign = myCallsign.uppercased()
-        self.theirCallsign = theirCallsign.uppercased()
-        self.theirName = theirName
-        self.theirQTH = theirQTH
-        self.mySerialNumber = 1
-        self.theirSerialNumber = 0
-        self.myRST = "599"
-        self.theirRST = ""
-        self.transcript = []
-        self.startTime = Date()
-        self.exchangeCount = 0
+    /// Duration of the QSO so far
+    var duration: TimeInterval {
+        Date().timeIntervalSince(startTime)
     }
 
     /// Add a message to the transcript
@@ -114,8 +144,4 @@ struct QSOState: Codable, Equatable {
         transcript.append(message)
     }
 
-    /// Duration of the QSO so far
-    var duration: TimeInterval {
-        Date().timeIntervalSince(startTime)
-    }
 }

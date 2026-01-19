@@ -2,17 +2,8 @@ import Foundation
 
 /// User preferences for notification behavior.
 struct NotificationSettings: Codable, Equatable {
-    /// Whether to send reminders when practice is due
-    var practiceRemindersEnabled: Bool
 
-    /// Whether to send reminders to maintain streak
-    var streakRemindersEnabled: Bool
-
-    /// Preferred time of day for reminder notifications
-    var preferredReminderTime: Date
-
-    /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
-    var quietHoursEnabled: Bool
+    // MARK: Lifecycle
 
     init(
         practiceRemindersEnabled: Bool = true,
@@ -26,6 +17,22 @@ struct NotificationSettings: Codable, Equatable {
         self.preferredReminderTime = preferredReminderTime ?? Self.defaultReminderTime()
         self.quietHoursEnabled = quietHoursEnabled
     }
+
+    // MARK: Internal
+
+    /// Whether to send reminders when practice is due
+    var practiceRemindersEnabled: Bool
+
+    /// Whether to send reminders to maintain streak
+    var streakRemindersEnabled: Bool
+
+    /// Preferred time of day for reminder notifications
+    var preferredReminderTime: Date
+
+    /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
+    var quietHoursEnabled: Bool
+
+    // MARK: Private
 
     /// Default reminder time: 9:00 AM today
     private static func defaultReminderTime() -> Date {

@@ -1,9 +1,9 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class BandConditionsProcessorTests: XCTestCase {
 
-    private var processor = BandConditionsProcessor()
+    // MARK: Internal
 
     override func setUp() {
         super.setUp()
@@ -57,7 +57,7 @@ final class BandConditionsProcessorTests: XCTestCase {
         processor.noiseLevel = 0.8
 
         // Process some samples to build internal state
-        for i in 0..<1000 {
+        for i in 0 ..< 1000 {
             _ = processor.processSample(0.5, at: i)
         }
 
@@ -102,17 +102,17 @@ final class BandConditionsProcessorTests: XCTestCase {
 
     func testFadingReducesAmplitude() {
         processor.isEnabled = true
-        processor.noiseLevel = 0  // Disable noise for clean test
+        processor.noiseLevel = 0 // Disable noise for clean test
         processor.fadingEnabled = true
-        processor.fadingDepth = 1.0  // Full fading
-        processor.fadingRate = 5.0  // 5 Hz = one cycle per 0.2 seconds
+        processor.fadingDepth = 1.0 // Full fading
+        processor.fadingRate = 5.0 // 5 Hz = one cycle per 0.2 seconds
         processor.interferenceEnabled = false
 
         let inputSample: Float = 0.5
 
         // Process samples covering a full fading cycle (0.2 seconds at 44100 Hz)
         var outputs: [Float] = []
-        for i in 0..<8820 {  // ~0.2 seconds at 44100 Hz
+        for i in 0 ..< 8820 { // ~0.2 seconds at 44100 Hz
             let output = processor.processSample(inputSample, at: i)
             outputs.append(output)
         }
@@ -137,7 +137,7 @@ final class BandConditionsProcessorTests: XCTestCase {
 
         // Process samples with fading disabled
         var outputs: [Float] = []
-        for i in 0..<1000 {
+        for i in 0 ..< 1000 {
             let output = processor.processSample(inputSample, at: i)
             outputs.append(output)
         }
@@ -159,7 +159,7 @@ final class BandConditionsProcessorTests: XCTestCase {
         let inputSample: Float = 0.5
 
         var outputs: [Float] = []
-        for i in 0..<100 {
+        for i in 0 ..< 100 {
             let output = processor.processSample(inputSample, at: i)
             outputs.append(output)
         }
@@ -177,7 +177,7 @@ final class BandConditionsProcessorTests: XCTestCase {
 
         let inputSample: Float = 0.5
 
-        for i in 0..<100 {
+        for i in 0 ..< 100 {
             let output = processor.processSample(inputSample, at: i)
             XCTAssertEqual(output, inputSample, accuracy: 0.0001)
         }
@@ -188,15 +188,17 @@ final class BandConditionsProcessorTests: XCTestCase {
     func testInterferenceParameters() {
         processor.isEnabled = true
         processor.interferenceEnabled = true
-        processor.interferenceLevel = 0.8
+        processor.interferenceLevel = 1.0 // Max level for reliable triggering
         processor.noiseLevel = 0
         processor.fadingEnabled = false
 
-        // Interference is probabilistic, so we process many samples
+        // Interference is probabilistic (p = 0.00002 * level per sample).
+        // With level=1.0, p=0.00002. Need many samples for reliable triggering.
+        // 500,000 samples gives ~10 expected interference starts.
         var outputs: [Float] = []
-        let inputSample: Float = 0.0  // Use zero to isolate interference
+        let inputSample: Float = 0.0 // Use zero to isolate interference
 
-        for i in 0..<50000 {
+        for i in 0 ..< 500_000 {
             let output = processor.processSample(inputSample, at: i)
             outputs.append(output)
         }
@@ -217,7 +219,7 @@ final class BandConditionsProcessorTests: XCTestCase {
         processor.interferenceEnabled = true
         processor.interferenceLevel = 1.0
 
-        for i in 0..<1000 {
+        for i in 0 ..< 1000 {
             let output = processor.processSample(0.9, at: i)
             XCTAssertGreaterThanOrEqual(output, -1.0)
             XCTAssertLessThanOrEqual(output, 1.0)
@@ -239,7 +241,7 @@ final class BandConditionsProcessorTests: XCTestCase {
         var outputs: [Float] = []
         let inputSample: Float = 0.5
 
-        for i in 0..<44100 {  // 1 second of audio
+        for i in 0 ..< 44100 { // 1 second of audio
             let output = processor.processSample(inputSample, at: i)
             outputs.append(output)
         }
@@ -254,4 +256,9 @@ final class BandConditionsProcessorTests: XCTestCase {
         let uniqueValues = Set(outputs.map { Int($0 * 1000) })
         XCTAssertGreaterThan(uniqueValues.count, 10)
     }
+
+    // MARK: Private
+
+    private var processor = BandConditionsProcessor()
+
 }

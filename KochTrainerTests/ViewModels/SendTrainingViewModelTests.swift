@@ -1,13 +1,10 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 @MainActor
 final class SendTrainingViewModelTests: XCTestCase {
 
-    private var viewModel = SendTrainingViewModel(audioEngine: MockAudioEngine())
-    private var mockAudioEngine = MockAudioEngine()
-    private var progressStore = ProgressStore()
-    private var settingsStore = SettingsStore()
+    // MARK: Internal
 
     override func setUp() async throws {
         mockAudioEngine = MockAudioEngine()
@@ -275,4 +272,12 @@ final class SendTrainingViewModelTests: XCTestCase {
 
         XCTAssertTrue(mockAudioEngine.stopCalled)
     }
+
+    // MARK: Private
+
+    private var viewModel = SendTrainingViewModel(audioEngine: MockAudioEngine())
+    private var mockAudioEngine = MockAudioEngine()
+    private var progressStore = ProgressStore()
+    private var settingsStore = SettingsStore()
+
 }

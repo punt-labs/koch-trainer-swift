@@ -1,5 +1,5 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 @MainActor
 final class ProgressStoreTests: XCTestCase {

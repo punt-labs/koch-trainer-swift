@@ -1,12 +1,11 @@
 import Foundation
 
+// MARK: - VirtualStation
+
 /// Represents an AI-controlled virtual ham radio station
 struct VirtualStation: Codable, Equatable {
-    let callsign: String
-    let name: String
-    let qth: String         // Location (city, state/country)
-    let rig: String         // Equipment description
-    let serialNumber: Int   // Contest serial number
+
+    // MARK: Lifecycle
 
     init(callsign: String, name: String, qth: String, rig: String = "100W", serialNumber: Int = 1) {
         self.callsign = callsign.uppercased()
@@ -16,13 +15,21 @@ struct VirtualStation: Codable, Equatable {
         self.serialNumber = serialNumber
     }
 
+    // MARK: Internal
+
+    let callsign: String
+    let name: String
+    let qth: String // Location (city, state/country)
+    let rig: String // Equipment description
+    let serialNumber: Int // Contest serial number
+
     /// Generate a random RST (Readability, Strength, Tone) report
     /// Typical contest reports are 599, but we vary slightly for realism
     var randomRST: String {
         let readabilityOptions = [5, 5, 5, 5, 4]
         let strengthOptions = [9, 9, 9, 8, 7]
-        let readability = readabilityOptions[Int.random(in: 0..<readabilityOptions.count)]
-        let strength = strengthOptions[Int.random(in: 0..<strengthOptions.count)]
+        let readability = readabilityOptions[Int.random(in: 0 ..< readabilityOptions.count)]
+        let strength = strengthOptions[Int.random(in: 0 ..< strengthOptions.count)]
         return "\(readability)\(strength)9"
     }
 
@@ -36,7 +43,7 @@ struct VirtualStation: Codable, Equatable {
 
 extension VirtualStation {
     /// Generate a random virtual station
-    static func random(serialNumber: Int = Int.random(in: 1...500)) -> VirtualStation {
+    static func random(serialNumber: Int = Int.random(in: 1 ... 500)) -> VirtualStation {
         let callsign = CallsignGenerator.random()
         let name = randomName()
         let qth = randomQTH()
@@ -58,7 +65,7 @@ extension VirtualStation {
             "ED", "PHIL", "MARK", "JEFF", "TONY", "AL", "JOE", "PETE",
             "SAM", "RAY", "LEE", "ART", "HAL", "VIC", "WALT", "FRED"
         ]
-        return names[Int.random(in: 0..<names.count)]
+        return names[Int.random(in: 0 ..< names.count)]
     }
 
     private static func randomQTH() -> String {
@@ -71,7 +78,7 @@ extension VirtualStation {
             "TUCSON AZ", "OMAHA NE", "TULSA OK", "FRESNO CA",
             "SACRAMENTO CA", "KANSAS CITY MO", "MILWAUKEE WI", "MEMPHIS TN"
         ]
-        return locations[Int.random(in: 0..<locations.count)]
+        return locations[Int.random(in: 0 ..< locations.count)]
     }
 
     private static func randomRig() -> String {
@@ -80,7 +87,7 @@ extension VirtualStation {
             "KENWOOD TS590", "ELECRAFT K3", "FLEX 6600", "100W DIPOLE",
             "KW AMP", "QRP 5W", "HOMEBREW", "PORTABLE"
         ]
-        return rigs[Int.random(in: 0..<rigs.count)]
+        return rigs[Int.random(in: 0 ..< rigs.count)]
     }
 }
 
@@ -98,13 +105,13 @@ extension VirtualStation {
 
     /// Get a random station (80% chance random, 20% chance preset)
     static func randomOrPreset() -> VirtualStation {
-        if Double.random(in: 0...1) < 0.2, let preset = presets.randomElement() {
+        if Double.random(in: 0 ... 1) < 0.2, let preset = presets.randomElement() {
             return VirtualStation(
                 callsign: preset.callsign,
                 name: preset.name,
                 qth: preset.qth,
                 rig: preset.rig,
-                serialNumber: Int.random(in: 1...500)
+                serialNumber: Int.random(in: 1 ... 500)
             )
         }
         return random()

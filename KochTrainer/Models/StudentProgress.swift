@@ -1,7 +1,34 @@
 import Foundation
 
+// MARK: - StudentProgress
+
 /// Tracks a student's overall progress in the Koch method training.
 struct StudentProgress: Codable, Equatable {
+
+    // MARK: Lifecycle
+
+    init(
+        receiveLevel: Int = 1,
+        sendLevel: Int = 1,
+        characterStats: [Character: CharacterStat] = [:],
+        sessionHistory: [SessionResult] = [],
+        startDate: Date = Date(),
+        schedule: PracticeSchedule = PracticeSchedule(),
+        wordStats: [String: WordStat] = [:],
+        customVocabularySets: [VocabularySet] = []
+    ) {
+        self.receiveLevel = max(1, min(receiveLevel, 26))
+        self.sendLevel = max(1, min(sendLevel, 26))
+        self.characterStats = characterStats
+        self.sessionHistory = sessionHistory
+        self.startDate = startDate
+        self.schedule = schedule
+        self.wordStats = wordStats
+        self.customVocabularySets = customVocabularySets
+    }
+
+    // MARK: Internal
+
     /// Level for receive training (1-26). Each level unlocks one additional character.
     var receiveLevel: Int
 
@@ -26,24 +53,22 @@ struct StudentProgress: Codable, Equatable {
     /// User-created vocabulary sets
     var customVocabularySets: [VocabularySet]
 
-    init(
-        receiveLevel: Int = 1,
-        sendLevel: Int = 1,
-        characterStats: [Character: CharacterStat] = [:],
-        sessionHistory: [SessionResult] = [],
-        startDate: Date = Date(),
-        schedule: PracticeSchedule = PracticeSchedule(),
-        wordStats: [String: WordStat] = [:],
-        customVocabularySets: [VocabularySet] = []
-    ) {
-        self.receiveLevel = max(1, min(receiveLevel, 26))
-        self.sendLevel = max(1, min(sendLevel, 26))
-        self.characterStats = characterStats
-        self.sessionHistory = sessionHistory
-        self.startDate = startDate
-        self.schedule = schedule
-        self.wordStats = wordStats
-        self.customVocabularySets = customVocabularySets
+    // Legacy computed properties for backward compatibility
+    var currentLevel: Int { max(receiveLevel, sendLevel) }
+    var unlockedCharacters: [Character] { MorseCode.characters(forLevel: currentLevel) }
+
+    /// Overall accuracy across all attempts (both directions combined)
+    var overallAccuracy: Double {
+        let totalAttempts = characterStats.values.reduce(0) { $0 + $1.totalAttempts }
+        let totalCorrect = characterStats.values.reduce(0) { $0 + $1.totalCorrect }
+        guard totalAttempts > 0 else { return 0 }
+        return Double(totalCorrect) / Double(totalAttempts)
+    }
+
+    /// Determines if the student should advance to the next level for a session type.
+    /// Requires ≥90% accuracy in a completed session.
+    static func shouldAdvance(sessionAccuracy: Double, level: Int) -> Bool {
+        sessionAccuracy >= 0.90 && level < 26
     }
 
     /// Get level for a specific session type (uses base type for custom/vocabulary)
@@ -67,18 +92,6 @@ struct StudentProgress: Codable, Equatable {
         return MorseCode.kochOrder[lvl]
     }
 
-    // Legacy computed properties for backward compatibility
-    var currentLevel: Int { max(receiveLevel, sendLevel) }
-    var unlockedCharacters: [Character] { MorseCode.characters(forLevel: currentLevel) }
-
-    /// Overall accuracy across all attempts (both directions combined)
-    var overallAccuracy: Double {
-        let totalAttempts = characterStats.values.reduce(0) { $0 + $1.totalAttempts }
-        let totalCorrect = characterStats.values.reduce(0) { $0 + $1.totalCorrect }
-        guard totalAttempts > 0 else { return 0 }
-        return Double(totalCorrect) / Double(totalAttempts)
-    }
-
     /// Overall accuracy for a specific session type (uses base type for custom/vocabulary)
     func overallAccuracy(for sessionType: SessionType) -> Double {
         let stats = characterStats.values
@@ -96,12 +109,6 @@ struct StudentProgress: Codable, Equatable {
         default:
             return overallAccuracy
         }
-    }
-
-    /// Determines if the student should advance to the next level for a session type.
-    /// Requires ≥90% accuracy in a completed session.
-    static func shouldAdvance(sessionAccuracy: Double, level: Int) -> Bool {
-        sessionAccuracy >= 0.90 && level < 26
     }
 
     /// Advance to next level for a session type if conditions are met (uses base type)
@@ -135,17 +142,12 @@ struct StudentProgress: Codable, Equatable {
     }
 }
 
+// MARK: - CharacterStat
+
 /// Performance statistics for a single character, tracked separately by direction.
 struct CharacterStat: Codable, Equatable {
-    /// Receive training stats (audio → text)
-    var receiveAttempts: Int
-    var receiveCorrect: Int
 
-    /// Send training stats (text → keying)
-    var sendAttempts: Int
-    var sendCorrect: Int
-
-    var lastPracticed: Date
+    // MARK: Lifecycle
 
     init(
         receiveAttempts: Int = 0,
@@ -165,26 +167,36 @@ struct CharacterStat: Codable, Equatable {
     init(sessionType: SessionType, attempts: Int, correct: Int, lastPracticed: Date = Date()) {
         switch sessionType.baseType {
         case .receive:
-            self.receiveAttempts = attempts
-            self.receiveCorrect = correct
-            self.sendAttempts = 0
-            self.sendCorrect = 0
+            receiveAttempts = attempts
+            receiveCorrect = correct
+            sendAttempts = 0
+            sendCorrect = 0
         case .send:
-            self.receiveAttempts = 0
-            self.receiveCorrect = 0
-            self.sendAttempts = attempts
-            self.sendCorrect = correct
+            receiveAttempts = 0
+            receiveCorrect = 0
+            sendAttempts = attempts
+            sendCorrect = correct
         default:
             // Fallback: treat as receive
-            self.receiveAttempts = attempts
-            self.receiveCorrect = correct
-            self.sendAttempts = 0
-            self.sendCorrect = 0
+            receiveAttempts = attempts
+            receiveCorrect = correct
+            sendAttempts = 0
+            sendCorrect = 0
         }
         self.lastPracticed = lastPracticed
     }
 
-    // MARK: - Computed Properties
+    // MARK: Internal
+
+    /// Receive training stats (audio → text)
+    var receiveAttempts: Int
+    var receiveCorrect: Int
+
+    /// Send training stats (text → keying)
+    var sendAttempts: Int
+    var sendCorrect: Int
+
+    var lastPracticed: Date
 
     var totalAttempts: Int { receiveAttempts + sendAttempts }
     var totalCorrect: Int { receiveCorrect + sendCorrect }
@@ -229,8 +241,15 @@ struct CharacterStat: Codable, Equatable {
 
 extension StudentProgress {
     enum CodingKeys: String, CodingKey {
-        case receiveLevel, sendLevel, currentLevel, characterStats, sessionHistory, startDate, schedule
-        case wordStats, customVocabularySets
+        case receiveLevel
+        case sendLevel
+        case currentLevel
+        case characterStats
+        case sessionHistory
+        case startDate
+        case schedule
+        case wordStats
+        case customVocabularySets
     }
 
     init(from decoder: Decoder) throws {
@@ -327,7 +346,7 @@ extension StudentProgress {
         let calendar = Calendar.current
         var currentStreak = 0
         var longestStreak = 0
-        var streakDays: Set<Int> = []  // Days since start date
+        var streakDays: Set<Int> = [] // Days since start date
 
         // Group sessions by calendar day
         for session in sortedSessions {
@@ -341,7 +360,7 @@ extension StudentProgress {
 
         // Calculate longest streak
         var tempStreak = 1
-        for i in 1..<sortedDays.count {
+        for i in 1 ..< sortedDays.count {
             if sortedDays[i] == sortedDays[i - 1] + 1 {
                 tempStreak += 1
             } else {

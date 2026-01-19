@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - PrimaryButtonStyle
+
 /// Primary button style with filled background.
 struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -15,6 +17,8 @@ struct PrimaryButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+
+// MARK: - SecondaryButtonStyle
 
 /// Secondary button style with outlined border.
 struct SecondaryButtonStyle: ButtonStyle {
@@ -34,6 +38,8 @@ struct SecondaryButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+
+// MARK: - DestructiveButtonStyle
 
 /// Destructive button style for dangerous actions.
 struct DestructiveButtonStyle: ButtonStyle {

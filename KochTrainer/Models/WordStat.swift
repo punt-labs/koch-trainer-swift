@@ -2,15 +2,8 @@ import Foundation
 
 /// Performance statistics for a single word in vocabulary training.
 struct WordStat: Codable, Equatable {
-    /// Receive training stats (audio → text)
-    var receiveAttempts: Int
-    var receiveCorrect: Int
 
-    /// Send training stats (text → keying)
-    var sendAttempts: Int
-    var sendCorrect: Int
-
-    var lastPracticed: Date
+    // MARK: Lifecycle
 
     init(
         receiveAttempts: Int = 0,
@@ -26,7 +19,17 @@ struct WordStat: Codable, Equatable {
         self.lastPracticed = lastPracticed
     }
 
-    // MARK: - Computed Properties
+    // MARK: Internal
+
+    /// Receive training stats (audio → text)
+    var receiveAttempts: Int
+    var receiveCorrect: Int
+
+    /// Send training stats (text → keying)
+    var sendAttempts: Int
+    var sendCorrect: Int
+
+    var lastPracticed: Date
 
     var totalAttempts: Int { receiveAttempts + sendAttempts }
     var totalCorrect: Int { receiveCorrect + sendCorrect }

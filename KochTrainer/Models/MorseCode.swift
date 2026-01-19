@@ -3,6 +3,46 @@ import Foundation
 /// Morse code encoding and Koch method character ordering.
 /// Character speed fixed at 20 WPM (dit = 60ms).
 enum MorseCode {
+    /// Timing at 20 WPM character speed
+    enum Timing {
+        /// Duration of one dit (basic unit) at 20 WPM: 60ms
+        static let ditDuration: TimeInterval = 0.060
+
+        /// Duration of one dah (3 dits): 180ms
+        static let dahDuration: TimeInterval = 0.180
+
+        /// Gap between elements within a character (1 dit): 60ms
+        static let elementGap: TimeInterval = 0.060
+
+        /// Standard inter-character gap (3 dits): 180ms
+        static let standardCharacterGap: TimeInterval = 0.180
+
+        /// Standard inter-word gap (7 dits): 420ms
+        static let standardWordGap: TimeInterval = 0.420
+
+        /// Calculate Farnsworth-adjusted character gap.
+        /// Character speed stays at 20 WPM, but gaps are extended.
+        /// - Parameter effectiveWPM: Target overall speed (10-18 WPM)
+        /// - Returns: Adjusted inter-character gap in seconds
+        static func farnsworthCharacterGap(effectiveWPM: Int) -> TimeInterval {
+            let charWPM: Double = 20
+            let effWPM = Double(max(10, min(18, effectiveWPM)))
+            // Farnsworth formula: extra time = (50/effWPM - 50/charWPM) * 60 / 19
+            let extraTime = (50.0 / effWPM - 50.0 / charWPM) * 60.0 / 19.0
+            return standardCharacterGap + extraTime * 3.0 / 19.0
+        }
+
+        /// Calculate Farnsworth-adjusted word gap.
+        /// - Parameter effectiveWPM: Target overall speed (10-18 WPM)
+        /// - Returns: Adjusted inter-word gap in seconds
+        static func farnsworthWordGap(effectiveWPM: Int) -> TimeInterval {
+            let charWPM: Double = 20
+            let effWPM = Double(max(10, min(18, effectiveWPM)))
+            let extraTime = (50.0 / effWPM - 50.0 / charWPM) * 60.0 / 19.0
+            return standardWordGap + extraTime * 7.0 / 19.0
+        }
+    }
+
     /// Koch method character order for learning Morse code.
     /// Characters are introduced in this specific sequence based on
     /// Ludwig Koch's research on optimal learning order.
@@ -49,43 +89,4 @@ enum MorseCode {
         decoding[pattern]
     }
 
-    /// Timing at 20 WPM character speed
-    enum Timing {
-        /// Duration of one dit (basic unit) at 20 WPM: 60ms
-        static let ditDuration: TimeInterval = 0.060
-
-        /// Duration of one dah (3 dits): 180ms
-        static let dahDuration: TimeInterval = 0.180
-
-        /// Gap between elements within a character (1 dit): 60ms
-        static let elementGap: TimeInterval = 0.060
-
-        /// Standard inter-character gap (3 dits): 180ms
-        static let standardCharacterGap: TimeInterval = 0.180
-
-        /// Standard inter-word gap (7 dits): 420ms
-        static let standardWordGap: TimeInterval = 0.420
-
-        /// Calculate Farnsworth-adjusted character gap.
-        /// Character speed stays at 20 WPM, but gaps are extended.
-        /// - Parameter effectiveWPM: Target overall speed (10-18 WPM)
-        /// - Returns: Adjusted inter-character gap in seconds
-        static func farnsworthCharacterGap(effectiveWPM: Int) -> TimeInterval {
-            let charWPM: Double = 20
-            let effWPM = Double(max(10, min(18, effectiveWPM)))
-            // Farnsworth formula: extra time = (50/effWPM - 50/charWPM) * 60 / 19
-            let extraTime = (50.0 / effWPM - 50.0 / charWPM) * 60.0 / 19.0
-            return standardCharacterGap + extraTime * 3.0 / 19.0
-        }
-
-        /// Calculate Farnsworth-adjusted word gap.
-        /// - Parameter effectiveWPM: Target overall speed (10-18 WPM)
-        /// - Returns: Adjusted inter-word gap in seconds
-        static func farnsworthWordGap(effectiveWPM: Int) -> TimeInterval {
-            let charWPM: Double = 20
-            let effWPM = Double(max(10, min(18, effectiveWPM)))
-            let extraTime = (50.0 / effWPM - 50.0 / charWPM) * 60.0 / 19.0
-            return standardWordGap + extraTime * 7.0 / 19.0
-        }
-    }
 }

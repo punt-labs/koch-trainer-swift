@@ -1,5 +1,5 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class IntervalCalculatorTests: XCTestCase {
 
@@ -117,7 +117,7 @@ final class IntervalCalculatorTests: XCTestCase {
 
         let result = IntervalCalculator.shouldResetInterval(
             lastPractice: twoWeeksAgo,
-            interval: 3.0  // More than 2 × 3 = 6 days ago
+            interval: 3.0 // More than 2 × 3 = 6 days ago
         )
 
         XCTAssertTrue(result)
@@ -128,7 +128,7 @@ final class IntervalCalculatorTests: XCTestCase {
 
         let result = IntervalCalculator.shouldResetInterval(
             lastPractice: twoDaysAgo,
-            interval: 2.0  // Within 2 × 2 = 4 days
+            interval: 2.0 // Within 2 × 2 = 4 days
         )
 
         XCTAssertFalse(result)
@@ -140,7 +140,7 @@ final class IntervalCalculatorTests: XCTestCase {
 
         let result = IntervalCalculator.shouldResetInterval(
             lastPractice: fourDaysAgo,
-            interval: 2.0,  // Exactly at 2 × 2 = 4 days
+            interval: 2.0, // Exactly at 2 × 2 = 4 days
             now: now
         )
 
@@ -153,7 +153,7 @@ final class IntervalCalculatorTests: XCTestCase {
 
         let result = IntervalCalculator.shouldResetInterval(
             lastPractice: overFourDaysAgo,
-            interval: 2.0,  // Just past 2 × 2 = 4 days
+            interval: 2.0, // Just past 2 × 2 = 4 days
             now: now
         )
 

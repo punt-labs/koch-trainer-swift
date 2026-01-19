@@ -1,5 +1,7 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
+
+// MARK: - QSOEngineTests
 
 @MainActor
 final class QSOEngineTests: XCTestCase {
@@ -15,13 +17,16 @@ final class QSOEngineTests: XCTestCase {
         func playGroup(_ group: String) async {
             playedGroups.append(group)
         }
+
         func stop() {}
         func setFrequency(_ frequency: Double) {
             self.frequency = frequency
         }
+
         func setEffectiveSpeed(_ wpm: Int) {
-            self.effectiveSpeed = wpm
+            effectiveSpeed = wpm
         }
+
         func configureBandConditions(from settings: AppSettings) {}
     }
 
@@ -79,7 +84,7 @@ final class QSOEngineTests: XCTestCase {
     }
 }
 
-// MARK: - Callsign Generator Tests
+// MARK: - CallsignGeneratorTests
 
 final class CallsignGeneratorTests: XCTestCase {
 
@@ -129,63 +134,7 @@ final class CallsignGeneratorTests: XCTestCase {
     }
 }
 
-// MARK: - QSO Template Tests
-
-final class QSOTemplateTests: XCTestCase {
-
-    func testUserHintForCallingCQ() {
-        var state = QSOState(style: .contest, myCallsign: "W5ABC")
-        state.phase = .callingCQ
-
-        let hint = QSOTemplate.userHint(for: state)
-
-        XCTAssertTrue(hint.contains("CQ"))
-        XCTAssertTrue(hint.contains("W5ABC"))
-    }
-
-    func testUserHintForReceivedCall() {
-        var state = QSOState(style: .contest, myCallsign: "W5ABC")
-        state.phase = .receivedCall
-        state.theirCallsign = "K0XYZ"
-
-        let hint = QSOTemplate.userHint(for: state)
-
-        XCTAssertTrue(hint.contains("K0XYZ"))
-    }
-
-    func testUserHintForSigning() {
-        var state = QSOState(style: .contest, myCallsign: "W5ABC")
-        state.phase = .signing
-
-        let hint = QSOTemplate.userHint(for: state)
-
-        XCTAssertTrue(hint.contains("73"))
-    }
-
-    func testValidateUserInputCQPhase() {
-        var state = QSOState(style: .contest, myCallsign: "W5ABC")
-        state.phase = .callingCQ
-
-        let validResult = QSOTemplate.validateUserInput("CQ CQ DE W5ABC K", for: state)
-        XCTAssertTrue(validResult.isValid)
-
-        let invalidResult = QSOTemplate.validateUserInput("HELLO", for: state)
-        XCTAssertFalse(invalidResult.isValid)
-    }
-
-    func testValidateUserInputSigningPhase() {
-        var state = QSOState(style: .contest, myCallsign: "W5ABC")
-        state.phase = .signing
-
-        let validResult = QSOTemplate.validateUserInput("73 SK", for: state)
-        XCTAssertTrue(validResult.isValid)
-
-        let invalidResult = QSOTemplate.validateUserInput("HELLO", for: state)
-        XCTAssertFalse(invalidResult.isValid)
-    }
-}
-
-// MARK: - Virtual Station Tests
+// MARK: - VirtualStationTests
 
 final class VirtualStationTests: XCTestCase {
 

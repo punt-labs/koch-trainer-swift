@@ -1,5 +1,5 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class GroupGeneratorTests: XCTestCase {
 
@@ -45,7 +45,7 @@ final class GroupGeneratorTests: XCTestCase {
         let level = 5
         let available = Set(MorseCode.characters(forLevel: level))
 
-        for _ in 0..<20 {
+        for _ in 0 ..< 20 {
             let group = GroupGenerator.generateLearningGroup(level: level, groupLength: 5)
             for char in group {
                 XCTAssertTrue(available.contains(char), "Character \(char) not available at level \(level)")
@@ -58,7 +58,7 @@ final class GroupGeneratorTests: XCTestCase {
         var newestCount = 0
         let iterations = 100
 
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             let group = GroupGenerator.generateLearningGroup(level: 5, groupLength: 5)
             newestCount += group.filter { $0 == "U" }.count
         }
@@ -99,7 +99,7 @@ final class GroupGeneratorTests: XCTestCase {
         var kCount = 0
         let iterations = 500
 
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             let group = GroupGenerator.generateRetentionGroup(
                 level: 5,
                 characterStats: stats,
@@ -131,7 +131,7 @@ final class GroupGeneratorTests: XCTestCase {
         var kCount = 0
         let iterations = 500
 
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             let group = GroupGenerator.generateRetentionGroup(
                 level: 5,
                 characterStats: stats,
@@ -165,7 +165,7 @@ final class GroupGeneratorTests: XCTestCase {
 
         // For receive mode, K should be weighted higher (low receive accuracy)
         var kCountReceive = 0
-        for _ in 0..<200 {
+        for _ in 0 ..< 200 {
             let group = GroupGenerator.generateRetentionGroup(
                 level: 2,
                 characterStats: stats,
@@ -177,7 +177,7 @@ final class GroupGeneratorTests: XCTestCase {
 
         // For send mode, M should be weighted higher (K has high send accuracy)
         var kCountSend = 0
-        for _ in 0..<200 {
+        for _ in 0 ..< 200 {
             let group = GroupGenerator.generateRetentionGroup(
                 level: 2,
                 characterStats: stats,
@@ -188,8 +188,11 @@ final class GroupGeneratorTests: XCTestCase {
         }
 
         // K should appear MORE in receive mode than send mode
-        XCTAssertGreaterThan(kCountReceive, kCountSend,
-            "K should appear more in receive mode (where it has low accuracy)")
+        XCTAssertGreaterThan(
+            kCountReceive,
+            kCountSend,
+            "K should appear more in receive mode (where it has low accuracy)"
+        )
     }
 
     func testRetentionGroupWithNoStats() {
@@ -259,7 +262,7 @@ final class GroupGeneratorTests: XCTestCase {
         let group = GroupGenerator.generateMixedGroup(
             level: 5,
             characterStats: stats,
-            sessionType: .send,  // No send stats exist
+            sessionType: .send, // No send stats exist
             groupLength: 5
         )
 

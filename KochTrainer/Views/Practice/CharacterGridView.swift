@@ -1,13 +1,15 @@
 import SwiftUI
 
+// MARK: - CharacterGridView
+
 /// A grid of all 26 letters showing Morse patterns with toggleable selection.
 struct CharacterGridView: View {
-    @Binding var selectedCharacters: Set<Character>
-    var onCharacterSelected: ((Character) -> Void)?
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 60, maximum: 80), spacing: Theme.Spacing.sm)
-    ]
+    // MARK: Internal
+
+    @Binding var selectedCharacters: Set<Character>
+
+    var onCharacterSelected: ((Character) -> Void)?
 
     var body: some View {
         ScrollView {
@@ -24,6 +26,12 @@ struct CharacterGridView: View {
         }
     }
 
+    // MARK: Private
+
+    private let columns = [
+        GridItem(.adaptive(minimum: 60, maximum: 80), spacing: Theme.Spacing.sm)
+    ]
+
     private func toggleSelection(_ character: Character) {
         if selectedCharacters.contains(character) {
             selectedCharacters.remove(character)
@@ -34,15 +42,16 @@ struct CharacterGridView: View {
     }
 }
 
+// MARK: - CharacterCell
+
 /// Individual character cell in the grid.
 private struct CharacterCell: View {
+
+    // MARK: Internal
+
     let character: Character
     let isSelected: Bool
     let onTap: () -> Void
-
-    private var pattern: String {
-        MorseCode.pattern(for: character) ?? ""
-    }
 
     var body: some View {
         Button(action: onTap) {
@@ -61,6 +70,13 @@ private struct CharacterCell: View {
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: Private
+
+    private var pattern: String {
+        MorseCode.pattern(for: character) ?? ""
+    }
+
 }
 
 #Preview {

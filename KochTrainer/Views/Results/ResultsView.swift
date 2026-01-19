@@ -1,9 +1,13 @@
 import SwiftUI
 
+// MARK: - ResultsView
+
 struct ResultsView: View {
+
+    // MARK: Internal
+
     let result: SessionResult
     let didLevelUp: Bool
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -53,7 +57,14 @@ struct ResultsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
     }
+
+    // MARK: Private
+
+    @Environment(\.dismiss) private var dismiss
+
 }
+
+// MARK: - ResultRow
 
 struct ResultRow: View {
     let label: String

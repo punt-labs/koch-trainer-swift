@@ -1,9 +1,19 @@
-import Foundation
 import Combine
+import Foundation
 
 /// ViewModel for QSO session, wraps QSOEngine for UI binding
 @MainActor
 final class QSOViewModel: ObservableObject {
+
+    // MARK: Lifecycle
+
+    // MARK: - Initialization
+
+    init(style: QSOStyle, callsign: String) {
+        engine = QSOEngine(style: style, myCallsign: callsign)
+    }
+
+    // MARK: Internal
 
     // MARK: - Published State
 
@@ -14,8 +24,6 @@ final class QSOViewModel: ObservableObject {
     // MARK: - Engine
 
     let engine: QSOEngine
-
-    // MARK: - Computed Properties
 
     var phase: QSOPhase {
         engine.state.phase
@@ -59,12 +67,6 @@ final class QSOViewModel: ObservableObject {
 
     var validationHint: String? {
         engine.lastValidationResult.hint
-    }
-
-    // MARK: - Initialization
-
-    init(style: QSOStyle, callsign: String) {
-        self.engine = QSOEngine(style: style, myCallsign: callsign)
     }
 
     // MARK: - Configuration

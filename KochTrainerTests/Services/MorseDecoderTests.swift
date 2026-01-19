@@ -1,9 +1,9 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class MorseDecoderTests: XCTestCase {
 
-    private var decoder = MorseDecoder()
+    // MARK: Internal
 
     override func setUp() {
         super.setUp()
@@ -133,10 +133,10 @@ final class MorseDecoderTests: XCTestCase {
         // Build pattern ".-.-" which is invalid (not a Morse letter)
         // Each prefix has extensions so no early return:
         // "." → has extensions, ".-" → has extensions (A), ".-." → has extensions (R→L)
-        _ = decoder.processInput(.dit)   // .
-        _ = decoder.processInput(.dah)   // .-
-        _ = decoder.processInput(.dit)   // .-.
-        _ = decoder.processInput(.dah)   // .-.-  (invalid pattern)
+        _ = decoder.processInput(.dit) // .
+        _ = decoder.processInput(.dah) // .-
+        _ = decoder.processInput(.dit) // .-.
+        _ = decoder.processInput(.dah) // .-.-  (invalid pattern)
 
         let result = decoder.completeCharacter()
 
@@ -210,4 +210,9 @@ final class MorseDecoderTests: XCTestCase {
             )
         }
     }
+
+    // MARK: Private
+
+    private var decoder = MorseDecoder()
+
 }

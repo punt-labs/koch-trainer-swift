@@ -1,9 +1,13 @@
 import Foundation
 
+// MARK: - MorseElement
+
 /// Input element for Morse decoding.
 enum MorseElement {
     case dit
     case dah
+
+    // MARK: Internal
 
     var symbol: String {
         switch self {
@@ -13,25 +17,32 @@ enum MorseElement {
     }
 }
 
+// MARK: - DecodedResult
+
 /// Result of attempting to decode a Morse pattern.
 enum DecodedResult: Equatable {
     case character(Character)
     case invalid(pattern: String)
 }
 
+// MARK: - MorseDecoder
+
 /// Decodes Morse code input from paddle buttons with timeout-based character completion.
 final class MorseDecoder {
+
+    // MARK: Lifecycle
+
+    deinit {
+        cancelTimeout()
+    }
+
+    // MARK: Internal
+
     /// Current pattern being built
     private(set) var currentPattern: String = ""
 
-    /// Time of last input
-    private var lastInputTime: Date?
-
     /// Timeout duration: 1.5× dah length (~270ms at 20 WPM)
     let timeoutDuration: TimeInterval = MorseCode.Timing.dahDuration * 1.5
-
-    /// Timer for automatic character completion
-    private var timeoutTimer: Timer?
 
     /// Callback when a character is decoded (due to timeout)
     var onCharacterDecoded: ((DecodedResult) -> Void)?
@@ -71,7 +82,8 @@ final class MorseDecoder {
     func checkTimeout() -> DecodedResult? {
         guard !currentPattern.isEmpty,
               let lastTime = lastInputTime,
-              Date().timeIntervalSince(lastTime) >= timeoutDuration else {
+              Date().timeIntervalSince(lastTime) >= timeoutDuration
+        else {
             return nil
         }
 
@@ -99,6 +111,14 @@ final class MorseDecoder {
         lastInputTime = nil
     }
 
+    // MARK: Private
+
+    /// Time of last input
+    private var lastInputTime: Date?
+
+    /// Timer for automatic character completion
+    private var timeoutTimer: Timer?
+
     private func startTimeout() {
         timeoutTimer = Timer.scheduledTimer(withTimeInterval: timeoutDuration, repeats: false) { [weak self] _ in
             guard let self = self else { return }
@@ -113,7 +133,4 @@ final class MorseDecoder {
         timeoutTimer = nil
     }
 
-    deinit {
-        cancelTimeout()
-    }
 }

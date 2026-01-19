@@ -1,25 +1,13 @@
-import Foundation
 import Combine
+import Foundation
+
+// MARK: - QSOEngine
 
 /// Engine that manages QSO state machine and AI station behavior
 @MainActor
 final class QSOEngine: ObservableObject {
 
-    // MARK: - Published State
-
-    @Published private(set) var state: QSOState
-    @Published private(set) var station: VirtualStation
-    @Published private(set) var isPlayingAudio: Bool = false
-    @Published private(set) var lastValidationResult: ValidationResult = .valid
-
-    // MARK: - Dependencies
-
-    private let audioEngine: AudioEngineProtocol
-
-    // MARK: - Configuration
-
-    /// Delay before AI responds (simulates listening/thinking)
-    private let aiResponseDelay: TimeInterval = 1.5
+    // MARK: Lifecycle
 
     // MARK: - Initialization
 
@@ -28,10 +16,19 @@ final class QSOEngine: ObservableObject {
         myCallsign: String,
         audioEngine: AudioEngineProtocol? = nil
     ) {
-        self.state = QSOState(style: style, myCallsign: myCallsign)
-        self.station = VirtualStation.randomOrPreset()
+        state = QSOState(style: style, myCallsign: myCallsign)
+        station = VirtualStation.randomOrPreset()
         self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
+
+    // MARK: Internal
+
+    // MARK: - Published State
+
+    @Published private(set) var state: QSOState
+    @Published private(set) var station: VirtualStation
+    @Published private(set) var isPlayingAudio: Bool = false
+    @Published private(set) var lastValidationResult: ValidationResult = .valid
 
     /// Configure audio settings
     func configureAudio(frequency: Double, effectiveSpeed: Int, settings: AppSettings) {
@@ -105,6 +102,23 @@ final class QSOEngine: ObservableObject {
         lastValidationResult = .valid
     }
 
+    /// Stop any ongoing audio playback
+    func stopAudio() {
+        audioEngine.stop()
+        isPlayingAudio = false
+    }
+
+    // MARK: Private
+
+    // MARK: - Dependencies
+
+    private let audioEngine: AudioEngineProtocol
+
+    // MARK: - Configuration
+
+    /// Delay before AI responds (simulates listening/thinking)
+    private let aiResponseDelay: TimeInterval = 1.5
+
     // MARK: - AI Response Generation
 
     private func generateAndPlayAIResponse() async {
@@ -159,17 +173,28 @@ final class QSOEngine: ObservableObject {
         }
     }
 
-    /// Stop any ongoing audio playback
-    func stopAudio() {
-        audioEngine.stop()
-        isPlayingAudio = false
-    }
 }
 
-// MARK: - QSO Result
+// MARK: - QSOResult
 
 /// Summary of a completed QSO
 struct QSOResult {
+
+    // MARK: Lifecycle
+
+    init(from state: QSOState) {
+        style = state.style
+        myCallsign = state.myCallsign
+        theirCallsign = state.theirCallsign
+        theirName = state.theirName
+        theirQTH = state.theirQTH
+        duration = state.duration
+        exchangeCount = state.exchangeCount
+        transcript = state.transcript
+    }
+
+    // MARK: Internal
+
     let style: QSOStyle
     let myCallsign: String
     let theirCallsign: String
@@ -178,17 +203,6 @@ struct QSOResult {
     let duration: TimeInterval
     let exchangeCount: Int
     let transcript: [QSOMessage]
-
-    init(from state: QSOState) {
-        self.style = state.style
-        self.myCallsign = state.myCallsign
-        self.theirCallsign = state.theirCallsign
-        self.theirName = state.theirName
-        self.theirQTH = state.theirQTH
-        self.duration = state.duration
-        self.exchangeCount = state.exchangeCount
-        self.transcript = state.transcript
-    }
 
     var formattedDuration: String {
         let minutes = Int(duration) / 60

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// View for vocabulary (word/callsign) practice.
 struct VocabularyView: View {
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
+
+    // MARK: Internal
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -30,12 +30,44 @@ struct VocabularyView: View {
                 )
             }
 
+            // QSO Simulation (advanced)
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("QSO Simulation")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("Advanced")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: QSOView()) {
+                    HStack {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                        Text("Start QSO Practice")
+                    }
+                }
+                .buttonStyle(SecondaryButtonStyle())
+
+                Text("Practice realistic ham radio conversations")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Colors.secondaryBackground)
+            .cornerRadius(12)
+
             Spacer()
         }
         .padding(Theme.Spacing.lg)
         .navigationTitle("Vocabulary")
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    // MARK: Private
+
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var settingsStore: SettingsStore
 
     private var callsignCard: some View {
         VStack(spacing: Theme.Spacing.sm) {

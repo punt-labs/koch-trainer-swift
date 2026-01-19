@@ -2,14 +2,14 @@ import SwiftUI
 
 /// Live QSO session view with transcript and input
 struct QSOSessionView: View {
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @StateObject private var viewModel: QSOViewModel
-    @Environment(\.dismiss) private var dismiss
-    @FocusState private var isInputFocused: Bool
+
+    // MARK: Lifecycle
 
     init(style: QSOStyle, callsign: String) {
         _viewModel = StateObject(wrappedValue: QSOViewModel(style: style, callsign: callsign))
     }
+
+    // MARK: Internal
 
     var body: some View {
         VStack(spacing: 0) {
@@ -67,6 +67,13 @@ struct QSOSessionView: View {
             }
         }
     }
+
+    // MARK: Private
+
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @StateObject private var viewModel: QSOViewModel
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var isInputFocused: Bool
 
     // MARK: - Status Bar
 
@@ -127,35 +134,6 @@ struct QSOSessionView: View {
         }
     }
 
-    private func messageRow(_ message: QSOMessage) -> some View {
-        HStack(alignment: .top) {
-            if message.sender == .station {
-                Image(systemName: "antenna.radiowaves.left.and.right")
-                    .foregroundColor(Theme.Colors.primary)
-                    .frame(width: 24)
-            } else {
-                Image(systemName: "person.fill")
-                    .foregroundColor(.secondary)
-                    .frame(width: 24)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(message.sender == .station ? viewModel.theirCallsign : "You")
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
-
-                Text(message.text)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundColor(message.sender == .station ? Theme.Colors.primary : .primary)
-            }
-
-            Spacer()
-        }
-        .padding(Theme.Spacing.sm)
-        .background(message.sender == .station ? Theme.Colors.primary.opacity(0.1) : Color.clear)
-        .cornerRadius(8)
-    }
-
     // MARK: - Hint View
 
     private var hintView: some View {
@@ -208,7 +186,34 @@ struct QSOSessionView: View {
         .background(Theme.Colors.secondaryBackground)
     }
 
-    // MARK: - Actions
+    private func messageRow(_ message: QSOMessage) -> some View {
+        HStack(alignment: .top) {
+            if message.sender == .station {
+                Image(systemName: "antenna.radiowaves.left.and.right")
+                    .foregroundColor(Theme.Colors.primary)
+                    .frame(width: 24)
+            } else {
+                Image(systemName: "person.fill")
+                    .foregroundColor(.secondary)
+                    .frame(width: 24)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(message.sender == .station ? viewModel.theirCallsign : "You")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+
+                Text(message.text)
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(message.sender == .station ? Theme.Colors.primary : .primary)
+            }
+
+            Spacer()
+        }
+        .padding(Theme.Spacing.sm)
+        .background(message.sender == .station ? Theme.Colors.primary.opacity(0.1) : Color.clear)
+        .cornerRadius(8)
+    }
 
     private func submitMessage() {
         Task {

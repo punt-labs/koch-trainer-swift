@@ -1,20 +1,34 @@
 import SwiftUI
 
-struct VocabularyTrainingView: View {
-    @StateObject private var viewModel: VocabularyTrainingViewModel
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+// MARK: - VocabularyTrainingView
 
-    @FocusState private var isKeyboardFocused: Bool
-    @State private var textInput: String = ""
+struct VocabularyTrainingView: View {
+
+    // MARK: Lifecycle
 
     init(vocabularySet: VocabularySet, sessionType: SessionType) {
         _viewModel = StateObject(wrappedValue: VocabularyTrainingViewModel(
             vocabularySet: vocabularySet,
             sessionType: sessionType
         ))
+    }
+
+    // MARK: Internal
+
+    var navigationTitle: String {
+        switch viewModel.phase {
+        case .training,
+             .paused:
+            return viewModel.isReceiveMode ? "Vocabulary Receive" : "Vocabulary Send"
+        case .completed:
+            return "Complete!"
+        }
+    }
+
+    var isTrainingActive: Bool {
+        if case .training = viewModel.phase { return true }
+        if case .paused = viewModel.phase { return true }
+        return false
     }
 
     var body: some View {
@@ -84,23 +98,20 @@ struct VocabularyTrainingView: View {
         }
     }
 
-    var navigationTitle: String {
-        switch viewModel.phase {
-        case .training, .paused:
-            return viewModel.isReceiveMode ? "Vocabulary Receive" : "Vocabulary Send"
-        case .completed:
-            return "Complete!"
-        }
-    }
+    // MARK: Private
 
-    var isTrainingActive: Bool {
-        if case .training = viewModel.phase { return true }
-        if case .paused = viewModel.phase { return true }
-        return false
-    }
+    @StateObject private var viewModel: VocabularyTrainingViewModel
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
+
+    @FocusState private var isKeyboardFocused: Bool
+    @State private var textInput: String = ""
+
 }
 
-// MARK: - Receive Training Phase View
+// MARK: - ReceiveVocabTrainingPhaseView
 
 private struct ReceiveVocabTrainingPhaseView: View {
     @ObservedObject var viewModel: VocabularyTrainingViewModel
@@ -187,7 +198,7 @@ private struct ReceiveVocabTrainingPhaseView: View {
     }
 }
 
-// MARK: - Send Training Phase View
+// MARK: - SendVocabTrainingPhaseView
 
 private struct SendVocabTrainingPhaseView: View {
     @ObservedObject var viewModel: VocabularyTrainingViewModel
@@ -284,7 +295,7 @@ private struct SendVocabTrainingPhaseView: View {
     }
 }
 
-// MARK: - Paused View
+// MARK: - VocabPausedView
 
 private struct VocabPausedView: View {
     @ObservedObject var viewModel: VocabularyTrainingViewModel
@@ -322,10 +333,11 @@ private struct VocabPausedView: View {
     }
 }
 
-// MARK: - Completed View
+// MARK: - VocabCompletedView
 
 private struct VocabCompletedView: View {
     @ObservedObject var viewModel: VocabularyTrainingViewModel
+
     let dismiss: DismissAction
 
     var body: some View {
@@ -364,7 +376,7 @@ private struct VocabCompletedView: View {
     }
 }
 
-// MARK: - Feedback View
+// MARK: - VocabFeedbackView
 
 private struct VocabFeedbackView: View {
     let feedback: VocabularyTrainingViewModel.Feedback

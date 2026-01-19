@@ -1,6 +1,8 @@
 import Combine
 import Foundation
 
+// MARK: - AudioEngineProtocol
+
 /// Protocol for playing Morse code audio.
 @MainActor
 protocol AudioEngineProtocol {
@@ -12,26 +14,17 @@ protocol AudioEngineProtocol {
     func configureBandConditions(from settings: AppSettings)
 }
 
+// MARK: - MorseAudioEngine
+
 /// Plays Morse code characters and groups with configurable timing.
 @MainActor
 final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
-    private let toneGenerator = ToneGenerator()
-    private var frequency: Double = 600
-    private var effectiveSpeed: Int = 12
 
-    private var isStopped = false
-
-    /// Timing configuration based on current effective speed
-    private var timing: Timing {
-        Timing(effectiveWPM: effectiveSpeed)
-    }
+    // MARK: Internal
 
     struct Timing {
-        let ditDuration: TimeInterval
-        let dahDuration: TimeInterval
-        let elementGap: TimeInterval
-        let characterGap: TimeInterval
-        let wordGap: TimeInterval
+
+        // MARK: Lifecycle
 
         init(effectiveWPM: Int) {
             // Character speed fixed at 20 WPM
@@ -41,6 +34,15 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
             characterGap = MorseCode.Timing.farnsworthCharacterGap(effectiveWPM: effectiveWPM)
             wordGap = MorseCode.Timing.farnsworthWordGap(effectiveWPM: effectiveWPM)
         }
+
+        // MARK: Internal
+
+        let ditDuration: TimeInterval
+        let dahDuration: TimeInterval
+        let elementGap: TimeInterval
+        let characterGap: TimeInterval
+        let wordGap: TimeInterval
+
     }
 
     func setFrequency(_ frequency: Double) {
@@ -48,7 +50,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     }
 
     func setEffectiveSpeed(_ wpm: Int) {
-        self.effectiveSpeed = max(10, min(18, wpm))
+        effectiveSpeed = max(10, min(18, wpm))
     }
 
     func configureBandConditions(from settings: AppSettings) {
@@ -109,7 +111,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
                 await playCharacter(char)
 
                 // Inter-character gap (except after last character or before space)
-                if index < characters.count - 1 && characters[index + 1] != " " {
+                if index < characters.count - 1, characters[index + 1] != " " {
                     await toneGenerator.playSilence(duration: timing.characterGap)
                 }
             }
@@ -126,4 +128,18 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     func reset() {
         isStopped = false
     }
+
+    // MARK: Private
+
+    private let toneGenerator = ToneGenerator()
+    private var frequency: Double = 600
+    private var effectiveSpeed: Int = 12
+
+    private var isStopped = false
+
+    /// Timing configuration based on current effective speed
+    private var timing: Timing {
+        Timing(effectiveWPM: effectiveSpeed)
+    }
+
 }

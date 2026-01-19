@@ -1,20 +1,36 @@
 import SwiftUI
 
-struct ReceiveTrainingView: View {
-    @StateObject private var viewModel = ReceiveTrainingViewModel()
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+// MARK: - ReceiveTrainingView
 
-    @FocusState private var isKeyboardFocused: Bool
-    @State private var hiddenInput: String = ""
+struct ReceiveTrainingView: View {
+
+    // MARK: Lifecycle
+
+    init(customCharacters: [Character]? = nil) {
+        self.customCharacters = customCharacters
+    }
+
+    // MARK: Internal
 
     /// Optional custom characters for practice mode
     let customCharacters: [Character]?
 
-    init(customCharacters: [Character]? = nil) {
-        self.customCharacters = customCharacters
+    var navigationTitle: String {
+        switch viewModel.phase {
+        case .introduction:
+            return "Learn Characters"
+        case .training,
+             .paused:
+            return "Receive Training"
+        case .completed:
+            return "Complete!"
+        }
+    }
+
+    var isTrainingActive: Bool {
+        if case .training = viewModel.phase { return true }
+        if case .paused = viewModel.phase { return true }
+        return false
     }
 
     var body: some View {
@@ -50,7 +66,7 @@ struct ReceiveTrainingView: View {
             case .paused:
                 PausedView(viewModel: viewModel)
 
-            case .completed(let didAdvance, let newCharacter):
+            case let .completed(didAdvance, newCharacter):
                 CompletedView(
                     viewModel: viewModel,
                     didAdvance: didAdvance,
@@ -64,7 +80,11 @@ struct ReceiveTrainingView: View {
         .navigationBarBackButtonHidden(isTrainingActive)
         .onAppear {
             if let custom = customCharacters {
-                viewModel.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: custom)
+                viewModel.configure(
+                    progressStore: progressStore,
+                    settingsStore: settingsStore,
+                    customCharacters: custom
+                )
             } else {
                 viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
             }
@@ -80,25 +100,20 @@ struct ReceiveTrainingView: View {
         }
     }
 
-    var navigationTitle: String {
-        switch viewModel.phase {
-        case .introduction:
-            return "Learn Characters"
-        case .training, .paused:
-            return "Receive Training"
-        case .completed:
-            return "Complete!"
-        }
-    }
+    // MARK: Private
 
-    var isTrainingActive: Bool {
-        if case .training = viewModel.phase { return true }
-        if case .paused = viewModel.phase { return true }
-        return false
-    }
+    @StateObject private var viewModel = ReceiveTrainingViewModel()
+    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
+
+    @FocusState private var isKeyboardFocused: Bool
+    @State private var hiddenInput: String = ""
+
 }
 
-// MARK: - Training Phase View
+// MARK: - TrainingPhaseView
 
 struct TrainingPhaseView: View {
     @ObservedObject var viewModel: ReceiveTrainingViewModel
@@ -154,7 +169,7 @@ struct TrainingPhaseView: View {
     }
 }
 
-// MARK: - Paused View
+// MARK: - PausedView
 
 struct PausedView: View {
     @ObservedObject var viewModel: ReceiveTrainingViewModel
@@ -192,10 +207,11 @@ struct PausedView: View {
     }
 }
 
-// MARK: - Completed View
+// MARK: - CompletedView
 
 struct CompletedView: View {
     @ObservedObject var viewModel: ReceiveTrainingViewModel
+
     let didAdvance: Bool
     let newCharacter: Character?
     let dismiss: DismissAction
@@ -275,7 +291,7 @@ struct CompletedView: View {
     }
 }
 
-// MARK: - Subviews
+// MARK: - WaitingForResponseView
 
 struct WaitingForResponseView: View {
     var body: some View {
@@ -291,6 +307,8 @@ struct WaitingForResponseView: View {
     }
 }
 
+// MARK: - PlayingIndicator
+
 struct PlayingIndicator: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.sm) {
@@ -304,6 +322,8 @@ struct PlayingIndicator: View {
         }
     }
 }
+
+// MARK: - FeedbackView
 
 struct FeedbackView: View {
     let feedback: ReceiveTrainingViewModel.Feedback
@@ -331,8 +351,20 @@ struct FeedbackView: View {
     }
 }
 
+// MARK: - TimeoutProgressBar
+
 struct TimeoutProgressBar: View {
     let progress: Double
+
+    var progressColor: Color {
+        if progress > 0.5 {
+            return Theme.Colors.success
+        } else if progress > 0.25 {
+            return Theme.Colors.warning
+        } else {
+            return Theme.Colors.error
+        }
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -347,15 +379,6 @@ struct TimeoutProgressBar: View {
         }
     }
 
-    var progressColor: Color {
-        if progress > 0.5 {
-            return Theme.Colors.success
-        } else if progress > 0.25 {
-            return Theme.Colors.warning
-        } else {
-            return Theme.Colors.error
-        }
-    }
 }
 
 #Preview {

@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - ProgressStoreProtocol
+
 /// Protocol for progress persistence.
 @MainActor
 protocol ProgressStoreProtocol: AnyObject {
@@ -9,18 +11,27 @@ protocol ProgressStoreProtocol: AnyObject {
     func resetProgress()
 }
 
+// MARK: - ProgressStore
+
 /// Manages persistence of student progress to UserDefaults.
 @MainActor
 final class ProgressStore: ObservableObject, ProgressStoreProtocol {
-    @Published var progress: StudentProgress
 
-    private let key = "studentProgress"
-    private let defaults: UserDefaults
+    // MARK: Lifecycle
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        self.progress = StudentProgress()
-        self.progress = load()
+        progress = StudentProgress()
+        progress = load()
+    }
+
+    // MARK: Internal
+
+    @Published var progress: StudentProgress
+
+    /// Overall accuracy as a whole percentage (0-100)
+    var overallAccuracyPercentage: Int {
+        Int((progress.overallAccuracy * 100).rounded())
     }
 
     func load() -> StudentProgress {
@@ -50,11 +61,6 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         save(fresh)
     }
 
-    /// Overall accuracy as a whole percentage (0-100)
-    var overallAccuracyPercentage: Int {
-        Int((progress.overallAccuracy * 100).rounded())
-    }
-
     /// Update progress after a session and check for level advancement.
     /// Returns true if the student leveled up.
     @discardableResult
@@ -65,7 +71,10 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         // Only allow advancement for standard sessions (not custom or vocabulary)
         let didAdvance: Bool
         if result.sessionType.canAdvanceLevel {
-            didAdvance = updated.advanceIfEligible(sessionAccuracy: result.accuracy, sessionType: result.sessionType.baseType)
+            didAdvance = updated.advanceIfEligible(
+                sessionAccuracy: result.accuracy,
+                sessionType: result.sessionType.baseType
+            )
         } else {
             didAdvance = false
         }
@@ -76,6 +85,11 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         save(updated)
         return didAdvance
     }
+
+    // MARK: Private
+
+    private let key = "studentProgress"
+    private let defaults: UserDefaults
 
     /// Update the practice schedule based on session result.
     private func updateSchedule(for progress: inout StudentProgress, result: SessionResult, didAdvance: Bool) {

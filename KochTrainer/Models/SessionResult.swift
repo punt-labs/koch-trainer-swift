@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - SessionType
+
 /// The type of training session.
 enum SessionType: String, Codable {
     case receive
@@ -8,6 +10,8 @@ enum SessionType: String, Codable {
     case sendCustom
     case receiveVocabulary
     case sendVocabulary
+
+    // MARK: Internal
 
     var displayName: String {
         switch self {
@@ -23,29 +27,34 @@ enum SessionType: String, Codable {
     /// Whether this session type can trigger level advancement
     var canAdvanceLevel: Bool {
         switch self {
-        case .receive, .send: return true
-        case .receiveCustom, .sendCustom, .receiveVocabulary, .sendVocabulary: return false
+        case .receive,
+             .send: return true
+        case .receiveCustom,
+             .sendCustom,
+             .receiveVocabulary,
+             .sendVocabulary: return false
         }
     }
 
     /// The base session type (receive or send direction)
     var baseType: SessionType {
         switch self {
-        case .receive, .receiveCustom, .receiveVocabulary: return .receive
-        case .send, .sendCustom, .sendVocabulary: return .send
+        case .receive,
+             .receiveCustom,
+             .receiveVocabulary: return .receive
+        case .send,
+             .sendCustom,
+             .sendVocabulary: return .send
         }
     }
 }
 
+// MARK: - SessionResult
+
 /// Result of a completed training session.
 struct SessionResult: Codable, Equatable, Identifiable {
-    let id: UUID
-    let sessionType: SessionType
-    let duration: TimeInterval
-    let totalAttempts: Int
-    let correctCount: Int
-    let characterStats: [Character: CharacterStat]
-    let date: Date
+
+    // MARK: Lifecycle
 
     init(
         id: UUID = UUID(),
@@ -64,6 +73,16 @@ struct SessionResult: Codable, Equatable, Identifiable {
         self.characterStats = characterStats
         self.date = date
     }
+
+    // MARK: Internal
+
+    let id: UUID
+    let sessionType: SessionType
+    let duration: TimeInterval
+    let totalAttempts: Int
+    let correctCount: Int
+    let characterStats: [Character: CharacterStat]
+    let date: Date
 
     /// Accuracy as a decimal (0.0 to 1.0)
     var accuracy: Double {
@@ -88,7 +107,13 @@ struct SessionResult: Codable, Equatable, Identifiable {
 
 extension SessionResult {
     enum CodingKeys: String, CodingKey {
-        case id, sessionType, duration, totalAttempts, correctCount, characterStats, date
+        case id
+        case sessionType
+        case duration
+        case totalAttempts
+        case correctCount
+        case characterStats
+        case date
     }
 
     init(from decoder: Decoder) throws {

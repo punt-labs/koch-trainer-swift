@@ -2,15 +2,19 @@ import Foundation
 
 /// Generates character groups for training sessions.
 /// Supports pattern-based grouping for learning and accuracy-weighted selection for retention.
-struct GroupGenerator {
+enum GroupGenerator {
+
+    // MARK: Internal
 
     /// Pattern families group characters by similar Morse structure.
     /// This helps learners recognize rhythmic similarities.
     enum PatternFamily: CaseIterable {
-        case singleElement    // E, T
-        case doubleElement    // I, M, A, N
-        case tripleElement    // S, O, U, R, W, G, D, K
-        case quadElement      // H, V, F, L, P, J, B, X, C, Y, Q, Z
+        case singleElement // E, T
+        case doubleElement // I, M, A, N
+        case tripleElement // S, O, U, R, W, G, D, K
+        case quadElement // H, V, F, L, P, J, B, X, C, Y, Q, Z
+
+        // MARK: Internal
 
         var characters: [Character] {
             switch self {
@@ -62,16 +66,16 @@ struct GroupGenerator {
         }
 
         var group = ""
-        for i in 0..<groupLength {
+        for i in 0 ..< groupLength {
             // Include newest character at least twice for emphasis
             if i == 0 || i == groupLength / 2 {
                 group.append(newestChar)
             } else if !similarChars.isEmpty && Bool.random() {
                 // 50% chance to pick from pattern-similar characters
-                group.append(similarChars[Int.random(in: 0..<similarChars.count)])
+                group.append(similarChars[Int.random(in: 0 ..< similarChars.count)])
             } else {
                 // Otherwise pick from all available
-                group.append(available[Int.random(in: 0..<available.count)])
+                group.append(available[Int.random(in: 0 ..< available.count)])
             }
         }
 
@@ -101,7 +105,7 @@ struct GroupGenerator {
         let weights = calculateWeights(for: available, stats: characterStats, sessionType: sessionType)
 
         var group = ""
-        for _ in 0..<groupLength {
+        for _ in 0 ..< groupLength {
             let selected = weightedRandomSelection(from: available, weights: weights)
             group.append(selected)
         }
@@ -147,9 +151,15 @@ struct GroupGenerator {
                 availableCharacters: availableCharacters
             )
         } else {
-            return generateLearningGroup(level: level, groupLength: groupLength, availableCharacters: availableCharacters)
+            return generateLearningGroup(
+                level: level,
+                groupLength: groupLength,
+                availableCharacters: availableCharacters
+            )
         }
     }
+
+    // MARK: Private
 
     // MARK: - Weight Calculation
 
@@ -208,7 +218,7 @@ struct GroupGenerator {
         weights: [Double]
     ) -> Character {
         let totalWeight = weights.reduce(0, +)
-        var random = Double.random(in: 0..<totalWeight)
+        var random = Double.random(in: 0 ..< totalWeight)
 
         for (index, weight) in weights.enumerated() {
             random -= weight

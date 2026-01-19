@@ -1,33 +1,39 @@
 import Foundation
 import UserNotifications
 
+// MARK: - NotificationCenterProtocol
+
+/// Protocol for abstracting UNUserNotificationCenter for testability.
+protocol NotificationCenterProtocol: Sendable {
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func notificationSettings() async -> UNNotificationSettings
+    func add(_ request: UNNotificationRequest, withCompletionHandler: (@Sendable (Error?) -> Void)?)
+    func removeAllPendingNotificationRequests()
+}
+
+// MARK: - UNUserNotificationCenter + NotificationCenterProtocol
+
+/// Default implementation using the real UNUserNotificationCenter.
+extension UNUserNotificationCenter: NotificationCenterProtocol {}
+
+// MARK: - NotificationManager
+
 /// Manages local notifications for practice reminders and streak alerts.
 @MainActor
 final class NotificationManager: ObservableObject {
-    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
-    private let notificationCenter = UNUserNotificationCenter.current()
+    // MARK: Lifecycle
 
-    // Notification identifiers
-    private enum NotificationID {
-        static let practiceReceive = "practice.receive"
-        static let practiceSend = "practice.send"
-        static let streakReminder = "streak.reminder"
-        static let welcomeBack = "welcome.back"
-        static func levelReview(_ level: Int) -> String { "level.review.\(level)" }
-    }
-
-    // Anti-nag constants
-    private static let maxNotificationsPerDay = 2
-    private static let minimumGapHours = 4
-    private static let quietHoursStart = 22  // 10 PM
-    private static let quietHoursEnd = 8     // 8 AM
-
-    init() {
+    init(notificationCenter: NotificationCenterProtocol = UNUserNotificationCenter.current()) {
+        self.notificationCenter = notificationCenter
         Task {
             await refreshAuthorizationStatus()
         }
     }
+
+    // MARK: Internal
+
+    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     /// Request notification authorization from the user.
     @discardableResult
@@ -60,6 +66,31 @@ final class NotificationManager: ObservableObject {
         scheduleWelcomeBackIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
     }
 
+    /// Cancel all scheduled notifications.
+    func cancelAllNotifications() {
+        notificationCenter.removeAllPendingNotificationRequests()
+    }
+
+    // MARK: Private
+
+    // Notification identifiers
+    private enum NotificationID {
+        static let practiceReceive = "practice.receive"
+        static let practiceSend = "practice.send"
+        static let streakReminder = "streak.reminder"
+        static let welcomeBack = "welcome.back"
+
+        static func levelReview(_ level: Int) -> String { "level.review.\(level)" }
+    }
+
+    // Anti-nag constants
+    private static let maxNotificationsPerDay = 2
+    private static let minimumGapHours = 4
+    private static let quietHoursStart = 22 // 10 PM
+    private static let quietHoursEnd = 8 // 8 AM
+
+    private let notificationCenter: NotificationCenterProtocol
+
     private func schedulePracticeReminders(
         schedule: PracticeSchedule,
         settings: NotificationSettings,
@@ -70,8 +101,12 @@ final class NotificationManager: ObservableObject {
         if let receiveDate = schedule.receiveNextDate {
             let adjusted = adjustForQuietHours(receiveDate, settings: settings)
             if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
-                schedulePracticeNotification(id: NotificationID.practiceReceive, date: adjusted,
-                                             title: "Time to Practice", body: "Your receive training session is ready.")
+                schedulePracticeNotification(
+                    id: NotificationID.practiceReceive,
+                    date: adjusted,
+                    title: "Time to Practice",
+                    body: "Your receive training session is ready."
+                )
                 scheduledTimes.append(adjusted)
             }
         }
@@ -79,8 +114,12 @@ final class NotificationManager: ObservableObject {
         if let sendDate = schedule.sendNextDate {
             let adjusted = adjustForQuietHours(sendDate, settings: settings)
             if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
-                schedulePracticeNotification(id: NotificationID.practiceSend, date: adjusted,
-                                             title: "Time to Practice", body: "Your send training session is ready.")
+                schedulePracticeNotification(
+                    id: NotificationID.practiceSend,
+                    date: adjusted,
+                    title: "Time to Practice",
+                    body: "Your send training session is ready."
+                )
                 scheduledTimes.append(adjusted)
             }
         }
@@ -134,11 +173,6 @@ final class NotificationManager: ObservableObject {
         }
     }
 
-    /// Cancel all scheduled notifications.
-    func cancelAllNotifications() {
-        notificationCenter.removeAllPendingNotificationRequests()
-    }
-
     // MARK: - Private Scheduling Methods
 
     private func schedulePracticeNotification(id: String, date: Date, title: String, body: String) {
@@ -153,7 +187,7 @@ final class NotificationManager: ObservableObject {
         )
 
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
-        notificationCenter.add(request)
+        notificationCenter.add(request, withCompletionHandler: nil)
     }
 
     private func scheduleStreakReminder(date: Date, streak: Int) {
@@ -167,8 +201,12 @@ final class NotificationManager: ObservableObject {
             repeats: false
         )
 
-        let request = UNNotificationRequest(identifier: NotificationID.streakReminder, content: content, trigger: trigger)
-        notificationCenter.add(request)
+        let request = UNNotificationRequest(
+            identifier: NotificationID.streakReminder,
+            content: content,
+            trigger: trigger
+        )
+        notificationCenter.add(request, withCompletionHandler: nil)
     }
 
     private func scheduleLevelReviewNotification(level: Int, date: Date) {
@@ -182,8 +220,12 @@ final class NotificationManager: ObservableObject {
             repeats: false
         )
 
-        let request = UNNotificationRequest(identifier: NotificationID.levelReview(level), content: content, trigger: trigger)
-        notificationCenter.add(request)
+        let request = UNNotificationRequest(
+            identifier: NotificationID.levelReview(level),
+            content: content,
+            trigger: trigger
+        )
+        notificationCenter.add(request, withCompletionHandler: nil)
     }
 
     private func scheduleWelcomeBackNotification(date: Date) {
@@ -198,7 +240,7 @@ final class NotificationManager: ObservableObject {
         )
 
         let request = UNNotificationRequest(identifier: NotificationID.welcomeBack, content: content, trigger: trigger)
-        notificationCenter.add(request)
+        notificationCenter.add(request, withCompletionHandler: nil)
     }
 
     // MARK: - Anti-Nag Policy Helpers

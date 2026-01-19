@@ -1,11 +1,8 @@
 import SwiftUI
 
 struct LearnView: View {
-    @EnvironmentObject private var progressStore: ProgressStore
 
-    private var schedule: PracticeSchedule {
-        progressStore.progress.schedule
-    }
+    // MARK: Internal
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -39,9 +36,11 @@ struct LearnView: View {
                 .buttonStyle(PrimaryButtonStyle())
 
                 HStack {
-                    Text("Characters: \(progressStore.progress.unlockedCharacters(for: .receive).map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
+                    Text(
+                        "Characters: \(progressStore.progress.unlockedCharacters(for: .receive).map { String($0) }.joined())"
+                    )
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
 
                     Spacer()
 
@@ -72,9 +71,11 @@ struct LearnView: View {
                 .buttonStyle(PrimaryButtonStyle())
 
                 HStack {
-                    Text("Characters: \(progressStore.progress.unlockedCharacters(for: .send).map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
+                    Text(
+                        "Characters: \(progressStore.progress.unlockedCharacters(for: .send).map { String($0) }.joined())"
+                    )
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
 
                     Spacer()
 
@@ -85,38 +86,19 @@ struct LearnView: View {
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
 
-            // QSO Simulation section
-            VStack(spacing: Theme.Spacing.sm) {
-                HStack {
-                    Text("QSO Simulation")
-                        .font(Typography.headline)
-                    Spacer()
-                    Text("On-Air Practice")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                NavigationLink(destination: QSOView()) {
-                    HStack {
-                        Image(systemName: "antenna.radiowaves.left.and.right")
-                        Text("Start QSO")
-                    }
-                }
-                .buttonStyle(SecondaryButtonStyle())
-
-                Text("Practice realistic ham radio conversations")
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(Theme.Spacing.md)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(12)
-
             Spacer()
         }
         .padding(Theme.Spacing.lg)
         .navigationTitle("Learn")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: Private
+
+    @EnvironmentObject private var progressStore: ProgressStore
+
+    private var schedule: PracticeSchedule {
+        progressStore.progress.schedule
     }
 
     // MARK: - Subviews

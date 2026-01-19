@@ -1,5 +1,7 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
+
+// MARK: - MockAudioEngine
 
 /// Mock audio engine for testing without actual audio playback.
 final class MockAudioEngine: AudioEngineProtocol {
@@ -40,13 +42,12 @@ final class MockAudioEngine: AudioEngineProtocol {
     }
 }
 
+// MARK: - ReceiveTrainingViewModelTests
+
 @MainActor
 final class ReceiveTrainingViewModelTests: XCTestCase {
 
-    private var viewModel = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
-    private var mockAudioEngine = MockAudioEngine()
-    private var progressStore = ProgressStore()
-    private var settingsStore = SettingsStore()
+    // MARK: Internal
 
     override func setUp() async throws {
         mockAudioEngine = MockAudioEngine()
@@ -58,6 +59,214 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     override func tearDown() async throws {
         viewModel.cleanup()
+    }
+
+    // MARK: - Initialization Tests
+
+    func testInitialState() {
+        let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+
+        XCTAssertEqual(vm.phase, .introduction(characterIndex: 0))
+        XCTAssertEqual(vm.timeRemaining, 300)
+        XCTAssertFalse(vm.isPlaying)
+        XCTAssertEqual(vm.correctCount, 0)
+        XCTAssertEqual(vm.totalAttempts, 0)
+        XCTAssertTrue(vm.characterStats.isEmpty)
+        XCTAssertNil(vm.currentCharacter)
+        XCTAssertNil(vm.lastFeedback)
+        XCTAssertFalse(vm.isWaitingForResponse)
+    }
+
+    func testConfigureWithProgressAndSettings() {
+        XCTAssertFalse(viewModel.introCharacters.isEmpty)
+        XCTAssertEqual(mockAudioEngine.frequencySet, settingsStore.settings.toneFrequency)
+        XCTAssertEqual(mockAudioEngine.effectiveSpeedSet, settingsStore.settings.effectiveSpeed)
+    }
+
+    func testConfigureWithCustomCharacters() {
+        let customChars: [Character] = ["A", "B", "C"]
+        let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
+
+        XCTAssertEqual(vm.introCharacters, customChars)
+        XCTAssertTrue(vm.isCustomSession)
+    }
+
+    func testIsCustomSessionFalseForNormalSession() {
+        XCTAssertFalse(viewModel.isCustomSession)
+    }
+
+    // MARK: - Computed Properties Tests
+
+    func testFormattedTime() {
+        viewModel.timeRemaining = 125 // 2:05
+        XCTAssertEqual(viewModel.formattedTime, "2:05")
+
+        viewModel.timeRemaining = 60 // 1:00
+        XCTAssertEqual(viewModel.formattedTime, "1:00")
+
+        viewModel.timeRemaining = 0
+        XCTAssertEqual(viewModel.formattedTime, "0:00")
+    }
+
+    func testAccuracyPercentageWithZeroAttempts() {
+        XCTAssertEqual(viewModel.accuracyPercentage, 0)
+    }
+
+    func testAccuracyPercentageWithAttempts() {
+        viewModel.recordResponse(expected: "K", wasCorrect: true, userPressed: "K")
+        viewModel.recordResponse(expected: "M", wasCorrect: true, userPressed: "M")
+        viewModel.recordResponse(expected: "R", wasCorrect: false, userPressed: "S")
+
+        // 2/3 = 66.67% rounded to 67%
+        XCTAssertEqual(viewModel.accuracyPercentage, 67)
+    }
+
+    func testAccuracyDoubleWithZeroAttempts() {
+        XCTAssertEqual(viewModel.accuracy, 0)
+    }
+
+    func testAccuracyDoubleWithAttempts() {
+        viewModel.recordResponse(expected: "K", wasCorrect: true, userPressed: "K")
+        viewModel.recordResponse(expected: "M", wasCorrect: false, userPressed: "R")
+
+        XCTAssertEqual(viewModel.accuracy, 0.5, accuracy: 0.001)
+    }
+
+    func testResponseProgress() {
+        viewModel.responseTimeRemaining = 1.5 // Half of 3.0 timeout
+        XCTAssertEqual(viewModel.responseProgress, 0.5, accuracy: 0.001)
+
+        viewModel.responseTimeRemaining = 3.0
+        XCTAssertEqual(viewModel.responseProgress, 1.0, accuracy: 0.001)
+
+        viewModel.responseTimeRemaining = 0
+        XCTAssertEqual(viewModel.responseProgress, 0, accuracy: 0.001)
+    }
+
+    func testIntroProgressString() {
+        viewModel.startSession()
+
+        // Should be in introduction
+        guard case .introduction = viewModel.phase else {
+            XCTFail("Expected introduction phase")
+            return
+        }
+
+        let progress = viewModel.introProgress
+        XCTAssertTrue(progress.contains("1 of"))
+    }
+
+    func testIntroProgressStringWhenNotInIntro() {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        XCTAssertEqual(viewModel.introProgress, "")
+    }
+
+    func testIsLastIntroCharacter() {
+        viewModel.startSession()
+
+        // Navigate to last intro character
+        while case let .introduction(index) = viewModel.phase {
+            if index == viewModel.introCharacters.count - 1 {
+                XCTAssertTrue(viewModel.isLastIntroCharacter)
+                return
+            }
+            XCTAssertFalse(viewModel.isLastIntroCharacter)
+            viewModel.nextIntroCharacter()
+        }
+    }
+
+    func testIsLastIntroCharacterFalseWhenNotInIntro() {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        XCTAssertFalse(viewModel.isLastIntroCharacter)
+    }
+
+    func testProficiencyProgressNotEnoughAttempts() {
+        viewModel.recordResponse(expected: "K", wasCorrect: true, userPressed: "K")
+
+        let progress = viewModel.proficiencyProgress
+        XCTAssertTrue(progress.contains("attempts"))
+        XCTAssertTrue(progress.contains("1/"))
+    }
+
+    func testProficiencyProgressWithEnoughAttempts() {
+        // Record enough attempts to pass minimum
+        for _ in 0 ..< viewModel.minimumAttemptsForProficiency {
+            viewModel.recordResponse(expected: "K", wasCorrect: true, userPressed: "K")
+        }
+
+        let progress = viewModel.proficiencyProgress
+        XCTAssertTrue(progress.contains("%"))
+        XCTAssertTrue(progress.contains("need"))
+    }
+
+    func testMinimumAttemptsForProficiency() {
+        // With intro characters, minimum should be 5 * count with floor of 15
+        let expected = max(15, 5 * viewModel.introCharacters.count)
+        XCTAssertEqual(viewModel.minimumAttemptsForProficiency, expected)
+    }
+
+    // MARK: - Introduction Phase Tests
+
+    func testStartIntroductionWithEmptyCharacters() {
+        let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+        // Don't configure - introCharacters will be empty
+
+        vm.startIntroduction()
+
+        // Should skip directly to training
+        XCTAssertEqual(vm.phase, .training)
+    }
+
+    func testStartIntroductionSetsFirstCharacter() {
+        viewModel.startSession()
+
+        guard case .introduction(let index) = viewModel.phase else {
+            XCTFail("Expected introduction phase")
+            return
+        }
+
+        XCTAssertEqual(index, 0)
+        XCTAssertEqual(viewModel.currentIntroCharacter, viewModel.introCharacters[0])
+    }
+
+    func testNextIntroCharacterAdvances() {
+        viewModel.startSession()
+
+        guard case .introduction(let indexBefore) = viewModel.phase else {
+            XCTFail("Expected introduction phase")
+            return
+        }
+
+        viewModel.nextIntroCharacter()
+
+        if viewModel.introCharacters.count > 1 {
+            guard case .introduction(let indexAfter) = viewModel.phase else {
+                XCTFail("Expected introduction phase after advance")
+                return
+            }
+            XCTAssertEqual(indexAfter, indexBefore + 1)
+        }
+    }
+
+    func testNextIntroCharacterStartsTrainingAfterLast() {
+        viewModel.startSession()
+
+        // Skip through all intro characters
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        XCTAssertEqual(viewModel.phase, .training)
+        XCTAssertTrue(viewModel.isPlaying)
     }
 
     // MARK: - Pause Tests
@@ -244,4 +453,25 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
         XCTAssertTrue(mockAudioEngine.stopCalled)
     }
+
+    func testCleanupSetsIsPlayingFalse() {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        XCTAssertTrue(viewModel.isPlaying)
+
+        viewModel.cleanup()
+
+        XCTAssertFalse(viewModel.isPlaying)
+    }
+
+    // MARK: Private
+
+    private var viewModel = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+    private var mockAudioEngine = MockAudioEngine()
+    private var progressStore = ProgressStore()
+    private var settingsStore = SettingsStore()
+
 }

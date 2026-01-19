@@ -1,5 +1,5 @@
-import XCTest
 @testable import KochTrainer
+import XCTest
 
 final class MorseCodeTests: XCTestCase {
 
@@ -56,8 +56,11 @@ final class MorseCodeTests: XCTestCase {
 
     func testDecodingAllPatterns() {
         for (char, pattern) in MorseCode.encoding {
-            XCTAssertEqual(MorseCode.character(for: pattern), char,
-                           "Failed to decode pattern \(pattern) for \(char)")
+            XCTAssertEqual(
+                MorseCode.character(for: pattern),
+                char,
+                "Failed to decode pattern \(pattern) for \(char)"
+            )
         }
     }
 

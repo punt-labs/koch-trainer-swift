@@ -1,14 +1,19 @@
 import Foundation
 
+// MARK: - QSOTemplate
+
 /// Templates for generating QSO messages
-struct QSOTemplate {
+enum QSOTemplate {
+
+    // MARK: Internal
 
     // MARK: - User Hints (what the user should send)
 
     /// Get a hint for what the user should send next
     static func userHint(for state: QSOState) -> String {
         switch state.phase {
-        case .idle, .callingCQ:
+        case .idle,
+             .callingCQ:
             return "CQ CQ CQ DE \(state.myCallsign) \(state.myCallsign) K"
 
         case .awaitingResponse:
@@ -59,7 +64,8 @@ struct QSOTemplate {
         case .idle:
             return "" // AI doesn't initiate
 
-        case .callingCQ, .awaitingResponse:
+        case .callingCQ,
+             .awaitingResponse:
             // AI calls in response to CQ
             return "\(state.myCallsign) DE \(station.callsign) \(station.callsign) K"
 
@@ -67,7 +73,8 @@ struct QSOTemplate {
             // Shouldn't happen - user sends exchange first
             return ""
 
-        case .sendingExchange, .awaitingExchange:
+        case .sendingExchange,
+             .awaitingExchange:
             // AI sends their exchange
             if state.style == .contest {
                 return contestExchange(station: station)
@@ -95,41 +102,6 @@ struct QSOTemplate {
         }
     }
 
-    // MARK: - Contest Templates
-
-    private static func contestExchange(station: VirtualStation) -> String {
-        let rst = station.randomRST
-        let serial = station.formattedSerialNumber
-        // Vary the format slightly for realism
-        let formats = [
-            "\(rst) \(serial) \(serial) K",
-            "UR \(rst) NR \(serial) K",
-            "\(rst) \(serial) K"
-        ]
-        return formats[Int.random(in: 0..<formats.count)]
-    }
-
-    // MARK: - Rag Chew Templates
-
-    private static func ragChewExchange(state: QSOState, station: VirtualStation) -> String {
-        let rst = station.randomRST
-        let templates = [
-            "R R \(state.myCallsign) UR RST \(rst) \(rst) NAME HR IS \(station.name) \(station.name) QTH IS \(station.qth) HW? K",
-            "GM TNX FER RPT UR RST \(rst) NAME IS \(station.name) QTH \(station.qth) K",
-            "TNX \(state.myCallsign) UR \(rst) HR NAME \(station.name) IN \(station.qth) HW CPY? K"
-        ]
-        return templates[Int.random(in: 0..<templates.count)]
-    }
-
-    private static func ragChewSecondExchange(station: VirtualStation) -> String {
-        let templates = [
-            "RIG HR IS \(station.rig) WX IS FB HR HW UR WX? K",
-            "RUNNING \(station.rig) INTO DIPOLE ANT WX GUD HR K",
-            "USING \(station.rig) WX NICE AND SUNNY K"
-        ]
-        return templates[Int.random(in: 0..<templates.count)]
-    }
-
     // MARK: - Validation
 
     /// Check if user input is valid for the current phase
@@ -137,14 +109,16 @@ struct QSOTemplate {
         let cleaned = input.uppercased().trimmingCharacters(in: .whitespaces)
 
         switch state.phase {
-        case .idle, .callingCQ:
+        case .idle,
+             .callingCQ:
             // Should contain CQ and callsign
             if cleaned.contains("CQ") && cleaned.contains(state.myCallsign) {
                 return .valid
             }
             return .invalid(hint: "Include 'CQ' and your callsign")
 
-        case .receivedCall, .sendingExchange:
+        case .receivedCall,
+             .sendingExchange:
             // Should contain some exchange info
             if cleaned.contains(state.theirCallsign) || cleaned.contains("5") || cleaned.contains("9") {
                 return .valid
@@ -169,6 +143,43 @@ struct QSOTemplate {
         }
     }
 
+    // MARK: Private
+
+    // MARK: - Contest Templates
+
+    private static func contestExchange(station: VirtualStation) -> String {
+        let rst = station.randomRST
+        let serial = station.formattedSerialNumber
+        // Vary the format slightly for realism
+        let formats = [
+            "\(rst) \(serial) \(serial) K",
+            "UR \(rst) NR \(serial) K",
+            "\(rst) \(serial) K"
+        ]
+        return formats[Int.random(in: 0 ..< formats.count)]
+    }
+
+    // MARK: - Rag Chew Templates
+
+    private static func ragChewExchange(state: QSOState, station: VirtualStation) -> String {
+        let rst = station.randomRST
+        let templates = [
+            "R R \(state.myCallsign) UR RST \(rst) \(rst) NAME HR IS \(station.name) \(station.name) QTH IS \(station.qth) HW? K",
+            "GM TNX FER RPT UR RST \(rst) NAME IS \(station.name) QTH \(station.qth) K",
+            "TNX \(state.myCallsign) UR \(rst) HR NAME \(station.name) IN \(station.qth) HW CPY? K"
+        ]
+        return templates[Int.random(in: 0 ..< templates.count)]
+    }
+
+    private static func ragChewSecondExchange(station: VirtualStation) -> String {
+        let templates = [
+            "RIG HR IS \(station.rig) WX IS FB HR HW UR WX? K",
+            "RUNNING \(station.rig) INTO DIPOLE ANT WX GUD HR K",
+            "USING \(station.rig) WX NICE AND SUNNY K"
+        ]
+        return templates[Int.random(in: 0 ..< templates.count)]
+    }
+
     // MARK: - Helpers
 
     private static func formatSerial(_ number: Int) -> String {
@@ -176,11 +187,13 @@ struct QSOTemplate {
     }
 }
 
-// MARK: - Validation Result
+// MARK: - ValidationResult
 
 enum ValidationResult: Equatable {
     case valid
     case invalid(hint: String)
+
+    // MARK: Internal
 
     var isValid: Bool {
         if case .valid = self { return true }
@@ -188,7 +201,7 @@ enum ValidationResult: Equatable {
     }
 
     var hint: String? {
-        if case .invalid(let hint) = self { return hint }
+        if case let .invalid(hint) = self { return hint }
         return nil
     }
 }
