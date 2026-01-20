@@ -97,7 +97,13 @@ struct SendTrainingView: View {
                paused.isCustomSession == (customCharacters != nil) {
                 // Restore directly to paused state - no dialog needed
                 viewModel.restoreFromPausedSession(paused)
-                progressStore.clearPausedSession(for: paused.sessionType)
+                // Only clear the paused session if restoration actually succeeded
+                if case .paused = viewModel.phase {
+                    progressStore.clearPausedSession(for: paused.sessionType)
+                } else {
+                    // Restoration did not succeed; start a fresh session without clearing
+                    viewModel.startSession()
+                }
             } else {
                 viewModel.startSession()
             }
