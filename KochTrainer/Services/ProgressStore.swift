@@ -226,13 +226,17 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     private let defaults: UserDefaults
 
     private func pausedSessionKey(for sessionType: SessionType) -> String {
+        // baseType only returns .receive or .send, but compiler requires exhaustiveness
         switch sessionType.baseType {
-        case .receive:
+        case .receive,
+             .receiveCustom,
+             .receiveVocabulary:
             return pausedReceiveKey
-        case .send:
+        case .send,
+             .sendCustom,
+             .sendVocabulary,
+             .qso:
             return pausedSendKey
-        default:
-            return pausedReceiveKey
         }
     }
 
