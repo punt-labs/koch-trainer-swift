@@ -474,6 +474,163 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPlaying)
     }
 
+    // MARK: - Paused Session Snapshot Tests
+
+    func testCreatePausedSessionSnapshotReturnsNilBeforeTraining() {
+        // Before starting, sessionStartTime is nil
+        let snapshot = viewModel.createPausedSessionSnapshot()
+        XCTAssertNil(snapshot)
+    }
+
+    func testCreatePausedSessionSnapshotCapturesState() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        // Simulate some responses
+        viewModel.recordResponse(expected: "K", wasCorrect: true, userPressed: "K")
+        viewModel.recordResponse(expected: "M", wasCorrect: false, userPressed: "R")
+
+        let snapshot = viewModel.createPausedSessionSnapshot()
+
+        XCTAssertNotNil(snapshot)
+        XCTAssertEqual(snapshot?.correctCount, 1)
+        XCTAssertEqual(snapshot?.totalAttempts, 2)
+        XCTAssertEqual(snapshot?.sessionType, .receive)
+        XCTAssertTrue(snapshot?.introCompleted ?? false)
+        XCTAssertNil(snapshot?.customCharacters)
+    }
+
+    func testCreatePausedSessionSnapshotForCustomSession() async {
+        let customChars: [Character] = ["A", "B", "C"]
+        let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
+        vm.startSession()
+        while case .introduction = vm.phase {
+            vm.nextIntroCharacter()
+        }
+
+        let snapshot = vm.createPausedSessionSnapshot()
+
+        XCTAssertNotNil(snapshot)
+        XCTAssertEqual(snapshot?.sessionType, .receiveCustom)
+        XCTAssertEqual(snapshot?.customCharacters, customChars)
+        XCTAssertTrue(snapshot?.isCustomSession ?? false)
+    }
+
+    func testRestoreFromPausedSessionRestoresState() async {
+        // Create a paused session
+        let session = PausedSession(
+            sessionType: .receive,
+            startTime: Date().addingTimeInterval(-120),
+            pausedAt: Date().addingTimeInterval(-60),
+            correctCount: 15,
+            totalAttempts: 20,
+            characterStats: [
+                "K": CharacterStat(receiveAttempts: 10, receiveCorrect: 8),
+                "M": CharacterStat(receiveAttempts: 10, receiveCorrect: 7)
+            ],
+            introCharacters: viewModel.introCharacters,
+            introCompleted: true,
+            customCharacters: nil,
+            currentLevel: progressStore.progress.receiveLevel
+        )
+
+        viewModel.restoreFromPausedSession(session)
+
+        XCTAssertEqual(viewModel.correctCount, 15)
+        XCTAssertEqual(viewModel.totalAttempts, 20)
+        XCTAssertEqual(viewModel.characterStats["K"]?.receiveAttempts, 10)
+        XCTAssertEqual(viewModel.phase, .paused)
+    }
+
+    func testRestoreFromPausedSessionDoesNotRestoreIfLevelChanged() {
+        // Create a session with different level
+        let session = PausedSession(
+            sessionType: .receive,
+            startTime: Date(),
+            pausedAt: Date(),
+            correctCount: 15,
+            totalAttempts: 20,
+            characterStats: [:],
+            introCharacters: [],
+            introCompleted: true,
+            customCharacters: nil,
+            currentLevel: 99 // Different level
+        )
+
+        viewModel.restoreFromPausedSession(session)
+
+        // Should not restore
+        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.totalAttempts, 0)
+    }
+
+    func testRestoreFromPausedSessionRestartsIntroIfNotCompleted() {
+        let session = PausedSession(
+            sessionType: .receive,
+            startTime: Date(),
+            pausedAt: Date(),
+            correctCount: 5,
+            totalAttempts: 10,
+            characterStats: [:],
+            introCharacters: viewModel.introCharacters,
+            introCompleted: false,
+            customCharacters: nil,
+            currentLevel: progressStore.progress.receiveLevel
+        )
+
+        viewModel.restoreFromPausedSession(session)
+
+        // Should restart intro
+        if case .introduction = viewModel.phase {
+            // Expected
+        } else {
+            XCTFail("Expected introduction phase when intro not completed")
+        }
+
+        // But stats should be restored
+        XCTAssertEqual(viewModel.correctCount, 5)
+        XCTAssertEqual(viewModel.totalAttempts, 10)
+    }
+
+    func testIsIntroCompletedFalseInIntroduction() {
+        viewModel.startSession()
+
+        guard case .introduction = viewModel.phase else {
+            XCTFail("Expected introduction phase")
+            return
+        }
+
+        XCTAssertFalse(viewModel.isIntroCompleted)
+    }
+
+    func testIsIntroCompletedTrueInTraining() {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        guard case .training = viewModel.phase else {
+            XCTFail("Expected training phase")
+            return
+        }
+
+        XCTAssertTrue(viewModel.isIntroCompleted)
+    }
+
+    func testIsIntroCompletedTrueInPaused() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+        viewModel.pause()
+
+        XCTAssertEqual(viewModel.phase, .paused)
+        XCTAssertTrue(viewModel.isIntroCompleted)
+    }
+
     // MARK: Private
 
     private var viewModel = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())

@@ -59,6 +59,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     let inputTimeout: TimeInterval = 2.0 // Time to complete a character
     let proficiencyThreshold: Double = 0.90
 
+    /// Custom characters for practice mode (nil = use level-based characters)
+    private(set) var customCharacters: [Character]?
+
     /// Minimum attempts scales with character count (5 per character, floor of 15)
     var minimumAttemptsForProficiency: Int {
         max(15, 5 * introCharacters.count)
@@ -108,6 +111,14 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         } else {
             return "\(accuracyPercentage)% (need \(Int(proficiencyThreshold * 100))%)"
         }
+    }
+
+    /// Whether introduction phase has been completed
+    var isIntroCompleted: Bool {
+        if case .training = phase { return true }
+        if case .paused = phase { return true }
+        if case .completed = phase { return true }
+        return false
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
@@ -180,6 +191,58 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForInput = false
+
+        // Only persist paused session if there's actual progress
+        if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
+            progressStore?.savePausedSession(snapshot)
+        }
+    }
+
+    // MARK: - Paused Session Management
+
+    func createPausedSessionSnapshot() -> PausedSession? {
+        guard let startTime = sessionStartTime else { return nil }
+
+        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
+        return PausedSession(
+            sessionType: sessionType,
+            startTime: startTime,
+            pausedAt: Date(),
+            correctCount: correctCount,
+            totalAttempts: totalAttempts,
+            characterStats: characterStats,
+            introCharacters: introCharacters,
+            introCompleted: isIntroCompleted,
+            customCharacters: customCharacters,
+            currentLevel: currentLevel
+        )
+    }
+
+    func restoreFromPausedSession(_ session: PausedSession) {
+        // Validate level matches current level
+        guard session.currentLevel == currentLevel else {
+            // Level changed since pause - don't restore
+            return
+        }
+
+        // Validate custom session type matches
+        let currentIsCustom = customCharacters != nil
+        guard session.isCustomSession == currentIsCustom else { return }
+
+        // Restore state
+        correctCount = session.correctCount
+        totalAttempts = session.totalAttempts
+        characterStats = session.characterStats
+        introCharacters = session.introCharacters
+        sessionStartTime = session.startTime
+
+        if session.introCompleted {
+            // Resume in paused state, user will tap "Resume" to continue training
+            phase = .paused
+        } else {
+            // Restart from introduction
+            phase = .introduction(characterIndex: 0)
+        }
     }
 
     func resume() {
@@ -197,6 +260,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
         isWaitingForInput = false
 
+        // Clear any paused session since we're ending
+        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
+        progressStore?.clearPausedSession(for: sessionType)
+
         guard let store = progressStore, let startTime = sessionStartTime else {
             phase = .completed(didAdvance: false, newCharacter: nil)
             return
@@ -209,7 +276,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
 
         let duration = Date().timeIntervalSince(startTime)
-        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
         let result = SessionResult(
             sessionType: sessionType,
             duration: duration,
@@ -281,9 +347,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var sessionStartTime: Date?
     private var currentLevel: Int = 1
     private var lastInputTime: Date?
-
-    /// Custom characters for practice mode (nil = use level-based characters)
-    private var customCharacters: [Character]?
 
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {

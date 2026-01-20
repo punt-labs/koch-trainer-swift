@@ -9,6 +9,13 @@ protocol ProgressStoreProtocol: AnyObject {
     func load() -> StudentProgress
     func save(_ progress: StudentProgress)
     func resetProgress()
+
+    // Paused session management
+    var pausedReceiveSession: PausedSession? { get }
+    var pausedSendSession: PausedSession? { get }
+    func savePausedSession(_ session: PausedSession)
+    func clearPausedSession(for sessionType: SessionType)
+    func pausedSession(for sessionType: SessionType) -> PausedSession?
 }
 
 // MARK: - ProgressStore
@@ -23,11 +30,14 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         self.defaults = defaults
         progress = StudentProgress()
         progress = load()
+        loadPausedSessions()
     }
 
     // MARK: Internal
 
     @Published var progress: StudentProgress
+    @Published private(set) var pausedReceiveSession: PausedSession?
+    @Published private(set) var pausedSendSession: PausedSession?
 
     /// Overall accuracy as a whole percentage (0-100)
     var overallAccuracyPercentage: Int {
@@ -162,10 +172,92 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         return didAdvance
     }
 
+    // MARK: - Paused Session Management
+
+    func savePausedSession(_ session: PausedSession) {
+        do {
+            let data = try JSONEncoder().encode(session)
+            let key = pausedSessionKey(for: session.sessionType.baseType)
+            defaults.set(data, forKey: key)
+
+            switch session.sessionType.baseType {
+            case .receive:
+                pausedReceiveSession = session
+            case .send:
+                pausedSendSession = session
+            default:
+                break
+            }
+        } catch {
+            print("Failed to encode paused session: \(error)")
+        }
+    }
+
+    func clearPausedSession(for sessionType: SessionType) {
+        let key = pausedSessionKey(for: sessionType.baseType)
+        defaults.removeObject(forKey: key)
+
+        switch sessionType.baseType {
+        case .receive:
+            pausedReceiveSession = nil
+        case .send:
+            pausedSendSession = nil
+        default:
+            break
+        }
+    }
+
+    func pausedSession(for sessionType: SessionType) -> PausedSession? {
+        switch sessionType.baseType {
+        case .receive:
+            return pausedReceiveSession
+        case .send:
+            return pausedSendSession
+        default:
+            return nil
+        }
+    }
+
     // MARK: Private
 
     private let key = "studentProgress"
+    private let pausedReceiveKey = "pausedReceiveSession"
+    private let pausedSendKey = "pausedSendSession"
     private let defaults: UserDefaults
+
+    private func pausedSessionKey(for sessionType: SessionType) -> String {
+        switch sessionType.baseType {
+        case .receive:
+            return pausedReceiveKey
+        case .send:
+            return pausedSendKey
+        default:
+            return pausedReceiveKey
+        }
+    }
+
+    private func loadPausedSessions() {
+        pausedReceiveSession = loadPausedSession(forKey: pausedReceiveKey)
+        pausedSendSession = loadPausedSession(forKey: pausedSendKey)
+
+        // Clear expired sessions
+        if let receive = pausedReceiveSession, receive.isExpired {
+            clearPausedSession(for: .receive)
+        }
+        if let send = pausedSendSession, send.isExpired {
+            clearPausedSession(for: .send)
+        }
+    }
+
+    private func loadPausedSession(forKey key: String) -> PausedSession? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        do {
+            return try JSONDecoder().decode(PausedSession.self, from: data)
+        } catch {
+            print("Failed to decode paused session: \(error)")
+            return nil
+        }
+    }
 
     /// Update the practice schedule based on session result.
     private func updateSchedule(for progress: inout StudentProgress, result: SessionResult, didAdvance: Bool) {
