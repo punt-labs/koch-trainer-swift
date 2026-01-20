@@ -133,12 +133,11 @@ final class QSOEngineTests: XCTestCase {
     func testStartWithAICQResetsState() {
         let engine = QSOEngine(style: .ragChew, myCallsign: "K1ABC")
         engine.startQSO()
-        // Simulate some state changes
-        engine.state.exchangeCount = 5
+        // startQSO puts us in callingCQ phase
 
         _ = engine.startWithAICQ()
 
-        // State should be fresh except for phase and transcript
+        // State should be fresh with receivedCall phase
         XCTAssertEqual(engine.state.exchangeCount, 0)
         XCTAssertEqual(engine.state.phase, .receivedCall)
     }
