@@ -127,25 +127,55 @@ struct TrainingPhaseView: View {
 
             Spacer()
 
-            // Main display area
-            VStack(spacing: Theme.Spacing.xl) {
-                if let feedback = viewModel.lastFeedback {
-                    FeedbackView(feedback: feedback)
-                } else if viewModel.isWaitingForResponse {
-                    WaitingForResponseView()
-                } else if viewModel.currentCharacter != nil {
-                    PlayingIndicator()
-                } else {
-                    Text("Starting...")
-                        .font(Typography.headline)
-                        .foregroundColor(.secondary)
+            // Main display area - fixed slots prevent layout shifts
+            VStack(spacing: 0) {
+                // Slot 1: Main symbol (fixed height) - character, "?", or speaker icon
+                Group {
+                    if let feedback = viewModel.lastFeedback {
+                        Text(String(feedback.expectedCharacter))
+                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
+                    } else if viewModel.isWaitingForResponse {
+                        Text("?")
+                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.Colors.primary)
+                    } else if viewModel.currentCharacter != nil {
+                        Image(systemName: "speaker.wave.2.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(Theme.Colors.primary)
+                    } else {
+                        Text(" ")
+                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                    }
                 }
+                .frame(height: 100)
 
-                if viewModel.isWaitingForResponse {
-                    TimeoutProgressBar(progress: viewModel.responseProgress)
-                        .frame(height: 8)
-                        .padding(.horizontal, Theme.Spacing.xl)
+                // Slot 2: Secondary text (fixed height)
+                Group {
+                    if let feedback = viewModel.lastFeedback {
+                        ReceiveFeedbackMessageView(feedback: feedback)
+                    } else if viewModel.isWaitingForResponse {
+                        Text("Type the letter you heard")
+                            .font(Typography.body)
+                            .foregroundColor(.secondary)
+                    } else if viewModel.currentCharacter != nil {
+                        Text("Listen...")
+                            .font(Typography.headline)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Starting...")
+                            .font(Typography.headline)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .frame(height: 40)
+
+                // Slot 3: Progress bar (always present, opacity controlled)
+                TimeoutProgressBar(progress: viewModel.responseProgress)
+                    .frame(height: 8)
+                    .padding(.horizontal, Theme.Spacing.xl)
+                    .padding(.top, Theme.Spacing.md)
+                    .opacity(viewModel.isWaitingForResponse ? 1 : 0)
             }
             .frame(height: 200)
 
@@ -291,62 +321,26 @@ struct CompletedView: View {
     }
 }
 
-// MARK: - WaitingForResponseView
+// MARK: - ReceiveFeedbackMessageView
 
-struct WaitingForResponseView: View {
-    var body: some View {
-        VStack(spacing: Theme.Spacing.sm) {
-            Text("?")
-                .font(.system(size: 80, weight: .bold, design: .rounded))
-                .foregroundColor(Theme.Colors.primary)
-
-            Text("Type the letter you heard")
-                .font(Typography.body)
-                .foregroundColor(.secondary)
-        }
-    }
-}
-
-// MARK: - PlayingIndicator
-
-struct PlayingIndicator: View {
-    var body: some View {
-        VStack(spacing: Theme.Spacing.sm) {
-            Image(systemName: "speaker.wave.2.fill")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.primary)
-
-            Text("Listen...")
-                .font(Typography.headline)
-                .foregroundColor(.secondary)
-        }
-    }
-}
-
-// MARK: - FeedbackView
-
-struct FeedbackView: View {
+/// Shows just the feedback message text (without the character).
+/// Used in the fixed-slot layout where character is displayed separately.
+struct ReceiveFeedbackMessageView: View {
     let feedback: ReceiveTrainingViewModel.Feedback
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.sm) {
-            Text(String(feedback.expectedCharacter))
-                .font(.system(size: 80, weight: .bold, design: .rounded))
-                .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
-
-            if feedback.wasCorrect {
-                Text("Correct!")
-                    .font(Typography.headline)
-                    .foregroundColor(Theme.Colors.success)
-            } else if let pressed = feedback.userPressed {
-                Text("You pressed: \(String(pressed))")
-                    .font(Typography.body)
-                    .foregroundColor(Theme.Colors.error)
-            } else {
-                Text("Too slow!")
-                    .font(Typography.headline)
-                    .foregroundColor(Theme.Colors.error)
-            }
+        if feedback.wasCorrect {
+            Text("Correct!")
+                .font(Typography.headline)
+                .foregroundColor(Theme.Colors.success)
+        } else if let pressed = feedback.userPressed {
+            Text("You pressed: \(String(pressed))")
+                .font(Typography.body)
+                .foregroundColor(Theme.Colors.error)
+        } else {
+            Text("Too slow!")
+                .font(Typography.headline)
+                .foregroundColor(Theme.Colors.error)
         }
     }
 }
