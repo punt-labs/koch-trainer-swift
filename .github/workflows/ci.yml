@@ -1,4 +1,5 @@
 name: CI
+# Caching: Homebrew packages (versioned) + DerivedData (source-hashed)
 
 on:
   push:
@@ -19,11 +20,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get XcodeGen version
+        id: xcodegen-version
+        run: |
+          version=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew/downloads
+            /opt/homebrew/Cellar/xcodegen
+          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.xcodegen-version.outputs.version }}
+          restore-keys: |
+            brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-
+
       - name: Install XcodeGen
-        run: brew install xcodegen
+        run: brew list xcodegen &>/dev/null && brew link --overwrite xcodegen || brew install xcodegen
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: .deriveddata
+          key: deriveddata-${{ runner.os }}-${{ hashFiles('**/*.swift', 'project.yml') }}
+          restore-keys: |
+            deriveddata-${{ runner.os }}-
 
       - name: List Available Simulators
         run: xcrun simctl list devices available | grep iPhone | head -10
@@ -33,6 +58,7 @@ jobs:
           xcodebuild build \
             -scheme KochTrainer \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath .deriveddata \
             -quiet
 
       - name: Run Tests
@@ -40,6 +66,7 @@ jobs:
           xcodebuild test \
             -scheme KochTrainer \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath .deriveddata \
             -resultBundlePath TestResults.xcresult \
             | xcpretty --color --report junit
 
@@ -58,8 +85,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get SwiftLint version
+        id: swiftlint-version
+        run: |
+          version=$(brew info swiftlint --json=v2 | jq -r '.formulae[0].versions.stable')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew/downloads
+            /opt/homebrew/Cellar/swiftlint
+          key: brew-${{ runner.os }}-${{ runner.arch }}-swiftlint-${{ steps.swiftlint-version.outputs.version }}
+          restore-keys: |
+            brew-${{ runner.os }}-${{ runner.arch }}-swiftlint-
+
       - name: Install SwiftLint
-        run: brew install swiftlint
+        run: brew list swiftlint &>/dev/null && brew link --overwrite swiftlint || brew install swiftlint
 
       - name: Run SwiftLint
         run: swiftlint lint --reporter github-actions-logging
