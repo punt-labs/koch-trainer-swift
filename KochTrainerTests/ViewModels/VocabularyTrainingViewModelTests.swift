@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 @testable import KochTrainer
 import XCTest
 
@@ -448,6 +449,130 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
+    // MARK: - Paused Session Snapshot Tests
+
+    func testCreatePausedSessionSnapshotReturnsNilBeforeTraining() {
+        // Before starting, sessionStartTime is nil
+        let snapshot = viewModel.createPausedSessionSnapshot()
+        XCTAssertNil(snapshot)
+    }
+
+    func testCreatePausedSessionSnapshotCapturesState() {
+        viewModel.startSession()
+
+        // Simulate some responses
+        viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
+        viewModel.recordResponse(expected: "DE", wasCorrect: false, userAnswer: "KE")
+
+        let snapshot = viewModel.createPausedSessionSnapshot()
+
+        XCTAssertNotNil(snapshot)
+        XCTAssertEqual(snapshot?.correctCount, 1)
+        XCTAssertEqual(snapshot?.totalAttempts, 2)
+        XCTAssertEqual(snapshot?.sessionType, .receive)
+        XCTAssertEqual(snapshot?.vocabularySetId, testSet.id)
+        XCTAssertNotNil(snapshot?.wordStats)
+        XCTAssertTrue(snapshot?.isVocabularySession ?? false)
+    }
+
+    func testRestoreFromPausedSessionRestoresState() {
+        viewModel.startSession()
+
+        // Create a paused session with matching vocabulary set ID
+        let session = PausedSession(
+            sessionType: .receive,
+            startTime: Date().addingTimeInterval(-120),
+            pausedAt: Date().addingTimeInterval(-60),
+            correctCount: 5,
+            totalAttempts: 8,
+            vocabularySetId: testSet.id,
+            wordStats: ["CQ": WordStat(receiveAttempts: 5, receiveCorrect: 3)]
+        )
+
+        viewModel.restoreFromPausedSession(session)
+
+        XCTAssertEqual(viewModel.correctCount, 5)
+        XCTAssertEqual(viewModel.totalAttempts, 8)
+        XCTAssertEqual(viewModel.phase, .paused)
+        XCTAssertEqual(viewModel.wordStats["CQ"]?.receiveAttempts, 5)
+    }
+
+    func testRestoreFromPausedSessionDoesNotRestoreIfVocabularySetMismatch() {
+        viewModel.startSession()
+
+        // Create a paused session with different vocabulary set ID
+        let differentSetId = UUID()
+        let session = PausedSession(
+            sessionType: .receive,
+            startTime: Date(),
+            pausedAt: Date(),
+            correctCount: 10,
+            totalAttempts: 15,
+            vocabularySetId: differentSetId,
+            wordStats: [:]
+        )
+
+        viewModel.restoreFromPausedSession(session)
+
+        // Should not restore - starts fresh session instead
+        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.phase, .training)
+    }
+
+    func testPauseDoesNotPersistWithZeroAttempts() {
+        viewModel.startSession()
+
+        // Pause immediately without any attempts
+        viewModel.pause()
+
+        // Should not have saved a paused session
+        let savedSession = progressStore.pausedSession(for: .receive)
+        XCTAssertNil(savedSession)
+    }
+
+    func testPausePersistsWithAttempts() {
+        viewModel.startSession()
+
+        // Make some progress
+        viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
+
+        viewModel.pause()
+
+        // Should have saved a paused session
+        let savedSession = progressStore.pausedSession(for: .receive)
+        XCTAssertNotNil(savedSession)
+        XCTAssertEqual(savedSession?.correctCount, 1)
+        XCTAssertEqual(savedSession?.totalAttempts, 1)
+    }
+
+    func testStartSessionClearsPausedSession() {
+        // First, create and save a paused session
+        viewModel.startSession()
+        viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
+        viewModel.pause()
+        XCTAssertNotNil(progressStore.pausedSession(for: .receive))
+
+        // Start a new session
+        viewModel.startSession()
+
+        // Paused session should be cleared
+        XCTAssertNil(progressStore.pausedSession(for: .receive))
+    }
+
+    func testEndSessionClearsPausedSession() {
+        viewModel.startSession()
+        viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
+        viewModel.pause()
+        XCTAssertNotNil(progressStore.pausedSession(for: .receive))
+
+        viewModel.resume()
+        viewModel.endSession()
+
+        // Paused session should be cleared
+        XCTAssertNil(progressStore.pausedSession(for: .receive))
+    }
+
     // MARK: Private
 
     private let testSet = VocabularySet(
@@ -467,3 +592,4 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     private var testDefaults = UserDefaults(suiteName: "TestVocabVM") ?? .standard
 
 }
+// swiftlint:enable file_length type_body_length

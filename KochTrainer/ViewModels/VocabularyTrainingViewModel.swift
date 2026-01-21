@@ -132,8 +132,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         audioEngine.stop()
         isWaitingForResponse = false
 
-        // Save paused session snapshot
-        if let snapshot = createPausedSessionSnapshot() {
+        // Save paused session snapshot only if there's actual progress
+        if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
         }
     }

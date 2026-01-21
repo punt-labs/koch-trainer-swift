@@ -88,8 +88,17 @@ struct VocabularyTrainingView: View {
                !paused.isExpired,
                paused.isVocabularySession,
                paused.vocabularySetId == viewModel.vocabularySet.id {
-                // Restore to paused state
+                // Attempt to restore to paused state
                 viewModel.restoreFromPausedSession(paused)
+
+                // Check if restoration succeeded (phase changed to paused)
+                if case .paused = viewModel.phase {
+                    // Restoration succeeded - session will be cleared when user resumes/ends
+                } else {
+                    // Restoration failed, clear invalid session and start fresh
+                    progressStore.clearPausedSession(for: paused.sessionType)
+                    viewModel.startSession()
+                }
             } else {
                 viewModel.startSession()
             }
