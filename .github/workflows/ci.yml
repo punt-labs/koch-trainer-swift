@@ -1,4 +1,5 @@
 name: CI
+# Caching: Homebrew packages (versioned) + DerivedData (source-hashed)
 
 on:
   push:
