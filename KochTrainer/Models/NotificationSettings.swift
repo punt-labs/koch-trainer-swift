@@ -8,13 +8,14 @@ struct NotificationSettings: Codable, Equatable {
     init(
         practiceRemindersEnabled: Bool = true,
         streakRemindersEnabled: Bool = true,
-        preferredReminderTime: Date? = nil,
+        preferredReminderHour: Int = 9,
+        preferredReminderMinute: Int = 0,
         quietHoursEnabled: Bool = true
     ) {
         self.practiceRemindersEnabled = practiceRemindersEnabled
         self.streakRemindersEnabled = streakRemindersEnabled
-        // Default to 9 AM
-        self.preferredReminderTime = preferredReminderTime ?? Self.defaultReminderTime()
+        self.preferredReminderHour = preferredReminderHour
+        self.preferredReminderMinute = preferredReminderMinute
         self.quietHoursEnabled = quietHoursEnabled
     }
 
@@ -26,19 +27,12 @@ struct NotificationSettings: Codable, Equatable {
     /// Whether to send reminders to maintain streak
     var streakRemindersEnabled: Bool
 
-    /// Preferred time of day for reminder notifications
-    var preferredReminderTime: Date
+    /// Preferred hour of day for reminder notifications (0-23)
+    var preferredReminderHour: Int
+
+    /// Preferred minute for reminder notifications (0-59)
+    var preferredReminderMinute: Int
 
     /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
     var quietHoursEnabled: Bool
-
-    // MARK: Private
-
-    /// Default reminder time: 9:00 AM today
-    private static func defaultReminderTime() -> Date {
-        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        components.hour = 9
-        components.minute = 0
-        return Calendar.current.date(from: components) ?? Date()
-    }
 }
