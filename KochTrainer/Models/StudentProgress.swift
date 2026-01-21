@@ -71,31 +71,30 @@ struct StudentProgress: Codable, Equatable {
         sessionAccuracy >= 0.90 && level < 26
     }
 
-    /// Get level for a specific session type (uses base type for custom/vocabulary)
-    func level(for sessionType: SessionType) -> Int {
-        switch sessionType.baseType {
+    /// Get level for a specific session type
+    func level(for sessionType: BaseSessionType) -> Int {
+        switch sessionType {
         case .receive: return receiveLevel
         case .send: return sendLevel
-        default: return max(receiveLevel, sendLevel)
         }
     }
 
     /// Characters unlocked for a specific session type
-    func unlockedCharacters(for sessionType: SessionType) -> [Character] {
+    func unlockedCharacters(for sessionType: BaseSessionType) -> [Character] {
         MorseCode.characters(forLevel: level(for: sessionType))
     }
 
     /// Next character to unlock for a specific session type, or nil if all unlocked
-    func nextCharacter(for sessionType: SessionType) -> Character? {
+    func nextCharacter(for sessionType: BaseSessionType) -> Character? {
         let lvl = level(for: sessionType)
         guard lvl < 26 else { return nil }
         return MorseCode.kochOrder[lvl]
     }
 
-    /// Overall accuracy for a specific session type (uses base type for custom/vocabulary)
-    func overallAccuracy(for sessionType: SessionType) -> Double {
+    /// Overall accuracy for a specific session type
+    func overallAccuracy(for sessionType: BaseSessionType) -> Double {
         let stats = characterStats.values
-        switch sessionType.baseType {
+        switch sessionType {
         case .receive:
             let attempts = stats.reduce(0) { $0 + $1.receiveAttempts }
             let correct = stats.reduce(0) { $0 + $1.receiveCorrect }
@@ -106,24 +105,20 @@ struct StudentProgress: Codable, Equatable {
             let correct = stats.reduce(0) { $0 + $1.sendCorrect }
             guard attempts > 0 else { return 0 }
             return Double(correct) / Double(attempts)
-        default:
-            return overallAccuracy
         }
     }
 
-    /// Advance to next level for a session type if conditions are met (uses base type)
-    mutating func advanceIfEligible(sessionAccuracy: Double, sessionType: SessionType) -> Bool {
+    /// Advance to next level for a session type if conditions are met
+    mutating func advanceIfEligible(sessionAccuracy: Double, sessionType: BaseSessionType) -> Bool {
         let currentLvl = level(for: sessionType)
         guard Self.shouldAdvance(sessionAccuracy: sessionAccuracy, level: currentLvl) else {
             return false
         }
-        switch sessionType.baseType {
+        switch sessionType {
         case .receive:
             receiveLevel += 1
         case .send:
             sendLevel += 1
-        default:
-            return false
         }
         return true
     }
@@ -163,9 +158,9 @@ struct CharacterStat: Codable, Equatable {
         self.lastPracticed = lastPracticed
     }
 
-    /// Convenience initializer for single-direction stats (used during sessions, uses base type)
-    init(sessionType: SessionType, attempts: Int, correct: Int, lastPracticed: Date = Date()) {
-        switch sessionType.baseType {
+    /// Convenience initializer for single-direction stats (used during sessions)
+    init(sessionType: BaseSessionType, attempts: Int, correct: Int, lastPracticed: Date = Date()) {
+        switch sessionType {
         case .receive:
             receiveAttempts = attempts
             receiveCorrect = correct
@@ -176,12 +171,6 @@ struct CharacterStat: Codable, Equatable {
             receiveCorrect = 0
             sendAttempts = attempts
             sendCorrect = correct
-        default:
-            // Fallback: treat as receive
-            receiveAttempts = attempts
-            receiveCorrect = correct
-            sendAttempts = 0
-            sendCorrect = 0
         }
         self.lastPracticed = lastPracticed
     }
@@ -216,12 +205,11 @@ struct CharacterStat: Codable, Equatable {
         return Double(totalCorrect) / Double(totalAttempts)
     }
 
-    /// Get accuracy for a specific session type (uses base type for custom/vocabulary)
-    func accuracy(for sessionType: SessionType) -> Double {
-        switch sessionType.baseType {
+    /// Get accuracy for a specific session type
+    func accuracy(for sessionType: BaseSessionType) -> Double {
+        switch sessionType {
         case .receive: return receiveAccuracy
         case .send: return sendAccuracy
-        default: return combinedAccuracy
         }
     }
 

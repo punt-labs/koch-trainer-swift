@@ -268,7 +268,6 @@ private struct SessionHistoryRow: View {
         switch session.sessionType.baseType {
         case .receive: return Theme.Colors.primary
         case .send: return Theme.Colors.success
-        default: return .secondary
         }
     }
 

@@ -123,7 +123,7 @@ struct LearnView: View {
 
     @ViewBuilder
     private func practiceDueIndicator(for sessionType: SessionType) -> some View {
-        if let nextDate = schedule.nextDate(for: sessionType) {
+        if let nextDate = schedule.nextDate(for: sessionType.baseType) {
             let isPastDue = nextDate < Date()
             if isPastDue {
                 Text("Due now")

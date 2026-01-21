@@ -185,8 +185,6 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
                 pausedReceiveSession = session
             case .send:
                 pausedSendSession = session
-            default:
-                break
             }
         } catch {
             print("Failed to encode paused session: \(error)")
@@ -202,8 +200,6 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
             pausedReceiveSession = nil
         case .send:
             pausedSendSession = nil
-        default:
-            break
         }
     }
 
@@ -213,8 +209,6 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
             return pausedReceiveSession
         case .send:
             return pausedSendSession
-        default:
-            return nil
         }
     }
 
@@ -225,15 +219,11 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     private let pausedSendKey = "pausedSendSession"
     private let defaults: UserDefaults
 
-    private func pausedSessionKey(for sessionType: SessionType) -> String {
-        // baseType only returns .receive or .send
-        switch sessionType.baseType {
+    private func pausedSessionKey(for baseType: BaseSessionType) -> String {
+        switch baseType {
         case .receive:
             return pausedReceiveKey
         case .send:
-            return pausedSendKey
-        default:
-            // baseType guarantees .receive or .send, but compiler requires exhaustiveness
             return pausedSendKey
         }
     }
