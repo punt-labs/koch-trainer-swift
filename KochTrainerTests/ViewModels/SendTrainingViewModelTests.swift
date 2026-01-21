@@ -1,6 +1,7 @@
 @testable import KochTrainer
 import XCTest
 
+// swiftlint:disable type_body_length
 @MainActor
 final class SendTrainingViewModelTests: XCTestCase {
 
@@ -467,3 +468,4 @@ final class SendTrainingViewModelTests: XCTestCase {
     private var settingsStore = SettingsStore()
 
 }
+// swiftlint:enable type_body_length

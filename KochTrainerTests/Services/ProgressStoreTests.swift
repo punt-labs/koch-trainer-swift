@@ -1,3 +1,4 @@
+// swiftlint:disable type_body_length
 @testable import KochTrainer
 import XCTest
 
@@ -483,3 +484,4 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertEqual(store.pausedSession(for: .receiveCustom)?.correctCount, 10)
     }
 }
+// swiftlint:enable type_body_length

@@ -114,6 +114,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
     // MARK: - Session Control
 
     func startSession() {
+        // Clear any existing paused session since we're starting fresh
+        progressStore?.clearPausedSession(for: sessionType)
+
         sessionStartTime = Date()
         isPlaying = true
         phase = .training
@@ -128,6 +131,11 @@ final class VocabularyTrainingViewModel: ObservableObject {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
+
+        // Save paused session snapshot
+        if let snapshot = createPausedSessionSnapshot() {
+            progressStore?.savePausedSession(snapshot)
+        }
     }
 
     func resume() {
@@ -137,12 +145,54 @@ final class VocabularyTrainingViewModel: ObservableObject {
         showNextWord()
     }
 
+    // MARK: - Paused Session Management
+
+    /// Create a snapshot of the current session state for persistence
+    func createPausedSessionSnapshot() -> PausedSession? {
+        guard let startTime = sessionStartTime else { return nil }
+
+        return PausedSession(
+            sessionType: sessionType,
+            startTime: startTime,
+            pausedAt: Date(),
+            correctCount: correctCount,
+            totalAttempts: totalAttempts,
+            vocabularySetId: vocabularySet.id,
+            wordStats: wordStats
+        )
+    }
+
+    /// Restore session state from a paused session snapshot
+    func restoreFromPausedSession(_ session: PausedSession) {
+        // Validate vocabulary set matches
+        guard session.vocabularySetId == vocabularySet.id else {
+            // Session was for a different vocabulary set, start fresh
+            startSession()
+            return
+        }
+
+        sessionStartTime = session.startTime
+        correctCount = session.correctCount
+        totalAttempts = session.totalAttempts
+
+        // Restore word stats
+        if let savedWordStats = session.wordStats {
+            wordStats = savedWordStats
+        }
+
+        phase = .paused
+        isPlaying = false
+    }
+
     func endSession() {
         isPlaying = false
         responseTimer?.invalidate()
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
+
+        // Clear any paused session since we're ending
+        progressStore?.clearPausedSession(for: sessionType)
 
         // Save word stats to progress store
         if var progress = progressStore?.progress {

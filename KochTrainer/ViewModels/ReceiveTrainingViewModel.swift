@@ -10,15 +10,11 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    // MARK: - Initialization
-
     init(audioEngine: AudioEngineProtocol? = nil) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
 
     // MARK: Internal
-
-    // MARK: - Session Phase
 
     enum SessionPhase: Equatable {
         case introduction(characterIndex: Int)
@@ -328,14 +324,9 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Private
 
-    // MARK: - Dependencies
-
     private let audioEngine: AudioEngineProtocol
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
-
-    // MARK: - Internal State
-
     private var sessionTimer: Timer?
     private var responseTimer: Timer?
     private var sessionStartTime: Date?

@@ -96,18 +96,22 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         return deleted
     }
 
-    /// Recalculate next practice dates based on most recent valid session for each type.
+    /// Recalculate next practice dates based on most recent valid Learn session for each type.
+    /// Only considers standard receive/send sessions, not Custom, Vocabulary, or QSO.
     func recalculateScheduleFromHistory() {
         var updated = progress
 
-        // Find most recent valid session for each type
-        let validSessions = updated.sessionHistory.filter { $0.totalAttempts > 0 }
+        // Find most recent valid Learn session for each type
+        // Only sessions that can advance level affect the schedule
+        let learnSessions = updated.sessionHistory.filter {
+            $0.totalAttempts > 0 && $0.sessionType.canAdvanceLevel
+        }
 
-        let lastReceive = validSessions
+        let lastReceive = learnSessions
             .filter { $0.sessionType.baseType == .receive }
             .max { $0.date < $1.date }
 
-        let lastSend = validSessions
+        let lastSend = learnSessions
             .filter { $0.sessionType.baseType == .send }
             .max { $0.date < $1.date }
 
@@ -165,8 +169,12 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
             false
         }
 
-        // Update schedule using base session type
-        updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+        // Only update schedule for Learn sessions (standard receive/send)
+        // Custom, Vocabulary, and QSO sessions contribute to stats but don't affect
+        // the spaced repetition schedule or notifications
+        if result.sessionType.canAdvanceLevel {
+            updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+        }
 
         save(updated)
         return didAdvance

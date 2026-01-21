@@ -10,15 +10,11 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    // MARK: - Initialization
-
     init(audioEngine: AudioEngineProtocol? = nil) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
     }
 
     // MARK: Internal
-
-    // MARK: - Session Phase
 
     enum SessionPhase: Equatable {
         case introduction(characterIndex: Int)
@@ -34,27 +30,19 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         let decodedCharacter: Character?
     }
 
-    // MARK: - Published State
-
     @Published var phase: SessionPhase = .introduction(characterIndex: 0)
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
-
-    // Introduction state
     @Published var introCharacters: [Character] = []
     @Published var currentIntroCharacter: Character?
-
-    // Training state
     @Published var targetCharacter: Character = "K"
     @Published var currentPattern: String = ""
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForInput: Bool = true
     @Published var inputTimeRemaining: TimeInterval = 0
-
-    // MARK: - Configuration
 
     let inputTimeout: TimeInterval = 2.0 // Time to complete a character
     let proficiencyThreshold: Double = 0.90
@@ -346,15 +334,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Private
 
-    // MARK: - Dependencies
-
     private let audioEngine: AudioEngineProtocol
     private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
-
-    // MARK: - Internal State
-
     private var sessionTimer: Timer?
     private var inputTimer: Timer?
     private var sessionStartTime: Date?
@@ -377,8 +360,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    // MARK: - Training Phase
-
     private func startTraining() {
         phase = .training
         sessionStartTime = Date()
@@ -386,8 +367,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         startSessionTimer()
         showNextCharacter()
     }
-
-    // MARK: - Proficiency Check
 
     private func checkForProficiency() {
         guard totalAttempts >= minimumAttemptsForProficiency else { return }

@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 @testable import KochTrainer
 import XCTest
 
@@ -666,3 +667,4 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
     private var settingsStore = SettingsStore()
 
 }
+// swiftlint:enable file_length type_body_length

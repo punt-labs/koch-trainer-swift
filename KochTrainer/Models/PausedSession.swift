@@ -3,10 +3,12 @@ import Foundation
 // MARK: - PausedSession
 
 /// Captures the state of a paused training session for later resumption.
+/// Supports both character-based sessions (receive/send/custom) and vocabulary sessions.
 struct PausedSession: Codable, Equatable {
 
     // MARK: Lifecycle
 
+    /// Initialize for character-based training sessions
     init(
         id: UUID = UUID(),
         sessionType: SessionType,
@@ -31,6 +33,34 @@ struct PausedSession: Codable, Equatable {
         self.introCompleted = introCompleted
         self.customCharacters = customCharacters
         self.currentLevel = currentLevel
+        vocabularySetId = nil
+        wordStats = nil
+    }
+
+    /// Initialize for vocabulary training sessions
+    init(
+        id: UUID = UUID(),
+        sessionType: SessionType,
+        startTime: Date,
+        pausedAt: Date,
+        correctCount: Int,
+        totalAttempts: Int,
+        vocabularySetId: UUID,
+        wordStats: [String: WordStat]
+    ) {
+        self.id = id
+        self.sessionType = sessionType
+        self.startTime = startTime
+        self.pausedAt = pausedAt
+        self.correctCount = correctCount
+        self.totalAttempts = totalAttempts
+        characterStats = [:]
+        introCharacters = []
+        introCompleted = true
+        customCharacters = nil
+        currentLevel = 0
+        self.vocabularySetId = vocabularySetId
+        self.wordStats = wordStats
     }
 
     // MARK: Internal
@@ -41,11 +71,17 @@ struct PausedSession: Codable, Equatable {
     let pausedAt: Date
     let correctCount: Int
     let totalAttempts: Int
+
+    // Character-based session fields
     let characterStats: [Character: CharacterStat]
     let introCharacters: [Character]
     let introCompleted: Bool
     let customCharacters: [Character]?
     let currentLevel: Int
+
+    // Vocabulary session fields
+    let vocabularySetId: UUID?
+    let wordStats: [String: WordStat]?
 
     /// Duration spent in training before pause
     var elapsedDuration: TimeInterval {
@@ -60,6 +96,11 @@ struct PausedSession: Codable, Equatable {
     /// Whether this is a custom practice session
     var isCustomSession: Bool {
         customCharacters != nil
+    }
+
+    /// Whether this is a vocabulary session
+    var isVocabularySession: Bool {
+        vocabularySetId != nil
     }
 }
 
@@ -78,6 +119,8 @@ extension PausedSession {
         case introCompleted
         case customCharacters
         case currentLevel
+        case vocabularySetId
+        case wordStats
     }
 
     init(from decoder: Decoder) throws {
@@ -111,6 +154,10 @@ extension PausedSession {
         } else {
             customCharacters = nil
         }
+
+        // Decode optional vocabulary fields
+        vocabularySetId = try container.decodeIfPresent(UUID.self, forKey: .vocabularySetId)
+        wordStats = try container.decodeIfPresent([String: WordStat].self, forKey: .wordStats)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -140,5 +187,9 @@ extension PausedSession {
             let customStrings = custom.map { String($0) }
             try container.encode(customStrings, forKey: .customCharacters)
         }
+
+        // Encode optional vocabulary fields
+        try container.encodeIfPresent(vocabularySetId, forKey: .vocabularySetId)
+        try container.encodeIfPresent(wordStats, forKey: .wordStats)
     }
 }
