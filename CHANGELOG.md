@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions
 
-## [1.0.0] - 2026-01-19
+## [0.7.0] - 2026-01-19
 
 ### Added
 - **Koch Method Training**: Progressive character learning following the Koch method order (K, M, R, S, U, A, P, T, L, O, W, I, N, J, E, F, Y, V, G, Q, Z, H, B, C, D, X)
@@ -51,9 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical
 - SwiftUI-based iOS app (iOS 16+)
 - XcodeGen for project configuration
-- 419 unit tests with 40% code coverage
+- 519 unit tests
 - SwiftLint and SwiftFormat for code quality
 - GitHub Actions CI pipeline
 
-[Unreleased]: https://github.com/punt-labs/koch-trainer-swift/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v1.0.0
+[Unreleased]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0
