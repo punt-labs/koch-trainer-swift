@@ -10,6 +10,7 @@
 		00A6783189E809BED31501C6 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2178F2133ED71F057D8616FD /* NotificationManager.swift */; };
 		0182E0DC819BAA9EF82895F5 /* WordStatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BFDF29DF9BF6B67A2F93594 /* WordStatTests.swift */; };
 		048E5C9BFB53764A7B87AC53 /* NotificationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE54B3EA6F922FE21B12591 /* NotificationManagerTests.swift */; };
+		0749FC3B799F994ED8C7277D /* EarTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D2FD9EAAD002ADB57171E /* EarTrainingViewModel.swift */; };
 		0B0287382195C5F72752969F /* GroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA57C4635A10132B6514C82 /* GroupGenerator.swift */; };
 		0E91FEA6D2AC24184755771F /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F7261D01A93BDA6B9BDA46A /* LicenseView.swift */; };
 		144A002289DF894D11ACD74E /* KochTrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */; };
@@ -19,6 +20,7 @@
 		15BB7D719F088E992E2978C8 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */; };
 		18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */; };
 		1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB4886489BF491D3156CA3 /* SettingsView.swift */; };
+		1FC3357D859CDBF4A1689A6E /* EarTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3246C8567B10F82A706BAC9 /* EarTrainingView.swift */; };
 		20B9FD5D2D772C067CE4CDF1 /* PausedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2954CF1027D368A87B4474 /* PausedSession.swift */; };
 		29F26F4BABB4F2C644CDCC48 /* ToneGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 383D96DE00AC3BFBDF1CE172 /* ToneGeneratorTests.swift */; };
 		2BBF8A4F8DF9913922139270 /* ReceiveTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */; };
@@ -184,6 +186,7 @@
 		CCE54B3EA6F922FE21B12591 /* NotificationManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManagerTests.swift; sourceTree = "<group>"; };
 		CE61188FF7955447386AE139 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
 		D950BDD4D1F290F5A134B1A6 /* VocabularyGroupGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyGroupGeneratorTests.swift; sourceTree = "<group>"; };
+		DA8D2FD9EAAD002ADB57171E /* EarTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarTrainingViewModel.swift; sourceTree = "<group>"; };
 		DAF220C49CB6660F74CB54C2 /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
 		DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneGenerator.swift; sourceTree = "<group>"; };
 		DC31258AA99162DE5FFF1584 /* MorseQSOViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseQSOViewModel.swift; sourceTree = "<group>"; };
@@ -194,6 +197,7 @@
 		EDE5C548190E477F2A1F215C /* KochTrainer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0704EA92EDE1A23D0CA675E /* SessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryView.swift; sourceTree = "<group>"; };
 		F30E39178817F40F4AA07D72 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		F3246C8567B10F82A706BAC9 /* EarTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarTrainingView.swift; sourceTree = "<group>"; };
 		F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResultTests.swift; sourceTree = "<group>"; };
 		F479EEB8605B2C50CAE2700D /* QSOViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOViewModel.swift; sourceTree = "<group>"; };
 		F755CF48DC3CF38BEA8528EC /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
@@ -221,6 +225,14 @@
 				DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */,
 			);
 			path = AudioEngine;
+			sourceTree = "<group>";
+		};
+		1899502BB8D8CE8F4376A30E /* Ear */ = {
+			isa = PBXGroup;
+			children = (
+				F3246C8567B10F82A706BAC9 /* EarTrainingView.swift */,
+			);
+			path = Ear;
 			sourceTree = "<group>";
 		};
 		19FC02BC19D18FD86BBECE31 = {
@@ -330,6 +342,7 @@
 		5B9E17A113C835082D502FF2 /* Training */ = {
 			isa = PBXGroup;
 			children = (
+				1899502BB8D8CE8F4376A30E /* Ear */,
 				A7AA370D33A91E76B3D17823 /* Receive */,
 				62BDED251F0F408940DDC03D /* Send */,
 				739FBCD860E35338DF9C3D71 /* CharacterIntroductionView.swift */,
@@ -486,6 +499,7 @@
 		C52F8C38914F36332B79DE6E /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				DA8D2FD9EAAD002ADB57171E /* EarTrainingViewModel.swift */,
 				DC31258AA99162DE5FFF1584 /* MorseQSOViewModel.swift */,
 				F479EEB8605B2C50CAE2700D /* QSOViewModel.swift */,
 				3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */,
@@ -625,6 +639,8 @@
 				AA98A168263FE04EF727F7F0 /* CharacterGridView.swift in Sources */,
 				41A8C114E04665E9E629D724 /* CharacterIntroductionView.swift in Sources */,
 				E4B9D745E40F369D1568D664 /* ContentView.swift in Sources */,
+				1FC3357D859CDBF4A1689A6E /* EarTrainingView.swift in Sources */,
+				0749FC3B799F994ED8C7277D /* EarTrainingViewModel.swift in Sources */,
 				C943590E06B23977053B00B2 /* GracefulDecoder.swift in Sources */,
 				0B0287382195C5F72752969F /* GroupGenerator.swift in Sources */,
 				8693131068361C6540C51824 /* IntervalCalculator.swift in Sources */,
@@ -799,7 +815,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -914,7 +930,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

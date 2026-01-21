@@ -11,6 +11,7 @@ struct StudentProgress: Codable, Equatable {
         schemaVersion: Int = currentSchemaVersion,
         receiveLevel: Int = 1,
         sendLevel: Int = 1,
+        earTrainingLevel: Int = 1,
         characterStats: [Character: CharacterStat] = [:],
         sessionHistory: [SessionResult] = [],
         startDate: Date = Date(),
@@ -21,6 +22,7 @@ struct StudentProgress: Codable, Equatable {
         self.schemaVersion = schemaVersion
         self.receiveLevel = max(1, min(receiveLevel, 26))
         self.sendLevel = max(1, min(sendLevel, 26))
+        self.earTrainingLevel = max(1, min(earTrainingLevel, 5))
         self.characterStats = characterStats
         self.sessionHistory = sessionHistory
         self.startDate = startDate
@@ -43,6 +45,11 @@ struct StudentProgress: Codable, Equatable {
 
     /// Level for send training (1-26). Each level unlocks one additional character.
     var sendLevel: Int
+
+    /// Level for ear training (1-5). Each level adds longer pattern characters.
+    /// Level 1 = 1-element patterns (E, T)
+    /// Level 5 = all patterns up to 5 elements
+    var earTrainingLevel: Int
 
     /// Per-character performance statistics
     var characterStats: [Character: CharacterStat]
@@ -158,12 +165,16 @@ struct CharacterStat: Codable, Equatable {
         receiveCorrect: Int = 0,
         sendAttempts: Int = 0,
         sendCorrect: Int = 0,
+        earTrainingAttempts: Int = 0,
+        earTrainingCorrect: Int = 0,
         lastPracticed: Date = Date()
     ) {
         self.receiveAttempts = receiveAttempts
         self.receiveCorrect = receiveCorrect
         self.sendAttempts = sendAttempts
         self.sendCorrect = sendCorrect
+        self.earTrainingAttempts = earTrainingAttempts
+        self.earTrainingCorrect = earTrainingCorrect
         self.lastPracticed = lastPracticed
     }
 
@@ -181,6 +192,19 @@ struct CharacterStat: Codable, Equatable {
             sendAttempts = attempts
             sendCorrect = correct
         }
+        earTrainingAttempts = 0
+        earTrainingCorrect = 0
+        self.lastPracticed = lastPracticed
+    }
+
+    /// Convenience initializer for ear training stats
+    init(earTrainingAttempts: Int, earTrainingCorrect: Int, lastPracticed: Date = Date()) {
+        receiveAttempts = 0
+        receiveCorrect = 0
+        sendAttempts = 0
+        sendCorrect = 0
+        self.earTrainingAttempts = earTrainingAttempts
+        self.earTrainingCorrect = earTrainingCorrect
         self.lastPracticed = lastPracticed
     }
 
@@ -194,10 +218,14 @@ struct CharacterStat: Codable, Equatable {
     var sendAttempts: Int
     var sendCorrect: Int
 
+    /// Ear training stats (audio → pattern reproduction)
+    var earTrainingAttempts: Int
+    var earTrainingCorrect: Int
+
     var lastPracticed: Date
 
-    var totalAttempts: Int { receiveAttempts + sendAttempts }
-    var totalCorrect: Int { receiveCorrect + sendCorrect }
+    var totalAttempts: Int { receiveAttempts + sendAttempts + earTrainingAttempts }
+    var totalCorrect: Int { receiveCorrect + sendCorrect + earTrainingCorrect }
 
     var receiveAccuracy: Double {
         guard receiveAttempts > 0 else { return 0 }
@@ -207,6 +235,11 @@ struct CharacterStat: Codable, Equatable {
     var sendAccuracy: Double {
         guard sendAttempts > 0 else { return 0 }
         return Double(sendCorrect) / Double(sendAttempts)
+    }
+
+    var earTrainingAccuracy: Double {
+        guard earTrainingAttempts > 0 else { return 0 }
+        return Double(earTrainingCorrect) / Double(earTrainingAttempts)
     }
 
     var combinedAccuracy: Double {
@@ -228,9 +261,48 @@ struct CharacterStat: Codable, Equatable {
         receiveCorrect += other.receiveCorrect
         sendAttempts += other.sendAttempts
         sendCorrect += other.sendCorrect
+        earTrainingAttempts += other.earTrainingAttempts
+        earTrainingCorrect += other.earTrainingCorrect
         if other.lastPracticed > lastPracticed {
             lastPracticed = other.lastPracticed
         }
+    }
+}
+
+// MARK: - CharacterStat Codable
+
+extension CharacterStat {
+    enum CodingKeys: String, CodingKey {
+        case receiveAttempts
+        case receiveCorrect
+        case sendAttempts
+        case sendCorrect
+        case earTrainingAttempts
+        case earTrainingCorrect
+        case lastPracticed
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        receiveAttempts = try container.decode(Int.self, forKey: .receiveAttempts)
+        receiveCorrect = try container.decode(Int.self, forKey: .receiveCorrect)
+        sendAttempts = try container.decode(Int.self, forKey: .sendAttempts)
+        sendCorrect = try container.decode(Int.self, forKey: .sendCorrect)
+        // Ear training fields default to 0 for legacy data
+        earTrainingAttempts = try container.decodeIfPresent(Int.self, forKey: .earTrainingAttempts) ?? 0
+        earTrainingCorrect = try container.decodeIfPresent(Int.self, forKey: .earTrainingCorrect) ?? 0
+        lastPracticed = try container.decode(Date.self, forKey: .lastPracticed)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(receiveAttempts, forKey: .receiveAttempts)
+        try container.encode(receiveCorrect, forKey: .receiveCorrect)
+        try container.encode(sendAttempts, forKey: .sendAttempts)
+        try container.encode(sendCorrect, forKey: .sendCorrect)
+        try container.encode(earTrainingAttempts, forKey: .earTrainingAttempts)
+        try container.encode(earTrainingCorrect, forKey: .earTrainingCorrect)
+        try container.encode(lastPracticed, forKey: .lastPracticed)
     }
 }
 
@@ -241,6 +313,7 @@ extension StudentProgress {
         case schemaVersion
         case receiveLevel
         case sendLevel
+        case earTrainingLevel
         case currentLevel
         case characterStats
         case sessionHistory
@@ -266,6 +339,9 @@ extension StudentProgress {
             receiveLevel = try container.decode(Int.self, forKey: .receiveLevel)
             sendLevel = try container.decode(Int.self, forKey: .sendLevel)
         }
+
+        // Ear training level with default for old data
+        earTrainingLevel = try container.decodeIfPresent(Int.self, forKey: .earTrainingLevel) ?? 1
 
         sessionHistory = try container.decode([SessionResult].self, forKey: .sessionHistory)
         startDate = try container.decode(Date.self, forKey: .startDate)
@@ -296,6 +372,7 @@ extension StudentProgress {
         try container.encode(schemaVersion, forKey: .schemaVersion)
         try container.encode(receiveLevel, forKey: .receiveLevel)
         try container.encode(sendLevel, forKey: .sendLevel)
+        try container.encode(earTrainingLevel, forKey: .earTrainingLevel)
         try container.encode(sessionHistory, forKey: .sessionHistory)
         try container.encode(startDate, forKey: .startDate)
         try container.encode(schedule, forKey: .schedule)

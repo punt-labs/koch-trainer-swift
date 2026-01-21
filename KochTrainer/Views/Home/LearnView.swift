@@ -16,6 +16,40 @@ struct LearnView: View {
 
             Spacer()
 
+            // Ear training section
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("Ear Training")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                }
+
+                NavigationLink(destination: EarTrainingView()) {
+                    HStack {
+                        Image(systemName: "waveform")
+                        Text("Start Ear Training")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+
+                HStack {
+                    let chars = MorseCode.charactersByPatternLength(
+                        upToLevel: progressStore.progress.earTrainingLevel
+                    )
+                    Text("Characters: \(chars.map { String($0) }.joined())")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Colors.secondaryBackground)
+            .cornerRadius(12)
+
             // Receive training section
             VStack(spacing: Theme.Spacing.sm) {
                 HStack {
