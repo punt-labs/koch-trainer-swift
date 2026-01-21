@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - NotificationSettings
+
 /// User preferences for notification behavior.
 struct NotificationSettings: Equatable {
 
@@ -14,8 +16,8 @@ struct NotificationSettings: Equatable {
     ) {
         self.practiceRemindersEnabled = practiceRemindersEnabled
         self.streakRemindersEnabled = streakRemindersEnabled
-        self._preferredReminderHour = max(0, min(23, preferredReminderHour))
-        self._preferredReminderMinute = max(0, min(59, preferredReminderMinute))
+        _preferredReminderHour = max(0, min(23, preferredReminderHour))
+        _preferredReminderMinute = max(0, min(59, preferredReminderMinute))
         self.quietHoursEnabled = quietHoursEnabled
     }
 
@@ -26,6 +28,9 @@ struct NotificationSettings: Equatable {
 
     /// Whether to send reminders to maintain streak
     var streakRemindersEnabled: Bool
+
+    /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
+    var quietHoursEnabled: Bool
 
     /// Preferred hour of day for reminder notifications (0-23)
     var preferredReminderHour: Int {
@@ -39,16 +44,13 @@ struct NotificationSettings: Equatable {
         set { _preferredReminderMinute = max(0, min(59, newValue)) }
     }
 
-    /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
-    var quietHoursEnabled: Bool
-
     // MARK: Private
 
     private var _preferredReminderHour: Int
     private var _preferredReminderMinute: Int
 }
 
-// MARK: - Codable
+// MARK: Codable
 
 extension NotificationSettings: Codable {
     enum CodingKeys: String, CodingKey {
