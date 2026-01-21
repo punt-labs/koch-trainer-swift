@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Pause and Resume Training**: Paused sessions persist and automatically restore when returning to training (within 24 hours)
 - Character proficiency indicators showing per-character accuracy as circular progress rings
 - VoiceOver accessibility labels for proficiency percentages
 - **Morse QSO Training**: Practice QSO conversations by keying dit/dah responses while listening to AI transmissions with progressive text reveal
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QSO text reveal now syncs with audio playback (character appears as it plays)
 
 ### Fixed
+- Custom and Vocabulary sessions no longer affect Learn mode spaced repetition schedule
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions
 
