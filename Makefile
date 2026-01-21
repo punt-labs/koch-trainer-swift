@@ -255,7 +255,10 @@ endif
 		git worktree add -b "$(BRANCH)" "$$WORKTREE_PATH" origin/main; \
 	else \
 		echo "Creating worktree for existing branch $(BRANCH)..."; \
-		git fetch origin "$(BRANCH)" 2>/dev/null || true; \
+		if ! git fetch origin "$(BRANCH)"; then \
+			echo "Warning: Failed to fetch origin/$(BRANCH). It may not exist on the remote, or there may be network/authentication issues."; \
+			echo "Proceeding to create worktree from local branch '$(BRANCH)' if it exists."; \
+		fi; \
 		git worktree add "$$WORKTREE_PATH" "$(BRANCH)"; \
 	fi; \
 	echo ""; \
