@@ -12,9 +12,12 @@ final class BackupManager {
 
     // MARK: Lifecycle
 
+    /// - Parameters:
+    ///   - defaults: UserDefaults instance for storage
+    ///   - maxBackups: Number of backups to maintain (minimum 1)
     init(defaults: UserDefaults = .standard, maxBackups: Int = 3) {
         self.defaults = defaults
-        self.maxBackups = maxBackups
+        self.maxBackups = max(1, maxBackups)
     }
 
     // MARK: Internal
