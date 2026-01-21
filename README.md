@@ -2,6 +2,10 @@
 
 An iOS app for learning Morse code using the Koch method—the scientifically-proven approach of learning characters at full speed from day one.
 
+<p align="center">
+  <img src="docs/home-screenshot.png" alt="Koch Trainer Home Screen" width="300">
+</p>
+
 ## Features
 
 ### Learn (Koch Method)
