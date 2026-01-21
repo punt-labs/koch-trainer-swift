@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Data Migration Safety**: Progress data is now protected with rolling backups and graceful degradation. If data becomes corrupted, the app recovers from backups instead of losing all progress. Schema versioning enables safe future updates.
 - **Pause and Resume Training**: Paused sessions persist and automatically restore when returning to training (within 24 hours)
 - Character proficiency indicators showing per-character accuracy as circular progress rings
 - VoiceOver accessibility labels for proficiency percentages

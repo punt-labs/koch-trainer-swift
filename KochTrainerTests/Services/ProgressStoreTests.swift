@@ -483,6 +483,191 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertEqual(store.pausedSession(for: .receive)?.correctCount, 10)
         XCTAssertEqual(store.pausedSession(for: .receiveCustom)?.correctCount, 10)
     }
+
+    // MARK: - Backup Integration Tests
+
+    func testSaveCreatesBackup() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let backupManager = BackupManager(defaults: defaults)
+        let store = ProgressStore(defaults: defaults, backupManager: backupManager)
+
+        // Save initial progress
+        let progress1 = StudentProgress(receiveLevel: 3, sendLevel: 2)
+        store.save(progress1)
+
+        // Save updated progress (should backup previous)
+        let progress2 = StudentProgress(receiveLevel: 5, sendLevel: 4)
+        store.save(progress2)
+
+        // Verify backup exists
+        XCTAssertTrue(backupManager.hasBackups)
+        let backups = backupManager.getBackups()
+        XCTAssertEqual(backups.count, 1)
+
+        // Verify backup contains first progress
+        let backupProgress = try JSONDecoder().decode(StudentProgress.self, from: backups[0])
+        XCTAssertEqual(backupProgress.receiveLevel, 3)
+        XCTAssertEqual(backupProgress.sendLevel, 2)
+    }
+
+    func testResetClearsBackups() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let backupManager = BackupManager(defaults: defaults)
+        let store = ProgressStore(defaults: defaults, backupManager: backupManager)
+
+        // Create some backups
+        let progress1 = StudentProgress(receiveLevel: 3)
+        store.save(progress1)
+        let progress2 = StudentProgress(receiveLevel: 5)
+        store.save(progress2)
+        XCTAssertTrue(backupManager.hasBackups)
+
+        // Reset should clear backups
+        store.resetProgress()
+
+        XCTAssertFalse(backupManager.hasBackups)
+    }
+
+    func testLoadRecoverFromBackupOnCorruptPrimary() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+
+        // First, save valid progress to create backup
+        let backupManager = BackupManager(defaults: defaults)
+        let store1 = ProgressStore(defaults: defaults, backupManager: backupManager)
+        let progress1 = StudentProgress(receiveLevel: 7, sendLevel: 5)
+        store1.save(progress1)
+
+        // Save again to push first save to backup
+        let progress2 = StudentProgress(receiveLevel: 10, sendLevel: 8)
+        store1.save(progress2)
+
+        // Now corrupt the primary data
+        defaults.set(Data("corrupted json".utf8), forKey: "studentProgress")
+
+        // Create new store - should recover from backup
+        let store2 = ProgressStore(defaults: defaults, backupManager: backupManager)
+
+        // Should recover the first progress (from backup)
+        XCTAssertEqual(store2.progress.receiveLevel, 7)
+        XCTAssertEqual(store2.progress.sendLevel, 5)
+    }
+
+    func testLoadUsesGracefulDecodeForPartialData() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+
+        // Create JSON with missing optional fields but valid core data
+        let json: [String: Any] = [
+            "receiveLevel": 12,
+            "sendLevel": 10,
+            "characterStats": [String: Any](),
+            "sessionHistory": [[String: Any]](),
+            "startDate": Date().timeIntervalSinceReferenceDate
+        ]
+        let data = try JSONSerialization.data(withJSONObject: json)
+        defaults.set(data, forKey: "studentProgress")
+
+        let store = ProgressStore(defaults: defaults)
+
+        XCTAssertEqual(store.progress.receiveLevel, 12)
+        XCTAssertEqual(store.progress.sendLevel, 10)
+    }
+
+    func testSchemaVersionPreserved() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let store = ProgressStore(defaults: defaults)
+        let progress = StudentProgress(schemaVersion: 1, receiveLevel: 5)
+
+        store.save(progress)
+
+        // Read back and verify schema version
+        guard let data = defaults.data(forKey: "studentProgress") else {
+            XCTFail("No data saved")
+            return
+        }
+        let loaded = try JSONDecoder().decode(StudentProgress.self, from: data)
+        XCTAssertEqual(loaded.schemaVersion, 1)
+    }
+
+    func testMultipleBackupsRotateCorrectly() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+        let backupManager = BackupManager(defaults: defaults, maxBackups: 3)
+        let store = ProgressStore(defaults: defaults, backupManager: backupManager)
+
+        // Save 4 times - should have 3 backups (oldest dropped)
+        store.save(StudentProgress(receiveLevel: 1))
+        store.save(StudentProgress(receiveLevel: 2))
+        store.save(StudentProgress(receiveLevel: 3))
+        store.save(StudentProgress(receiveLevel: 4))
+
+        let backups = backupManager.getBackups()
+        XCTAssertEqual(backups.count, 3)
+
+        // Newest backup should be level 3, oldest should be level 1
+        let backup0 = try JSONDecoder().decode(StudentProgress.self, from: backups[0])
+        let backup2 = try JSONDecoder().decode(StudentProgress.self, from: backups[2])
+        XCTAssertEqual(backup0.receiveLevel, 3) // Most recent backup
+        XCTAssertEqual(backup2.receiveLevel, 1) // Oldest backup
+    }
+
+    func testGracefulDecodeRecoverPartialSessionHistory() throws {
+        guard let defaults = testDefaults else {
+            XCTFail("Test defaults not initialized")
+            return
+        }
+
+        // Create JSON with one valid session and one invalid session
+        let validSession: [String: Any] = [
+            "id": UUID().uuidString,
+            "sessionType": "receive",
+            "date": Date().timeIntervalSinceReferenceDate,
+            "duration": 300.0,
+            "totalAttempts": 20,
+            "correctCount": 18,
+            "characterStats": [String: Any]()
+        ]
+
+        let invalidSession: [String: Any] = [
+            "id": "not-a-uuid",
+            "sessionType": "unknown",
+            "date": "invalid"
+        ]
+
+        let json: [String: Any] = [
+            "receiveLevel": 5,
+            "sendLevel": 3,
+            "characterStats": [String: Any](),
+            "sessionHistory": [validSession, invalidSession],
+            "startDate": Date().timeIntervalSinceReferenceDate
+        ]
+        let data = try JSONSerialization.data(withJSONObject: json)
+        defaults.set(data, forKey: "studentProgress")
+
+        let store = ProgressStore(defaults: defaults)
+
+        // Should recover valid data and keep valid session
+        XCTAssertEqual(store.progress.receiveLevel, 5)
+        XCTAssertEqual(store.progress.sendLevel, 3)
+        XCTAssertEqual(store.progress.sessionHistory.count, 1)
+        XCTAssertEqual(store.progress.sessionHistory.first?.totalAttempts, 20)
+    }
 }
 
 // swiftlint:enable type_body_length

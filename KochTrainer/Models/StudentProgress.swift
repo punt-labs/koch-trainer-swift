@@ -8,6 +8,7 @@ struct StudentProgress: Codable, Equatable {
     // MARK: Lifecycle
 
     init(
+        schemaVersion: Int = currentSchemaVersion,
         receiveLevel: Int = 1,
         sendLevel: Int = 1,
         characterStats: [Character: CharacterStat] = [:],
@@ -17,6 +18,7 @@ struct StudentProgress: Codable, Equatable {
         wordStats: [String: WordStat] = [:],
         customVocabularySets: [VocabularySet] = []
     ) {
+        self.schemaVersion = schemaVersion
         self.receiveLevel = max(1, min(receiveLevel, 26))
         self.sendLevel = max(1, min(sendLevel, 26))
         self.characterStats = characterStats
@@ -28,6 +30,13 @@ struct StudentProgress: Codable, Equatable {
     }
 
     // MARK: Internal
+
+    /// Current schema version for data migration support.
+    /// Increment when making breaking changes to the data structure.
+    static let currentSchemaVersion = 1
+
+    /// Schema version for migration support. Defaults to currentSchemaVersion for new instances.
+    var schemaVersion: Int
 
     /// Level for receive training (1-26). Each level unlocks one additional character.
     var receiveLevel: Int
@@ -229,6 +238,7 @@ struct CharacterStat: Codable, Equatable {
 
 extension StudentProgress {
     enum CodingKeys: String, CodingKey {
+        case schemaVersion
         case receiveLevel
         case sendLevel
         case currentLevel
@@ -242,6 +252,10 @@ extension StudentProgress {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Schema version (default to 1 for old data without version field)
+        schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion)
+            ?? Self.currentSchemaVersion
 
         // Support migration from old single-level format
         if let oldLevel = try container.decodeIfPresent(Int.self, forKey: .currentLevel) {
@@ -279,6 +293,7 @@ extension StudentProgress {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(schemaVersion, forKey: .schemaVersion)
         try container.encode(receiveLevel, forKey: .receiveLevel)
         try container.encode(sendLevel, forKey: .sendLevel)
         try container.encode(sessionHistory, forKey: .sessionHistory)
