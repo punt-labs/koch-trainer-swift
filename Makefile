@@ -225,7 +225,7 @@ archive: generate
 # Worktrees
 # =============================================================================
 
-WORKTREE_DIR = $(HOME)/Coding/koch-trainer-worktrees
+WORKTREE_DIR ?= $(HOME)/Coding/koch-trainer-worktrees
 
 # Create a worktree for a branch
 # Usage: make worktree-create BRANCH=feature/foo
