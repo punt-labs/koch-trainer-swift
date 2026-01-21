@@ -19,11 +19,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew/downloads
+          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen
+          restore-keys: |
+            brew-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: deriveddata-${{ runner.os }}-${{ hashFiles('**/*.swift', 'project.yml') }}
+          restore-keys: |
+            deriveddata-${{ runner.os }}-
 
       - name: List Available Simulators
         run: xcrun simctl list devices available | grep iPhone | head -10
@@ -57,6 +73,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew/downloads
+          key: brew-${{ runner.os }}-${{ runner.arch }}-swiftlint
+          restore-keys: |
+            brew-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install SwiftLint
         run: brew install swiftlint
