@@ -174,7 +174,7 @@ release:
 	echo ""; \
 	echo "Preparing release v$$NEW_VERSION..."; \
 	DATE=$$(date +%Y-%m-%d); \
-	PREV_VERSION=$$(grep -E '^\[0-9]+\.[0-9]+\.[0-9]+\]:' CHANGELOG.md | head -1 | sed 's/\[\([^]]*\)\].*/\1/'); \
+	PREV_VERSION=$$(grep -E '^\[[0-9]+\.[0-9]+\.[0-9]+\]:' CHANGELOG.md | head -1 | sed 's/\[\([^]]*\)\].*/\1/'); \
 	python3 -c "import re; \
 	content = open('CHANGELOG.md').read(); \
 	content = re.sub(r'## \[Unreleased\]', '## [Unreleased]\\n\\n## [$$NEW_VERSION] - $$DATE', content, count=1); \
