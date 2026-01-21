@@ -592,4 +592,5 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     private var testDefaults = UserDefaults(suiteName: "TestVocabVM") ?? .standard
 
 }
+
 // swiftlint:enable file_length type_body_length

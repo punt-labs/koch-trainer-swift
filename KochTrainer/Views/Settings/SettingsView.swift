@@ -117,7 +117,7 @@ struct SettingsView: View {
 
                     DatePicker(
                         "Preferred Time",
-                        selection: $settingsStore.settings.notificationSettings.preferredReminderTime,
+                        selection: preferredTimeBinding,
                         displayedComponents: .hourAndMinute
                     )
 
@@ -231,6 +231,24 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var isPreviewingBandConditions = false
     @StateObject private var previewAudioEngine = MorseAudioEngine()
+
+    /// Binding that converts between hour/minute Ints and Date for the DatePicker
+    private var preferredTimeBinding: Binding<Date> {
+        Binding(
+            get: {
+                var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+                components.hour = settingsStore.settings.notificationSettings.preferredReminderHour
+                components.minute = settingsStore.settings.notificationSettings.preferredReminderMinute
+                return Calendar.current.date(from: components) ?? Date()
+            },
+            set: { newDate in
+                settingsStore.settings.notificationSettings.preferredReminderHour =
+                    Calendar.current.component(.hour, from: newDate)
+                settingsStore.settings.notificationSettings.preferredReminderMinute =
+                    Calendar.current.component(.minute, from: newDate)
+            }
+        )
+    }
 
     private var appVersion: String {
         let info = Bundle.main.infoDictionary

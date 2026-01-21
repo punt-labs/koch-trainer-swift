@@ -667,4 +667,5 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
     private var settingsStore = SettingsStore()
 
 }
+
 // swiftlint:enable file_length type_body_length

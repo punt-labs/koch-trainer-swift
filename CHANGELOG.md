@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom and Vocabulary sessions no longer affect Learn mode spaced repetition schedule
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions
+- **Notification timezone bug**: Preferred reminder time now preserves local hour/minute across timezone changes
 
 ## [0.7.0] - 2026-01-19
 

@@ -468,4 +468,5 @@ final class SendTrainingViewModelTests: XCTestCase {
     private var settingsStore = SettingsStore()
 
 }
+
 // swiftlint:enable type_body_length

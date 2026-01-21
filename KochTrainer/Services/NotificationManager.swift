@@ -186,8 +186,10 @@ final class NotificationManager: ObservableObject {
         let daysSinceLast = Int(Date().timeIntervalSince(lastDate) / 86400)
         guard daysSinceLast >= 7 else { return }
 
-        let hour = Calendar.current.component(.hour, from: settings.preferredReminderTime)
-        let adjusted = adjustForQuietHours(tomorrowAt(hour: hour), settings: settings)
+        let adjusted = adjustForQuietHours(
+            tomorrowAt(hour: settings.preferredReminderHour, minute: settings.preferredReminderMinute),
+            settings: settings
+        )
         if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
             scheduleWelcomeBackNotification(date: adjusted)
         }
@@ -309,20 +311,20 @@ final class NotificationManager: ObservableObject {
         return date
     }
 
-    private func todayAt(hour: Int) -> Date {
+    private func todayAt(hour: Int, minute: Int = 0) -> Date {
         let calendar = Calendar.current
         var components = calendar.dateComponents([.year, .month, .day], from: Date())
         components.hour = hour
-        components.minute = 0
+        components.minute = minute
         return calendar.date(from: components) ?? Date()
     }
 
-    private func tomorrowAt(hour: Int) -> Date {
+    private func tomorrowAt(hour: Int, minute: Int = 0) -> Date {
         let calendar = Calendar.current
         guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date()) else { return Date() }
         var components = calendar.dateComponents([.year, .month, .day], from: tomorrow)
         components.hour = hour
-        components.minute = 0
+        components.minute = minute
         return calendar.date(from: components) ?? Date()
     }
 }
