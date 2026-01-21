@@ -14,8 +14,8 @@ struct NotificationSettings: Codable, Equatable {
     ) {
         self.practiceRemindersEnabled = practiceRemindersEnabled
         self.streakRemindersEnabled = streakRemindersEnabled
-        self.preferredReminderHour = preferredReminderHour
-        self.preferredReminderMinute = preferredReminderMinute
+        self.preferredReminderHour = max(0, min(23, preferredReminderHour))
+        self.preferredReminderMinute = max(0, min(59, preferredReminderMinute))
         self.quietHoursEnabled = quietHoursEnabled
     }
 
@@ -28,10 +28,18 @@ struct NotificationSettings: Codable, Equatable {
     var streakRemindersEnabled: Bool
 
     /// Preferred hour of day for reminder notifications (0-23)
-    var preferredReminderHour: Int
+    var preferredReminderHour: Int {
+        didSet {
+            preferredReminderHour = max(0, min(23, preferredReminderHour))
+        }
+    }
 
     /// Preferred minute for reminder notifications (0-59)
-    var preferredReminderMinute: Int
+    var preferredReminderMinute: Int {
+        didSet {
+            preferredReminderMinute = max(0, min(59, preferredReminderMinute))
+        }
+    }
 
     /// Whether to suppress notifications during quiet hours (10 PM - 8 AM)
     var quietHoursEnabled: Bool
