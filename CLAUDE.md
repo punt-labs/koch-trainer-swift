@@ -209,7 +209,7 @@ protocol CharacterIntroducing: ObservableObject {
 - Flaky tests must be fixed to be deterministic or use sufficient sample sizes for probabilistic assertions.
 - Run SwiftLint and fix all warnings before considering work complete.
 
-**Current Status:** 463 tests. Target: 80% coverage.
+**Current Status:** 519 tests. Target: 80% coverage.
 
 ## SwiftFormat & SwiftLint Compliance
 
@@ -311,6 +311,87 @@ let day = try XCTUnwrap(components.day)
 components.day = day + 1
 ```
 
+## Issue Tracking with Beads
+
+This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendly issue tracker that lives in the `.beads/` directory.
+
+### When to Use Beads vs TodoWrite
+
+| Use Beads (`bd`) | Use TodoWrite |
+|------------------|---------------|
+| Multi-session work | Single-session tasks |
+| Work with dependencies | Simple linear execution |
+| Discovered work to track | Immediate TODO items |
+| Strategic planning | Tactical execution |
+| Handoff to future sessions | Current session tracking |
+
+**Rule of thumb**: If you might not finish it this session, or if it blocks/is blocked by other work, use beads.
+
+### Essential Commands
+
+```bash
+# Finding work
+bd ready                    # Show issues ready to work (no blockers)
+bd list --status=open       # All open issues
+bd show <id>                # View issue details with dependencies
+
+# Working on issues
+bd create --title="..." --type=task --priority=2   # Create issue (priority 0-4)
+bd update <id> --status=in_progress                # Claim work
+bd close <id>                                      # Mark complete
+bd close <id1> <id2> ...                           # Close multiple at once
+
+# Dependencies
+bd dep add <child> <parent>  # child depends on parent (parent blocks child)
+bd blocked                   # Show all blocked issues
+
+# Sync
+bd sync                      # Sync with git remote
+```
+
+### Priority Levels
+
+| Priority | Meaning |
+|----------|---------|
+| P0 | Critical - drop everything |
+| P1 | High - do soon |
+| P2 | Medium (default) |
+| P3 | Low - when time permits |
+| P4 | Backlog |
+
+### Session Close Protocol
+
+**CRITICAL**: Before ending any session, complete this checklist:
+
+```bash
+# 1. Check for uncommitted work
+git status
+
+# 2. Stage and commit code changes
+git add <files>
+git commit -m "..."
+
+# 3. Sync beads changes
+bd sync
+
+# 4. Push everything
+git push
+
+# 5. Verify
+git status  # Must show "up to date with origin"
+```
+
+**Work is NOT complete until `git push` succeeds.** Never leave work stranded locally.
+
+### Creating Issues for Discovered Work
+
+When you discover work that needs doing but isn't part of the current task:
+1. Create a beads issue immediately: `bd create --title="..." --type=task`
+2. Add dependencies if relevant: `bd dep add <new-issue> <blocking-issue>`
+3. Continue with current work
+
+This prevents losing track of discovered issues across session boundaries.
+
 ## Development Workflow
 
 ### Feature Branch Workflow
@@ -343,10 +424,20 @@ components.day = day + 1
 
 ### Release Workflow
 
-1. Move `[Unreleased]` entries to new version section in CHANGELOG.md
-2. Update version in `project.yml` and Info.plist
-3. Tag the release: `git tag v1.x.0`
-4. Push tag: `git push origin v1.x.0`
+Use `make release` for the automated workflow:
+
+```bash
+make release  # Interactive: prompts for patch/minor/major, updates CHANGELOG, tags, pushes
+```
+
+The release target:
+1. Validates clean git state and main branch
+2. Bumps version in `project.yml`
+3. Moves `[Unreleased]` entries to new version section in CHANGELOG.md
+4. Increments build number
+5. Commits, tags, and optionally pushes + creates GitHub release
+
+For TestFlight archives: `make archive` computes build number from base + git commits.
 
 ### Commit Message Convention
 
