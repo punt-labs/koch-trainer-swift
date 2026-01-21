@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - ProgressStoreProtocol
 
@@ -26,8 +27,9 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
 
     // MARK: Lifecycle
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, backupManager: BackupManager? = nil) {
         self.defaults = defaults
+        self.backupManager = backupManager ?? BackupManager(defaults: defaults)
         progress = StudentProgress()
         progress = load()
         loadPausedSessions()
@@ -48,25 +50,45 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         guard let data = defaults.data(forKey: key) else {
             return StudentProgress()
         }
-        do {
-            return try JSONDecoder().decode(StudentProgress.self, from: data)
-        } catch {
-            print("Failed to decode progress: \(error)")
-            return StudentProgress()
+
+        // Try primary data with graceful decode
+        if let progress = GracefulDecoder.decode(from: data) {
+            return progress
         }
+
+        // Primary failed completely, try backups
+        logger.warning("Primary decode failed, attempting backup recovery")
+        for (index, backupData) in backupManager.getBackups().enumerated() {
+            if let progress = GracefulDecoder.decode(from: backupData) {
+                logger.notice("Recovered from backup \(index)")
+                return progress
+            }
+        }
+
+        // All decode attempts failed
+        logger.error("All decode attempts failed, returning fresh progress")
+        return StudentProgress()
     }
 
     func save(_ progress: StudentProgress) {
         do {
             let data = try JSONEncoder().encode(progress)
+
+            // Create backup of existing data before overwriting
+            if let existingData = defaults.data(forKey: key) {
+                backupManager.createBackup(from: existingData)
+            }
+
             defaults.set(data, forKey: key)
             self.progress = progress
         } catch {
-            print("Failed to encode progress: \(error)")
+            logger.error("Failed to encode progress: \(error.localizedDescription)")
         }
     }
 
     func resetProgress() {
+        backupManager.clearBackups() // Clear backups on intentional reset
+        defaults.removeObject(forKey: key) // Remove existing data so save() doesn't backup
         let fresh = StudentProgress()
         save(fresh)
     }
@@ -226,6 +248,8 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     private let pausedReceiveKey = "pausedReceiveSession"
     private let pausedSendKey = "pausedSendSession"
     private let defaults: UserDefaults
+    private let backupManager: BackupManager
+    private let logger = Logger(subsystem: "com.kochtrainer", category: "ProgressStore")
 
     private func pausedSessionKey(for baseType: BaseSessionType) -> String {
         switch baseType {
