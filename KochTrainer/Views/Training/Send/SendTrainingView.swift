@@ -98,13 +98,16 @@ struct SendTrainingView: View {
                 // Restore directly to paused state - no dialog needed
                 viewModel.restoreFromPausedSession(paused)
 
-                // Only clear if restoration succeeded (phase changed to paused or intro)
+                // Check if restoration succeeded (phase changed to paused or intro)
+                // Don't clear the paused session yet - wait until user resumes/ends
+                // so if they navigate away it can be restored again
                 if case .paused = viewModel.phase {
-                    progressStore.clearPausedSession(for: paused.sessionType)
+                    // Restoration succeeded - session will be cleared when user resumes/ends
                 } else if case .introduction = viewModel.phase {
-                    progressStore.clearPausedSession(for: paused.sessionType)
+                    // Restoration succeeded but user was mid-intro
                 } else {
-                    // Restoration failed, start fresh
+                    // Restoration failed, clear invalid session and start fresh
+                    progressStore.clearPausedSession(for: paused.sessionType)
                     viewModel.startSession()
                 }
             } else {

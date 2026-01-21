@@ -227,6 +227,14 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         let currentIsCustom = customCharacters != nil
         guard session.isCustomSession == currentIsCustom else { return }
 
+        // If custom session, validate custom characters match
+        if currentIsCustom {
+            guard session.customCharacters == customCharacters else {
+                // Custom characters differ from paused session - don't restore
+                return
+            }
+        }
+
         // Restore state
         correctCount = session.correctCount
         totalAttempts = session.totalAttempts
@@ -245,6 +253,11 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     func resume() {
         guard phase == .paused else { return }
+
+        // Clear the paused session now that user is actively resuming
+        let sessionType: SessionType = isCustomSession ? .receiveCustom : .receive
+        progressStore?.clearPausedSession(for: sessionType)
+
         phase = .training
         isPlaying = true
         startSessionTimer()

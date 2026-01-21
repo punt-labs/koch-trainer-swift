@@ -595,6 +595,33 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.totalAttempts, 10)
     }
 
+    func testRestoreFromPausedSessionDoesNotRestoreIfCustomCharactersMismatch() {
+        // Set up a custom session view model
+        let customChars: [Character] = ["A", "B", "C"]
+        let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
+
+        // Create a paused session with different custom characters
+        let session = PausedSession(
+            sessionType: .receiveCustom,
+            startTime: Date(),
+            pausedAt: Date(),
+            correctCount: 5,
+            totalAttempts: 10,
+            characterStats: [:],
+            introCharacters: ["D", "E", "F"],
+            introCompleted: true,
+            customCharacters: ["D", "E", "F"], // Different custom characters
+            currentLevel: progressStore.progress.receiveLevel
+        )
+
+        vm.restoreFromPausedSession(session)
+
+        // Should not restore because custom characters don't match
+        XCTAssertEqual(vm.correctCount, 0)
+        XCTAssertEqual(vm.totalAttempts, 0)
+    }
+
     func testIsIntroCompletedFalseInIntroduction() {
         viewModel.startSession()
 
