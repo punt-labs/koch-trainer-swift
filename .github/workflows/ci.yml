@@ -37,7 +37,7 @@ jobs:
             brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-
 
       - name: Install XcodeGen
-        run: brew install xcodegen || brew link --overwrite xcodegen
+        run: brew list xcodegen &>/dev/null && brew link --overwrite xcodegen || brew install xcodegen
 
       - name: Generate Xcode Project
         run: xcodegen generate
@@ -102,7 +102,7 @@ jobs:
             brew-${{ runner.os }}-${{ runner.arch }}-swiftlint-
 
       - name: Install SwiftLint
-        run: brew install swiftlint || brew link --overwrite swiftlint
+        run: brew list swiftlint &>/dev/null && brew link --overwrite swiftlint || brew install swiftlint
 
       - name: Run SwiftLint
         run: swiftlint lint --reporter github-actions-logging
