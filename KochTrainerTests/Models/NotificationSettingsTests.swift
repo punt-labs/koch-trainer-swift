@@ -147,11 +147,7 @@ final class NotificationSettingsTests: XCTestCase {
         """
 
         let data = json.data(using: .utf8)!
-        var settings = try JSONDecoder().decode(NotificationSettings.self, from: data)
-
-        // Validation happens in init, but decoded value won't trigger didSet
-        // We need to manually set it to trigger validation
-        settings.preferredReminderHour = settings.preferredReminderHour
+        let settings = try JSONDecoder().decode(NotificationSettings.self, from: data)
 
         XCTAssertEqual(settings.preferredReminderHour, 23, "Decoded hour should be clamped to 23")
     }
@@ -168,11 +164,7 @@ final class NotificationSettingsTests: XCTestCase {
         """
 
         let data = json.data(using: .utf8)!
-        var settings = try JSONDecoder().decode(NotificationSettings.self, from: data)
-
-        // Validation happens in init, but decoded value won't trigger didSet
-        // We need to manually set it to trigger validation
-        settings.preferredReminderMinute = settings.preferredReminderMinute
+        let settings = try JSONDecoder().decode(NotificationSettings.self, from: data)
 
         XCTAssertEqual(settings.preferredReminderMinute, 59, "Decoded minute should be clamped to 59")
     }
