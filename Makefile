@@ -240,7 +240,12 @@ endif
 	@WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
 	WORKTREE_PATH="$(WORKTREE_DIR)/$$WORKTREE_NAME"; \
 	if [ -d "$$WORKTREE_PATH" ]; then \
-		echo "Error: Worktree already exists at $$WORKTREE_PATH"; \
+		if git worktree list --porcelain | awk '/^worktree / {print $$2}' | grep -qx "$$WORKTREE_PATH"; then \
+			echo "Error: Git worktree already exists at $$WORKTREE_PATH"; \
+		else \
+			echo "Error: Directory already exists at $$WORKTREE_PATH but is not a git worktree."; \
+			echo "Please remove or rename this directory, or choose a different BRANCH/WORKTREE_NAME."; \
+		fi; \
 		exit 1; \
 	fi; \
 	mkdir -p "$(WORKTREE_DIR)"; \
