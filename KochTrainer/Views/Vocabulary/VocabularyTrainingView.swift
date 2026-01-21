@@ -36,11 +36,18 @@ struct VocabularyTrainingView: View {
             // Hidden text field for keyboard capture
             if case .training = viewModel.phase {
                 if viewModel.isReceiveMode {
-                    // Receive mode: capture text input for answer
+                    // Receive mode: auto-submit when input length matches expected word
                     TextField("", text: $textInput)
                         .focused($isKeyboardFocused)
                         .opacity(0)
                         .frame(width: 0, height: 0)
+                        .onChange(of: textInput) { newValue in
+                            if !viewModel.currentWord.isEmpty,
+                               newValue.count >= viewModel.currentWord.count {
+                                viewModel.submitAnswer(newValue)
+                                textInput = ""
+                            }
+                        }
                         .onSubmit {
                             viewModel.submitAnswer(textInput)
                             textInput = ""
