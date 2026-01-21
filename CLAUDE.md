@@ -394,33 +394,71 @@ This prevents losing track of discovered issues across session boundaries.
 
 ## Development Workflow
 
-### Feature Branch Workflow
+### Working a Beads Issue
 
-1. **Create feature branch** from `main`:
-   ```bash
-   git checkout -b feature/my-feature-name
-   ```
+**1. Find and claim work:**
+```bash
+bd ready                              # Show available work
+bd show <id>                          # Review issue details
+bd update <id> --status=in_progress   # Claim it
+```
 
-2. **Develop with tests**:
-   - Write code with corresponding unit tests
-   - Run `make build` frequently (formats, lints, compiles)
-   - Run `make test` before considering work complete
+**2. Create feature branch:**
+```bash
+git checkout main && git pull
+git checkout -b feature/<short-description>   # or fix/, refactor/
+```
 
-3. **Update CHANGELOG.md**:
-   - Add entry under `[Unreleased]` section
-   - Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
-   - Write user-facing descriptions, not technical jargon
+**3. Implement:**
+- Read relevant files, understand current implementation
+- Write code with corresponding unit tests
+- Run `make build` frequently (formats, lints, compiles)
+- Run `make test` before considering work complete
 
-4. **Create Pull Request**:
-   ```bash
-   git push -u origin feature/my-feature-name
-   gh pr create --title "feat: description" --body "## Summary\n..."
-   ```
+**4. Update CHANGELOG.md:**
+- Add entry under `[Unreleased]` section
+- Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
+- Write user-facing descriptions, not technical jargon
 
-5. **Merge after CI passes**:
-   - All tests must pass
-   - No linter warnings
-   - Squash merge to `main`
+**5. Commit and push branch:**
+```bash
+git add <files>
+git commit -m "feat: description"
+git push -u origin feature/<short-description>
+```
+
+**6. Create Pull Request:**
+```bash
+gh pr create --title "feat: description" --body "## Summary\n..."
+```
+
+**7. After PR merged:**
+```bash
+bd close <id>                         # Mark issue complete
+git checkout main && git pull
+git branch -d feature/<short-description>
+bd sync                               # Sync beads state
+```
+
+### Branch Naming Convention
+
+| Prefix | Use Case |
+|--------|----------|
+| `feature/` | New features |
+| `fix/` | Bug fixes |
+| `refactor/` | Code improvements |
+| `docs/` | Documentation only |
+
+### If Blocked or Discovering New Work
+
+```bash
+# Create issue for discovered work
+bd create --title="..." --type=task --priority=2
+
+# If current issue is blocked by another
+bd update <id> --status=open          # Unclaim
+bd dep add <id> <blocking-id>         # Mark dependency
+```
 
 ### Release Workflow
 
