@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions
 - **Notification timezone bug**: Preferred reminder time now preserves local hour/minute across timezone changes
+- **Vocabulary receive auto-submit**: Answers now submit automatically when typed character count matches the expected word length, matching Learn mode behavior
 
 ## [0.7.0] - 2026-01-19
 
