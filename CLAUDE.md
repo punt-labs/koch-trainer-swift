@@ -490,6 +490,66 @@ test:     Adding or updating tests
 chore:    Build process, dependencies, CI
 ```
 
+## Parallel Development with Worktrees
+
+Git worktrees allow working on multiple branches simultaneously without stashing or switching. Each worktree is a separate checkout that shares the same `.git` directory.
+
+### Worktree Location
+
+All worktrees live in `~/Coding/koch-trainer-worktrees/`. The main repo stays at `~/Coding/koch-trainer-swift/`.
+
+### Creating a Worktree
+
+```bash
+# Create worktree for existing remote branch
+make worktree-create BRANCH=feature/foo
+
+# Create worktree with new branch (based on main)
+make worktree-create BRANCH=feature/new-thing NEW=1
+
+# Or manually
+git worktree add ~/Coding/koch-trainer-worktrees/feature-foo feature/foo
+git worktree add -b feature/new-thing ~/Coding/koch-trainer-worktrees/new-thing main
+```
+
+### Working in a Worktree
+
+```bash
+cd ~/Coding/koch-trainer-worktrees/feature-foo
+bd list    # Same issues as main repo (beads auto-redirects)
+make build
+make test
+```
+
+### Beads Redirect Behavior
+
+When you create a worktree, beads automatically creates a redirect file in the worktree's `.beads/` that points to the main repo's `.beads/` database. All worktrees share the same issue database—no manual configuration needed.
+
+### Listing Worktrees
+
+```bash
+make worktree-list
+# Or: git worktree list
+```
+
+### Removing a Worktree
+
+```bash
+make worktree-remove BRANCH=feature/foo
+
+# Or manually
+git worktree remove ~/Coding/koch-trainer-worktrees/feature-foo
+git worktree remove --force ~/Coding/koch-trainer-worktrees/feature-foo  # If uncommitted changes
+```
+
+### Syncing Beads Across Branches
+
+Run `bd sync` before and after merging or switching contexts to ensure issue state is consistent across all worktrees.
+
+### Optional: External Beads with direnv
+
+For complete separation of beads from code history, you can use an external beads repo with direnv. See `.envrc.example` for configuration. This adds complexity and is not recommended for single-developer projects.
+
 ## Standards
 
 - Do not suggest skipping tests, lowering coverage targets, or ignoring failures.

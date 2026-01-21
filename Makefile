@@ -4,7 +4,7 @@
 SCHEME = KochTrainer
 DESTINATION = platform=iOS Simulator,name=iPhone 17 Pro
 
-.PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive
+.PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list
 
 help:
 	@echo "Available commands:"
@@ -27,6 +27,12 @@ help:
 	@echo "    make bump-major  - Bump major version (0.7.0 -> 1.0.0)"
 	@echo "    make release     - Create a release (bump, tag, push, GitHub release)"
 	@echo "    make archive     - Build release archive with computed build number"
+	@echo ""
+	@echo "  Worktrees:"
+	@echo "    make worktree-create BRANCH=feature/foo       - Create worktree for branch"
+	@echo "    make worktree-create BRANCH=feature/foo NEW=1 - Create worktree with new branch"
+	@echo "    make worktree-remove BRANCH=feature/foo       - Remove worktree"
+	@echo "    make worktree-list                            - List active worktrees"
 
 generate:
 	@echo "Generating Xcode project..."
@@ -214,3 +220,62 @@ archive: generate
 		CURRENT_PROJECT_VERSION=$$COMPUTED_BUILD \
 		-quiet; \
 	echo "Archive created: ./build/KochTrainer.xcarchive"
+
+# =============================================================================
+# Worktrees
+# =============================================================================
+
+WORKTREE_DIR = $(HOME)/Coding/koch-trainer-worktrees
+
+# Create a worktree for a branch
+# Usage: make worktree-create BRANCH=feature/foo
+#        make worktree-create BRANCH=feature/new-thing NEW=1  (creates new branch)
+worktree-create:
+ifndef BRANCH
+	@echo "Error: BRANCH is required"
+	@echo "Usage: make worktree-create BRANCH=feature/foo"
+	@echo "       make worktree-create BRANCH=feature/new-thing NEW=1"
+	@exit 1
+endif
+	@WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
+	WORKTREE_PATH="$(WORKTREE_DIR)/$$WORKTREE_NAME"; \
+	if [ -d "$$WORKTREE_PATH" ]; then \
+		echo "Error: Worktree already exists at $$WORKTREE_PATH"; \
+		exit 1; \
+	fi; \
+	mkdir -p "$(WORKTREE_DIR)"; \
+	if [ -n "$(NEW)" ]; then \
+		echo "Creating new branch $(BRANCH) from main..."; \
+		git fetch origin main; \
+		git worktree add -b "$(BRANCH)" "$$WORKTREE_PATH" origin/main; \
+	else \
+		echo "Creating worktree for existing branch $(BRANCH)..."; \
+		git fetch origin "$(BRANCH)" 2>/dev/null || true; \
+		git worktree add "$$WORKTREE_PATH" "$(BRANCH)"; \
+	fi; \
+	echo ""; \
+	echo "Worktree created at: $$WORKTREE_PATH"; \
+	echo "cd $$WORKTREE_PATH"
+
+# Remove a worktree
+# Usage: make worktree-remove BRANCH=feature/foo
+worktree-remove:
+ifndef BRANCH
+	@echo "Error: BRANCH is required"
+	@echo "Usage: make worktree-remove BRANCH=feature/foo"
+	@exit 1
+endif
+	@WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
+	WORKTREE_PATH="$(WORKTREE_DIR)/$$WORKTREE_NAME"; \
+	if [ ! -d "$$WORKTREE_PATH" ]; then \
+		echo "Error: Worktree not found at $$WORKTREE_PATH"; \
+		exit 1; \
+	fi; \
+	echo "Removing worktree at $$WORKTREE_PATH..."; \
+	git worktree remove "$$WORKTREE_PATH" || git worktree remove --force "$$WORKTREE_PATH"; \
+	echo "Worktree removed."
+
+# List all worktrees
+worktree-list:
+	@echo "Active worktrees:"
+	@git worktree list

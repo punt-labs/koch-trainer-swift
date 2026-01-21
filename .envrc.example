@@ -1,0 +1,26 @@
+# Optional direnv configuration for Koch Trainer
+#
+# Copy to .envrc and run `direnv allow` to enable.
+# See: https://direnv.net/
+#
+# This file is optional. The default setup (beads in-repo) works without direnv.
+
+# =============================================================================
+# External Beads (Optional, Not Recommended)
+# =============================================================================
+# Use an external beads repo for complete separation from code history.
+# Only use this if you specifically need beads commits separate from code.
+#
+# Setup:
+#   mkdir -p ~/Coding/koch-trainer-beads
+#   cd ~/Coding/koch-trainer-beads
+#   git init
+#   bd init --prefix koch
+#
+# Then uncomment:
+# export BEADS_DIR="$HOME/Coding/koch-trainer-beads/.beads"
+
+# =============================================================================
+# Other Environment Variables
+# =============================================================================
+# Add any other project-specific environment variables below.
