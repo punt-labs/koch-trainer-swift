@@ -88,7 +88,31 @@ struct ReceiveTrainingView: View {
             } else {
                 viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
             }
-            viewModel.startSession()
+
+            // Check for paused session and restore directly
+            let sessionType: SessionType = customCharacters != nil ? .receiveCustom : .receive
+            if let paused = progressStore.pausedSession(for: sessionType),
+               !paused.isExpired,
+               paused.currentLevel == progressStore.progress.receiveLevel,
+               paused.isCustomSession == (customCharacters != nil) {
+                // Restore directly to paused state - no dialog needed
+                viewModel.restoreFromPausedSession(paused)
+
+                // Check if restoration succeeded (phase changed to paused or intro)
+                // Don't clear the paused session yet - wait until user resumes/ends
+                // so if they navigate away it can be restored again
+                if case .paused = viewModel.phase {
+                    // Restoration succeeded - session will be cleared when user resumes/ends
+                } else if case .introduction = viewModel.phase {
+                    // Restoration succeeded but user was mid-intro
+                } else {
+                    // Restoration failed, clear invalid session and start fresh
+                    progressStore.clearPausedSession(for: paused.sessionType)
+                    viewModel.startSession()
+                }
+            } else {
+                viewModel.startSession()
+            }
         }
         .onDisappear {
             viewModel.cleanup()

@@ -50,11 +50,10 @@ struct WordStat: Codable, Equatable {
     }
 
     /// Get accuracy for a specific session type
-    func accuracy(for sessionType: SessionType) -> Double {
-        switch sessionType.baseType {
+    func accuracy(for sessionType: BaseSessionType) -> Double {
+        switch sessionType {
         case .receive: return receiveAccuracy
         case .send: return sendAccuracy
-        default: return combinedAccuracy
         }
     }
 

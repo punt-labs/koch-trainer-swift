@@ -82,7 +82,26 @@ struct VocabularyTrainingView: View {
         .navigationBarBackButtonHidden(isTrainingActive)
         .onAppear {
             viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
-            viewModel.startSession()
+
+            // Check for paused session and restore if it matches this vocabulary set
+            if let paused = progressStore.pausedSession(for: viewModel.sessionType),
+               !paused.isExpired,
+               paused.isVocabularySession,
+               paused.vocabularySetId == viewModel.vocabularySet.id {
+                // Attempt to restore to paused state
+                viewModel.restoreFromPausedSession(paused)
+
+                // Check if restoration succeeded (phase changed to paused)
+                if case .paused = viewModel.phase {
+                    // Restoration succeeded - session will be cleared when user resumes/ends
+                } else {
+                    // Restoration failed, clear invalid session and start fresh
+                    progressStore.clearPausedSession(for: paused.sessionType)
+                    viewModel.startSession()
+                }
+            } else {
+                viewModel.startSession()
+            }
             isKeyboardFocused = true
         }
         .onDisappear {

@@ -106,9 +106,6 @@ enum VocabularyGroupGenerator {
             case .send:
                 attempts = stat.sendAttempts
                 accuracy = stat.sendAccuracy
-            default:
-                attempts = stat.totalAttempts
-                accuracy = stat.combinedAccuracy
             }
 
             guard attempts >= minAttempts else {

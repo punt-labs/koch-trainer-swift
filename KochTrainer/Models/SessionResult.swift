@@ -1,5 +1,15 @@
 import Foundation
 
+// MARK: - BaseSessionType
+
+/// The fundamental training direction: receive (copy) or send (key).
+/// Used as the return type of SessionType.baseType to provide compile-time
+/// exhaustiveness checking with exactly two cases.
+enum BaseSessionType: String, Codable {
+    case receive
+    case send
+}
+
 // MARK: - SessionType
 
 /// The type of training session.
@@ -40,7 +50,7 @@ enum SessionType: String, Codable {
     }
 
     /// The base session type (receive or send direction)
-    var baseType: SessionType {
+    var baseType: BaseSessionType {
         switch self {
         case .receive,
              .receiveCustom,

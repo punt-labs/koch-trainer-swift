@@ -9,6 +9,13 @@ protocol ProgressStoreProtocol: AnyObject {
     func load() -> StudentProgress
     func save(_ progress: StudentProgress)
     func resetProgress()
+
+    // Paused session management
+    var pausedReceiveSession: PausedSession? { get }
+    var pausedSendSession: PausedSession? { get }
+    func savePausedSession(_ session: PausedSession)
+    func clearPausedSession(for sessionType: SessionType)
+    func pausedSession(for sessionType: SessionType) -> PausedSession?
 }
 
 // MARK: - ProgressStore
@@ -23,11 +30,14 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         self.defaults = defaults
         progress = StudentProgress()
         progress = load()
+        loadPausedSessions()
     }
 
     // MARK: Internal
 
     @Published var progress: StudentProgress
+    @Published private(set) var pausedReceiveSession: PausedSession?
+    @Published private(set) var pausedSendSession: PausedSession?
 
     /// Overall accuracy as a whole percentage (0-100)
     var overallAccuracyPercentage: Int {
@@ -86,18 +96,22 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         return deleted
     }
 
-    /// Recalculate next practice dates based on most recent valid session for each type.
+    /// Recalculate next practice dates based on most recent valid Learn session for each type.
+    /// Only considers standard receive/send sessions, not Custom, Vocabulary, or QSO.
     func recalculateScheduleFromHistory() {
         var updated = progress
 
-        // Find most recent valid session for each type
-        let validSessions = updated.sessionHistory.filter { $0.totalAttempts > 0 }
+        // Find most recent valid Learn session for each type
+        // Only sessions that can advance level affect the schedule
+        let learnSessions = updated.sessionHistory.filter {
+            $0.totalAttempts > 0 && $0.sessionType.canAdvanceLevel
+        }
 
-        let lastReceive = validSessions
+        let lastReceive = learnSessions
             .filter { $0.sessionType.baseType == .receive }
             .max { $0.date < $1.date }
 
-        let lastSend = validSessions
+        let lastSend = learnSessions
             .filter { $0.sessionType.baseType == .send }
             .max { $0.date < $1.date }
 
@@ -155,17 +169,95 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
             false
         }
 
-        // Update schedule using base session type
-        updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+        // Only update schedule for Learn sessions (standard receive/send)
+        // Custom, Vocabulary, and QSO sessions contribute to stats but don't affect
+        // the spaced repetition schedule or notifications
+        if result.sessionType.canAdvanceLevel {
+            updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+        }
 
         save(updated)
         return didAdvance
     }
 
+    // MARK: - Paused Session Management
+
+    func savePausedSession(_ session: PausedSession) {
+        do {
+            let data = try JSONEncoder().encode(session)
+            let key = pausedSessionKey(for: session.sessionType.baseType)
+            defaults.set(data, forKey: key)
+
+            switch session.sessionType.baseType {
+            case .receive:
+                pausedReceiveSession = session
+            case .send:
+                pausedSendSession = session
+            }
+        } catch {
+            print("Failed to encode paused session: \(error)")
+        }
+    }
+
+    func clearPausedSession(for sessionType: SessionType) {
+        let key = pausedSessionKey(for: sessionType.baseType)
+        defaults.removeObject(forKey: key)
+
+        switch sessionType.baseType {
+        case .receive:
+            pausedReceiveSession = nil
+        case .send:
+            pausedSendSession = nil
+        }
+    }
+
+    func pausedSession(for sessionType: SessionType) -> PausedSession? {
+        switch sessionType.baseType {
+        case .receive:
+            return pausedReceiveSession
+        case .send:
+            return pausedSendSession
+        }
+    }
+
     // MARK: Private
 
     private let key = "studentProgress"
+    private let pausedReceiveKey = "pausedReceiveSession"
+    private let pausedSendKey = "pausedSendSession"
     private let defaults: UserDefaults
+
+    private func pausedSessionKey(for baseType: BaseSessionType) -> String {
+        switch baseType {
+        case .receive:
+            return pausedReceiveKey
+        case .send:
+            return pausedSendKey
+        }
+    }
+
+    private func loadPausedSessions() {
+        pausedReceiveSession = loadPausedSession(forKey: pausedReceiveKey)
+        pausedSendSession = loadPausedSession(forKey: pausedSendKey)
+
+        // Clear expired sessions
+        if let receive = pausedReceiveSession, receive.isExpired {
+            clearPausedSession(for: .receive)
+        }
+        if let send = pausedSendSession, send.isExpired {
+            clearPausedSession(for: .send)
+        }
+    }
+
+    private func loadPausedSession(forKey key: String) -> PausedSession? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        do {
+            return try JSONDecoder().decode(PausedSession.self, from: data)
+        } catch {
+            print("Failed to decode paused session: \(error)")
+            return nil
+        }
+    }
 
     /// Update the practice schedule based on session result.
     private func updateSchedule(for progress: inout StudentProgress, result: SessionResult, didAdvance: Bool) {

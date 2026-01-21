@@ -137,7 +137,6 @@ enum GroupGenerator {
             switch sessionType.baseType {
             case .receive: return stat.receiveAttempts > 0
             case .send: return stat.sendAttempts > 0
-            default: return stat.totalAttempts > 0
             }
         }
 
@@ -193,9 +192,6 @@ enum GroupGenerator {
             case .send:
                 attempts = stat.sendAttempts
                 accuracy = stat.sendAccuracy
-            default:
-                attempts = stat.totalAttempts
-                accuracy = stat.combinedAccuracy
             }
 
             guard attempts >= minAttempts else {

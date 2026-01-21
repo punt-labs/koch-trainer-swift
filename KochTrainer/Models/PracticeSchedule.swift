@@ -51,39 +51,35 @@ struct PracticeSchedule: Codable, Equatable {
     /// Level -> date when that level should be reviewed (refresher sessions)
     var levelReviewDates: [Int: Date]
 
-    /// Get next practice date for a session type (uses base type for custom/vocabulary)
-    func nextDate(for sessionType: SessionType) -> Date? {
-        switch sessionType.baseType {
+    /// Get next practice date for a session type
+    func nextDate(for sessionType: BaseSessionType) -> Date? {
+        switch sessionType {
         case .receive: return receiveNextDate
         case .send: return sendNextDate
-        default: return nil
         }
     }
 
-    /// Get interval for a session type (uses base type for custom/vocabulary)
-    func interval(for sessionType: SessionType) -> Double {
-        switch sessionType.baseType {
+    /// Get interval for a session type
+    func interval(for sessionType: BaseSessionType) -> Double {
+        switch sessionType {
         case .receive: return receiveInterval
         case .send: return sendInterval
-        default: return 1.0
         }
     }
 
-    /// Set next practice date for a session type (uses base type for custom/vocabulary)
-    mutating func setNextDate(_ date: Date?, for sessionType: SessionType) {
-        switch sessionType.baseType {
+    /// Set next practice date for a session type
+    mutating func setNextDate(_ date: Date?, for sessionType: BaseSessionType) {
+        switch sessionType {
         case .receive: receiveNextDate = date
         case .send: sendNextDate = date
-        default: break
         }
     }
 
-    /// Set interval for a session type (uses base type for custom/vocabulary)
-    mutating func setInterval(_ interval: Double, for sessionType: SessionType) {
-        switch sessionType.baseType {
+    /// Set interval for a session type
+    mutating func setInterval(_ interval: Double, for sessionType: BaseSessionType) {
+        switch sessionType {
         case .receive: receiveInterval = interval
         case .send: sendInterval = interval
-        default: break
         }
     }
 }

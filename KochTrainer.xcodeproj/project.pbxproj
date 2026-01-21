@@ -19,6 +19,7 @@
 		15BB7D719F088E992E2978C8 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0CC5DAE4E508B528159648 /* ButtonStyles.swift */; };
 		18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC1C1F63E0D2663FED5D7BB /* SendTrainingView.swift */; };
 		1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB4886489BF491D3156CA3 /* SettingsView.swift */; };
+		20B9FD5D2D772C067CE4CDF1 /* PausedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2954CF1027D368A87B4474 /* PausedSession.swift */; };
 		29F26F4BABB4F2C644CDCC48 /* ToneGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 383D96DE00AC3BFBDF1CE172 /* ToneGeneratorTests.swift */; };
 		2BBF8A4F8DF9913922139270 /* ReceiveTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */; };
 		2FE91C024BFA87E204D75206 /* MorseAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */; };
@@ -37,6 +38,7 @@
 		5FB1E254B8ED7E4982EF0375 /* StreakCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F276096EB4A5A2B87158ADA /* StreakCalculator.swift */; };
 		5FF043B6E497C3499008FDC4 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5809AFCCFD6E36E491F1411E /* WhatsNewView.swift */; };
 		6906226FBD5357293714E929 /* MorseCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */; };
+		6926CAFE0A66E17ED418A11E /* PausedSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E6556A3CBE5C091DBF2739 /* PausedSessionTests.swift */; };
 		69FEED19449943623183DA30 /* QSOSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A595D8E54B39F3D8F4B46685 /* QSOSessionView.swift */; };
 		6D9F252591FB2193CF59E786 /* VirtualStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C19546866846BD084D6E01 /* VirtualStation.swift */; };
 		718342D8BAA896E1D49AE80A /* VocabularyTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695EF4BBFCDACBB7FAE88254 /* VocabularyTrainingViewModelTests.swift */; };
@@ -137,9 +139,11 @@
 		5F276096EB4A5A2B87158ADA /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		61646CC951F313ADD0B6F32A /* QSOStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOStateTests.swift; sourceTree = "<group>"; };
 		65AA21DEA3C5F0E9CF6FCECF /* QSOEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOEngine.swift; sourceTree = "<group>"; };
+		66E6556A3CBE5C091DBF2739 /* PausedSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PausedSessionTests.swift; sourceTree = "<group>"; };
 		67A2DEA8E0296612058B96AC /* MorseQSOView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseQSOView.swift; sourceTree = "<group>"; };
 		68314A69DCAAEBF19B178525 /* VocabularyTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTrainingView.swift; sourceTree = "<group>"; };
 		695EF4BBFCDACBB7FAE88254 /* VocabularyTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTrainingViewModelTests.swift; sourceTree = "<group>"; };
+		6B2954CF1027D368A87B4474 /* PausedSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PausedSession.swift; sourceTree = "<group>"; };
 		6C33288E0802408B6CED9143 /* CallsignGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsignGenerator.swift; sourceTree = "<group>"; };
 		6CA57C4635A10132B6514C82 /* GroupGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupGenerator.swift; sourceTree = "<group>"; };
 		6CD09C44BCD391959078B978 /* StudentProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgressTests.swift; sourceTree = "<group>"; };
@@ -359,6 +363,7 @@
 			children = (
 				201572E255508434A27317A7 /* QSO */,
 				119C8F4AF07B70E5FC5C9441 /* MorseCodeTests.swift */,
+				66E6556A3CBE5C091DBF2739 /* PausedSessionTests.swift */,
 				61646CC951F313ADD0B6F32A /* QSOStateTests.swift */,
 				F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */,
 				6CD09C44BCD391959078B978 /* StudentProgressTests.swift */,
@@ -375,6 +380,7 @@
 				F30E39178817F40F4AA07D72 /* AppSettings.swift */,
 				8505513FAC9BA060C1AD4B2B /* MorseCode.swift */,
 				AC37A38805458CDFFB61E5D8 /* NotificationSettings.swift */,
+				6B2954CF1027D368A87B4474 /* PausedSession.swift */,
 				42E9C5CC48B26ED90748F52F /* PracticeSchedule.swift */,
 				03D7ADDFD818AD9C12165E74 /* SessionResult.swift */,
 				85CD768AEED253F0A22D4D6B /* StudentProgress.swift */,
@@ -616,6 +622,7 @@
 				FF61A895951D3FC1A2BCF635 /* MorseQSOViewModel.swift in Sources */,
 				00A6783189E809BED31501C6 /* NotificationManager.swift in Sources */,
 				F4707BCED852ABC5F468F3B2 /* NotificationSettings.swift in Sources */,
+				20B9FD5D2D772C067CE4CDF1 /* PausedSession.swift in Sources */,
 				14CAB408E99A099B40BDD169 /* PracticeSchedule.swift in Sources */,
 				F1845A8517A1BF93FD2D0B0F /* PracticeView.swift in Sources */,
 				15703CEB48034421653A52D1 /* ProficiencyRingView.swift in Sources */,
@@ -666,6 +673,7 @@
 				FADE38F6C3DAF2079797E672 /* MorseQSOResultTests.swift in Sources */,
 				E7A14873B055B84CAA99DA92 /* MorseQSOViewModelTests.swift in Sources */,
 				048E5C9BFB53764A7B87AC53 /* NotificationManagerTests.swift in Sources */,
+				6926CAFE0A66E17ED418A11E /* PausedSessionTests.swift in Sources */,
 				C233FD0E9146D9F38934A581 /* ProgressStoreTests.swift in Sources */,
 				1480A9FC477063DF298C6FD4 /* QSOEngineTests.swift in Sources */,
 				9212E6AD03F9E860122FAA37 /* QSOStateTests.swift in Sources */,
