@@ -105,15 +105,21 @@ final class QSOEnginePhaseTests: XCTestCase {
         XCTAssertEqual(engine.state.transcript.first?.text, "CQ CQ DE W5ABC")
     }
 
-    func testProcessUserInputFromSigningToCompleted() async {
+    func testProcessUserInputCompletesContestQSO() async {
         let mockAudio = MockAudioEngine()
         let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
 
-        // Manually set phase to signing
-        engine.startQSO()
-        _ = await engine.processUserInput("CQ CQ DE W5ABC", playAudio: false)
-        // After several exchanges, get to signing phase manually is complex
-        // Test the signing → completed transition directly by checking the code logic
+        // Start with AI calling CQ - puts us in receivedCall
+        _ = engine.startWithAICQ()
+        XCTAssertEqual(engine.state.phase, .receivedCall)
+
+        // User responds with exchange - transitions through awaitingExchange to exchangeReceived
+        _ = await engine.processUserInput("\(engine.station.callsign) DE W5ABC 599 001", playAudio: false)
+        XCTAssertEqual(engine.state.phase, .exchangeReceived)
+
+        // User sends sign-off - contest style goes to signing, AI responds, then completed
+        _ = await engine.processUserInput("TU 73", playAudio: false)
+        XCTAssertEqual(engine.state.phase, .completed)
     }
 
     // MARK: - configureAudio Tests
@@ -183,33 +189,40 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     // MARK: - Validation Result Tests
 
-    func testValidationResultUpdatedOnInput() async {
+    func testValidationResultValidForCorrectInput() async {
         let mockAudio = MockAudioEngine()
         let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
         engine.startQSO()
 
         _ = await engine.processUserInput("CQ CQ DE W5ABC K", playAudio: false)
 
-        // Validation result should be updated (may be valid or have suggestions)
-        // Just verify it's accessible
-        _ = engine.lastValidationResult
+        XCTAssertEqual(engine.lastValidationResult, .valid)
     }
 
-    // MARK: - Rag Chew Style Tests
+    func testValidationResultInvalidForIncorrectInput() async {
+        let mockAudio = MockAudioEngine()
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        engine.startQSO()
 
-    func testRagChewStyleAllowsMoreExchanges() async {
+        // In callingCQ phase, input must contain "CQ" and callsign
+        _ = await engine.processUserInput("HELLO WORLD", playAudio: false)
+
+        XCTAssertEqual(engine.lastValidationResult, .invalid(hint: "Include 'CQ' and your callsign"))
+    }
+
+    // MARK: - Style Initialization Tests
+
+    func testRagChewStyleInitialization() {
         let mockAudio = MockAudioEngine()
         let engine = QSOEngine(style: .ragChew, myCallsign: "W5ABC", audioEngine: mockAudio)
 
-        _ = engine.startWithAICQ()
         XCTAssertEqual(engine.state.style, .ragChew)
     }
 
-    func testContestStyleQuickExchange() async {
+    func testContestStyleInitialization() {
         let mockAudio = MockAudioEngine()
         let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
 
-        _ = engine.startWithAICQ()
         XCTAssertEqual(engine.state.style, .contest)
     }
 }
