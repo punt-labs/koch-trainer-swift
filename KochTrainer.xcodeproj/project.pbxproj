@@ -81,6 +81,7 @@
 		AF22771ABDED2406C7AEEDD2 /* StudentProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD09C44BCD391959078B978 /* StudentProgressTests.swift */; };
 		B23DA9930048CC728EE1644C /* MorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7798C72A68405B53C0541B1 /* MorseDecoder.swift */; };
 		B3F8C98C2B7A8FD724F1E07A /* AccessibilityAnnouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3371933ADBC0C0E9FFA33DA /* AccessibilityAnnouncer.swift */; };
+		B3F8C98D2B7A8FD724F1E07A /* AccessibilityAnnouncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3371934ADBC0C0E9FFA33DA /* AccessibilityAnnouncerTests.swift */; };
 		B4B344A5F10DB214363B9606 /* SessionResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */; };
 		B4BF7DABC40D6E89F05B03EF /* VocabularyTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9A8860F89210C47A628B0C /* VocabularyTrainingViewModel.swift */; };
 		B833E93C2551FC913AB96D4E /* BackupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6D06DF663885F7A8197F50 /* BackupManager.swift */; };
