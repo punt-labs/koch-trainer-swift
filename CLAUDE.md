@@ -331,7 +331,8 @@ This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendl
 
 ```bash
 # Finding work
-bd ready                    # Show issues ready to work (no blockers)
+bd ready                    # Show issues ready to work (default: 10 results)
+bd ready --limit=100        # Show more results
 bd list --status=open       # All open issues
 bd show <id>                # View issue details with dependencies
 
@@ -411,7 +412,7 @@ cd ~/Coding/koch-trainer-worktrees/feature-foo
 
 **1. Find and claim work:**
 ```bash
-bd ready                              # Show available work
+bd ready --limit=100                  # Show available work
 bd show <id>                          # Review issue details
 bd update <id> --status=in_progress   # Claim it
 ```
