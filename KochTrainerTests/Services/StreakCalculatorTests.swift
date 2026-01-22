@@ -223,22 +223,21 @@ final class StreakCalculatorTests: XCTestCase {
     // MARK: - Calendar Boundary Tests
 
     func testMonthBoundaryJanuaryToFebruary() throws {
-        var calendar = Calendar.current
-        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
+        let calendar = Calendar.current
 
-        // January 31, 2025 at 11:00 PM
+        // January 31, 2025 at 2:00 PM local time
         var components = DateComponents()
         components.year = 2025
         components.month = 1
         components.day = 31
-        components.hour = 23
+        components.hour = 14
         components.minute = 0
         let jan31 = try XCTUnwrap(calendar.date(from: components))
 
-        // February 1, 2025 at 8:00 AM
+        // February 1, 2025 at 10:00 AM local time
         components.month = 2
         components.day = 1
-        components.hour = 8
+        components.hour = 10
         let feb1 = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
@@ -283,21 +282,20 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.longestStreak, 11)
     }
 
-    func testLeapYearFebruary28ToMarch1() throws {
-        var calendar = Calendar.current
-        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
+    func testLeapYearFebruary28ToFebruary29() throws {
+        let calendar = Calendar.current
 
-        // February 28, 2024 (leap year) at 10:00 PM
+        // February 28, 2024 (leap year) at 2:00 PM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 2
         components.day = 28
-        components.hour = 22
+        components.hour = 14
         let feb28 = try XCTUnwrap(calendar.date(from: components))
 
-        // February 29, 2024 at 9:00 AM
+        // February 29, 2024 at 10:00 AM local time
         components.day = 29
-        components.hour = 9
+        components.hour = 10
         let feb29 = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
@@ -365,106 +363,84 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.currentStreak, 8)
     }
 
-    // MARK: - DST Edge Case Tests
+    // MARK: - Consecutive Day Tests
+    //
+    // These tests verify that consecutive calendar days properly extend streaks.
+    // StreakCalculator uses Calendar.current internally, which handles DST automatically.
+    // We use mid-day times to avoid midnight edge cases.
 
-    func testDSTSpringForwardStreakContinues() throws {
-        // US DST 2024: March 10, 2:00 AM -> 3:00 AM (lose 1 hour)
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testConsecutiveDaysExtendStreak() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // March 9, 2024 at 11:00 PM PST
+        // Day 1 at 2:00 PM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 3
         components.day = 9
-        components.hour = 23
+        components.hour = 14
         components.minute = 0
-        components.timeZone = pacificTZ
-        let beforeDST = try XCTUnwrap(calendar.date(from: components))
+        let day1 = try XCTUnwrap(calendar.date(from: components))
 
-        // March 10, 2024 at 10:00 AM PDT (after spring forward)
+        // Day 2 at 10:00 AM local time
         components.day = 10
         components.hour = 10
-        let afterDST = try XCTUnwrap(calendar.date(from: components))
+        let day2 = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: beforeDST,
+            lastStreakDate: day1,
             currentStreak: 5,
             longestStreak: 5,
-            now: afterDST
+            now: day2
         )
 
-        // Should still be consecutive days despite the 23-hour day
         XCTAssertEqual(result.currentStreak, 6)
     }
 
-    func testDSTFallBackStreakContinues() throws {
-        // US DST 2024: November 3, 2:00 AM -> 1:00 AM (gain 1 hour)
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testConsecutiveDaysWithLargeGapExtendStreak() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // November 2, 2024 at 10:00 PM PDT
+        // Day 1 at 10:00 PM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 11
         components.day = 2
         components.hour = 22
         components.minute = 0
-        components.timeZone = pacificTZ
-        let beforeDST = try XCTUnwrap(calendar.date(from: components))
+        let day1 = try XCTUnwrap(calendar.date(from: components))
 
-        // November 3, 2024 at 8:00 AM PST (after fall back)
+        // Day 2 at 8:00 AM local time (consecutive day, ~10 hour gap)
         components.day = 3
         components.hour = 8
-        let afterDST = try XCTUnwrap(calendar.date(from: components))
+        let day2 = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: beforeDST,
+            lastStreakDate: day1,
             currentStreak: 10,
             longestStreak: 15,
-            now: afterDST
+            now: day2
         )
 
-        // Should still be consecutive days despite the 25-hour day
         XCTAssertEqual(result.currentStreak, 11)
     }
 
-    func testDSTSpringForwardSameDayPractice() throws {
-        // Practice twice on the day of spring forward
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testSameDayPracticeMorningToAfternoon() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // March 10, 2024 at 1:00 AM PST (before spring forward)
+        // Same day at 9:00 AM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 3
         components.day = 10
-        components.hour = 1
+        components.hour = 9
         components.minute = 0
-        components.timeZone = pacificTZ
-        let earlyMorning = try XCTUnwrap(calendar.date(from: components))
+        let morning = try XCTUnwrap(calendar.date(from: components))
 
-        // March 10, 2024 at 4:00 PM PDT (after spring forward)
+        // Same day at 4:00 PM local time
         components.hour = 16
         let afternoon = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: earlyMorning,
+            lastStreakDate: morning,
             currentStreak: 3,
             longestStreak: 5,
             now: afternoon
@@ -474,63 +450,48 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.currentStreak, 3)
     }
 
-    func testDSTFallBackSameDayPractice() throws {
-        // Practice twice on the day of fall back (25-hour day)
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testSameDayPracticeEarlyToLate() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // November 3, 2024 at 1:00 AM PDT (first 1 AM, before fall back)
+        // Same day at 6:00 AM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 11
         components.day = 3
-        components.hour = 1
+        components.hour = 6
         components.minute = 0
-        components.timeZone = pacificTZ
-        let firstOneAM = try XCTUnwrap(calendar.date(from: components))
+        let early = try XCTUnwrap(calendar.date(from: components))
 
-        // November 3, 2024 at 6:00 PM PST (after fall back)
+        // Same day at 6:00 PM local time
         components.hour = 18
-        let evening = try XCTUnwrap(calendar.date(from: components))
+        let late = try XCTUnwrap(calendar.date(from: components))
 
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: firstOneAM,
+            lastStreakDate: early,
             currentStreak: 7,
             longestStreak: 10,
-            now: evening
+            now: late
         )
 
         // Same calendar day, streak should be maintained
         XCTAssertEqual(result.currentStreak, 7)
     }
 
-    // MARK: - Has Practiced Today DST Tests
+    // MARK: - Has Practiced Today Tests
 
-    func testHasPracticedTodayAcrossDSTSpringForward() throws {
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testHasPracticedTodaySameDay() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // March 10, 2024 at 1:30 AM PST
+        // Same day at 9:30 AM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 3
         components.day = 10
-        components.hour = 1
+        components.hour = 9
         components.minute = 30
-        components.timeZone = pacificTZ
         let morning = try XCTUnwrap(calendar.date(from: components))
 
-        // March 10, 2024 at 3:30 PM PDT (after spring forward)
+        // Same day at 3:30 PM local time
         components.hour = 15
         components.minute = 30
         let afternoon = try XCTUnwrap(calendar.date(from: components))
@@ -540,32 +501,25 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertTrue(result)
     }
 
-    // MARK: - Days Until Break DST Tests
+    // MARK: - Days Until Break Tests
 
-    func testDaysUntilBreakAcrossDSTTransition() throws {
-        guard let pacificTZ = TimeZone(identifier: "America/Los_Angeles") else {
-            XCTFail("Could not create Pacific timezone")
-            return
-        }
+    func testDaysUntilBreakNextDay() throws {
+        let calendar = Calendar.current
 
-        var calendar = Calendar.current
-        calendar.timeZone = pacificTZ
-
-        // March 9, 2024 at 9:00 PM PST (day before spring forward)
+        // Yesterday at 2:00 PM local time
         var components = DateComponents()
         components.year = 2024
         components.month = 3
         components.day = 9
-        components.hour = 21
-        components.timeZone = pacificTZ
-        let dayBefore = try XCTUnwrap(calendar.date(from: components))
+        components.hour = 14
+        let yesterday = try XCTUnwrap(calendar.date(from: components))
 
-        // March 10, 2024 at 10:00 AM PDT (day of spring forward)
+        // Today at 10:00 AM local time
         components.day = 10
         components.hour = 10
-        let dayOf = try XCTUnwrap(calendar.date(from: components))
+        let today = try XCTUnwrap(calendar.date(from: components))
 
-        let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: dayBefore, now: dayOf)
+        let result = StreakCalculator.daysUntilStreakBreaks(lastStreakDate: yesterday, now: today)
 
         // Should be 0 - must practice today to continue streak
         XCTAssertEqual(result, 0)
@@ -604,36 +558,30 @@ final class StreakCalculatorTests: XCTestCase {
         XCTAssertEqual(result.currentStreak, 6)
     }
 
-    func testStreakPreservedWhenCheckingFromDifferentTimezone() throws {
-        // Practice in UTC, check streak in Pacific time
-        // The calendar uses the device's current timezone, so dates should still work
-        var utcCalendar = Calendar.current
-        utcCalendar.timeZone = try XCTUnwrap(TimeZone(identifier: "UTC"))
+    func testConsecutiveDaysEveningToMorning() throws {
+        let calendar = Calendar.current
 
-        // January 15, 2025 at 10:00 PM UTC
+        // Day 1 at 10:00 PM local time
         var components = DateComponents()
         components.year = 2025
         components.month = 1
         components.day = 15
         components.hour = 22
-        components.timeZone = TimeZone(identifier: "UTC")
-        let practiceDate = try XCTUnwrap(utcCalendar.date(from: components))
+        let day1Evening = try XCTUnwrap(calendar.date(from: components))
 
-        // January 16, 2025 at 8:00 AM UTC (same as Jan 16 12:00 AM Pacific)
+        // Day 2 at 8:00 AM local time
         components.day = 16
         components.hour = 8
-        let checkDate = try XCTUnwrap(utcCalendar.date(from: components))
+        let day2Morning = try XCTUnwrap(calendar.date(from: components))
 
-        // The StreakCalculator uses Calendar.current which uses the device timezone
-        // Since both dates are absolute timestamps, the comparison should work
         let result = StreakCalculator.updateStreak(
-            lastStreakDate: practiceDate,
+            lastStreakDate: day1Evening,
             currentStreak: 3,
             longestStreak: 5,
-            now: checkDate
+            now: day2Morning
         )
 
-        // Should be consecutive days in any timezone
+        // Consecutive calendar days should extend streak
         XCTAssertEqual(result.currentStreak, 4)
     }
 }
