@@ -58,10 +58,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     /// Current ear training level (1-5)
     private(set) var currentLevel: Int = 1
 
-    /// Minimum attempts scales with character count (5 per character, floor of 15)
-    var minimumAttemptsForProficiency: Int {
-        max(15, 5 * introCharacters.count)
-    }
+    /// Fixed minimum attempts for proficiency check
+    let minimumAttemptsForProficiency: Int = 20
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -145,9 +143,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
         }
     }
 
@@ -343,15 +340,13 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     private func playDit() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDit()
+            await audioEngine.playDit()
         }
     }
 
     private func playDah() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDah()
+            await audioEngine.playDah()
         }
     }
 }
@@ -437,8 +432,8 @@ extension EarTrainingViewModel {
             if !wasCorrect {
                 // Show feedback briefly, then replay correct pattern
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
-                    await engine.playCharacter(expectedChar)
+                if isPlaying {
+                    await audioEngine.playCharacter(expectedChar)
                 }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
@@ -461,10 +456,9 @@ extension EarTrainingViewModel {
 
         // Play the character audio
         Task {
-            guard let char = targetCharacter,
-                  let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            guard let char = targetCharacter else { return }
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
 
             // After audio finishes, start accepting input and start timer
             isWaitingForInput = true

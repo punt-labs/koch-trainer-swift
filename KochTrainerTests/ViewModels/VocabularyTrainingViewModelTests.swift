@@ -46,6 +46,10 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
         playGroupCalls = []
         stopCalled = false
     }
+
+    func playDit() async {}
+
+    func playDah() async {}
 }
 
 // MARK: - VocabularyTrainingViewModelTests

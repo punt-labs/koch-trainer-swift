@@ -149,9 +149,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
         }
     }
 
@@ -379,15 +378,13 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     private func playDit() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDit()
+            await audioEngine.playDit()
         }
     }
 
     private func playDah() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDah()
+            await audioEngine.playDah()
         }
     }
 }
@@ -462,7 +459,7 @@ extension SendTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playCharacter(expected) }
+                if isPlaying { await audioEngine.playCharacter(expected) }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

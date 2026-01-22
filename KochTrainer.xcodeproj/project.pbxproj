@@ -46,6 +46,7 @@
 		6D9F252591FB2193CF59E786 /* VirtualStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C19546866846BD084D6E01 /* VirtualStation.swift */; };
 		718342D8BAA896E1D49AE80A /* VocabularyTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695EF4BBFCDACBB7FAE88254 /* VocabularyTrainingViewModelTests.swift */; };
 		733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */; };
+		77492FA14CA23C6DA87CAAB8 /* EarTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CCBC6CC72486A7377AC2F93 /* EarTrainingViewModelTests.swift */; };
 		7955259369B40EEB0B631BB7 /* ReceiveTrainingViewModelInputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3268C3EF73321AADA6C7CA54 /* ReceiveTrainingViewModelInputTests.swift */; };
 		7B8E681589D1D821EA4D2A32 /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF220C49CB6660F74CB54C2 /* StreakCalculatorTests.swift */; };
 		7BA86FFFC62FBCEFE6B59F40 /* QSOEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65AA21DEA3C5F0E9CF6FCECF /* QSOEngine.swift */; };
@@ -144,6 +145,7 @@
 		4F5BB57C072242009B88EF52 /* VocabularySetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySetTests.swift; sourceTree = "<group>"; };
 		52304BFA45E3AB138BDC3DD6 /* SendTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModelTests.swift; sourceTree = "<group>"; };
 		5809AFCCFD6E36E491F1411E /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
+		5CCBC6CC72486A7377AC2F93 /* EarTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarTrainingViewModelTests.swift; sourceTree = "<group>"; };
 		5F276096EB4A5A2B87158ADA /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		5FE85DFEC0A64AB0EB5BB9BF /* GracefulDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GracefulDecoderTests.swift; sourceTree = "<group>"; };
 		61646CC951F313ADD0B6F32A /* QSOStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOStateTests.swift; sourceTree = "<group>"; };
@@ -353,6 +355,7 @@
 		5DB2C71C293C78C678EB405A /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				5CCBC6CC72486A7377AC2F93 /* EarTrainingViewModelTests.swift */,
 				01F6AA0F56542CBF62A84A0D /* MorseQSOViewModelTests.swift */,
 				15D44175E4725C4BC8D71B3B /* QSOViewModelTests.swift */,
 				3268C3EF73321AADA6C7CA54 /* ReceiveTrainingViewModelInputTests.swift */,
@@ -699,6 +702,7 @@
 			files = (
 				AB9D02A4BA7E3F0221419220 /* BackupManagerTests.swift in Sources */,
 				B88424C52862FABAA508BB05 /* BandConditionsProcessorTests.swift in Sources */,
+				77492FA14CA23C6DA87CAAB8 /* EarTrainingViewModelTests.swift in Sources */,
 				85DE58D7575B88D7D639C95D /* GracefulDecoderTests.swift in Sources */,
 				871CC10C74706F8EDAB701DE /* GroupGeneratorTests.swift in Sources */,
 				836EED5ADA714DFC42A5A2F0 /* IntervalCalculatorTests.swift in Sources */,

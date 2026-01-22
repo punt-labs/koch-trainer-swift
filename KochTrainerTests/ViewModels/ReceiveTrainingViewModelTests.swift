@@ -48,6 +48,14 @@ final class MockAudioEngine: AudioEngineProtocol {
         playGroupCalls = []
         stopCalled = false
     }
+
+    func playDit() async {
+        // No-op for testing
+    }
+
+    func playDah() async {
+        // No-op for testing
+    }
 }
 
 // MARK: - ReceiveTrainingViewModelTests
