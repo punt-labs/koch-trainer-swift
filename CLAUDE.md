@@ -576,6 +576,57 @@ Run `bd sync` before and after merging or switching contexts to ensure issue sta
 
 For complete separation of beads from code history, you can use an external beads repo with direnv. See `.envrc.example` for configuration. This adds complexity and is not recommended for single-developer projects.
 
+## Z Specification Workflow
+
+This project uses formal Z specifications (`docs/koch_trainer.tex`) to model stateful behavior. The z-spec plugin (`/z`) integrates formal methods into development.
+
+### Spec Location and Scope
+
+- **File**: `docs/koch_trainer.tex`
+- **Current scope**: Persistent state (levels, intervals, streaks, character stats)
+- **Planned extension**: Session flow and training phases
+
+### Commands
+
+| Command | When to Use |
+|---------|-------------|
+| `/z check docs/koch_trainer.tex` | After editing spec—verify type-correctness |
+| `/z test docs/koch_trainer.tex` | Animate operations, verify behavior |
+| `/z model2code docs/koch_trainer.tex swift` | Generate code from new spec operations |
+| `/z code2model <file>` | Audit existing code against spec |
+
+### Workflow by Scenario
+
+**Adding new stateful behavior:**
+1. Edit spec to add schema (or propose changes for review)
+2. `/z check` to verify type-correctness
+3. `/z model2code` to generate implementation scaffold
+4. Write tests, then production code
+
+**Modifying existing behavior:**
+1. Propose spec change to clarify intent
+2. Review and edit spec together
+3. `/z check` to validate
+4. Update code to match spec
+
+**Verifying code-spec alignment:**
+1. `/z code2model` on changed files
+2. Compare generated spec against `koch_trainer.tex`
+3. Resolve discrepancies case-by-case
+
+### Spec-Code Alignment Principles
+
+- **Case-by-case resolution**: No blanket rule for whether spec or code is authoritative
+- **Spec clarifies intent**: Use spec changes to align on behavior before coding
+- **Implementation details in code**: Things like floating-point vs integer can differ if semantically equivalent
+- **Document unmodeled behavior**: Note in spec what's intentionally left to implementation
+
+### Known Discrepancies
+
+| Spec | Code | Status |
+|------|------|--------|
+| `receiveInterval: \nat` | `Double` | Acceptable—could use millis in future |
+
 ## Standards
 
 - Do not suggest skipping tests, lowering coverage targets, or ignoring failures.

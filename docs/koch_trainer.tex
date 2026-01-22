@@ -122,13 +122,19 @@ maxLevel : \nat \\
 minLevel : \nat \\
 maxInterval : \nat \\
 minInterval : \nat \\
-advanceThreshold : \nat
+advanceThreshold : \nat \\
+habitFormationDays : \nat \\
+habitMaxInterval : \nat \\
+missedPracticeMultiplier : \nat
 \where
 maxLevel = 26 \\
 minLevel = 1 \\
 maxInterval = 30 \\
 minInterval = 1 \\
-advanceThreshold = 90
+advanceThreshold = 90 \\
+habitFormationDays = 14 \\
+habitMaxInterval = 2 \\
+missedPracticeMultiplier = 2
 \end{axdef}
 
 The advancement threshold of 90\% accuracy over a minimum of 20 attempts ensures
@@ -388,14 +394,33 @@ The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
 \Delta State \\
-accuracy? : \nat
+accuracy? : \nat \\
+daysSinceStart? : \nat
 \where
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
-(receiveInterval * 2 \leq maxInterval \land
+\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
+    \THEN habitMaxInterval \ELSE maxInterval @
+(receiveInterval * 2 \leq effectiveMax \land
     receiveInterval' = receiveInterval * 2) \lor
-(receiveInterval * 2 > maxInterval \land
-    receiveInterval' = maxInterval) \\
+(receiveInterval * 2 > effectiveMax \land
+    receiveInterval' = effectiveMax) \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\begin{schema}{UpdateReceiveIntervalMedium}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq 70 \\
+accuracy? < advanceThreshold \\
+receiveInterval' = receiveInterval \\
 sendInterval' = sendInterval \\
 currentStreak' = currentStreak \\
 longestStreak' = longestStreak \\
@@ -410,7 +435,6 @@ sessionCount' = sessionCount
 accuracy? : \nat
 \where
 accuracy? < 70 \\
-accuracy? \leq 100 \\
 receiveInterval' = minInterval \\
 sendInterval' = sendInterval \\
 currentStreak' = currentStreak \\
@@ -421,11 +445,99 @@ earLevel' = earLevel \\
 sessionCount' = sessionCount
 \end{schema}
 
-Note: The implementation includes additional rules not modeled here:
-\begin{itemize}
-\item First 14 days: intervals capped at 2 days (habit formation period)
-\item Missed $> 2\times$ interval: reset to 1 day (skill decay)
-\end{itemize}
+The three interval schemas partition the accuracy range: high ($\geq 90\%$),
+medium ($70\%$--$89\%$), and low ($< 70\%$). The \emph{daysSinceStart?} input
+allows the habit formation cap to be applied during the first 14 days.
+
+Symmetric operations exist for send training:
+
+\begin{schema}{UpdateSendIntervalHigh}
+\Delta State \\
+accuracy? : \nat \\
+daysSinceStart? : \nat
+\where
+accuracy? \geq advanceThreshold \\
+accuracy? \leq 100 \\
+\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
+    \THEN habitMaxInterval \ELSE maxInterval @
+(sendInterval * 2 \leq effectiveMax \land
+    sendInterval' = sendInterval * 2) \lor
+(sendInterval * 2 > effectiveMax \land
+    sendInterval' = effectiveMax) \\
+receiveInterval' = receiveInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\begin{schema}{UpdateSendIntervalMedium}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq 70 \\
+accuracy? < advanceThreshold \\
+sendInterval' = sendInterval \\
+receiveInterval' = receiveInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\begin{schema}{UpdateSendIntervalLow}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? < 70 \\
+sendInterval' = minInterval \\
+receiveInterval' = receiveInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\subsection{Missed Practice Reset}
+
+If a student misses practice for more than twice their current interval,
+skill decay is assumed and the interval resets to daily practice.
+
+\begin{schema}{ResetReceiveIntervalOnMissedPractice}
+\Delta State \\
+daysSinceLastPractice? : \nat
+\where
+daysSinceLastPractice? > receiveInterval * missedPracticeMultiplier \\
+receiveInterval' = minInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\begin{schema}{ResetSendIntervalOnMissedPractice}
+\Delta State \\
+daysSinceLastPractice? : \nat
+\where
+daysSinceLastPractice? > sendInterval * missedPracticeMultiplier \\
+sendInterval' = minInterval \\
+receiveInterval' = receiveInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
 
 \subsection{Streak Tracking}
 
