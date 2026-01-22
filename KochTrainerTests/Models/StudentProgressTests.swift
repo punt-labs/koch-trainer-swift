@@ -286,6 +286,258 @@ final class StudentProgressTests: XCTestCase {
         XCTAssertEqual(decoded.receiveLevel, 7)
         XCTAssertEqual(decoded.sendLevel, 7)
     }
+
+    // MARK: - Ear Training Level Tests
+
+    func testDefaultEarTrainingLevel() {
+        let progress = StudentProgress()
+
+        XCTAssertEqual(progress.earTrainingLevel, 1)
+    }
+
+    func testEarTrainingLevelInitialization() {
+        let progress = StudentProgress(earTrainingLevel: 3)
+
+        XCTAssertEqual(progress.earTrainingLevel, 3)
+    }
+
+    func testEarTrainingLevelClampsAbove5() {
+        let progress = StudentProgress(earTrainingLevel: 10)
+
+        XCTAssertEqual(progress.earTrainingLevel, 5)
+    }
+
+    func testEarTrainingLevelClampsBelowOne() {
+        let progress = StudentProgress(earTrainingLevel: -2)
+
+        XCTAssertEqual(progress.earTrainingLevel, 1)
+    }
+
+    func testEncodingDecodingEarTrainingLevel() throws {
+        let progress = StudentProgress(earTrainingLevel: 4)
+
+        let encoded = try JSONEncoder().encode(progress)
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
+
+        XCTAssertEqual(decoded.earTrainingLevel, 4)
+    }
+
+    func testMigrationDefaultsEarTrainingLevelToOne() throws {
+        // Simulate old format without earTrainingLevel
+        let oldJson = """
+        {
+            "receiveLevel": 5,
+            "sendLevel": 3,
+            "characterStats": {},
+            "sessionHistory": [],
+            "startDate": 0
+        }
+        """
+        let data = try XCTUnwrap(oldJson.data(using: .utf8))
+
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: data)
+
+        XCTAssertEqual(decoded.earTrainingLevel, 1)
+    }
+
+    // MARK: - Word Stats Tests
+
+    func testDefaultWordStatsIsEmpty() {
+        let progress = StudentProgress()
+
+        XCTAssertTrue(progress.wordStats.isEmpty)
+    }
+
+    func testWordStatsInitialization() {
+        let stats = ["CQ": WordStat(receiveAttempts: 10, receiveCorrect: 8)]
+        let progress = StudentProgress(wordStats: stats)
+
+        XCTAssertEqual(progress.wordStats["CQ"]?.receiveAttempts, 10)
+        XCTAssertEqual(progress.wordStats["CQ"]?.receiveCorrect, 8)
+    }
+
+    func testEncodingDecodingWordStats() throws {
+        var progress = StudentProgress()
+        progress.wordStats["CQ"] = WordStat(receiveAttempts: 5, receiveCorrect: 4)
+        progress.wordStats["DE"] = WordStat(sendAttempts: 3, sendCorrect: 2)
+
+        let encoded = try JSONEncoder().encode(progress)
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
+
+        XCTAssertEqual(decoded.wordStats["CQ"]?.receiveAttempts, 5)
+        XCTAssertEqual(decoded.wordStats["DE"]?.sendAttempts, 3)
+    }
+
+    func testMigrationDefaultsWordStatsToEmpty() throws {
+        // Simulate old format without wordStats
+        let oldJson = """
+        {
+            "receiveLevel": 5,
+            "sendLevel": 3,
+            "characterStats": {},
+            "sessionHistory": [],
+            "startDate": 0
+        }
+        """
+        let data = try XCTUnwrap(oldJson.data(using: .utf8))
+
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: data)
+
+        XCTAssertTrue(decoded.wordStats.isEmpty)
+    }
+
+    // MARK: - Custom Vocabulary Sets Tests
+
+    func testDefaultCustomVocabularySetsIsEmpty() {
+        let progress = StudentProgress()
+
+        XCTAssertTrue(progress.customVocabularySets.isEmpty)
+    }
+
+    func testCustomVocabularySetsInitialization() {
+        let sets = [VocabularySet(name: "My Set", words: ["CQ", "DE"], isBuiltIn: false)]
+        let progress = StudentProgress(customVocabularySets: sets)
+
+        XCTAssertEqual(progress.customVocabularySets.count, 1)
+        XCTAssertEqual(progress.customVocabularySets.first?.name, "My Set")
+    }
+
+    func testEncodingDecodingCustomVocabularySets() throws {
+        var progress = StudentProgress()
+        progress.customVocabularySets = [VocabularySet(name: "Test", words: ["A", "B"])]
+
+        let encoded = try JSONEncoder().encode(progress)
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
+
+        XCTAssertEqual(decoded.customVocabularySets.count, 1)
+        XCTAssertEqual(decoded.customVocabularySets.first?.name, "Test")
+    }
+
+    // MARK: - Session History Tests
+
+    func testUpdateStatsAppendsToSessionHistory() {
+        var progress = StudentProgress()
+        XCTAssertEqual(progress.sessionHistory.count, 0)
+
+        let result1 = SessionResult(
+            sessionType: .receive,
+            duration: 300,
+            totalAttempts: 10,
+            correctCount: 9,
+            characterStats: [:]
+        )
+        progress.updateStats(from: result1)
+        XCTAssertEqual(progress.sessionHistory.count, 1)
+
+        let result2 = SessionResult(
+            sessionType: .send,
+            duration: 200,
+            totalAttempts: 8,
+            correctCount: 7,
+            characterStats: [:]
+        )
+        progress.updateStats(from: result2)
+        XCTAssertEqual(progress.sessionHistory.count, 2)
+    }
+
+    func testUpdateStatsMergesCharacterStats() {
+        var progress = StudentProgress()
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 8)
+
+        let result = SessionResult(
+            sessionType: .receive,
+            duration: 300,
+            totalAttempts: 5,
+            correctCount: 4,
+            characterStats: ["K": CharacterStat(receiveAttempts: 5, receiveCorrect: 5)]
+        )
+        progress.updateStats(from: result)
+
+        XCTAssertEqual(progress.characterStats["K"]?.receiveAttempts, 15)
+        XCTAssertEqual(progress.characterStats["K"]?.receiveCorrect, 13)
+    }
+
+    // MARK: - Calculate Initial Schedule Tests
+
+    func testCalculateInitialScheduleReturnsDefaultForEmptyHistory() {
+        let schedule = StudentProgress.calculateInitialSchedule(from: [], startDate: Date())
+
+        XCTAssertEqual(schedule.receiveInterval, 1.0)
+        XCTAssertEqual(schedule.sendInterval, 1.0)
+        XCTAssertEqual(schedule.currentStreak, 0)
+        XCTAssertEqual(schedule.longestStreak, 0)
+    }
+
+    func testCalculateInitialScheduleCalculatesStreakFromHistory() throws {
+        let calendar = Calendar.current
+        let today = Date()
+        let yesterday = try XCTUnwrap(calendar.date(byAdding: .day, value: -1, to: today))
+
+        let sessions = [
+            SessionResult(
+                sessionType: .receive,
+                duration: 300,
+                totalAttempts: 10,
+                correctCount: 9,
+                characterStats: [:],
+                date: yesterday
+            ),
+            SessionResult(
+                sessionType: .receive,
+                duration: 300,
+                totalAttempts: 10,
+                correctCount: 9,
+                characterStats: [:],
+                date: today
+            )
+        ]
+
+        let schedule = StudentProgress.calculateInitialSchedule(from: sessions, startDate: yesterday)
+
+        // Two consecutive days should give streak of 2
+        XCTAssertEqual(schedule.currentStreak, 2)
+        XCTAssertEqual(schedule.longestStreak, 2)
+    }
+
+    // MARK: - Schema Version Tests
+
+    func testSchemaVersionDefault() {
+        let progress = StudentProgress()
+
+        XCTAssertEqual(progress.schemaVersion, StudentProgress.currentSchemaVersion)
+    }
+
+    func testSchemaVersionEncodedAndDecoded() throws {
+        let progress = StudentProgress(schemaVersion: 1)
+
+        let encoded = try JSONEncoder().encode(progress)
+        let decoded = try JSONDecoder().decode(StudentProgress.self, from: encoded)
+
+        XCTAssertEqual(decoded.schemaVersion, 1)
+    }
+
+    // MARK: - Overall Accuracy Direction-Specific Tests
+
+    func testOverallAccuracyForReceiveWithNoAttempts() {
+        let progress = StudentProgress()
+
+        XCTAssertEqual(progress.overallAccuracy(for: .receive), 0)
+    }
+
+    func testOverallAccuracyForSendWithNoAttempts() {
+        let progress = StudentProgress()
+
+        XCTAssertEqual(progress.overallAccuracy(for: .send), 0)
+    }
+
+    func testOverallAccuracyCombinesMultipleCharacters() {
+        var progress = StudentProgress()
+        progress.characterStats["K"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 10)
+        progress.characterStats["M"] = CharacterStat(receiveAttempts: 10, receiveCorrect: 5)
+
+        // 15/20 = 0.75
+        XCTAssertEqual(progress.overallAccuracy(for: .receive), 0.75, accuracy: 0.001)
+    }
 }
 
 // MARK: - CharacterStatTests
@@ -388,5 +640,109 @@ final class CharacterStatTests: XCTestCase {
         XCTAssertEqual(sendStat.sendAttempts, 10)
         XCTAssertEqual(sendStat.sendCorrect, 6)
         XCTAssertEqual(sendStat.receiveAttempts, 0)
+    }
+
+    // MARK: - Ear Training Tests
+
+    func testEarTrainingInitializer() {
+        let stat = CharacterStat(earTrainingAttempts: 15, earTrainingCorrect: 12)
+
+        XCTAssertEqual(stat.earTrainingAttempts, 15)
+        XCTAssertEqual(stat.earTrainingCorrect, 12)
+        XCTAssertEqual(stat.receiveAttempts, 0)
+        XCTAssertEqual(stat.sendAttempts, 0)
+    }
+
+    func testEarTrainingAccuracyWithNoAttempts() {
+        let stat = CharacterStat()
+
+        XCTAssertEqual(stat.earTrainingAccuracy, 0)
+    }
+
+    func testEarTrainingAccuracyCalculation() {
+        let stat = CharacterStat(earTrainingAttempts: 10, earTrainingCorrect: 7)
+
+        XCTAssertEqual(stat.earTrainingAccuracy, 0.7, accuracy: 0.001)
+    }
+
+    func testTotalAttemptsIncludesEarTraining() {
+        let stat = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 8,
+            sendAttempts: 5, sendCorrect: 4,
+            earTrainingAttempts: 8, earTrainingCorrect: 6
+        )
+
+        XCTAssertEqual(stat.totalAttempts, 23)
+        XCTAssertEqual(stat.totalCorrect, 18)
+    }
+
+    func testMergeIncludesEarTraining() {
+        var stat1 = CharacterStat(earTrainingAttempts: 10, earTrainingCorrect: 8)
+        let stat2 = CharacterStat(earTrainingAttempts: 5, earTrainingCorrect: 4)
+
+        stat1.merge(stat2)
+
+        XCTAssertEqual(stat1.earTrainingAttempts, 15)
+        XCTAssertEqual(stat1.earTrainingCorrect, 12)
+    }
+
+    func testMergeUpdatesLastPracticedToLaterDate() throws {
+        let earlierDate = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: Date()))
+        let laterDate = Date()
+
+        var stat1 = CharacterStat(receiveAttempts: 5, receiveCorrect: 4, lastPracticed: earlierDate)
+        let stat2 = CharacterStat(receiveAttempts: 5, receiveCorrect: 4, lastPracticed: laterDate)
+
+        stat1.merge(stat2)
+
+        XCTAssertEqual(stat1.lastPracticed, laterDate)
+    }
+
+    func testMergeKeepsLastPracticedIfNewer() throws {
+        let earlierDate = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: Date()))
+        let laterDate = Date()
+
+        var stat1 = CharacterStat(receiveAttempts: 5, receiveCorrect: 4, lastPracticed: laterDate)
+        let stat2 = CharacterStat(receiveAttempts: 5, receiveCorrect: 4, lastPracticed: earlierDate)
+
+        stat1.merge(stat2)
+
+        XCTAssertEqual(stat1.lastPracticed, laterDate)
+    }
+
+    // MARK: - Codable Tests
+
+    func testEncodingDecodingPreservesEarTraining() throws {
+        let stat = CharacterStat(
+            receiveAttempts: 10, receiveCorrect: 8,
+            sendAttempts: 5, sendCorrect: 4,
+            earTrainingAttempts: 7, earTrainingCorrect: 6
+        )
+
+        let encoded = try JSONEncoder().encode(stat)
+        let decoded = try JSONDecoder().decode(CharacterStat.self, from: encoded)
+
+        XCTAssertEqual(decoded.earTrainingAttempts, 7)
+        XCTAssertEqual(decoded.earTrainingCorrect, 6)
+    }
+
+    func testDecodingLegacyDataDefaultsEarTrainingToZero() throws {
+        // Simulate legacy JSON without ear training fields
+        let legacyJson = """
+        {
+            "receiveAttempts": 10,
+            "receiveCorrect": 8,
+            "sendAttempts": 5,
+            "sendCorrect": 4,
+            "lastPracticed": 0
+        }
+        """
+        let data = try XCTUnwrap(legacyJson.data(using: .utf8))
+
+        let decoded = try JSONDecoder().decode(CharacterStat.self, from: data)
+
+        XCTAssertEqual(decoded.earTrainingAttempts, 0)
+        XCTAssertEqual(decoded.earTrainingCorrect, 0)
+        XCTAssertEqual(decoded.receiveAttempts, 10)
     }
 }
