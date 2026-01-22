@@ -96,9 +96,9 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
             switch element {
             case ".":
-                await toneGenerator.playTone(frequency: frequency, duration: timing.ditDuration)
+                await playToneElement(duration: timing.ditDuration)
             case "-":
-                await toneGenerator.playTone(frequency: frequency, duration: timing.dahDuration)
+                await playToneElement(duration: timing.dahDuration)
             default:
                 continue
             }
@@ -113,13 +113,13 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// Play a single dit (short tone).
     func playDit() async {
         guard !isStopped else { return }
-        await toneGenerator.playTone(frequency: frequency, duration: timing.ditDuration)
+        await playToneElement(duration: timing.ditDuration)
     }
 
     /// Play a single dah (long tone).
     func playDah() async {
         guard !isStopped else { return }
-        await toneGenerator.playTone(frequency: frequency, duration: timing.dahDuration)
+        await playToneElement(duration: timing.dahDuration)
     }
 
     /// Play a group of characters (word or character group).
@@ -168,12 +168,14 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// The audio engine runs continuously with radio mode control.
     func startSession() {
         isStopped = false
+        isSessionActive = true
         toneGenerator.startSession()
     }
 
     /// End the continuous audio session.
     func endSession() {
         isStopped = true
+        isSessionActive = false
         toneGenerator.endSession()
     }
 
@@ -189,10 +191,24 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     private var effectiveSpeed: Int = 12
 
     private var isStopped = false
+    private var isSessionActive = false
 
     /// Timing configuration based on current effective speed
     private var timing: Timing {
         Timing(effectiveWPM: effectiveSpeed)
+    }
+
+    /// Play a tone element using the appropriate mode (continuous or discrete).
+    private func playToneElement(duration: TimeInterval) async {
+        if isSessionActive {
+            // Continuous mode: activate/deactivate tone flag
+            toneGenerator.activateTone(frequency: frequency)
+            await toneGenerator.playSilence(duration: duration)
+            toneGenerator.deactivateTone()
+        } else {
+            // Discrete mode: use playTone which starts/stops audio engine
+            await toneGenerator.playTone(frequency: frequency, duration: duration)
+        }
     }
 
 }
