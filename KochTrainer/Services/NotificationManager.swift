@@ -153,7 +153,12 @@ final class NotificationManager: ObservableObject {
         guard settings.streakRemindersEnabled, schedule.currentStreak >= 3,
               !StreakCalculator.hasPracticedToday(lastStreakDate: schedule.lastStreakDate) else { return }
 
-        let adjusted = adjustForQuietHours(todayAt(hour: 20), settings: settings)
+        // Try today at 8 PM, fall back to tomorrow if today's time has passed
+        var targetDate = todayAt(hour: 20)
+        if targetDate <= Date() {
+            targetDate = tomorrowAt(hour: 20)
+        }
+        let adjusted = adjustForQuietHours(targetDate, settings: settings)
         if shouldSchedule(at: adjusted, existingTimes: scheduledTimes, settings: settings) {
             scheduleStreakReminder(date: adjusted, streak: schedule.currentStreak)
             scheduledTimes.append(adjusted)
