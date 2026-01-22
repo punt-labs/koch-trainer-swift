@@ -623,6 +623,238 @@ sendCorrect' = sendCorrect
 \end{schema}
 
 %==============================================================================
+\section{Session Flow}
+%==============================================================================
+
+This section models the state machine for training sessions. While persistent
+state (levels, streaks, intervals) survives across sessions, session state
+exists only during active training.
+
+\subsection{Session Phase}
+
+A training session progresses through distinct phases:
+
+\begin{zed}
+SessionPhase ::= introduction | training | paused | completed
+\end{zed}
+
+\begin{itemize}
+\item \emph{introduction}: Showing unlocked characters with audio playback
+\item \emph{training}: Active call-and-response practice
+\item \emph{paused}: Session suspended mid-training
+\item \emph{completed}: Session ended, results recorded
+\end{itemize}
+
+\subsection{Session Constants}
+
+\begin{axdef}
+proficiencyThreshold : \nat \\
+baseMinimumAttempts : \nat \\
+attemptsPerCharacter : \nat \\
+responseTimeoutMs : \nat
+\where
+proficiencyThreshold = 90 \\
+baseMinimumAttempts = 15 \\
+attemptsPerCharacter = 5 \\
+responseTimeoutMs = 3000
+\end{axdef}
+
+The proficiency threshold (90\%) matches the level advancement threshold.
+Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
+
+\subsection{Session State}
+
+Session state is separate from persistent progress state. In the implementation,
+this lives in the ViewModel; here we model it as a distinct schema.
+
+\begin{schema}{SessionState}
+phase : SessionPhase \\
+direction : Direction \\
+characterCount : \nat \\
+introIndex : \nat \\
+sessionAttempts : \nat \\
+sessionCorrect : \nat
+\where
+characterCount \geq 1 \\
+characterCount \leq maxLevel \\
+introIndex \leq characterCount \\
+sessionCorrect \leq sessionAttempts \\
+sessionAttempts \leq 1000
+\end{schema}
+
+The \emph{characterCount} is the number of unlocked characters for this session's
+direction (equal to the current level). The \emph{introIndex} tracks progress
+through the introduction phase.
+
+\subsection{Session Initialization}
+
+\begin{schema}{InitSession}
+SessionState' \\
+direction? : Direction \\
+level? : \nat
+\where
+level? \geq minLevel \\
+level? \leq maxLevel \\
+phase' = introduction \\
+direction' = direction? \\
+characterCount' = level? \\
+introIndex' = 0 \\
+sessionAttempts' = 0 \\
+sessionCorrect' = 0
+\end{schema}
+
+A session begins in the introduction phase with the character count set to the
+student's current level for the chosen direction.
+
+\subsection{Introduction Phase Operations}
+
+\begin{schema}{NextIntroCharacter}
+\Delta SessionState
+\where
+phase = introduction \\
+introIndex < characterCount \\
+introIndex' = introIndex + 1 \\
+phase' = phase \\
+direction' = direction \\
+characterCount' = characterCount \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+\begin{schema}{CompleteIntroduction}
+\Delta SessionState
+\where
+phase = introduction \\
+introIndex = characterCount \\
+phase' = training \\
+introIndex' = introIndex \\
+direction' = direction \\
+characterCount' = characterCount \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+When all characters have been shown ($introIndex = characterCount$), the
+session transitions to the training phase.
+
+\subsection{Training Phase Operations}
+
+During training, the student responds to character prompts. Each response
+(correct, incorrect, or timeout) is recorded.
+
+\begin{schema}{RecordCorrectResponse}
+\Delta SessionState
+\where
+phase = training \\
+sessionAttempts' = sessionAttempts + 1 \\
+sessionCorrect' = sessionCorrect + 1 \\
+phase' = phase \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex
+\end{schema}
+
+\begin{schema}{RecordIncorrectResponse}
+\Delta SessionState
+\where
+phase = training \\
+sessionAttempts' = sessionAttempts + 1 \\
+sessionCorrect' = sessionCorrect \\
+phase' = phase \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex
+\end{schema}
+
+A timeout is treated as an incorrect response---the student failed to respond
+within \emph{responseTimeoutMs} (3 seconds).
+
+\subsection{Pause and Resume}
+
+\begin{schema}{PauseSession}
+\Delta SessionState
+\where
+phase = training \\
+phase' = paused \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+\begin{schema}{ResumeSession}
+\Delta SessionState
+\where
+phase = paused \\
+phase' = training \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+Pausing preserves all session state. The implementation persists paused sessions
+to storage so they survive app termination.
+
+\subsection{Proficiency Check}
+
+The session ends automatically when the student achieves proficiency:
+$\geq 90\%$ accuracy over at least $\max(15, 5 \times characterCount)$ attempts.
+
+\begin{schema}{CheckProficiencyMet}
+\Xi SessionState \\
+proficiencyMet! : ZBOOL
+\where
+phase = training \\
+\LET minAttempts == \IF baseMinimumAttempts > attemptsPerCharacter * characterCount
+    \THEN baseMinimumAttempts
+    \ELSE attemptsPerCharacter * characterCount @
+\LET accuracyPercent == (sessionCorrect * 100) \div sessionAttempts @
+(sessionAttempts \geq minAttempts \land accuracyPercent \geq proficiencyThreshold
+    \land proficiencyMet! = ztrue) \lor
+(sessionAttempts < minAttempts \land proficiencyMet! = zfalse) \lor
+(accuracyPercent < proficiencyThreshold \land proficiencyMet! = zfalse)
+\end{schema}
+
+This is a query operation ($\Xi$ indicates no state change). The implementation
+calls this after each response to determine whether to end the session.
+
+\subsection{Session Completion}
+
+\begin{schema}{CompleteSession}
+\Delta SessionState
+\where
+phase = training \\
+phase' = completed \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+When a session completes (either by proficiency or user action), the accumulated
+statistics are transferred to persistent state via $RecordSession$ and the
+relevant $Advance$ and $UpdateInterval$ operations.
+
+\subsection{Session-to-Progress Integration}
+
+The session flow connects to persistent progress through these operations:
+
+\begin{enumerate}
+\item On session completion, calculate accuracy: $sessionCorrect \div sessionAttempts$
+\item If accuracy $\geq 90\%$: invoke $AdvanceReceiveLevel$ or $AdvanceSendLevel$
+\item Based on accuracy tier: invoke appropriate $UpdateInterval$ operation
+\item Invoke $RecordSession$ to increment session count
+\item Update streak via $IncrementStreak$ or $ResetStreak$ based on calendar day
+\end{enumerate}
+
+This integration is orchestrated by the application layer (ProgressStore in the
+implementation) rather than modeled as a single composite operation.
+
+%==============================================================================
 \section{System Invariants}
 %==============================================================================
 
@@ -651,15 +883,12 @@ type-correct operations preserve them.
 \section{Properties Not Modeled}
 %==============================================================================
 
-This specification focuses on persistent state. The following aspects are
-intentionally omitted:
+This specification focuses on state that affects learning outcomes. The following
+aspects are intentionally omitted:
 
 \begin{itemize}
 \item \textbf{Audio timing}: Dit/dah durations (60ms/180ms at 20 WPM),
       Farnsworth spacing adjustments
-
-\item \textbf{Session flow}: Introduction phase, training phase, pause/resume,
-      timeout handling
 
 \item \textbf{QSO simulation}: Virtual station exchanges, protocol phases,
       message templates
