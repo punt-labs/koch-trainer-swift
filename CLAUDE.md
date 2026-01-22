@@ -448,11 +448,22 @@ gh pr create --title "feat: description" --body "## Summary\n..."
 
 **7. After PR merged:**
 ```bash
-bd close <id>                         # Mark issue complete
-cd ~/Coding/koch-trainer-swift        # Return to main repo
+# 1. Remove worktree FIRST (before deleting branch)
+cd ~/Coding/koch-trainer-swift
 make worktree-remove BRANCH=feature/<short-description>
+
+# 2. Merge PR (now safe to delete branch)
+gh pr merge <number> --squash --delete-branch
+
+# 3. Update local main
 git fetch --prune
-bd sync                               # Sync beads state
+git pull origin main
+
+# 4. Sync beads (requires --no-verify for main commits)
+bd close <id>
+git add .beads/issues.jsonl
+git commit --no-verify -m "chore(beads): sync after merge"
+git push
 ```
 
 ### Branch Naming Convention
