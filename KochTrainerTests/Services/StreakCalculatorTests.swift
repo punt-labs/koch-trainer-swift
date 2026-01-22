@@ -364,6 +364,7 @@ final class StreakCalculatorTests: XCTestCase {
     }
 
     // MARK: - Consecutive Day Tests
+
     //
     // These tests verify that consecutive calendar days properly extend streaks.
     // StreakCalculator uses Calendar.current internally, which handles DST automatically.

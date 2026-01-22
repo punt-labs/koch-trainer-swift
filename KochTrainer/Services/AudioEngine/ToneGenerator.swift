@@ -72,6 +72,7 @@ final class ToneGenerator: @unchecked Sendable {
         sourceNode = nil
         isPlaying = false
         currentPhase = 0
+        bandConditionsProcessor.reset()
     }
 
     /// Play silence for the specified duration.
