@@ -224,9 +224,9 @@ final class MorseDecoderEdgeCaseTests: XCTestCase {
         XCTAssertEqual(result, .invalid(pattern: ".-.-"))
     }
 
-    func testResetClearsCallback() {
-        decoder.onCharacterDecoded = { _ in }
+    func testResetClearsPattern() {
         _ = decoder.processInput(.dit)
+        XCTAssertEqual(decoder.currentPattern, ".")
 
         decoder.reset()
 

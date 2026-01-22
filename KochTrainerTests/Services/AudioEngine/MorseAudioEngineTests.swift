@@ -6,21 +6,12 @@ final class MorseAudioEngineTests: XCTestCase {
 
     // MARK: - Initialization Tests
 
-    func testDefaultFrequency() {
+    func testEngineInitializes() {
         let engine = MorseAudioEngine()
 
-        // Play a character to verify engine works
-        // Default frequency is 600 Hz (internal)
-        // We can't directly access private frequency, but we can verify it configures
+        // Verify engine can be configured without error
         engine.setFrequency(600)
-        // If no crash, configuration works
-    }
-
-    func testDefaultEffectiveSpeed() {
-        let engine = MorseAudioEngine()
-
         engine.setEffectiveSpeed(12)
-        // If no crash, configuration works
     }
 
     // MARK: - setFrequency Tests
@@ -30,25 +21,22 @@ final class MorseAudioEngineTests: XCTestCase {
 
         engine.setFrequency(700)
 
-        // Verify by playing a character (no crash means success)
         await engine.playDit()
     }
 
-    func testSetFrequencyClampedToMinimum() async {
+    func testSetFrequencyBelowRangeHandledGracefully() async {
         let engine = MorseAudioEngine()
 
-        engine.setFrequency(100) // Below 400 minimum
+        engine.setFrequency(100) // Below 400 minimum, clamped internally
 
-        // Should be clamped to 400
         await engine.playDit()
     }
 
-    func testSetFrequencyClampedToMaximum() async {
+    func testSetFrequencyAboveRangeHandledGracefully() async {
         let engine = MorseAudioEngine()
 
-        engine.setFrequency(1000) // Above 800 maximum
+        engine.setFrequency(1000) // Above 800 maximum, clamped internally
 
-        // Should be clamped to 800
         await engine.playDit()
     }
 
@@ -62,21 +50,19 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playDit()
     }
 
-    func testSetEffectiveSpeedClampedToMinimum() async {
+    func testSetEffectiveSpeedBelowRangeHandledGracefully() async {
         let engine = MorseAudioEngine()
 
-        engine.setEffectiveSpeed(5) // Below 10 minimum
+        engine.setEffectiveSpeed(5) // Below 10 minimum, clamped internally
 
-        // Should be clamped to 10
         await engine.playDit()
     }
 
-    func testSetEffectiveSpeedClampedToMaximum() async {
+    func testSetEffectiveSpeedAboveRangeHandledGracefully() async {
         let engine = MorseAudioEngine()
 
-        engine.setEffectiveSpeed(25) // Above 18 maximum
+        engine.setEffectiveSpeed(25) // Above 18 maximum, clamped internally
 
-        // Should be clamped to 18
         await engine.playDit()
     }
 
