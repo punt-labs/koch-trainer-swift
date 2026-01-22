@@ -11,8 +11,9 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil) {
+    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -167,7 +168,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForInput = false
-        AccessibilityAnnouncer.announcePaused()
+        announcer.announcePaused()
 
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
@@ -181,7 +182,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
-        AccessibilityAnnouncer.announceResumed()
+        announcer.announceResumed()
         startSessionTimer()
         playNextCharacter()
     }
@@ -221,9 +222,9 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // Announce completion for VoiceOver
         if didAdvance, let chars = newCharacters {
-            AccessibilityAnnouncer.announceLevelUp(newCharacters: chars)
+            announcer.announceLevelUp(newCharacters: chars)
         } else {
-            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+            announcer.announceSessionComplete(accuracy: accuracyPercentage)
         }
 
         phase = .completed(didAdvance: didAdvance, newCharacters: newCharacters)
@@ -303,6 +304,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: Private
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?
@@ -439,11 +441,11 @@ extension EarTrainingViewModel {
 
         // Announce feedback for VoiceOver
         if wasCorrect {
-            AccessibilityAnnouncer.announceCorrect()
+            announcer.announceCorrect()
         } else if userPattern == "(no response)" {
-            AccessibilityAnnouncer.announceTimeout(expected: expectedChar)
+            announcer.announceTimeout(expected: expectedChar)
         } else {
-            AccessibilityAnnouncer.announceIncorrectPattern(sent: userPattern, expected: expectedChar)
+            announcer.announceIncorrectPattern(sent: userPattern, expected: expectedChar)
         }
 
         Task {
