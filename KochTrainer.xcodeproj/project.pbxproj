@@ -53,6 +53,7 @@
 		6D9F252591FB2193CF59E786 /* VirtualStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C19546866846BD084D6E01 /* VirtualStation.swift */; };
 		718342D8BAA896E1D49AE80A /* VocabularyTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695EF4BBFCDACBB7FAE88254 /* VocabularyTrainingViewModelTests.swift */; };
 		733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */; };
+		75AEB04BC7BDEAA5639DA72F /* SilentAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A878E88A26B9ACC5D382EC6 /* SilentAudioEngine.swift */; };
 		77492FA14CA23C6DA87CAAB8 /* EarTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CCBC6CC72486A7377AC2F93 /* EarTrainingViewModelTests.swift */; };
 		7955259369B40EEB0B631BB7 /* ReceiveTrainingViewModelInputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3268C3EF73321AADA6C7CA54 /* ReceiveTrainingViewModelInputTests.swift */; };
 		7B8E681589D1D821EA4D2A32 /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF220C49CB6660F74CB54C2 /* StreakCalculatorTests.swift */; };
@@ -156,6 +157,7 @@
 		4F5BB57C072242009B88EF52 /* VocabularySetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySetTests.swift; sourceTree = "<group>"; };
 		52304BFA45E3AB138BDC3DD6 /* SendTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModelTests.swift; sourceTree = "<group>"; };
 		5809AFCCFD6E36E491F1411E /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
+		5A878E88A26B9ACC5D382EC6 /* SilentAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentAudioEngine.swift; sourceTree = "<group>"; };
 		5CCBC6CC72486A7377AC2F93 /* EarTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EarTrainingViewModelTests.swift; sourceTree = "<group>"; };
 		5F276096EB4A5A2B87158ADA /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		5FE4D55B8B829856B67D3A0F /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
@@ -286,6 +288,14 @@
 				7BC14AF6458B728B1D6F1580 /* Assets.xcassets */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		381FB49B68252A16BF494129 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				5A878E88A26B9ACC5D382EC6 /* SilentAudioEngine.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		3A12B56CFB1E692710B720E8 /* Services */ = {
@@ -576,6 +586,7 @@
 		F7E249D812687B025E41D870 /* KochTrainerTests */ = {
 			isa = PBXGroup;
 			children = (
+				381FB49B68252A16BF494129 /* Helpers */,
 				7F808D60CCE85AE39653B865 /* Models */,
 				3A12B56CFB1E692710B720E8 /* Services */,
 				5DB2C71C293C78C678EB405A /* ViewModels */,
@@ -768,6 +779,7 @@
 				A5B26729247712BBB5A8FF24 /* SendTrainingViewModelTests.swift in Sources */,
 				B4B344A5F10DB214363B9606 /* SessionResultTests.swift in Sources */,
 				A23391BC7CF60ECB5166F69C /* SettingsStoreTests.swift in Sources */,
+				75AEB04BC7BDEAA5639DA72F /* SilentAudioEngine.swift in Sources */,
 				7B8E681589D1D821EA4D2A32 /* StreakCalculatorTests.swift in Sources */,
 				AF22771ABDED2406C7AEEDD2 /* StudentProgressTests.swift in Sources */,
 				29F26F4BABB4F2C644CDCC48 /* ToneGeneratorTests.swift in Sources */,

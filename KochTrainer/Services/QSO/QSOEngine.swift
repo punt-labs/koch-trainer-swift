@@ -14,11 +14,13 @@ final class QSOEngine: ObservableObject {
     init(
         style: QSOStyle,
         myCallsign: String,
-        audioEngine: AudioEngineProtocol? = nil
+        audioEngine: AudioEngineProtocol? = nil,
+        aiResponseDelay: TimeInterval = 1.5
     ) {
         state = QSOState(style: style, myCallsign: myCallsign)
         station = VirtualStation.randomOrPreset()
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.aiResponseDelay = aiResponseDelay
     }
 
     // MARK: Internal
@@ -147,10 +149,8 @@ final class QSOEngine: ObservableObject {
 
     private let audioEngine: AudioEngineProtocol
 
-    // MARK: - Configuration
-
     /// Delay before AI responds (simulates listening/thinking)
-    private let aiResponseDelay: TimeInterval = 1.5
+    private let aiResponseDelay: TimeInterval
 
     // MARK: - AI Response Generation
 
