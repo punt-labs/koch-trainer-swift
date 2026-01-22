@@ -10,8 +10,9 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil) {
+    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -185,7 +186,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         responseTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
-        AccessibilityAnnouncer.announcePaused()
+        announcer.announcePaused()
 
         // Only persist paused session if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -257,7 +258,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
-        AccessibilityAnnouncer.announceResumed()
+        announcer.announceResumed()
         startSessionTimer()
         playNextGroup()
     }
@@ -299,9 +300,9 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // Announce completion for VoiceOver
         if didAdvance, let char = newCharacter {
-            AccessibilityAnnouncer.announceLevelUp(newCharacter: char)
+            announcer.announceLevelUp(newCharacter: char)
         } else {
-            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+            announcer.announceSessionComplete(accuracy: accuracyPercentage)
         }
 
         phase = .completed(didAdvance: didAdvance, newCharacter: newCharacter)
@@ -334,6 +335,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: Private
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?
@@ -467,11 +469,11 @@ extension ReceiveTrainingViewModel {
 
         // Announce feedback for VoiceOver
         if wasCorrect {
-            AccessibilityAnnouncer.announceCorrect()
+            announcer.announceCorrect()
         } else if let pressed = userPressed {
-            AccessibilityAnnouncer.announceIncorrect(userEntered: pressed, expected: expected)
+            announcer.announceIncorrect(userEntered: pressed, expected: expected)
         } else {
-            AccessibilityAnnouncer.announceTimeout(expected: expected)
+            announcer.announceTimeout(expected: expected)
         }
 
         Task {

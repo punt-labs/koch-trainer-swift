@@ -15,11 +15,13 @@ final class VocabularyTrainingViewModel: ObservableObject {
     init(
         vocabularySet: VocabularySet,
         sessionType: SessionType,
-        audioEngine: AudioEngineProtocol? = nil
+        audioEngine: AudioEngineProtocol? = nil,
+        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -131,7 +133,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
-        AccessibilityAnnouncer.announcePaused()
+        announcer.announcePaused()
 
         // Save paused session snapshot only if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -143,7 +145,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         guard phase == .paused else { return }
         phase = .training
         isPlaying = true
-        AccessibilityAnnouncer.announceResumed()
+        announcer.announceResumed()
         showNextWord()
     }
 
@@ -210,7 +212,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         }
 
         // Announce completion for VoiceOver
-        AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+        announcer.announceSessionComplete(accuracy: accuracyPercentage)
 
         phase = .completed
     }
@@ -286,6 +288,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
@@ -437,9 +440,9 @@ extension VocabularyTrainingViewModel {
 
         // Announce feedback for VoiceOver
         if wasCorrect {
-            AccessibilityAnnouncer.announceCorrectWord()
+            announcer.announceCorrectWord()
         } else {
-            AccessibilityAnnouncer.announceIncorrectWord(expected: expected, userEntered: userAnswer)
+            announcer.announceIncorrectWord(expected: expected, userEntered: userAnswer)
         }
 
         Task {

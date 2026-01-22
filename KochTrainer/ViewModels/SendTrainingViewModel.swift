@@ -10,8 +10,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil) {
+    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -177,7 +178,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForInput = false
-        AccessibilityAnnouncer.announcePaused()
+        announcer.announcePaused()
 
         // Only persist paused session if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -249,7 +250,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
-        AccessibilityAnnouncer.announceResumed()
+        announcer.announceResumed()
         startSessionTimer()
         showNextCharacter()
     }
@@ -291,9 +292,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // Announce completion for VoiceOver
         if didAdvance, let char = newCharacter {
-            AccessibilityAnnouncer.announceLevelUp(newCharacter: char)
+            announcer.announceLevelUp(newCharacter: char)
         } else {
-            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+            announcer.announceSessionComplete(accuracy: accuracyPercentage)
         }
 
         phase = .completed(didAdvance: didAdvance, newCharacter: newCharacter)
@@ -340,6 +341,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: Private
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
@@ -467,11 +469,11 @@ extension SendTrainingViewModel {
 
         // Announce feedback for VoiceOver
         if wasCorrect {
-            AccessibilityAnnouncer.announceCorrect()
+            announcer.announceCorrect()
         } else if pattern == "(no response)" {
-            AccessibilityAnnouncer.announceTimeout(expected: expected)
+            announcer.announceTimeout(expected: expected)
         } else {
-            AccessibilityAnnouncer.announceIncorrectPattern(sent: pattern, expected: expected)
+            announcer.announceIncorrectPattern(sent: pattern, expected: expected)
         }
 
         Task {
