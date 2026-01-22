@@ -1,9 +1,15 @@
 import AVFoundation
 import Foundation
-import GameplayKit
 
 /// Simulates HF band conditions: noise (QRN), fading (QSB), and interference (QRM).
-/// Thread-safe for use in audio render callbacks.
+///
+/// Threading model:
+/// - `processSample(_:at:)` is called from the audio render thread at high frequency
+/// - `configure(from:)` must only be called when audio is not playing (during setup)
+/// - `reset()` is called automatically by ToneGenerator.stopTone()
+///
+/// The `@unchecked Sendable` annotation is safe because configuration happens only during
+/// setup when audio is stopped, and scalar property reads/writes are atomic on modern CPUs.
 final class BandConditionsProcessor: @unchecked Sendable {
 
     // MARK: Lifecycle
@@ -58,6 +64,9 @@ final class BandConditionsProcessor: @unchecked Sendable {
         interferenceSamplesRemaining = 0
         crashSamplesRemaining = 0
         crashAmplitude = 0
+        pinkB0 = 0
+        pinkB1 = 0
+        pinkB2 = 0
     }
 
     // MARK: - Processing
@@ -95,14 +104,6 @@ final class BandConditionsProcessor: @unchecked Sendable {
     private var fadingPhase: Double = 0
     private var sampleRate: Double = 44100
 
-    // Noise generation using GameplayKit for reproducible Gaussian distribution
-    private let randomSource = GKMersenneTwisterRandomSource(seed: 12345)
-    private lazy var gaussianDistribution = GKGaussianDistribution(
-        randomSource: randomSource,
-        mean: 0,
-        deviation: 100
-    )
-
     // Interference state
     private var interferenceActive: Bool = false
     private var interferenceFrequency: Double = 0
@@ -112,6 +113,12 @@ final class BandConditionsProcessor: @unchecked Sendable {
     // Static crash state for QRN
     private var crashSamplesRemaining: Int = 0
     private var crashAmplitude: Float = 0
+
+    // Pink noise filter state (Paul Kellet's economy filter)
+    // Filters white noise to 1/f spectrum (±0.5dB accuracy)
+    private var pinkB0: Float = 0
+    private var pinkB1: Float = 0
+    private var pinkB2: Float = 0
 
     // MARK: - Fading (QSB)
 
@@ -135,13 +142,20 @@ final class BandConditionsProcessor: @unchecked Sendable {
     // MARK: - Noise (QRN)
 
     /// Add atmospheric noise to simulate QRN.
-    /// Uses pink-ish noise with occasional static crashes.
+    /// Uses pink noise (1/f spectrum) with occasional static crashes.
     private func addNoise(to sample: Float) -> Float {
         var output = sample
 
-        // Base continuous noise (Gaussian, scaled)
-        let gaussianValue = Double(gaussianDistribution.nextInt()) / 100.0
-        let baseNoise = Float(gaussianValue * noiseLevel * 0.15)
+        // Generate pink noise using Paul Kellet's economy filter
+        // This filters white noise to achieve 1/f spectral characteristics
+        let white = Float.random(in: -1 ... 1)
+        pinkB0 = 0.99765 * pinkB0 + white * 0.0990460
+        pinkB1 = 0.96300 * pinkB1 + white * 0.2965164
+        pinkB2 = 0.57000 * pinkB2 + white * 1.0526913
+        let pink = pinkB0 + pinkB1 + pinkB2 + white * 0.1848
+
+        // Scale pink noise by noise level (pink output is roughly -1 to 1)
+        let baseNoise = pink * Float(noiseLevel) * 0.15
         output += baseNoise
 
         // Handle ongoing crash
