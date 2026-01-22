@@ -3,6 +3,8 @@
 
 SCHEME = KochTrainer
 DESTINATION = platform=iOS Simulator,name=iPhone 17 Pro
+# Use local DerivedData to isolate parallel worktree builds/tests
+DERIVED_DATA = ./DerivedData
 
 .PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list
 
@@ -63,6 +65,7 @@ build: generate format lint
 	xcodebuild build \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
+		-derivedDataPath $(DERIVED_DATA) \
 		-quiet
 
 test: generate
@@ -70,12 +73,13 @@ test: generate
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
+		-derivedDataPath $(DERIVED_DATA) \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
 clean:
 	@echo "Cleaning..."
-	xcodebuild clean -scheme $(SCHEME) -quiet 2>/dev/null || true
-	rm -rf ~/Library/Developer/Xcode/DerivedData/KochTrainer-*
+	xcodebuild clean -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA) -quiet 2>/dev/null || true
+	rm -rf $(DERIVED_DATA)
 	@echo "Clean complete."
 
 run: build
@@ -83,7 +87,7 @@ run: build
 	xcrun simctl boot "iPhone 17 Pro" 2>/dev/null || true
 	open -a Simulator
 	@echo "Installing app..."
-	xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/KochTrainer-*/Build/Products/Debug-iphonesimulator/KochTrainer.app
+	xcrun simctl install booted $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app
 	@echo "Launching app..."
 	xcrun simctl launch booted com.kochtrainer.app
 
@@ -92,6 +96,7 @@ coverage: generate
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
+		-derivedDataPath $(DERIVED_DATA) \
 		-enableCodeCoverage YES \
 		-resultBundlePath ./build/TestResults.xcresult \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
