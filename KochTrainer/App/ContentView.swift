@@ -12,6 +12,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Learn", systemImage: "graduationcap")
             }
+            .accessibilityIdentifier(AccessibilityID.Tab.learn)
 
             NavigationStack {
                 PracticeView()
@@ -19,6 +20,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Practice", systemImage: "checklist")
             }
+            .accessibilityIdentifier(AccessibilityID.Tab.practice)
 
             NavigationStack {
                 VocabularyView()
@@ -26,6 +28,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Vocab", systemImage: "text.book.closed")
             }
+            .accessibilityIdentifier(AccessibilityID.Tab.vocab)
 
             NavigationStack {
                 SettingsView()
@@ -33,6 +36,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Settings", systemImage: "gear")
             }
+            .accessibilityIdentifier(AccessibilityID.Tab.settings)
         }
     }
 

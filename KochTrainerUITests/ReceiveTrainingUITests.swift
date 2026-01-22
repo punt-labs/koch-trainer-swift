@@ -2,6 +2,10 @@ import XCTest
 
 /// Integration tests for the Receive Training flow.
 /// Tests the complete user journey from home screen through training completion.
+///
+/// Note: Views now have stable accessibilityIdentifiers (e.g., "receive-training-start-button")
+/// for future test expansion. These tests use text-based matching for compatibility with
+/// current SwiftUI accessibility behavior.
 final class ReceiveTrainingUITests: XCTestCase {
 
     // MARK: Internal

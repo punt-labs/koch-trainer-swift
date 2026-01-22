@@ -148,6 +148,7 @@ struct SendTrainingPhaseView: View {
             Text(viewModel.proficiencyProgress)
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
 
             Spacer()
 
@@ -166,6 +167,7 @@ struct SendTrainingPhaseView: View {
                     }
                 }
                 .frame(height: 120)
+                .accessibilityIdentifier(AccessibilityID.Training.characterDisplay)
 
                 // Slot 2: Secondary content (fixed height)
                 Group {
@@ -175,15 +177,18 @@ struct SendTrainingPhaseView: View {
                         Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
                             .font(.system(size: 36, weight: .medium, design: .monospaced))
                             .foregroundColor(.secondary)
+                            .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
                     }
                 }
                 .frame(height: 56)
+                .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
 
                 // Slot 3: Progress bar (always present, opacity controlled)
                 TimeoutProgressBar(progress: viewModel.inputProgress)
                     .frame(height: 8)
                     .padding(.horizontal, Theme.Spacing.xl)
                     .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
+                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
             }
             .frame(height: 200)
 
@@ -193,6 +198,7 @@ struct SendTrainingPhaseView: View {
             Text("Keyboard: . or F = dit, - or J = dah")
                 .font(Typography.caption)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.Send.keyboardHint)
 
             // Paddle area
             HStack(spacing: 2) {
@@ -207,6 +213,7 @@ struct SendTrainingPhaseView: View {
                         .background(Theme.Colors.primary.opacity(0.8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.Send.ditButton)
 
                 // Dah button
                 Button {
@@ -219,6 +226,7 @@ struct SendTrainingPhaseView: View {
                         .background(Theme.Colors.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.Send.dahButton)
             }
             .frame(height: 120)
             .cornerRadius(12)
@@ -227,8 +235,10 @@ struct SendTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                    .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
             }
             .font(Typography.body)
 
@@ -237,8 +247,10 @@ struct SendTrainingPhaseView: View {
                 viewModel.pause()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
 }
 
@@ -253,10 +265,12 @@ struct SendPausedView: View {
 
             Text("Paused")
                 .font(Typography.largeTitle)
+                .accessibilityIdentifier(AccessibilityID.Training.pausedTitle)
 
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.Training.pausedScore)
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
                     .font(Typography.body)
                     .foregroundColor(.secondary)
@@ -268,15 +282,18 @@ struct SendPausedView: View {
                 viewModel.resume()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.resumeButton)
 
             Button("End Session") {
                 viewModel.endSession()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.endSessionButton)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.pausedView)
     }
 }
 
@@ -299,6 +316,7 @@ struct SendCompletedView: View {
                     Text("Level Up!")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(Theme.Colors.success)
+                        .accessibilityIdentifier(AccessibilityID.Training.levelUpTitle)
 
                     if let char = newCharacter {
                         Text("New character unlocked:")
@@ -308,6 +326,7 @@ struct SendCompletedView: View {
                         Text(String(char))
                             .font(.system(size: 80, weight: .bold, design: .rounded))
                             .foregroundColor(Theme.Colors.primary)
+                            .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
 
                         Text(MorseCode.pattern(for: char) ?? "")
                             .font(.system(size: 24, weight: .medium, design: .monospaced))
@@ -318,6 +337,7 @@ struct SendCompletedView: View {
                 // Session complete without advancement
                 Text("Session Complete")
                     .font(Typography.largeTitle)
+                    .accessibilityIdentifier(AccessibilityID.Training.sessionCompleteTitle)
             }
 
             Spacer()
@@ -326,10 +346,12 @@ struct SendCompletedView: View {
             VStack(spacing: Theme.Spacing.sm) {
                 Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.Training.finalScore)
 
                 Text("\(viewModel.accuracyPercentage)% accuracy")
                     .font(Typography.body)
                     .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
+                    .accessibilityIdentifier(AccessibilityID.Training.finalAccuracy)
 
                 if !didAdvance, viewModel.accuracyPercentage < 90 {
                     Text("Need 90% to advance")
@@ -346,21 +368,25 @@ struct SendCompletedView: View {
                     dismiss()
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.continueButton)
             } else {
                 Button("Try Again") {
                     dismiss()
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.tryAgainButton)
 
                 Button("Done") {
                     dismiss()
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.doneButton)
             }
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
 }
 
@@ -377,10 +403,12 @@ struct SendFeedbackMessageView: View {
                 Text("Correct!")
                     .font(Typography.headline)
                     .foregroundColor(Theme.Colors.success)
+                    .accessibilityIdentifier(AccessibilityID.Training.feedbackCorrect)
             } else {
                 Text("You sent: \(feedback.sentPattern)")
                     .font(Typography.caption)
                     .foregroundColor(Theme.Colors.error)
+                    .accessibilityIdentifier(AccessibilityID.Training.feedbackIncorrect)
 
                 if let decoded = feedback.decodedCharacter {
                     Text(

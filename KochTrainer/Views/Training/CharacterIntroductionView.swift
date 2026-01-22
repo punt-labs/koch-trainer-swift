@@ -27,6 +27,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
             Text("Character \(viewModel.introProgress)")
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.Training.introProgress)
 
             Spacer()
 
@@ -34,10 +35,12 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                 Text(String(char))
                     .font(.system(size: 120, weight: .bold, design: .rounded))
                     .foregroundColor(Theme.Colors.primary)
+                    .accessibilityIdentifier(AccessibilityID.Training.introCharacter)
 
                 Text(MorseCode.pattern(for: char) ?? "")
                     .font(.system(size: 36, weight: .medium, design: .monospaced))
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.Training.introPattern)
 
                 Spacer()
 
@@ -51,6 +54,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                     .font(Typography.headline)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.playSoundButton)
 
                 Button {
                     viewModel.nextIntroCharacter()
@@ -59,11 +63,17 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                         .font(Typography.headline)
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(
+                    viewModel.isLastIntroCharacter
+                        ? AccessibilityID.Training.startTrainingButton
+                        : AccessibilityID.Training.nextCharacterButton
+                )
                 .padding(.top, Theme.Spacing.sm)
             }
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.introView)
     }
 }

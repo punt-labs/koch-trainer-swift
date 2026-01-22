@@ -3,7 +3,7 @@ import XCTest
 
 final class MorseDecoderEdgeCaseTests: XCTestCase {
 
-    private var decoder = MorseDecoder()
+    // MARK: Internal
 
     override func setUp() {
         super.setUp()
@@ -285,4 +285,9 @@ final class MorseDecoderEdgeCaseTests: XCTestCase {
 
         XCTAssertNotEqual(charResult, invalidResult)
     }
+
+    // MARK: Private
+
+    private var decoder = MorseDecoder()
+
 }
