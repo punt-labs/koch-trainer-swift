@@ -17,9 +17,11 @@ final class ToneGenerator: @unchecked Sendable {
 
     init() {
         setupAudioSession()
+        setupInterruptionHandling()
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         endSession()
     }
 
@@ -172,6 +174,7 @@ final class ToneGenerator: @unchecked Sendable {
     // Continuous session state
     private var isSessionActive = false
     private var currentFrequency: Double = 600
+    private var wasInterrupted = false
 
     // Radio mode (thread-safe for audio callback access)
     private let radioModeLock = NSLock()
@@ -202,6 +205,65 @@ final class ToneGenerator: @unchecked Sendable {
         } catch {
             print("Failed to setup audio session: \(error)")
         }
+    }
+
+    private func setupInterruptionHandling() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+    }
+
+    @objc
+    private func handleAudioInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        else { return }
+
+        switch type {
+        case .began:
+            // Audio was interrupted (app backgrounded, phone call, etc.)
+            // The audio engine will be stopped by iOS
+            wasInterrupted = true
+
+        case .ended:
+            // Interruption ended - check if we should resume
+            guard wasInterrupted, isSessionActive else { return }
+            wasInterrupted = false
+
+            // Check if we should resume playback
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    // Reactivate audio session and restart continuous audio
+                    do {
+                        try AVAudioSession.sharedInstance().setActive(true)
+                        restartContinuousAudio()
+                    } catch {
+                        print("Failed to reactivate audio session: \(error)")
+                    }
+                }
+            }
+
+        @unknown default:
+            break
+        }
+    }
+
+    /// Restart continuous audio after interruption (preserves current radio mode).
+    private func restartContinuousAudio() {
+        guard isSessionActive else { return }
+
+        // Stop any existing audio
+        if isPlaying {
+            stopContinuousAudio()
+        }
+
+        // Restart with current radio mode
+        startContinuousAudio()
     }
 
     /// Start continuous tone at the specified frequency (internal, called from queue).
