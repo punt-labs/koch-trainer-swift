@@ -177,6 +177,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForInput = false
+        AccessibilityAnnouncer.announcePaused()
 
         // Only persist paused session if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -248,6 +249,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
+        AccessibilityAnnouncer.announceResumed()
         startSessionTimer()
         showNextCharacter()
     }
@@ -286,6 +288,13 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         // Record session and check for advancement (custom sessions can't advance)
         let didAdvance = store.recordSession(result)
         let newCharacter: Character? = didAdvance ? store.progress.unlockedCharacters(for: .send).last : nil
+
+        // Announce completion for VoiceOver
+        if didAdvance, let char = newCharacter {
+            AccessibilityAnnouncer.announceLevelUp(newCharacter: char)
+        } else {
+            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+        }
 
         phase = .completed(didAdvance: didAdvance, newCharacter: newCharacter)
     }
@@ -455,6 +464,15 @@ extension SendTrainingViewModel {
             sentPattern: pattern,
             decodedCharacter: decoded
         )
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            AccessibilityAnnouncer.announceCorrect()
+        } else if pattern == "(no response)" {
+            AccessibilityAnnouncer.announceTimeout(expected: expected)
+        } else {
+            AccessibilityAnnouncer.announceIncorrectPattern(sent: pattern, expected: expected)
+        }
 
         Task {
             if !wasCorrect {

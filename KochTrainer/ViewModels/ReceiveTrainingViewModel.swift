@@ -185,6 +185,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         responseTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
+        AccessibilityAnnouncer.announcePaused()
 
         // Only persist paused session if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -256,6 +257,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
+        AccessibilityAnnouncer.announceResumed()
         startSessionTimer()
         playNextGroup()
     }
@@ -294,6 +296,13 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         // Record session and check for advancement (custom sessions can't advance)
         let didAdvance = store.recordSession(result)
         let newCharacter: Character? = didAdvance ? store.progress.unlockedCharacters(for: .receive).last : nil
+
+        // Announce completion for VoiceOver
+        if didAdvance, let char = newCharacter {
+            AccessibilityAnnouncer.announceLevelUp(newCharacter: char)
+        } else {
+            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+        }
 
         phase = .completed(didAdvance: didAdvance, newCharacter: newCharacter)
     }
@@ -455,6 +464,15 @@ extension ReceiveTrainingViewModel {
 
     func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, userPressed: Character?) {
         lastFeedback = Feedback(wasCorrect: wasCorrect, expectedCharacter: expected, userPressed: userPressed)
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            AccessibilityAnnouncer.announceCorrect()
+        } else if let pressed = userPressed {
+            AccessibilityAnnouncer.announceIncorrect(userEntered: pressed, expected: expected)
+        } else {
+            AccessibilityAnnouncer.announceTimeout(expected: expected)
+        }
 
         Task {
             if !wasCorrect {

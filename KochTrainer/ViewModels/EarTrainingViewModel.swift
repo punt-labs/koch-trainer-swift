@@ -167,6 +167,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForInput = false
+        AccessibilityAnnouncer.announcePaused()
 
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
@@ -180,6 +181,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
+        AccessibilityAnnouncer.announceResumed()
         startSessionTimer()
         playNextCharacter()
     }
@@ -216,6 +218,13 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         let newCharacters: [Character]? = didAdvance
             ? MorseCode.charactersAtPatternLength(store.progress.earTrainingLevel)
             : nil
+
+        // Announce completion for VoiceOver
+        if didAdvance, let chars = newCharacters {
+            AccessibilityAnnouncer.announceLevelUp(newCharacters: chars)
+        } else {
+            AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
+        }
 
         phase = .completed(didAdvance: didAdvance, newCharacters: newCharacters)
     }
@@ -427,6 +436,15 @@ extension EarTrainingViewModel {
             expectedPattern: expectedPattern,
             userPattern: userPattern
         )
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            AccessibilityAnnouncer.announceCorrect()
+        } else if userPattern == "(no response)" {
+            AccessibilityAnnouncer.announceTimeout(expected: expectedChar)
+        } else {
+            AccessibilityAnnouncer.announceIncorrectPattern(sent: userPattern, expected: expectedChar)
+        }
 
         Task {
             if !wasCorrect {

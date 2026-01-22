@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pause and Resume Training**: Paused sessions persist and automatically restore when returning to training (within 24 hours)
 - Character proficiency indicators showing per-character accuracy as circular progress rings
 - VoiceOver accessibility labels for proficiency percentages
+- **VoiceOver training feedback**: Announces correct/incorrect responses, timeouts, level-ups, and session completion during training
 - **Morse QSO Training**: Practice QSO conversations by keying dit/dah responses while listening to AI transmissions with progressive text reveal
 - **Number support (0-9)**: Morse code patterns for digits (ITU standard), enabling callsigns (e.g., W5ABC) and RST reports (e.g., 599) to play correctly
 - **Answer CQ mode**: AI calls CQ first, user responds—more realistic practice flow

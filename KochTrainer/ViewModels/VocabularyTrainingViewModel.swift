@@ -131,6 +131,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         inputTimer?.invalidate()
         audioEngine.stop()
         isWaitingForResponse = false
+        AccessibilityAnnouncer.announcePaused()
 
         // Save paused session snapshot only if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -142,6 +143,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         guard phase == .paused else { return }
         phase = .training
         isPlaying = true
+        AccessibilityAnnouncer.announceResumed()
         showNextWord()
     }
 
@@ -206,6 +208,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
             }
             progressStore?.save(progress)
         }
+
+        // Announce completion for VoiceOver
+        AccessibilityAnnouncer.announceSessionComplete(accuracy: accuracyPercentage)
 
         phase = .completed
     }
@@ -429,6 +434,13 @@ extension VocabularyTrainingViewModel {
 
     func showFeedbackAndContinue(wasCorrect: Bool, expected: String, userAnswer: String) {
         lastFeedback = Feedback(wasCorrect: wasCorrect, expectedWord: expected, userAnswer: userAnswer)
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            AccessibilityAnnouncer.announceCorrectWord()
+        } else {
+            AccessibilityAnnouncer.announceIncorrectWord(expected: expected, userEntered: userAnswer)
+        }
 
         Task {
             if !wasCorrect {
