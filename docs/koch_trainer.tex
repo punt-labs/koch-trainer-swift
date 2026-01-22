@@ -1,0 +1,578 @@
+%
+% koch_trainer.tex
+%
+% Z Specification for Koch Trainer
+% Formal model of a Morse code learning application using the Koch method
+%
+
+\documentclass[a4paper,10pt,fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{fuzz}
+
+\begin{document}
+
+\title{Koch Trainer: A Z Specification}
+\author{Formal Model of Morse Code Learning Progress}
+\date{January 2026}
+\maketitle
+
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+Koch Trainer teaches Morse code using the \emph{Koch method}---a proven technique
+developed by German psychologist Ludwig Koch in the 1930s. Rather than learning
+Morse at slow speeds and gradually increasing, students learn characters at full
+speed (20 words per minute) from the start, adding one new character at a time
+after achieving 90\% accuracy.
+
+\subsection{Design Philosophy}
+
+The application follows four core principles:
+
+\begin{enumerate}
+\item \textbf{Audio-first}: Morse code is fundamentally an auditory skill. Visual
+      aids support learning, but audio remains primary.
+
+\item \textbf{Spaced repetition}: Practice intervals adapt to performance,
+      maximizing long-term retention while minimizing daily time commitment.
+
+\item \textbf{Separate skills}: Receiving (copying audio to text) and sending
+      (keying Morse from text) are distinct skills that progress independently.
+
+\item \textbf{Realistic simulation}: QSO practice mirrors real amateur radio
+      operation with authentic timing and protocols.
+\end{enumerate}
+
+\subsection{Scope of This Specification}
+
+This formal specification models the stateful components of the learning system:
+
+\begin{itemize}
+\item Student progress through 26 Koch-ordered characters
+\item Per-character accuracy statistics by training direction
+\item Spaced repetition scheduling with adaptive intervals
+\item Streak tracking for consecutive practice days
+\end{itemize}
+
+We do not model audio generation, UI state, or real-time session mechanics---only
+the persistent state that survives between sessions.
+
+%==============================================================================
+\section{Basic Types}
+%==============================================================================
+
+We introduce given sets for entities whose internal structure is irrelevant to
+the learning model.
+
+\begin{zed}
+[SESSIONID, TIMESTAMP]
+\end{zed}
+
+$SESSIONID$ uniquely identifies completed training sessions.
+$TIMESTAMP$ represents points in time for scheduling and history tracking.
+
+Note: We do not model individual Morse characters as a given set. The 26 letters
+follow a fixed Koch order (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X),
+and level numbers 1--26 implicitly identify the character set unlocked at each level.
+
+%==============================================================================
+\section{Free Types}
+%==============================================================================
+
+\subsection{Training Direction}
+
+Training occurs in two distinct directions, each developing a different skill:
+
+\begin{zed}
+Direction ::= receive | send
+\end{zed}
+
+In \emph{receive} mode, the student hears Morse audio and types the corresponding
+letter---training auditory pattern recognition. In \emph{send} mode, the student
+sees a letter and keys the Morse pattern using dit/dah inputs---training motor
+memory and timing.
+
+These skills progress independently. A student may excel at receiving while
+struggling with sending, or vice versa. Separate tracking prevents frustration
+and allows focused practice on weaker skills.
+
+\subsection{Boolean Type}
+
+We define a boolean type for input flags, using names that avoid conflicts
+with ProB's reserved keywords:
+
+\begin{zed}
+ZBOOL ::= ztrue | zfalse
+\end{zed}
+
+%==============================================================================
+\section{Global Constants}
+%==============================================================================
+
+The Koch method uses exactly 26 letters introduced in a specific order based on
+Ludwig Koch's research on optimal learning sequences. Characters are introduced
+one at a time: level 1 unlocks only K, level 2 adds M, and so on.
+
+\begin{axdef}
+maxLevel : \nat \\
+minLevel : \nat \\
+maxInterval : \nat \\
+minInterval : \nat \\
+advanceThreshold : \nat
+\where
+maxLevel = 26 \\
+minLevel = 1 \\
+maxInterval = 30 \\
+minInterval = 1 \\
+advanceThreshold = 90
+\end{axdef}
+
+The advancement threshold of 90\% accuracy over a minimum of 20 attempts ensures
+students have truly mastered current characters before encountering new ones.
+This high bar is intentional: the Koch method's effectiveness depends on
+learning characters correctly at full speed from the start.
+
+%==============================================================================
+\section{Character Statistics}
+%==============================================================================
+
+The system tracks per-character accuracy separately for each training direction.
+This granular tracking serves multiple purposes:
+
+\begin{itemize}
+\item Identify specific characters that need more practice
+\item Display proficiency indicators (color-coded rings) on the character grid
+\item Enable future features like adaptive character selection
+\end{itemize}
+
+\begin{schema}{CharacterStat}
+receiveAttempts : \nat \\
+receiveCorrect : \nat \\
+sendAttempts : \nat \\
+sendCorrect : \nat \\
+earAttempts : \nat \\
+earCorrect : \nat
+\where
+receiveCorrect \leq receiveAttempts \\
+sendCorrect \leq sendAttempts \\
+earCorrect \leq earAttempts \\
+receiveAttempts \leq 10000 \\
+sendAttempts \leq 10000 \\
+earAttempts \leq 10000
+\end{schema}
+
+The invariants ensure that correct counts never exceed attempt counts---a
+fundamental data integrity property. Upper bounds support finite model checking.
+
+The \emph{earAttempts} and \emph{earCorrect} fields track ear training mode,
+where students reproduce heard patterns rather than identify letters.
+
+Combined accuracy for display purposes is computed as:
+\[
+accuracy = \frac{receiveCorrect + sendCorrect}{receiveAttempts + sendAttempts}
+\]
+
+%==============================================================================
+\section{Session Result}
+%==============================================================================
+
+Each completed training session produces an immutable result record.
+
+\begin{schema}{SessionResult}
+sessionId : SESSIONID \\
+direction : Direction \\
+totalAttempts : \nat \\
+correctCount : \nat \\
+timestamp : TIMESTAMP
+\where
+correctCount \leq totalAttempts \\
+totalAttempts \leq 1000
+\end{schema}
+
+Session results form the historical record used for:
+\begin{itemize}
+\item Calculating streak continuity (did the student practice yesterday?)
+\item Tracking long-term progress trends
+\item Supporting future analytics features
+\end{itemize}
+
+Only \emph{learn mode} sessions (not custom practice or vocabulary drills)
+affect level advancement and spaced repetition intervals.
+
+%==============================================================================
+\section{Student Progress}
+%==============================================================================
+
+The central state schema captures all persistent student progress. We flatten
+the schedule fields into the main state for ProB animation compatibility.
+
+\begin{schema}{State}
+receiveLevel : \nat \\
+sendLevel : \nat \\
+earLevel : \nat \\
+sessionCount : \nat \\
+receiveInterval : \nat \\
+sendInterval : \nat \\
+currentStreak : \nat \\
+longestStreak : \nat
+\where
+receiveLevel \geq minLevel \\
+receiveLevel \leq maxLevel \\
+sendLevel \geq minLevel \\
+sendLevel \leq maxLevel \\
+earLevel \geq 1 \\
+earLevel \leq 5 \\
+sessionCount \leq 10000 \\
+receiveInterval \geq minInterval \\
+receiveInterval \leq maxInterval \\
+sendInterval \geq minInterval \\
+sendInterval \leq maxInterval \\
+currentStreak \leq longestStreak \\
+longestStreak \leq 365
+\end{schema}
+
+\subsection{Level Semantics}
+
+Each level $n$ unlocks the first $n$ characters in Koch order:
+\begin{itemize}
+\item Level 1: K
+\item Level 2: K, M
+\item Level 3: K, M, R
+\item $\vdots$
+\item Level 26: All 26 letters
+\end{itemize}
+
+Receive and send levels progress independently. A student at receive level 15
+and send level 8 can copy 15 characters but only send 8.
+
+\subsection{Interval Semantics}
+
+The \emph{receiveInterval} and \emph{sendInterval} fields represent the number
+of days until the next scheduled practice for each direction. These intervals
+adapt based on performance, implementing a simplified spaced repetition algorithm.
+
+\subsection{Streak Semantics}
+
+The streak tracks consecutive \emph{calendar days} with at least one completed
+session (either direction counts). The longest streak persists as a personal
+record for motivation.
+
+%==============================================================================
+\section{Initialization}
+%==============================================================================
+
+A new student begins at level 1 in all directions with 1-day intervals and
+no streak history.
+
+\begin{schema}{Init}
+State'
+\where
+receiveLevel' = minLevel \\
+sendLevel' = minLevel \\
+earLevel' = 1 \\
+sessionCount' = 0 \\
+receiveInterval' = minInterval \\
+sendInterval' = minInterval \\
+currentStreak' = 0 \\
+longestStreak' = 0
+\end{schema}
+
+%==============================================================================
+\section{Operations}
+%==============================================================================
+
+\subsection{Level Advancement}
+
+The Koch method's core progression: when a student achieves $\geq 90\%$ accuracy
+over at least 20 attempts in a session, they advance to the next level, unlocking
+one additional character.
+
+\begin{schema}{AdvanceReceiveLevel}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq advanceThreshold \\
+accuracy? \leq 100 \\
+receiveLevel < maxLevel \\
+receiveLevel' = receiveLevel + 1 \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak
+\end{schema}
+
+\begin{schema}{AdvanceSendLevel}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq advanceThreshold \\
+accuracy? \leq 100 \\
+sendLevel < maxLevel \\
+sendLevel' = sendLevel + 1 \\
+receiveLevel' = receiveLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak
+\end{schema}
+
+The precondition $receiveLevel < maxLevel$ (or $sendLevel < maxLevel$) ensures
+we cannot advance beyond the 26 available characters.
+
+\begin{schema}{AdvanceEarLevel}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq advanceThreshold \\
+accuracy? \leq 100 \\
+earLevel < 5 \\
+earLevel' = earLevel + 1 \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+sessionCount' = sessionCount \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak
+\end{schema}
+
+Ear training levels (1--5) correspond to pattern length: level 1 covers single-element
+patterns (E, T), level 5 includes 5-element patterns like digits. Unlike receive/send,
+ear training does not affect spaced repetition scheduling or streaks.
+
+\subsection{Session Recording}
+
+Each completed session increments the session count for analytics.
+
+\begin{schema}{RecordSession}
+\Delta State
+\where
+sessionCount' = sessionCount + 1 \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak
+\end{schema}
+
+\subsection{Spaced Repetition}
+
+The interval algorithm adapts practice frequency based on performance:
+
+\begin{center}
+\begin{tabular}{ll}
+\hline
+Accuracy & Interval Change \\
+\hline
+$\geq 90\%$ & Double interval (max 30 days) \\
+$70\%$--$89\%$ & No change \\
+$< 70\%$ & Reset to 1 day \\
+\hline
+\end{tabular}
+\end{center}
+
+High accuracy indicates mastery, so we increase the interval to avoid
+over-practice. Low accuracy signals struggle, so we reset to daily practice.
+The middle range maintains the current schedule.
+
+\begin{schema}{UpdateReceiveIntervalHigh}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? \geq advanceThreshold \\
+accuracy? \leq 100 \\
+(receiveInterval * 2 \leq maxInterval \land
+    receiveInterval' = receiveInterval * 2) \lor
+(receiveInterval * 2 > maxInterval \land
+    receiveInterval' = maxInterval) \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+\begin{schema}{UpdateReceiveIntervalLow}
+\Delta State \\
+accuracy? : \nat
+\where
+accuracy? < 70 \\
+accuracy? \leq 100 \\
+receiveInterval' = minInterval \\
+sendInterval' = sendInterval \\
+currentStreak' = currentStreak \\
+longestStreak' = longestStreak \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+Note: The implementation includes additional rules not modeled here:
+\begin{itemize}
+\item First 14 days: intervals capped at 2 days (habit formation period)
+\item Missed $> 2\times$ interval: reset to 1 day (skill decay)
+\end{itemize}
+
+\subsection{Streak Tracking}
+
+Streaks measure consecutive calendar days with at least one completed session.
+They provide motivation through gamification without affecting learning outcomes.
+
+\begin{schema}{IncrementStreak}
+\Delta State
+\where
+currentStreak' = currentStreak + 1 \\
+(currentStreak + 1 > longestStreak \land
+    longestStreak' = currentStreak + 1) \lor
+(currentStreak + 1 \leq longestStreak \land
+    longestStreak' = longestStreak) \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+The streak increments when the student practices on the calendar day following
+their last practice. The longest streak updates if the current streak exceeds it.
+
+\begin{schema}{ResetStreak}
+\Delta State
+\where
+currentStreak' = 0 \\
+longestStreak' = longestStreak \\
+receiveInterval' = receiveInterval \\
+sendInterval' = sendInterval \\
+receiveLevel' = receiveLevel \\
+sendLevel' = sendLevel \\
+earLevel' = earLevel \\
+sessionCount' = sessionCount
+\end{schema}
+
+The streak resets to zero when a calendar day passes without any practice.
+Note that the longest streak is preserved---it represents the all-time record.
+
+\subsection{Attempt Recording}
+
+During training, each character attempt updates the per-character statistics.
+
+\begin{schema}{RecordReceiveAttempt}
+\Delta CharacterStat \\
+correct? : ZBOOL
+\where
+receiveAttempts' = receiveAttempts + 1 \\
+(correct? = ztrue \land receiveCorrect' = receiveCorrect + 1) \lor
+(correct? = zfalse \land receiveCorrect' = receiveCorrect) \\
+sendAttempts' = sendAttempts \\
+sendCorrect' = sendCorrect \\
+earAttempts' = earAttempts \\
+earCorrect' = earCorrect
+\end{schema}
+
+\begin{schema}{RecordSendAttempt}
+\Delta CharacterStat \\
+correct? : ZBOOL
+\where
+sendAttempts' = sendAttempts + 1 \\
+(correct? = ztrue \land sendCorrect' = sendCorrect + 1) \lor
+(correct? = zfalse \land sendCorrect' = sendCorrect) \\
+receiveAttempts' = receiveAttempts \\
+receiveCorrect' = receiveCorrect \\
+earAttempts' = earAttempts \\
+earCorrect' = earCorrect
+\end{schema}
+
+\begin{schema}{RecordEarAttempt}
+\Delta CharacterStat \\
+correct? : ZBOOL
+\where
+earAttempts' = earAttempts + 1 \\
+(correct? = ztrue \land earCorrect' = earCorrect + 1) \lor
+(correct? = zfalse \land earCorrect' = earCorrect) \\
+receiveAttempts' = receiveAttempts \\
+receiveCorrect' = receiveCorrect \\
+sendAttempts' = sendAttempts \\
+sendCorrect' = sendCorrect
+\end{schema}
+
+%==============================================================================
+\section{System Invariants}
+%==============================================================================
+
+The following properties hold for any reachable state:
+
+\begin{enumerate}
+\item \textbf{Level bounds}: $1 \leq receiveLevel \leq 26$ and
+      $1 \leq sendLevel \leq 26$
+
+\item \textbf{Correctness bounds}: For any character,
+      $receiveCorrect \leq receiveAttempts$ and
+      $sendCorrect \leq sendAttempts$
+
+\item \textbf{Streak monotonicity}: $currentStreak \leq longestStreak$
+
+\item \textbf{Interval bounds}: $1 \leq interval \leq 30$ for both directions
+
+\item \textbf{Non-negative counts}: All attempt and session counts are
+      non-negative natural numbers
+\end{enumerate}
+
+These invariants are encoded directly in the schema predicates, ensuring
+type-correct operations preserve them.
+
+%==============================================================================
+\section{Properties Not Modeled}
+%==============================================================================
+
+This specification focuses on persistent state. The following aspects are
+intentionally omitted:
+
+\begin{itemize}
+\item \textbf{Audio timing}: Dit/dah durations (60ms/180ms at 20 WPM),
+      Farnsworth spacing adjustments
+
+\item \textbf{Session flow}: Introduction phase, training phase, pause/resume,
+      timeout handling
+
+\item \textbf{QSO simulation}: Virtual station exchanges, protocol phases,
+      message templates
+
+\item \textbf{UI state}: Current screen, selected characters, input buffers
+
+\item \textbf{Notifications}: Practice due reminders, streak alerts,
+      anti-nag policies
+\end{itemize}
+
+These could be modeled in future extensions or separate specifications.
+
+%==============================================================================
+\section{Validation}
+%==============================================================================
+
+This specification has been validated with:
+
+\begin{itemize}
+\item \textbf{fuzz}: Type-checking passes with no errors
+\item \textbf{probcli -init}: Initialization succeeds
+\item \textbf{probcli -animate}: All operations covered
+\end{itemize}
+
+The flattened state schema and bounded inputs ensure ProB can explore the
+state space without unbounded enumeration warnings.
+
+\end{document}
