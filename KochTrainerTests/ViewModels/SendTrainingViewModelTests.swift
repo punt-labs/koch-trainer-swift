@@ -267,11 +267,11 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     func testCleanupStopsAudio() {
         viewModel.startSession()
-        mockAudioEngine.stopCalled = false
+        mockAudioEngine.endSessionCalled = false
 
         viewModel.cleanup()
 
-        XCTAssertTrue(mockAudioEngine.stopCalled)
+        XCTAssertTrue(mockAudioEngine.endSessionCalled)
     }
 
     // MARK: - Paused Session Snapshot Tests

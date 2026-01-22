@@ -35,7 +35,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published var characterStats: [Character: CharacterStat] = [:]
     @Published var introCharacters: [Character] = []
     @Published var currentIntroCharacter: Character?
     @Published var targetCharacter: Character = "K"
@@ -48,6 +48,19 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Custom characters for practice mode (nil = use level-based characters)
     private(set) var customCharacters: [Character]?
+
+    var progressStore: ProgressStore?
+    var settingsStore: SettingsStore?
+    var sessionTimer: Timer?
+    var inputTimer: Timer?
+    var currentLevel: Int = 1
+
+    // MARK: Internal (for extension access)
+
+    let audioEngine: AudioEngineProtocol
+    let decoder = MorseDecoder()
+    var sessionStartTime: Date?
+    var lastInputTime: Date?
 
     /// Minimum attempts scales with character count (5 per character, floor of 15)
     var minimumAttemptsForProficiency: Int {
@@ -106,6 +119,11 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         if case .paused = phase { return true }
         if case .completed = phase { return true }
         return false
+    }
+
+    /// Dynamic timeout based on current target character's pattern length
+    var currentInputTimeout: TimeInterval {
+        TrainingTiming.timeoutForCharacter(targetCharacter)
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
@@ -175,6 +193,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
+
+        // Turn off radio
+        audioEngine.setRadioMode(.off)
         audioEngine.stop()
         isWaitingForInput = false
 
@@ -248,6 +269,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
+
+        // Resume receiving mode
+        audioEngine.setRadioMode(.receiving)
+
         startSessionTimer()
         showNextCharacter()
     }
@@ -256,7 +281,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.stop()
+        audioEngine.endSession()
         isWaitingForInput = false
 
         // Clear any paused session since we're ending
@@ -296,7 +321,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Input Handling
@@ -318,6 +343,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "."
         lastInputTime = Date()
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDit()
     }
 
@@ -325,25 +353,20 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "-"
         lastInputTime = Date()
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDah()
     }
 
-    // MARK: Private
+    func checkForProficiency() {
+        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard accuracy >= proficiencyThreshold else { return }
 
-    private let audioEngine: AudioEngineProtocol
-    private let decoder = MorseDecoder()
-    private var progressStore: ProgressStore?
-    private var settingsStore: SettingsStore?
-    private var sessionTimer: Timer?
-    private var inputTimer: Timer?
-    private var sessionStartTime: Date?
-    private var currentLevel: Int = 1
-    private var lastInputTime: Date?
-
-    /// Dynamic timeout based on current target character's pattern length
-    private var currentInputTimeout: TimeInterval {
-        TrainingTiming.timeoutForCharacter(targetCharacter)
+        endSession()
     }
+
+    // MARK: Private
 
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {
@@ -365,134 +388,30 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         sessionStartTime = Date()
         isPlaying = true
+
+        // Start continuous audio session if band conditions enabled
+        if settingsStore?.settings.bandConditionsEnabled == true {
+            audioEngine.startSession()
+            // Radio starts in receiving mode (listening)
+        }
+
         startSessionTimer()
         showNextCharacter()
-    }
-
-    private func checkForProficiency() {
-        guard totalAttempts >= minimumAttemptsForProficiency else { return }
-        guard accuracy >= proficiencyThreshold else { return }
-
-        endSession()
     }
 
     private func playDit() {
         Task {
             await audioEngine.playDit()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
     }
 
     private func playDah() {
         Task {
             await audioEngine.playDah()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
-    }
-}
-
-// MARK: - Private Helpers
-
-extension SendTrainingViewModel {
-    func startSessionTimer() {
-        sessionTimer?.invalidate()
-        sessionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tickSession() }
-        }
-    }
-
-    private func tickSession() {
-        guard timeRemaining > 0 else { endSession()
-            return
-        }
-        timeRemaining -= 1
-    }
-
-    func resetInputTimer() {
-        inputTimeRemaining = currentInputTimeout
-        inputTimer?.invalidate()
-        inputTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tickInput() }
-        }
-    }
-
-    private func tickInput() {
-        inputTimeRemaining -= 0.05
-        if inputTimeRemaining <= 0 {
-            inputTimer?.invalidate()
-            completeCurrentInput()
-        }
-    }
-
-    private func completeCurrentInput() {
-        isWaitingForInput = false
-
-        let decodedChar = currentPattern.isEmpty ? nil : MorseCode.character(for: currentPattern)
-        let isCorrect = !currentPattern.isEmpty && decodedChar == targetCharacter
-        let displayPattern = currentPattern.isEmpty ? "(no response)" : currentPattern
-        recordResponse(expected: targetCharacter, wasCorrect: isCorrect, pattern: displayPattern, decoded: decodedChar)
-        showFeedbackAndContinue(
-            wasCorrect: isCorrect,
-            expected: targetCharacter,
-            pattern: displayPattern,
-            decoded: decodedChar
-        )
-    }
-
-    func recordResponse(expected: Character, wasCorrect: Bool, pattern: String, decoded: Character?) {
-        totalAttempts += 1
-        if wasCorrect { correctCount += 1 }
-
-        var stat = characterStats[expected] ?? CharacterStat()
-        stat.sendAttempts += 1
-        if wasCorrect { stat.sendCorrect += 1 }
-        stat.lastPracticed = Date()
-        characterStats[expected] = stat
-    }
-
-    func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, pattern: String, decoded: Character?) {
-        lastFeedback = Feedback(
-            wasCorrect: wasCorrect,
-            expectedCharacter: expected,
-            sentPattern: pattern,
-            decodedCharacter: decoded
-        )
-
-        Task {
-            if !wasCorrect {
-                try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if isPlaying { await audioEngine.playCharacter(expected) }
-                try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
-            } else {
-                try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
-            }
-
-            checkForProficiency()
-            if isPlaying { showNextCharacter() }
-        }
-    }
-
-    func showNextCharacter() {
-        var combinedStats = progressStore?.progress.characterStats ?? [:]
-        for (char, sessionStat) in characterStats {
-            if var existing = combinedStats[char] {
-                existing.merge(sessionStat)
-                combinedStats[char] = existing
-            } else {
-                combinedStats[char] = sessionStat
-            }
-        }
-
-        let group = GroupGenerator.generateMixedGroup(
-            level: currentLevel,
-            characterStats: combinedStats,
-            sessionType: .send,
-            groupLength: 1,
-            availableCharacters: customCharacters
-        )
-
-        if let char = group.first { targetCharacter = char }
-        currentPattern = ""
-        lastFeedback = nil
-        isWaitingForInput = true
-        resetInputTimer()
     }
 }

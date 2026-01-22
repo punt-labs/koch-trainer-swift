@@ -120,6 +120,13 @@ final class VocabularyTrainingViewModel: ObservableObject {
         sessionStartTime = Date()
         isPlaying = true
         phase = .training
+
+        // Start continuous audio session if band conditions enabled
+        if settingsStore?.settings.bandConditionsEnabled == true {
+            audioEngine.startSession()
+            // Radio starts in receiving mode
+        }
+
         showNextWord()
     }
 
@@ -129,6 +136,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
         phase = .paused
         responseTimer?.invalidate()
         inputTimer?.invalidate()
+
+        // Turn off radio
+        audioEngine.setRadioMode(.off)
         audioEngine.stop()
         isWaitingForResponse = false
 
@@ -142,6 +152,10 @@ final class VocabularyTrainingViewModel: ObservableObject {
         guard phase == .paused else { return }
         phase = .training
         isPlaying = true
+
+        // Resume receiving mode
+        audioEngine.setRadioMode(.receiving)
+
         showNextWord()
     }
 
@@ -188,7 +202,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         isPlaying = false
         responseTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.stop()
+        audioEngine.endSession()
         isWaitingForResponse = false
 
         // Clear any paused session since we're ending
@@ -216,7 +230,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Receive Mode Input
@@ -265,6 +279,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
     func inputDit() {
         guard isPlaying, isWaitingForResponse else { return }
         currentPattern += "."
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDit()
         resetInputTimer()
     }
@@ -272,6 +289,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
     func inputDah() {
         guard isPlaying, isWaitingForResponse else { return }
         currentPattern += "-"
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDah()
         resetInputTimer()
     }
@@ -295,15 +315,17 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     private func playDit() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDit()
+            await audioEngine.playDit()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
     }
 
     private func playDah() {
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDah()
+            await audioEngine.playDah()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
     }
 

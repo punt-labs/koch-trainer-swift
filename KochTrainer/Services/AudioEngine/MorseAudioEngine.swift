@@ -16,6 +16,22 @@ protocol AudioEngineProtocol {
     func setFrequency(_ frequency: Double)
     func setEffectiveSpeed(_ wpm: Int)
     func configureBandConditions(from settings: AppSettings)
+
+    // MARK: - Continuous Session API (Half-Duplex Radio Simulation)
+
+    /// Start a continuous audio session with radio mode control.
+    /// Audio engine runs continuously until `endSession()` is called.
+    func startSession()
+
+    /// End the continuous audio session.
+    func endSession()
+
+    /// Set the radio mode (controls audio output behavior).
+    /// - Parameter mode: `.off` (silence), `.receiving` (noise + signals), `.transmitting` (sidetone only)
+    func setRadioMode(_ mode: RadioMode)
+
+    /// Current radio mode.
+    var radioMode: RadioMode { get }
 }
 
 // MARK: - MorseAudioEngine
@@ -47,6 +63,11 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         let characterGap: TimeInterval
         let wordGap: TimeInterval
 
+    }
+
+    /// Current radio mode.
+    var radioMode: RadioMode {
+        toneGenerator.radioMode
     }
 
     func setFrequency(_ frequency: Double) {
@@ -139,6 +160,26 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// Reset stopped state to allow playback again.
     func reset() {
         isStopped = false
+    }
+
+    // MARK: - Continuous Session API
+
+    /// Start a continuous audio session.
+    /// The audio engine runs continuously with radio mode control.
+    func startSession() {
+        isStopped = false
+        toneGenerator.startSession()
+    }
+
+    /// End the continuous audio session.
+    func endSession() {
+        isStopped = true
+        toneGenerator.endSession()
+    }
+
+    /// Set the radio mode.
+    func setRadioMode(_ mode: RadioMode) {
+        toneGenerator.setRadioMode(mode)
     }
 
     // MARK: Private

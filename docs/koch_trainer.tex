@@ -109,6 +109,28 @@ with ProB's reserved keywords:
 ZBOOL ::= ztrue | zfalse
 \end{zed}
 
+\subsection{Radio Mode}
+
+Amateur radio is half-duplex: the operator either receives (listens to incoming
+signals) or transmits (sends outgoing signals), but not both simultaneously.
+This fundamental constraint shapes the audio experience during training.
+
+\begin{zed}
+RadioMode ::= radioOff | radioReceiving | radioTransmitting
+\end{zed}
+
+\begin{itemize}
+\item \emph{radioOff}: Radio not active (session not started, paused, or completed)
+\item \emph{radioReceiving}: Radio on, listening---continuous noise floor with
+      band conditions (QRN, QSB, QRM), incoming Morse signals audible
+\item \emph{radioTransmitting}: Radio on, sending---sidetone only, receiver muted
+      (no noise or band conditions)
+\end{itemize}
+
+When the radio is on and the operator is not transmitting, they are receiving.
+This models real amateur radio behavior where the receiver is always active
+unless explicitly transmitting.
+
 %==============================================================================
 \section{Global Constants}
 %==============================================================================
@@ -670,6 +692,7 @@ this lives in the ViewModel; here we model it as a distinct schema.
 \begin{schema}{SessionState}
 phase : SessionPhase \\
 direction : Direction \\
+radioMode : RadioMode \\
 characterCount : \nat \\
 introIndex : \nat \\
 sessionAttempts : \nat \\
@@ -679,12 +702,24 @@ characterCount \geq 1 \\
 characterCount \leq maxLevel \\
 introIndex \leq characterCount \\
 sessionCorrect \leq sessionAttempts \\
-sessionAttempts \leq 1000
+sessionAttempts \leq 1000 \\
+% Radio mode constraints (half-duplex behavior)
+phase \in \{introduction, paused, completed\} \implies radioMode = radioOff \\
+(phase = training \land direction = receive) \implies radioMode = radioReceiving \\
+radioMode = radioTransmitting \implies direction = send
 \end{schema}
 
 The \emph{characterCount} is the number of unlocked characters for this session's
 direction (equal to the current level). The \emph{introIndex} tracks progress
 through the introduction phase.
+
+The \emph{radioMode} models half-duplex radio behavior:
+\begin{itemize}
+\item During introduction, pause, or completion: radio is off (no audio)
+\item During receive training: radio always receiving (user listens to incoming Morse)
+\item During send training: user toggles between receiving (waiting) and transmitting (keying)
+\item Transmitting is only valid in send mode (cannot transmit during receive training)
+\end{itemize}
 
 \subsection{Session Initialization}
 
@@ -697,14 +732,15 @@ level? \geq minLevel \\
 level? \leq maxLevel \\
 phase' = introduction \\
 direction' = direction? \\
+radioMode' = radioOff \\
 characterCount' = level? \\
 introIndex' = 0 \\
 sessionAttempts' = 0 \\
 sessionCorrect' = 0
 \end{schema}
 
-A session begins in the introduction phase with the character count set to the
-student's current level for the chosen direction.
+A session begins in the introduction phase with the radio off. The radio
+activates when training begins (transitioning to receiving mode).
 
 \subsection{Introduction Phase Operations}
 
@@ -716,6 +752,7 @@ introIndex < characterCount \\
 introIndex' = introIndex + 1 \\
 phase' = phase \\
 direction' = direction \\
+radioMode' = radioMode \\
 characterCount' = characterCount \\
 sessionAttempts' = sessionAttempts \\
 sessionCorrect' = sessionCorrect
@@ -727,6 +764,7 @@ sessionCorrect' = sessionCorrect
 phase = introduction \\
 introIndex = characterCount \\
 phase' = training \\
+radioMode' = radioReceiving \\
 introIndex' = introIndex \\
 direction' = direction \\
 characterCount' = characterCount \\
@@ -735,7 +773,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 When all characters have been shown ($introIndex = characterCount$), the
-session transitions to the training phase.
+session transitions to the training phase and the radio turns on in receiving mode.
 
 \subsection{Training Phase Operations}
 
@@ -750,6 +788,7 @@ sessionAttempts' = sessionAttempts + 1 \\
 sessionCorrect' = sessionCorrect + 1 \\
 phase' = phase \\
 direction' = direction \\
+radioMode' = radioMode \\
 characterCount' = characterCount \\
 introIndex' = introIndex
 \end{schema}
@@ -762,6 +801,7 @@ sessionAttempts' = sessionAttempts + 1 \\
 sessionCorrect' = sessionCorrect \\
 phase' = phase \\
 direction' = direction \\
+radioMode' = radioMode \\
 characterCount' = characterCount \\
 introIndex' = introIndex
 \end{schema}
@@ -776,6 +816,7 @@ within \emph{responseTimeoutMs} (3 seconds).
 \where
 phase = training \\
 phase' = paused \\
+radioMode' = radioOff \\
 direction' = direction \\
 characterCount' = characterCount \\
 introIndex' = introIndex \\
@@ -788,6 +829,7 @@ sessionCorrect' = sessionCorrect
 \where
 phase = paused \\
 phase' = training \\
+radioMode' = radioReceiving \\
 direction' = direction \\
 characterCount' = characterCount \\
 introIndex' = introIndex \\
@@ -795,8 +837,49 @@ sessionAttempts' = sessionAttempts \\
 sessionCorrect' = sessionCorrect
 \end{schema}
 
-Pausing preserves all session state. The implementation persists paused sessions
-to storage so they survive app termination.
+Pausing turns the radio off. Resuming returns to receiving mode (the radio
+turns back on, listening for incoming signals).
+
+\subsection{Radio Mode Transitions}
+
+During send training, the student toggles between receiving (waiting to key)
+and transmitting (actively keying). These transitions model the half-duplex
+nature of amateur radio.
+
+\begin{schema}{EnterTransmitMode}
+\Delta SessionState
+\where
+phase = training \\
+direction = send \\
+radioMode = radioReceiving \\
+radioMode' = radioTransmitting \\
+phase' = phase \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+\begin{schema}{ExitTransmitMode}
+\Delta SessionState
+\where
+phase = training \\
+direction = send \\
+radioMode = radioTransmitting \\
+radioMode' = radioReceiving \\
+phase' = phase \\
+direction' = direction \\
+characterCount' = characterCount \\
+introIndex' = introIndex \\
+sessionAttempts' = sessionAttempts \\
+sessionCorrect' = sessionCorrect
+\end{schema}
+
+$EnterTransmitMode$ occurs when the student begins keying (presses dit or dah).
+$ExitTransmitMode$ occurs when keying completes (timeout after last element).
+Note that transmitting is only valid during send training---the precondition
+$direction = send$ enforces this constraint.
 
 \subsection{Proficiency Check}
 
@@ -828,6 +911,7 @@ calls this after each response to determine whether to end the session.
 \where
 phase = training \\
 phase' = completed \\
+radioMode' = radioOff \\
 direction' = direction \\
 characterCount' = characterCount \\
 introIndex' = introIndex \\
@@ -835,9 +919,9 @@ sessionAttempts' = sessionAttempts \\
 sessionCorrect' = sessionCorrect
 \end{schema}
 
-When a session completes (either by proficiency or user action), the accumulated
-statistics are transferred to persistent state via $RecordSession$ and the
-relevant $Advance$ and $UpdateInterval$ operations.
+When a session completes (either by proficiency or user action), the radio
+turns off and the accumulated statistics are transferred to persistent state
+via $RecordSession$ and the relevant $Advance$ and $UpdateInterval$ operations.
 
 \subsection{Session-to-Progress Integration}
 

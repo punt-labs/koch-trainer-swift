@@ -12,6 +12,9 @@ final class QSOEnginePhaseTests: XCTestCase {
         var effectiveSpeed: Int = 12
         var stopCalled = false
         var bandConditionsConfigured = false
+        private(set) var storedRadioMode: RadioMode = .off
+
+        var radioMode: RadioMode { storedRadioMode }
 
         func playCharacter(_: Character) async {}
         func playGroup(_ group: String) async {
@@ -40,6 +43,10 @@ final class QSOEnginePhaseTests: XCTestCase {
         func configureBandConditions(from _: AppSettings) {
             bandConditionsConfigured = true
         }
+
+        func startSession() { storedRadioMode = .receiving }
+        func endSession() { storedRadioMode = .off }
+        func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
     }
 
     // MARK: - processUserInput Phase Transition Tests
