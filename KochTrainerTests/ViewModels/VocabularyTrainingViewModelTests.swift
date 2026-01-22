@@ -451,8 +451,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
         // Pattern should be cleared after space
         XCTAssertEqual(sendVM.currentPattern, "")
-        // User input should contain decoded character
-        XCTAssertTrue(sendVM.userInput.contains("C") || !sendVM.userInput.isEmpty)
+        // User input should contain decoded character 'C'
+        XCTAssertTrue(sendVM.userInput.contains("C"))
 
         sendVM.cleanup()
     }
@@ -589,18 +589,6 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(mockAudioEngine.playGroupCalls.isEmpty)
 
         sendVM.cleanup()
-    }
-
-    func testReplayWordIgnoredWhenCurrentWordEmpty() {
-        viewModel.startSession()
-        mockAudioEngine.playGroupCalls = []
-
-        // Force currentWord to be empty (normally wouldn't happen)
-        // Just test that an empty word doesn't cause issues
-        if viewModel.currentWord.isEmpty {
-            viewModel.replayWord()
-            // Should not crash
-        }
     }
 
     // MARK: - Word Selection Tests

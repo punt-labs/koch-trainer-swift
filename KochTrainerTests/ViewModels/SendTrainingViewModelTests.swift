@@ -657,16 +657,21 @@ final class SendTrainingViewModelTests: XCTestCase {
     // MARK: - Introduction Phase Tests
 
     func testStartIntroductionWithEmptyCharactersGoesDirectlyToTraining() {
-        // Create a VM that would have empty intro characters
+        // Create a VM with empty intro characters
         let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
-        // If we don't configure, introCharacters will be empty
+        // Don't configure - introCharacters will be empty
+        XCTAssertTrue(vm.introCharacters.isEmpty)
+
         vm.startSession()
 
-        // Should go directly to training if no intro characters
-        // (In practice this won't happen since configure is always called)
+        // Should go directly to training phase when no intro characters
+        XCTAssertEqual(vm.phase, .training)
+        XCTAssertTrue(vm.isPlaying)
     }
 
     func testPlayCurrentIntroCharacterDoesNothingWithNoCharacter() {
+        // currentIntroCharacter is nil before startSession
+        XCTAssertNil(viewModel.currentIntroCharacter)
         viewModel.playCurrentIntroCharacter()
         // Should not crash when currentIntroCharacter is nil
     }
