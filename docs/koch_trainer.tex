@@ -8,12 +8,19 @@
 \documentclass[a4paper,10pt,fleqn]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{fuzz}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
 \begin{document}
 
 \title{Koch Trainer: A Z Specification}
 \author{Formal Model of Morse Code Learning Progress}
 \date{January 2026}
+\hypersetup{
+  pdftitle={Koch Trainer: A Z Specification},
+  pdfauthor={Formal Model of Morse Code Learning Progress},
+  pdfsubject={Z Specification for Morse Code Learning},
+  pdfcreator={fuzz/probcli}
+}
 \maketitle
 
 \tableofcontents
@@ -23,7 +30,8 @@
 \section{Introduction}
 %==============================================================================
 
-Koch Trainer teaches Morse code using the \emph{Koch method}---a proven technique
+Koch Trainer teaches Morse code using the \emph{Koch method}---a
+proven technique
 developed by German psychologist Ludwig Koch in the 1930s. Rather than learning
 Morse at slow speeds and gradually increasing, students learn characters at full
 speed (20 words per minute) from the start, adding one new character at a time
@@ -34,17 +42,18 @@ after achieving 90\% accuracy.
 The application follows four core principles:
 
 \begin{enumerate}
-\item \textbf{Audio-first}: Morse code is fundamentally an auditory skill. Visual
-      aids support learning, but audio remains primary.
+  \item \textbf{Audio-first}: Morse code is fundamentally an auditory
+    skill. Visual
+    aids support learning, but audio remains primary.
 
-\item \textbf{Spaced repetition}: Practice intervals adapt to performance,
-      maximizing long-term retention while minimizing daily time commitment.
+  \item \textbf{Spaced repetition}: Practice intervals adapt to performance,
+    maximizing long-term retention while minimizing daily time commitment.
 
-\item \textbf{Separate skills}: Receiving (copying audio to text) and sending
-      (keying Morse from text) are distinct skills that progress independently.
+  \item \textbf{Separate skills}: Receiving (copying audio to text) and sending
+    (keying Morse from text) are distinct skills that progress independently.
 
-\item \textbf{Realistic simulation}: QSO practice mirrors real amateur radio
-      operation with authentic timing and protocols.
+  \item \textbf{Realistic simulation}: QSO practice mirrors real amateur radio
+    operation with authentic timing and protocols.
 \end{enumerate}
 
 \subsection{Scope of This Specification}
@@ -52,13 +61,14 @@ The application follows four core principles:
 This formal specification models the stateful components of the learning system:
 
 \begin{itemize}
-\item Student progress through 26 Koch-ordered characters
-\item Per-character accuracy statistics by training direction
-\item Spaced repetition scheduling with adaptive intervals
-\item Streak tracking for consecutive practice days
+  \item Student progress through 26 Koch-ordered characters
+  \item Per-character accuracy statistics by training direction
+  \item Spaced repetition scheduling with adaptive intervals
+  \item Streak tracking for consecutive practice days
 \end{itemize}
 
-We do not model audio generation, UI state, or real-time session mechanics---only
+We do not model audio generation, UI state, or real-time session
+mechanics---only
 the persistent state that survives between sessions.
 
 %==============================================================================
@@ -69,7 +79,7 @@ We introduce given sets for entities whose internal structure is irrelevant to
 the learning model.
 
 \begin{zed}
-[SESSIONID, TIMESTAMP]
+  [SESSIONID, TIMESTAMP]
 \end{zed}
 
 $SESSIONID$ uniquely identifies completed training sessions.
@@ -77,7 +87,8 @@ $TIMESTAMP$ represents points in time for scheduling and history tracking.
 
 Note: We do not model individual Morse characters as a given set. The 26 letters
 follow a fixed Koch order (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X),
-and level numbers 1--26 implicitly identify the character set unlocked at each level.
+and level numbers 1--26 implicitly identify the character set
+unlocked at each level.
 
 %==============================================================================
 \section{Free Types}
@@ -88,10 +99,11 @@ and level numbers 1--26 implicitly identify the character set unlocked at each l
 Training occurs in two distinct directions, each developing a different skill:
 
 \begin{zed}
-Direction ::= receive | send
+  Direction ::= receive | send
 \end{zed}
 
-In \emph{receive} mode, the student hears Morse audio and types the corresponding
+In \emph{receive} mode, the student hears Morse audio and types the
+corresponding
 letter---training auditory pattern recognition. In \emph{send} mode, the student
 sees a letter and keys the Morse pattern using dit/dah inputs---training motor
 memory and timing.
@@ -106,7 +118,7 @@ We define a boolean type for input flags, using names that avoid conflicts
 with ProB's reserved keywords:
 
 \begin{zed}
-ZBOOL ::= ztrue | zfalse
+  ZBOOL ::= ztrue | zfalse
 \end{zed}
 
 %==============================================================================
@@ -118,23 +130,23 @@ Ludwig Koch's research on optimal learning sequences. Characters are introduced
 one at a time: level 1 unlocks only K, level 2 adds M, and so on.
 
 \begin{axdef}
-maxLevel : \nat \\
-minLevel : \nat \\
-maxInterval : \nat \\
-minInterval : \nat \\
-advanceThreshold : \nat \\
-habitFormationDays : \nat \\
-habitMaxInterval : \nat \\
-missedPracticeMultiplier : \nat
-\where
-maxLevel = 26 \\
-minLevel = 1 \\
-maxInterval = 30 \\
-minInterval = 1 \\
-advanceThreshold = 90 \\
-habitFormationDays = 14 \\
-habitMaxInterval = 2 \\
-missedPracticeMultiplier = 2
+  maxLevel : \nat \\
+  minLevel : \nat \\
+  maxInterval : \nat \\
+  minInterval : \nat \\
+  advanceThreshold : \nat \\
+  habitFormationDays : \nat \\
+  habitMaxInterval : \nat \\
+  missedPracticeMultiplier : \nat
+  \where
+  maxLevel = 26 \\
+  minLevel = 1 \\
+  maxInterval = 30 \\
+  minInterval = 1 \\
+  advanceThreshold = 90 \\
+  habitFormationDays = 14 \\
+  habitMaxInterval = 2 \\
+  missedPracticeMultiplier = 2
 \end{axdef}
 
 The advancement threshold of 90\% accuracy over a minimum of 20 attempts ensures
@@ -150,25 +162,25 @@ The system tracks per-character accuracy separately for each training direction.
 This granular tracking serves multiple purposes:
 
 \begin{itemize}
-\item Identify specific characters that need more practice
-\item Display proficiency indicators (color-coded rings) on the character grid
-\item Enable future features like adaptive character selection
+  \item Identify specific characters that need more practice
+  \item Display proficiency indicators (color-coded rings) on the character grid
+  \item Enable future features like adaptive character selection
 \end{itemize}
 
 \begin{schema}{CharacterStat}
-receiveAttempts : \nat \\
-receiveCorrect : \nat \\
-sendAttempts : \nat \\
-sendCorrect : \nat \\
-earAttempts : \nat \\
-earCorrect : \nat
-\where
-receiveCorrect \leq receiveAttempts \\
-sendCorrect \leq sendAttempts \\
-earCorrect \leq earAttempts \\
-receiveAttempts \leq 10000 \\
-sendAttempts \leq 10000 \\
-earAttempts \leq 10000
+  receiveAttempts : \nat \\
+  receiveCorrect : \nat \\
+  sendAttempts : \nat \\
+  sendCorrect : \nat \\
+  earAttempts : \nat \\
+  earCorrect : \nat
+  \where
+  receiveCorrect \leq receiveAttempts \\
+  sendCorrect \leq sendAttempts \\
+  earCorrect \leq earAttempts \\
+  receiveAttempts \leq 10000 \\
+  sendAttempts \leq 10000 \\
+  earAttempts \leq 10000
 \end{schema}
 
 The invariants ensure that correct counts never exceed attempt counts---a
@@ -179,7 +191,7 @@ where students reproduce heard patterns rather than identify letters.
 
 Combined accuracy for display purposes is computed as:
 \[
-accuracy = \frac{receiveCorrect + sendCorrect}{receiveAttempts + sendAttempts}
+  accuracy = \frac{receiveCorrect + sendCorrect}{receiveAttempts + sendAttempts}
 \]
 
 %==============================================================================
@@ -189,21 +201,21 @@ accuracy = \frac{receiveCorrect + sendCorrect}{receiveAttempts + sendAttempts}
 Each completed training session produces an immutable result record.
 
 \begin{schema}{SessionResult}
-sessionId : SESSIONID \\
-direction : Direction \\
-totalAttempts : \nat \\
-correctCount : \nat \\
-timestamp : TIMESTAMP
-\where
-correctCount \leq totalAttempts \\
-totalAttempts \leq 1000
+  sessionId : SESSIONID \\
+  direction : Direction \\
+  totalAttempts : \nat \\
+  correctCount : \nat \\
+  timestamp : TIMESTAMP
+  \where
+  correctCount \leq totalAttempts \\
+  totalAttempts \leq 1000
 \end{schema}
 
 Session results form the historical record used for:
 \begin{itemize}
-\item Calculating streak continuity (did the student practice yesterday?)
-\item Tracking long-term progress trends
-\item Supporting future analytics features
+  \item Calculating streak continuity (did the student practice yesterday?)
+  \item Tracking long-term progress trends
+  \item Supporting future analytics features
 \end{itemize}
 
 Only \emph{learn mode} sessions (not custom practice or vocabulary drills)
@@ -217,39 +229,39 @@ The central state schema captures all persistent student progress. We flatten
 the schedule fields into the main state for ProB animation compatibility.
 
 \begin{schema}{State}
-receiveLevel : \nat \\
-sendLevel : \nat \\
-earLevel : \nat \\
-sessionCount : \nat \\
-receiveInterval : \nat \\
-sendInterval : \nat \\
-currentStreak : \nat \\
-longestStreak : \nat
-\where
-receiveLevel \geq minLevel \\
-receiveLevel \leq maxLevel \\
-sendLevel \geq minLevel \\
-sendLevel \leq maxLevel \\
-earLevel \geq 1 \\
-earLevel \leq 5 \\
-sessionCount \leq 10000 \\
-receiveInterval \geq minInterval \\
-receiveInterval \leq maxInterval \\
-sendInterval \geq minInterval \\
-sendInterval \leq maxInterval \\
-currentStreak \leq longestStreak \\
-longestStreak \leq 365
+  receiveLevel : \nat \\
+  sendLevel : \nat \\
+  earLevel : \nat \\
+  sessionCount : \nat \\
+  receiveInterval : \nat \\
+  sendInterval : \nat \\
+  currentStreak : \nat \\
+  longestStreak : \nat
+  \where
+  receiveLevel \geq minLevel \\
+  receiveLevel \leq maxLevel \\
+  sendLevel \geq minLevel \\
+  sendLevel \leq maxLevel \\
+  earLevel \geq 1 \\
+  earLevel \leq 5 \\
+  sessionCount \leq 10000 \\
+  receiveInterval \geq minInterval \\
+  receiveInterval \leq maxInterval \\
+  sendInterval \geq minInterval \\
+  sendInterval \leq maxInterval \\
+  currentStreak \leq longestStreak \\
+  longestStreak \leq 365
 \end{schema}
 
 \subsection{Level Semantics}
 
 Each level $n$ unlocks the first $n$ characters in Koch order:
 \begin{itemize}
-\item Level 1: K
-\item Level 2: K, M
-\item Level 3: K, M, R
-\item $\vdots$
-\item Level 26: All 26 letters
+  \item Level 1: K
+  \item Level 2: K, M
+  \item Level 3: K, M, R
+  \item $\vdots$
+  \item Level 26: All 26 letters
 \end{itemize}
 
 Receive and send levels progress independently. A student at receive level 15
@@ -259,7 +271,8 @@ and send level 8 can copy 15 characters but only send 8.
 
 The \emph{receiveInterval} and \emph{sendInterval} fields represent the number
 of days until the next scheduled practice for each direction. These intervals
-adapt based on performance, implementing a simplified spaced repetition algorithm.
+adapt based on performance, implementing a simplified spaced
+repetition algorithm.
 
 \subsection{Streak Semantics}
 
@@ -275,16 +288,16 @@ A new student begins at level 1 in all directions with 1-day intervals and
 no streak history.
 
 \begin{schema}{Init}
-State'
-\where
-receiveLevel' = minLevel \\
-sendLevel' = minLevel \\
-earLevel' = 1 \\
-sessionCount' = 0 \\
-receiveInterval' = minInterval \\
-sendInterval' = minInterval \\
-currentStreak' = 0 \\
-longestStreak' = 0
+  State'
+  \where
+  receiveLevel' = minLevel \\
+  sendLevel' = minLevel \\
+  earLevel' = 1 \\
+  sessionCount' = 0 \\
+  receiveInterval' = minInterval \\
+  sendInterval' = minInterval \\
+  currentStreak' = 0 \\
+  longestStreak' = 0
 \end{schema}
 
 %==============================================================================
@@ -294,65 +307,68 @@ longestStreak' = 0
 \subsection{Level Advancement}
 
 The Koch method's core progression: when a student achieves $\geq 90\%$ accuracy
-over at least 20 attempts in a session, they advance to the next level, unlocking
+over at least 20 attempts in a session, they advance to the next
+level, unlocking
 one additional character.
 
 \begin{schema}{AdvanceReceiveLevel}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-receiveLevel < maxLevel \\
-receiveLevel' = receiveLevel + 1 \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  receiveLevel < maxLevel \\
+  receiveLevel' = receiveLevel + 1 \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak
 \end{schema}
 
 \begin{schema}{AdvanceSendLevel}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-sendLevel < maxLevel \\
-sendLevel' = sendLevel + 1 \\
-receiveLevel' = receiveLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  sendLevel < maxLevel \\
+  sendLevel' = sendLevel + 1 \\
+  receiveLevel' = receiveLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak
 \end{schema}
 
 The precondition $receiveLevel < maxLevel$ (or $sendLevel < maxLevel$) ensures
 we cannot advance beyond the 26 available characters.
 
 \begin{schema}{AdvanceEarLevel}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-earLevel < 5 \\
-earLevel' = earLevel + 1 \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-sessionCount' = sessionCount \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  earLevel < 5 \\
+  earLevel' = earLevel + 1 \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  sessionCount' = sessionCount \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak
 \end{schema}
 
-Ear training levels (1--5) correspond to pattern length: level 1 covers single-element
-patterns (E, T), level 5 includes 5-element patterns like digits. Unlike receive/send,
+Ear training levels (1--5) correspond to pattern length: level 1
+covers single-element
+patterns (E, T), level 5 includes 5-element patterns like digits.
+Unlike receive/send,
 ear training does not affect spaced repetition scheduling or streaks.
 
 \subsection{Session Recording}
@@ -360,16 +376,16 @@ ear training does not affect spaced repetition scheduling or streaks.
 Each completed session increments the session count for analytics.
 
 \begin{schema}{RecordSession}
-\Delta State
-\where
-sessionCount' = sessionCount + 1 \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak
+  \Delta State
+  \where
+  sessionCount' = sessionCount + 1 \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak
 \end{schema}
 
 \subsection{Spaced Repetition}
@@ -377,15 +393,15 @@ longestStreak' = longestStreak
 The interval algorithm adapts practice frequency based on performance:
 
 \begin{center}
-\begin{tabular}{ll}
-\hline
-Accuracy & Interval Change \\
-\hline
-$\geq 90\%$ & Double interval (max 30 days) \\
-$70\%$--$89\%$ & No change \\
-$< 70\%$ & Reset to 1 day \\
-\hline
-\end{tabular}
+  \begin{tabular}{ll}
+    \hline
+    Accuracy & Interval Change \\
+    \hline
+    $\geq 90\%$ & Double interval (max 30 days) \\
+    $70\%$--$89\%$ & No change \\
+    $< 70\%$ & Reset to 1 day \\
+    \hline
+  \end{tabular}
 \end{center}
 
 High accuracy indicates mastery, so we increase the interval to avoid
@@ -393,56 +409,58 @@ over-practice. Low accuracy signals struggle, so we reset to daily practice.
 The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
-\Delta State \\
-accuracy? : \nat \\
-daysSinceStart? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
-    \THEN habitMaxInterval \ELSE maxInterval @
-(receiveInterval * 2 \leq effectiveMax \land
-    receiveInterval' = receiveInterval * 2) \lor
-(receiveInterval * 2 > effectiveMax \land
-    receiveInterval' = effectiveMax) \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat \\
+  daysSinceStart? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  \LET effectiveMax == \\
+  \t1 \IF daysSinceStart? < habitFormationDays \\
+  \t1 \THEN habitMaxInterval \\
+  \t1 \ELSE maxInterval @
+  (receiveInterval * 2 \leq effectiveMax \\
+  \t1 \land receiveInterval' = receiveInterval * 2) \\
+  \lor (receiveInterval * 2 > effectiveMax \\
+  \t1 \land receiveInterval' = effectiveMax) \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalMedium}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? \geq 70 \\
-accuracy? < advanceThreshold \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? \geq 70 \\
+  accuracy? < advanceThreshold \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalLow}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? < 70 \\
-receiveInterval' = minInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? < 70 \\
+  receiveInterval' = minInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 The three interval schemas partition the accuracy range: high ($\geq 90\%$),
@@ -452,56 +470,58 @@ allows the habit formation cap to be applied during the first 14 days.
 Symmetric operations exist for send training:
 
 \begin{schema}{UpdateSendIntervalHigh}
-\Delta State \\
-accuracy? : \nat \\
-daysSinceStart? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
-    \THEN habitMaxInterval \ELSE maxInterval @
-(sendInterval * 2 \leq effectiveMax \land
-    sendInterval' = sendInterval * 2) \lor
-(sendInterval * 2 > effectiveMax \land
-    sendInterval' = effectiveMax) \\
-receiveInterval' = receiveInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat \\
+  daysSinceStart? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  \LET effectiveMax == \\
+  \t1 \IF daysSinceStart? < habitFormationDays \\
+  \t1 \THEN habitMaxInterval \\
+  \t1 \ELSE maxInterval @
+  (sendInterval * 2 \leq effectiveMax \\
+  \t1 \land sendInterval' = sendInterval * 2) \\
+  \lor (sendInterval * 2 > effectiveMax \\
+  \t1 \land sendInterval' = effectiveMax) \\
+  receiveInterval' = receiveInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalMedium}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? \geq 70 \\
-accuracy? < advanceThreshold \\
-sendInterval' = sendInterval \\
-receiveInterval' = receiveInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? \geq 70 \\
+  accuracy? < advanceThreshold \\
+  sendInterval' = sendInterval \\
+  receiveInterval' = receiveInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalLow}
-\Delta State \\
-accuracy? : \nat
-\where
-accuracy? < 70 \\
-sendInterval' = minInterval \\
-receiveInterval' = receiveInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat
+  \where
+  accuracy? < 70 \\
+  sendInterval' = minInterval \\
+  receiveInterval' = receiveInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \subsection{Missed Practice Reset}
@@ -510,70 +530,72 @@ If a student misses practice for more than twice their current interval,
 skill decay is assumed and the interval resets to daily practice.
 
 \begin{schema}{ResetReceiveIntervalOnMissedPractice}
-\Delta State \\
-daysSinceLastPractice? : \nat
-\where
-daysSinceLastPractice? > receiveInterval * missedPracticeMultiplier \\
-receiveInterval' = minInterval \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  daysSinceLastPractice? : \nat
+  \where
+  daysSinceLastPractice? > receiveInterval * missedPracticeMultiplier \\
+  receiveInterval' = minInterval \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{ResetSendIntervalOnMissedPractice}
-\Delta State \\
-daysSinceLastPractice? : \nat
-\where
-daysSinceLastPractice? > sendInterval * missedPracticeMultiplier \\
-sendInterval' = minInterval \\
-receiveInterval' = receiveInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  daysSinceLastPractice? : \nat
+  \where
+  daysSinceLastPractice? > sendInterval * missedPracticeMultiplier \\
+  sendInterval' = minInterval \\
+  receiveInterval' = receiveInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \subsection{Streak Tracking}
 
 Streaks measure consecutive calendar days with at least one completed session.
-They provide motivation through gamification without affecting learning outcomes.
+They provide motivation through gamification without affecting
+learning outcomes.
 
 \begin{schema}{IncrementStreak}
-\Delta State
-\where
-currentStreak' = currentStreak + 1 \\
-(currentStreak + 1 > longestStreak \land
-    longestStreak' = currentStreak + 1) \lor
-(currentStreak + 1 \leq longestStreak \land
-    longestStreak' = longestStreak) \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State
+  \where
+  currentStreak' = currentStreak + 1 \\
+  (currentStreak + 1 > longestStreak \\
+  \t1 \land longestStreak' = currentStreak + 1) \\
+  \lor (currentStreak + 1 \leq longestStreak \\
+  \t1 \land longestStreak' = longestStreak) \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 The streak increments when the student practices on the calendar day following
-their last practice. The longest streak updates if the current streak exceeds it.
+their last practice. The longest streak updates if the current streak
+exceeds it.
 
 \begin{schema}{ResetStreak}
-\Delta State
-\where
-currentStreak' = 0 \\
-longestStreak' = longestStreak \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State
+  \where
+  currentStreak' = 0 \\
+  longestStreak' = longestStreak \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 The streak resets to zero when a calendar day passes without any practice.
@@ -584,42 +606,48 @@ Note that the longest streak is preserved---it represents the all-time record.
 During training, each character attempt updates the per-character statistics.
 
 \begin{schema}{RecordReceiveAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-receiveAttempts' = receiveAttempts + 1 \\
-(correct? = ztrue \land receiveCorrect' = receiveCorrect + 1) \lor
-(correct? = zfalse \land receiveCorrect' = receiveCorrect) \\
-sendAttempts' = sendAttempts \\
-sendCorrect' = sendCorrect \\
-earAttempts' = earAttempts \\
-earCorrect' = earCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  receiveAttempts' = receiveAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land receiveCorrect' = receiveCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land receiveCorrect' = receiveCorrect) \\
+  sendAttempts' = sendAttempts \\
+  sendCorrect' = sendCorrect \\
+  earAttempts' = earAttempts \\
+  earCorrect' = earCorrect
 \end{schema}
 
 \begin{schema}{RecordSendAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-sendAttempts' = sendAttempts + 1 \\
-(correct? = ztrue \land sendCorrect' = sendCorrect + 1) \lor
-(correct? = zfalse \land sendCorrect' = sendCorrect) \\
-receiveAttempts' = receiveAttempts \\
-receiveCorrect' = receiveCorrect \\
-earAttempts' = earAttempts \\
-earCorrect' = earCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  sendAttempts' = sendAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land sendCorrect' = sendCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land sendCorrect' = sendCorrect) \\
+  receiveAttempts' = receiveAttempts \\
+  receiveCorrect' = receiveCorrect \\
+  earAttempts' = earAttempts \\
+  earCorrect' = earCorrect
 \end{schema}
 
 \begin{schema}{RecordEarAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-earAttempts' = earAttempts + 1 \\
-(correct? = ztrue \land earCorrect' = earCorrect + 1) \lor
-(correct? = zfalse \land earCorrect' = earCorrect) \\
-receiveAttempts' = receiveAttempts \\
-receiveCorrect' = receiveCorrect \\
-sendAttempts' = sendAttempts \\
-sendCorrect' = sendCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  earAttempts' = earAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land earCorrect' = earCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land earCorrect' = earCorrect) \\
+  receiveAttempts' = receiveAttempts \\
+  receiveCorrect' = receiveCorrect \\
+  sendAttempts' = sendAttempts \\
+  sendCorrect' = sendCorrect
 \end{schema}
 
 %==============================================================================
@@ -635,32 +663,33 @@ exists only during active training.
 A training session progresses through distinct phases:
 
 \begin{zed}
-SessionPhase ::= introduction | training | paused | completed
+  SessionPhase ::= introduction | training | paused | completed
 \end{zed}
 
 \begin{itemize}
-\item \emph{introduction}: Showing unlocked characters with audio playback
-\item \emph{training}: Active call-and-response practice
-\item \emph{paused}: Session suspended mid-training
-\item \emph{completed}: Session ended, results recorded
+  \item \emph{introduction}: Showing unlocked characters with audio playback
+  \item \emph{training}: Active call-and-response practice
+  \item \emph{paused}: Session suspended mid-training
+  \item \emph{completed}: Session ended, results recorded
 \end{itemize}
 
 \subsection{Session Constants}
 
 \begin{axdef}
-proficiencyThreshold : \nat \\
-baseMinimumAttempts : \nat \\
-attemptsPerCharacter : \nat \\
-responseTimeoutMs : \nat
-\where
-proficiencyThreshold = 90 \\
-baseMinimumAttempts = 15 \\
-attemptsPerCharacter = 5 \\
-responseTimeoutMs = 3000
+  proficiencyThreshold : \nat \\
+  baseMinimumAttempts : \nat \\
+  attemptsPerCharacter : \nat \\
+  responseTimeoutMs : \nat
+  \where
+  proficiencyThreshold = 90 \\
+  baseMinimumAttempts = 15 \\
+  attemptsPerCharacter = 5 \\
+  responseTimeoutMs = 3000
 \end{axdef}
 
 The proficiency threshold (90\%) matches the level advancement threshold.
-Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
+Minimum attempts scale with character count: $\max(15, 5 \times
+characterCount)$.
 
 \subsection{Session State}
 
@@ -668,39 +697,40 @@ Session state is separate from persistent progress state. In the implementation,
 this lives in the ViewModel; here we model it as a distinct schema.
 
 \begin{schema}{SessionState}
-phase : SessionPhase \\
-direction : Direction \\
-characterCount : \nat \\
-introIndex : \nat \\
-sessionAttempts : \nat \\
-sessionCorrect : \nat
-\where
-characterCount \geq 1 \\
-characterCount \leq maxLevel \\
-introIndex \leq characterCount \\
-sessionCorrect \leq sessionAttempts \\
-sessionAttempts \leq 1000
+  phase : SessionPhase \\
+  direction : Direction \\
+  characterCount : \nat \\
+  introIndex : \nat \\
+  sessionAttempts : \nat \\
+  sessionCorrect : \nat
+  \where
+  characterCount \geq 1 \\
+  characterCount \leq maxLevel \\
+  introIndex \leq characterCount \\
+  sessionCorrect \leq sessionAttempts \\
+  sessionAttempts \leq 1000
 \end{schema}
 
-The \emph{characterCount} is the number of unlocked characters for this session's
+The \emph{characterCount} is the number of unlocked characters for
+this session's
 direction (equal to the current level). The \emph{introIndex} tracks progress
 through the introduction phase.
 
 \subsection{Session Initialization}
 
 \begin{schema}{InitSession}
-SessionState' \\
-direction? : Direction \\
-level? : \nat
-\where
-level? \geq minLevel \\
-level? \leq maxLevel \\
-phase' = introduction \\
-direction' = direction? \\
-characterCount' = level? \\
-introIndex' = 0 \\
-sessionAttempts' = 0 \\
-sessionCorrect' = 0
+  SessionState' \\
+  direction? : Direction \\
+  level? : \nat
+  \where
+  level? \geq minLevel \\
+  level? \leq maxLevel \\
+  phase' = introduction \\
+  direction' = direction? \\
+  characterCount' = level? \\
+  introIndex' = 0 \\
+  sessionAttempts' = 0 \\
+  sessionCorrect' = 0
 \end{schema}
 
 A session begins in the introduction phase with the character count set to the
@@ -709,29 +739,29 @@ student's current level for the chosen direction.
 \subsection{Introduction Phase Operations}
 
 \begin{schema}{NextIntroCharacter}
-\Delta SessionState
-\where
-phase = introduction \\
-introIndex < characterCount \\
-introIndex' = introIndex + 1 \\
-phase' = phase \\
-direction' = direction \\
-characterCount' = characterCount \\
-sessionAttempts' = sessionAttempts \\
-sessionCorrect' = sessionCorrect
+  \Delta SessionState
+  \where
+  phase = introduction \\
+  introIndex < characterCount \\
+  introIndex' = introIndex + 1 \\
+  phase' = phase \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  sessionAttempts' = sessionAttempts \\
+  sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{CompleteIntroduction}
-\Delta SessionState
-\where
-phase = introduction \\
-introIndex = characterCount \\
-phase' = training \\
-introIndex' = introIndex \\
-direction' = direction \\
-characterCount' = characterCount \\
-sessionAttempts' = sessionAttempts \\
-sessionCorrect' = sessionCorrect
+  \Delta SessionState
+  \where
+  phase = introduction \\
+  introIndex = characterCount \\
+  phase' = training \\
+  introIndex' = introIndex \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  sessionAttempts' = sessionAttempts \\
+  sessionCorrect' = sessionCorrect
 \end{schema}
 
 When all characters have been shown ($introIndex = characterCount$), the
@@ -743,27 +773,27 @@ During training, the student responds to character prompts. Each response
 (correct, incorrect, or timeout) is recorded.
 
 \begin{schema}{RecordCorrectResponse}
-\Delta SessionState
-\where
-phase = training \\
-sessionAttempts' = sessionAttempts + 1 \\
-sessionCorrect' = sessionCorrect + 1 \\
-phase' = phase \\
-direction' = direction \\
-characterCount' = characterCount \\
-introIndex' = introIndex
+  \Delta SessionState
+  \where
+  phase = training \\
+  sessionAttempts' = sessionAttempts + 1 \\
+  sessionCorrect' = sessionCorrect + 1 \\
+  phase' = phase \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  introIndex' = introIndex
 \end{schema}
 
 \begin{schema}{RecordIncorrectResponse}
-\Delta SessionState
-\where
-phase = training \\
-sessionAttempts' = sessionAttempts + 1 \\
-sessionCorrect' = sessionCorrect \\
-phase' = phase \\
-direction' = direction \\
-characterCount' = characterCount \\
-introIndex' = introIndex
+  \Delta SessionState
+  \where
+  phase = training \\
+  sessionAttempts' = sessionAttempts + 1 \\
+  sessionCorrect' = sessionCorrect \\
+  phase' = phase \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  introIndex' = introIndex
 \end{schema}
 
 A timeout is treated as an incorrect response---the student failed to respond
@@ -772,27 +802,27 @@ within \emph{responseTimeoutMs} (3 seconds).
 \subsection{Pause and Resume}
 
 \begin{schema}{PauseSession}
-\Delta SessionState
-\where
-phase = training \\
-phase' = paused \\
-direction' = direction \\
-characterCount' = characterCount \\
-introIndex' = introIndex \\
-sessionAttempts' = sessionAttempts \\
-sessionCorrect' = sessionCorrect
+  \Delta SessionState
+  \where
+  phase = training \\
+  phase' = paused \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  introIndex' = introIndex \\
+  sessionAttempts' = sessionAttempts \\
+  sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{ResumeSession}
-\Delta SessionState
-\where
-phase = paused \\
-phase' = training \\
-direction' = direction \\
-characterCount' = characterCount \\
-introIndex' = introIndex \\
-sessionAttempts' = sessionAttempts \\
-sessionCorrect' = sessionCorrect
+  \Delta SessionState
+  \where
+  phase = paused \\
+  phase' = training \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  introIndex' = introIndex \\
+  sessionAttempts' = sessionAttempts \\
+  sessionCorrect' = sessionCorrect
 \end{schema}
 
 Pausing preserves all session state. The implementation persists paused sessions
@@ -804,18 +834,24 @@ The session ends automatically when the student achieves proficiency:
 $\geq 90\%$ accuracy over at least $\max(15, 5 \times characterCount)$ attempts.
 
 \begin{schema}{CheckProficiencyMet}
-\Xi SessionState \\
-proficiencyMet! : ZBOOL
-\where
-phase = training \\
-\LET minAttempts == \IF baseMinimumAttempts > attemptsPerCharacter * characterCount
-    \THEN baseMinimumAttempts
-    \ELSE attemptsPerCharacter * characterCount @
-\LET accuracyPercent == (sessionCorrect * 100) \div sessionAttempts @
-(sessionAttempts \geq minAttempts \land accuracyPercent \geq proficiencyThreshold
-    \land proficiencyMet! = ztrue) \lor
-(sessionAttempts < minAttempts \land proficiencyMet! = zfalse) \lor
-(accuracyPercent < proficiencyThreshold \land proficiencyMet! = zfalse)
+  \Xi SessionState \\
+  proficiencyMet! : ZBOOL
+  \where
+  phase = training \\
+  \LET minAttempts == \\
+  \t1 \IF baseMinimumAttempts \\
+  \t2 > attemptsPerCharacter * characterCount \\
+  \t1 \THEN baseMinimumAttempts \\
+  \t1 \ELSE attemptsPerCharacter * characterCount @
+  \LET accuracyPercent == \\
+  \t1 (sessionCorrect * 100) \div sessionAttempts @
+  (sessionAttempts \geq minAttempts \\
+  \t1 \land accuracyPercent \geq proficiencyThreshold \\
+  \t1 \land proficiencyMet! = ztrue) \\
+  \lor (sessionAttempts < minAttempts \\
+  \t1 \land proficiencyMet! = zfalse) \\
+  \lor (accuracyPercent < proficiencyThreshold \\
+  \t1 \land proficiencyMet! = zfalse)
 \end{schema}
 
 This is a query operation ($\Xi$ indicates no state change). The implementation
@@ -824,15 +860,15 @@ calls this after each response to determine whether to end the session.
 \subsection{Session Completion}
 
 \begin{schema}{CompleteSession}
-\Delta SessionState
-\where
-phase = training \\
-phase' = completed \\
-direction' = direction \\
-characterCount' = characterCount \\
-introIndex' = introIndex \\
-sessionAttempts' = sessionAttempts \\
-sessionCorrect' = sessionCorrect
+  \Delta SessionState
+  \where
+  phase = training \\
+  phase' = completed \\
+  direction' = direction \\
+  characterCount' = characterCount \\
+  introIndex' = introIndex \\
+  sessionAttempts' = sessionAttempts \\
+  sessionCorrect' = sessionCorrect
 \end{schema}
 
 When a session completes (either by proficiency or user action), the accumulated
@@ -844,11 +880,14 @@ relevant $Advance$ and $UpdateInterval$ operations.
 The session flow connects to persistent progress through these operations:
 
 \begin{enumerate}
-\item On session completion, calculate accuracy: $sessionCorrect \div sessionAttempts$
-\item If accuracy $\geq 90\%$: invoke $AdvanceReceiveLevel$ or $AdvanceSendLevel$
-\item Based on accuracy tier: invoke appropriate $UpdateInterval$ operation
-\item Invoke $RecordSession$ to increment session count
-\item Update streak via $IncrementStreak$ or $ResetStreak$ based on calendar day
+  \item On session completion, calculate accuracy: $sessionCorrect
+    \div sessionAttempts$
+  \item If accuracy $\geq 90\%$: invoke $AdvanceReceiveLevel$ or
+    $AdvanceSendLevel$
+  \item Based on accuracy tier: invoke appropriate $UpdateInterval$ operation
+  \item Invoke $RecordSession$ to increment session count
+  \item Update streak via $IncrementStreak$ or $ResetStreak$ based on
+    calendar day
 \end{enumerate}
 
 This integration is orchestrated by the application layer (ProgressStore in the
@@ -861,19 +900,19 @@ implementation) rather than modeled as a single composite operation.
 The following properties hold for any reachable state:
 
 \begin{enumerate}
-\item \textbf{Level bounds}: $1 \leq receiveLevel \leq 26$ and
-      $1 \leq sendLevel \leq 26$
+  \item \textbf{Level bounds}: $1 \leq receiveLevel \leq 26$ and
+    $1 \leq sendLevel \leq 26$
 
-\item \textbf{Correctness bounds}: For any character,
-      $receiveCorrect \leq receiveAttempts$ and
-      $sendCorrect \leq sendAttempts$
+  \item \textbf{Correctness bounds}: For any character,
+    $receiveCorrect \leq receiveAttempts$ and
+    $sendCorrect \leq sendAttempts$
 
-\item \textbf{Streak monotonicity}: $currentStreak \leq longestStreak$
+  \item \textbf{Streak monotonicity}: $currentStreak \leq longestStreak$
 
-\item \textbf{Interval bounds}: $1 \leq interval \leq 30$ for both directions
+  \item \textbf{Interval bounds}: $1 \leq interval \leq 30$ for both directions
 
-\item \textbf{Non-negative counts}: All attempt and session counts are
-      non-negative natural numbers
+  \item \textbf{Non-negative counts}: All attempt and session counts are
+    non-negative natural numbers
 \end{enumerate}
 
 These invariants are encoded directly in the schema predicates, ensuring
@@ -883,20 +922,21 @@ type-correct operations preserve them.
 \section{Properties Not Modeled}
 %==============================================================================
 
-This specification focuses on state that affects learning outcomes. The following
+This specification focuses on state that affects learning outcomes.
+The following
 aspects are intentionally omitted:
 
 \begin{itemize}
-\item \textbf{Audio timing}: Dit/dah durations (60ms/180ms at 20 WPM),
-      Farnsworth spacing adjustments
+  \item \textbf{Audio timing}: Dit/dah durations (60ms/180ms at 20 WPM),
+    Farnsworth spacing adjustments
 
-\item \textbf{QSO simulation}: Virtual station exchanges, protocol phases,
-      message templates
+  \item \textbf{QSO simulation}: Virtual station exchanges, protocol phases,
+    message templates
 
-\item \textbf{UI state}: Current screen, selected characters, input buffers
+  \item \textbf{UI state}: Current screen, selected characters, input buffers
 
-\item \textbf{Notifications}: Practice due reminders, streak alerts,
-      anti-nag policies
+  \item \textbf{Notifications}: Practice due reminders, streak alerts,
+    anti-nag policies
 \end{itemize}
 
 These could be modeled in future extensions or separate specifications.
@@ -908,9 +948,9 @@ These could be modeled in future extensions or separate specifications.
 This specification has been validated with:
 
 \begin{itemize}
-\item \textbf{fuzz}: Type-checking passes with no errors
-\item \textbf{probcli -init}: Initialization succeeds
-\item \textbf{probcli -animate}: All operations covered
+  \item \textbf{fuzz}: Type-checking passes with no errors
+  \item \textbf{probcli -init}: Initialization succeeds
+  \item \textbf{probcli -animate}: All operations covered
 \end{itemize}
 
 The flattened state schema and bounded inputs ensure ProB can explore the
