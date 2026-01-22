@@ -226,7 +226,7 @@ final class AppSettingsCodableTests: XCTestCase {
     }
 
     func testSendInputModeInvalidValueThrows() throws {
-        let json = "\"straightKey\""
+        let json = "\"invalid\""
         let data = try XCTUnwrap(json.data(using: .utf8))
         XCTAssertThrowsError(try JSONDecoder().decode(SendInputMode.self, from: data))
     }

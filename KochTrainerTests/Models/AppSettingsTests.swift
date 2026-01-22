@@ -284,6 +284,12 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.fadingDepth, 1.0, "Setter should clamp to 1.0")
     }
 
+    func testSetFadingDepthTooLow() {
+        var settings = AppSettings()
+        settings.fadingDepth = -0.5
+        XCTAssertEqual(settings.fadingDepth, 0.0, "Setter should clamp to 0.0")
+    }
+
     func testSetFadingRateTooHigh() {
         var settings = AppSettings()
         settings.fadingRate = 1.0
@@ -300,6 +306,12 @@ final class AppSettingsTests: XCTestCase {
         var settings = AppSettings()
         settings.interferenceLevel = 1.5
         XCTAssertEqual(settings.interferenceLevel, 1.0, "Setter should clamp to 1.0")
+    }
+
+    func testSetInterferenceLevelTooLow() {
+        var settings = AppSettings()
+        settings.interferenceLevel = -0.5
+        XCTAssertEqual(settings.interferenceLevel, 0.0, "Setter should clamp to 0.0")
     }
 
     func testSetUserCallsignUppercases() {
