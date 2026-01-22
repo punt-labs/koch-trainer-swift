@@ -460,6 +460,243 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isIntroCompleted)
     }
 
+    // MARK: - Pattern Building Tests
+
+    func testPatternBuildsCorrectly() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        viewModel.inputDit()
+        XCTAssertEqual(viewModel.currentPattern, ".")
+
+        viewModel.inputDah()
+        XCTAssertEqual(viewModel.currentPattern, ".-")
+
+        viewModel.inputDit()
+        XCTAssertEqual(viewModel.currentPattern, ".-.")
+
+        viewModel.inputDah()
+        XCTAssertEqual(viewModel.currentPattern, ".-.-")
+    }
+
+    func testPatternClearsAfterShowNextCharacter() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        // Build a pattern
+        viewModel.inputDit()
+        viewModel.inputDah()
+        XCTAssertEqual(viewModel.currentPattern, ".-")
+
+        // Manually call showNextCharacter
+        viewModel.showNextCharacter()
+
+        // Pattern should be cleared
+        XCTAssertEqual(viewModel.currentPattern, "")
+    }
+
+    // MARK: - Computed Properties Tests
+
+    func testAccuracyWithNoAttempts() {
+        XCTAssertEqual(viewModel.accuracy, 0)
+        XCTAssertEqual(viewModel.accuracyPercentage, 0)
+    }
+
+    func testAccuracyCalculation() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        // Record some responses
+        viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
+        viewModel.recordResponse(expected: "M", wasCorrect: true, pattern: "--", decoded: "M")
+        viewModel.recordResponse(expected: "R", wasCorrect: false, pattern: ".-", decoded: "A")
+
+        XCTAssertEqual(viewModel.accuracy, 2.0 / 3.0, accuracy: 0.001)
+        XCTAssertEqual(viewModel.accuracyPercentage, 67)
+    }
+
+    func testInputProgressInitiallyZero() {
+        XCTAssertEqual(viewModel.inputProgress, 0)
+    }
+
+    func testMinimumAttemptsForProficiency() {
+        // At level 1, only 1 character, floor is 15
+        // max(15, 5 * 1) = 15
+        viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
+        XCTAssertGreaterThanOrEqual(viewModel.minimumAttemptsForProficiency, 15)
+    }
+
+    func testMinimumAttemptsScalesWithCharacters() {
+        // Create a VM with custom characters to test scaling
+        let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: ["A", "B", "C", "D"])
+
+        // 5 * 4 = 20, which is greater than 15
+        XCTAssertEqual(vm.minimumAttemptsForProficiency, 20)
+    }
+
+    func testProficiencyThreshold() {
+        XCTAssertEqual(viewModel.proficiencyThreshold, 0.90)
+    }
+
+    func testFormattedTime() {
+        // timeRemaining defaults to 300 (5 minutes)
+        XCTAssertEqual(viewModel.formattedTime, "5:00")
+    }
+
+    func testProficiencyProgressShowsAttempts() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        // With fewer than minimum attempts, should show attempts
+        viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
+
+        let progress = viewModel.proficiencyProgress
+        XCTAssertTrue(progress.contains("attempts"))
+    }
+
+    func testIntroProgressDuringIntroduction() {
+        viewModel.startSession()
+
+        // Should show progress during introduction
+        let progress = viewModel.introProgress
+        XCTAssertTrue(progress.contains("of"))
+    }
+
+    func testIntroProgressEmptyOutsideIntroduction() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        XCTAssertEqual(viewModel.introProgress, "")
+    }
+
+    func testIsLastIntroCharacterFalseAtStart() {
+        viewModel.startSession()
+
+        // At first character, shouldn't be last
+        if viewModel.introCharacters.count > 1 {
+            XCTAssertFalse(viewModel.isLastIntroCharacter)
+        }
+    }
+
+    // MARK: - Record Response Tests
+
+    func testRecordResponseUpdatesStats() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
+
+        XCTAssertEqual(viewModel.totalAttempts, 1)
+        XCTAssertEqual(viewModel.correctCount, 1)
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 1)
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 1)
+    }
+
+    func testRecordResponseIncorrectDoesNotIncrementCorrect() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        viewModel.recordResponse(expected: "K", wasCorrect: false, pattern: ".-", decoded: "A")
+
+        XCTAssertEqual(viewModel.totalAttempts, 1)
+        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 1)
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 0)
+    }
+
+    func testRecordResponseMergesCharacterStats() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
+        viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
+        viewModel.recordResponse(expected: "K", wasCorrect: false, pattern: "--", decoded: "M")
+
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 3)
+        XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 2)
+    }
+
+    // MARK: - Custom Session Tests
+
+    func testIsCustomSessionFalseByDefault() {
+        XCTAssertFalse(viewModel.isCustomSession)
+    }
+
+    func testIsCustomSessionTrueWhenConfiguredWithCustomCharacters() {
+        let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: ["A", "B"])
+
+        XCTAssertTrue(vm.isCustomSession)
+    }
+
+    func testCustomSessionUsesCustomCharactersForIntro() {
+        let customChars: [Character] = ["X", "Y", "Z"]
+        let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
+        vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
+
+        XCTAssertEqual(vm.introCharacters, customChars)
+    }
+
+    // MARK: - Introduction Phase Tests
+
+    func testStartIntroductionWithEmptyCharactersGoesDirectlyToTraining() {
+        // Create a VM with empty intro characters
+        let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
+        // Don't configure - introCharacters will be empty
+        XCTAssertTrue(vm.introCharacters.isEmpty)
+
+        vm.startSession()
+
+        // Should go directly to training phase when no intro characters
+        XCTAssertEqual(vm.phase, .training)
+        XCTAssertTrue(vm.isPlaying)
+    }
+
+    func testPlayCurrentIntroCharacterDoesNothingWithNoCharacter() {
+        // currentIntroCharacter is nil before startSession
+        XCTAssertNil(viewModel.currentIntroCharacter)
+        viewModel.playCurrentIntroCharacter()
+        // Should not crash when currentIntroCharacter is nil
+    }
+
+    // MARK: - Feedback Tests
+
+    func testLastFeedbackInitiallyNil() {
+        XCTAssertNil(viewModel.lastFeedback)
+    }
+
+    func testShowFeedbackAndContinueSetsLastFeedback() async {
+        viewModel.startSession()
+        while case .introduction = viewModel.phase {
+            viewModel.nextIntroCharacter()
+        }
+
+        viewModel.showFeedbackAndContinue(wasCorrect: true, expected: "K", pattern: "-.-", decoded: "K")
+
+        XCTAssertNotNil(viewModel.lastFeedback)
+        XCTAssertEqual(viewModel.lastFeedback?.wasCorrect, true)
+        XCTAssertEqual(viewModel.lastFeedback?.expectedCharacter, "K")
+        XCTAssertEqual(viewModel.lastFeedback?.sentPattern, "-.-")
+        XCTAssertEqual(viewModel.lastFeedback?.decodedCharacter, "K")
+    }
+
     // MARK: Private
 
     private var viewModel = SendTrainingViewModel(audioEngine: MockAudioEngine())

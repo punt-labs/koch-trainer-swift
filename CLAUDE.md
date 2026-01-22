@@ -394,6 +394,19 @@ This prevents losing track of discovered issues across session boundaries.
 
 ## Development Workflow
 
+### ⚠️ CRITICAL: Always Use Worktrees
+
+**NEVER create branches directly in the main repo directory.** You don't know who else (human or AI) is working there. Always use a worktree for any feature work:
+
+```bash
+# WRONG - Do NOT do this:
+git checkout -b feature/foo   # Disrupts anyone else in this directory
+
+# RIGHT - Always use worktrees:
+make worktree-create BRANCH=feature/foo NEW=1
+cd ~/Coding/koch-trainer-worktrees/feature-foo
+```
+
 ### Working a Beads Issue
 
 **1. Find and claim work:**
@@ -403,13 +416,14 @@ bd show <id>                          # Review issue details
 bd update <id> --status=in_progress   # Claim it
 ```
 
-**2. Create feature branch:**
+**2. Create worktree for feature branch:**
 ```bash
-git checkout main && git pull
-git checkout -b feature/<short-description>   # or fix/, refactor/
+# From main repo directory:
+make worktree-create BRANCH=feature/<short-description> NEW=1
+cd ~/Coding/koch-trainer-worktrees/feature-<short-description>
 ```
 
-**3. Implement:**
+**3. Implement (in the worktree):**
 - Read relevant files, understand current implementation
 - Write code with corresponding unit tests
 - Run `make build` frequently (formats, lints, compiles)
@@ -435,8 +449,9 @@ gh pr create --title "feat: description" --body "## Summary\n..."
 **7. After PR merged:**
 ```bash
 bd close <id>                         # Mark issue complete
-git checkout main && git pull
-git branch -d feature/<short-description>
+cd ~/Coding/koch-trainer-swift        # Return to main repo
+make worktree-remove BRANCH=feature/<short-description>
+git fetch --prune
 bd sync                               # Sync beads state
 ```
 

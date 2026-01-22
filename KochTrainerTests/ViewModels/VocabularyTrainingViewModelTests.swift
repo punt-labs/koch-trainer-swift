@@ -430,6 +430,167 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         sendVM.cleanup()
     }
 
+    func testHandleKeyPressSpaceAdvancesToNextCharacter() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        sendVM.startSession()
+
+        // Input pattern for 'C' (-.-.)
+        sendVM.handleKeyPress("-")
+        sendVM.handleKeyPress(".")
+        sendVM.handleKeyPress("-")
+        sendVM.handleKeyPress(".")
+        XCTAssertEqual(sendVM.currentPattern, "-.-.")
+
+        // Space should decode the pattern and add to userInput
+        sendVM.handleKeyPress(" ")
+
+        // Pattern should be cleared after space
+        XCTAssertEqual(sendVM.currentPattern, "")
+        // User input should contain decoded character 'C'
+        XCTAssertTrue(sendVM.userInput.contains("C"))
+
+        sendVM.cleanup()
+    }
+
+    func testHandleKeyPressIgnoredInReceiveMode() {
+        // Receive mode should ignore key presses
+        viewModel.startSession()
+        viewModel.startResponseTimer()
+
+        viewModel.handleKeyPress(".")
+        viewModel.handleKeyPress("-")
+        viewModel.handleKeyPress(" ")
+
+        // Pattern should remain empty in receive mode
+        XCTAssertEqual(viewModel.currentPattern, "")
+    }
+
+    func testHandleKeyPressIgnoredWhenNotWaitingForResponse() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        // Don't start session - isWaitingForResponse should be false
+
+        sendVM.handleKeyPress(".")
+
+        XCTAssertEqual(sendVM.currentPattern, "")
+
+        sendVM.cleanup()
+    }
+
+    // MARK: - Send Mode Input Progress Tests
+
+    func testInputProgressInitiallyZero() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+
+        XCTAssertEqual(sendVM.inputProgress, 0)
+
+        sendVM.cleanup()
+    }
+
+    func testInputTimeoutConstant() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+
+        XCTAssertEqual(sendVM.inputTimeout, 2.0)
+
+        sendVM.cleanup()
+    }
+
+    func testInputDitNotAllowedWhenNotPlaying() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        // Don't start session
+
+        sendVM.inputDit()
+
+        XCTAssertEqual(sendVM.currentPattern, "")
+
+        sendVM.cleanup()
+    }
+
+    func testInputDahNotAllowedWhenNotPlaying() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        // Don't start session
+
+        sendVM.inputDah()
+
+        XCTAssertEqual(sendVM.currentPattern, "")
+
+        sendVM.cleanup()
+    }
+
+    func testInputDitNotAllowedWhenNotWaitingForResponse() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        sendVM.startSession()
+
+        // Pause to clear isWaitingForResponse
+        sendVM.pause()
+
+        sendVM.inputDit()
+
+        XCTAssertEqual(sendVM.currentPattern, "")
+
+        sendVM.cleanup()
+    }
+
+    // MARK: - Receive Mode Replay Tests
+
+    func testReplayWordIgnoredInSendMode() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        sendVM.startSession()
+        mockAudioEngine.playGroupCalls = []
+
+        sendVM.replayWord()
+
+        // Give time for async operation
+        let expectation = XCTestExpectation(description: "Replay")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+
+        // Should not have played anything since we're in send mode
+        XCTAssertTrue(mockAudioEngine.playGroupCalls.isEmpty)
+
+        sendVM.cleanup()
+    }
+
     // MARK: - Word Selection Tests
 
     func testShowNextWordSelectsFromSet() {
