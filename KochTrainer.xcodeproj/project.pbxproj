@@ -72,6 +72,7 @@
 		8D1BF986A50A61DB23A740C1 /* QSOEnginePhaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2BB16AE36DB3BD9F1EF6EA /* QSOEnginePhaseTests.swift */; };
 		8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D7ADDFD818AD9C12165E74 /* SessionResult.swift */; };
 		8F969AC17120BCDA9814D527 /* SendTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */; };
+		90B87E5E90257E291BA8D8CD /* ReceiveTrainingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E999E60360C4F9135FC5E21F /* ReceiveTrainingUITests.swift */; };
 		9212E6AD03F9E860122FAA37 /* QSOStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61646CC951F313ADD0B6F32A /* QSOStateTests.swift */; };
 		A23391BC7CF60ECB5166F69C /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEEA2AF66173198C5606B7E /* SettingsStoreTests.swift */; };
 		A5B26729247712BBB5A8FF24 /* SendTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52304BFA45E3AB138BDC3DD6 /* SendTrainingViewModelTests.swift */; };
@@ -112,6 +113,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4B5E143BA26ADA328ECC2409 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FCD34FACB00CD1E80289A106 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB58D6BD5815BA97F7E2C290;
+			remoteInfo = KochTrainer;
+		};
 		63A927BDB5688A21FF439C1A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FCD34FACB00CD1E80289A106 /* Project object */;
@@ -192,6 +200,7 @@
 		8F2BB16AE36DB3BD9F1EF6EA /* QSOEnginePhaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOEnginePhaseTests.swift; sourceTree = "<group>"; };
 		9145C1BD8515A86E59BC029C /* BandConditionsProcessorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandConditionsProcessorTests.swift; sourceTree = "<group>"; };
 		93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
+		A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KochTrainerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A595D8E54B39F3D8F4B46685 /* QSOSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOSessionView.swift; sourceTree = "<group>"; };
 		A6DEDA26B902C6973704CDDE /* ProgressStorePausedSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStorePausedSessionTests.swift; sourceTree = "<group>"; };
 		A7798C72A68405B53C0541B1 /* MorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoder.swift; sourceTree = "<group>"; };
@@ -216,6 +225,7 @@
 		DFBFBABD9BA016A17C22D856 /* AcknowledgmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcknowledgmentsView.swift; sourceTree = "<group>"; };
 		E4CB4886489BF491D3156CA3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E5976B14C96DDADF69F86E7E /* IntervalCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalCalculator.swift; sourceTree = "<group>"; };
+		E999E60360C4F9135FC5E21F /* ReceiveTrainingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingUITests.swift; sourceTree = "<group>"; };
 		EDE5C548190E477F2A1F215C /* KochTrainer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KochTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0704EA92EDE1A23D0CA675E /* SessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryView.swift; sourceTree = "<group>"; };
 		F30E39178817F40F4AA07D72 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
@@ -262,6 +272,7 @@
 			children = (
 				5A4C67945DC658C33C91F060 /* KochTrainer */,
 				F7E249D812687B025E41D870 /* KochTrainerTests */,
+				5801C0FE24F2FDAB1EB9DAF2 /* KochTrainerUITests */,
 				502598F156F5569B8CCDE77A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -346,6 +357,7 @@
 			children = (
 				EDE5C548190E477F2A1F215C /* KochTrainer.app */,
 				86C1C03CE8794BDE0AA76390 /* KochTrainerTests.xctest */,
+				A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -359,6 +371,14 @@
 				2ABCB027383DC4E72387285E /* QSOView.swift */,
 			);
 			path = QSO;
+			sourceTree = "<group>";
+		};
+		5801C0FE24F2FDAB1EB9DAF2 /* KochTrainerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				E999E60360C4F9135FC5E21F /* ReceiveTrainingUITests.swift */,
+			);
+			path = KochTrainerUITests;
 			sourceTree = "<group>";
 		};
 		5A4C67945DC658C33C91F060 /* KochTrainer */ = {
@@ -598,6 +618,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4199376494D0896EA3C84028 /* KochTrainerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A4C22FE6CFA139910703B4FA /* Build configuration list for PBXNativeTarget "KochTrainerUITests" */;
+			buildPhases = (
+				DB0B8536C7EEB48F66B6D376 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DED5A58A606C2936259B2B0D /* PBXTargetDependency */,
+			);
+			name = KochTrainerUITests;
+			packageProductDependencies = (
+			);
+			productName = KochTrainerUITests;
+			productReference = A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		BB58D6BD5815BA97F7E2C290 /* KochTrainer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7AD3B27DDF30867DA01B4AB0 /* Build configuration list for PBXNativeTarget "KochTrainer" */;
@@ -642,6 +680,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					4199376494D0896EA3C84028 = {
+						TestTargetID = BB58D6BD5815BA97F7E2C290;
+					};
+				};
 			};
 			buildConfigurationList = 782BEFDBAAD39153839596EC /* Build configuration list for PBXProject "KochTrainer" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -659,6 +702,7 @@
 			targets = (
 				BB58D6BD5815BA97F7E2C290 /* KochTrainer */,
 				C3754BE0CB04635A1C22733D /* KochTrainerTests */,
+				4199376494D0896EA3C84028 /* KochTrainerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -790,6 +834,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB0B8536C7EEB48F66B6D376 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				90B87E5E90257E291BA8D8CD /* ReceiveTrainingUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -798,9 +850,31 @@
 			target = BB58D6BD5815BA97F7E2C290 /* KochTrainer */;
 			targetProxy = 63A927BDB5688A21FF439C1A /* PBXContainerItemProxy */;
 		};
+		DED5A58A606C2936259B2B0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB58D6BD5815BA97F7E2C290 /* KochTrainer */;
+			targetProxy = 4B5E143BA26ADA328ECC2409 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		11D107128D094E005E97CC0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = KochTrainer;
+			};
+			name = Debug;
+		};
 		3E15716F2AD9BA0DA58949CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -923,6 +997,23 @@
 			};
 			name = Release;
 		};
+		CE8DEEFB5A202DE74789835E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = KochTrainer;
+			};
+			name = Release;
+		};
 		D7073AFCA3C2ECB4F13D9BA5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1028,6 +1119,15 @@
 			buildConfigurations = (
 				3E15716F2AD9BA0DA58949CD /* Debug */,
 				B76C2D2E645738FBF6697938 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A4C22FE6CFA139910703B4FA /* Build configuration list for PBXNativeTarget "KochTrainerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11D107128D094E005E97CC0E /* Debug */,
+				CE8DEEFB5A202DE74789835E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
