@@ -72,11 +72,6 @@ enum AccessibilityAnnouncer {
         post("Session resumed")
     }
 
-    /// Announce character introduction.
-    static func announceIntroCharacter(_ char: Character, pattern: String) {
-        post("\(char). Pattern: \(spokenPattern(pattern))")
-    }
-
     // MARK: - Vocabulary Training
 
     /// Announce correct word response.
