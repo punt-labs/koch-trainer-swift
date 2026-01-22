@@ -40,6 +40,13 @@ protocol AudioEngineProtocol {
 @MainActor
 final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
+    // MARK: Lifecycle
+
+    deinit {
+        // Ensure audio session is cleaned up when engine is deallocated
+        toneGenerator.endSession()
+    }
+
     // MARK: Internal
 
     struct Timing {
