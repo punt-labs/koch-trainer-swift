@@ -44,7 +44,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var isWaitingForInput: Bool = true
     @Published var inputTimeRemaining: TimeInterval = 0
 
-    let inputTimeout: TimeInterval = 2.0 // Time to complete a character
     let proficiencyThreshold: Double = 0.90
 
     /// Custom characters for practice mode (nil = use level-based characters)
@@ -75,8 +74,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var inputProgress: Double {
-        guard inputTimeout > 0 else { return 0 }
-        return inputTimeRemaining / inputTimeout
+        guard currentInputTimeout > 0 else { return 0 }
+        return inputTimeRemaining / currentInputTimeout
     }
 
     var introProgress: String {
@@ -321,7 +320,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         currentPattern += "."
         lastInputTime = Date()
         playDit()
-        resetInputTimer()
     }
 
     func inputDah() {
@@ -329,7 +327,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         currentPattern += "-"
         lastInputTime = Date()
         playDah()
-        resetInputTimer()
     }
 
     // MARK: Private
@@ -343,6 +340,11 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var sessionStartTime: Date?
     private var currentLevel: Int = 1
     private var lastInputTime: Date?
+
+    /// Dynamic timeout based on current target character's pattern length
+    private var currentInputTimeout: TimeInterval {
+        TrainingTiming.timeoutForCharacter(targetCharacter)
+    }
 
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {
@@ -408,7 +410,7 @@ extension SendTrainingViewModel {
     }
 
     func resetInputTimer() {
-        inputTimeRemaining = inputTimeout
+        inputTimeRemaining = currentInputTimeout
         inputTimer?.invalidate()
         inputTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tickInput() }
@@ -424,16 +426,16 @@ extension SendTrainingViewModel {
     }
 
     private func completeCurrentInput() {
-        guard !currentPattern.isEmpty else { return }
         isWaitingForInput = false
 
-        let decodedChar = MorseCode.character(for: currentPattern)
-        let isCorrect = decodedChar == targetCharacter
-        recordResponse(expected: targetCharacter, wasCorrect: isCorrect, pattern: currentPattern, decoded: decodedChar)
+        let decodedChar = currentPattern.isEmpty ? nil : MorseCode.character(for: currentPattern)
+        let isCorrect = !currentPattern.isEmpty && decodedChar == targetCharacter
+        let displayPattern = currentPattern.isEmpty ? "(no response)" : currentPattern
+        recordResponse(expected: targetCharacter, wasCorrect: isCorrect, pattern: displayPattern, decoded: decodedChar)
         showFeedbackAndContinue(
             wasCorrect: isCorrect,
             expected: targetCharacter,
-            pattern: currentPattern,
+            pattern: displayPattern,
             decoded: decodedChar
         )
     }
@@ -494,6 +496,6 @@ extension SendTrainingViewModel {
         currentPattern = ""
         lastFeedback = nil
         isWaitingForInput = true
-        inputTimeRemaining = 0
+        resetInputTimer()
     }
 }

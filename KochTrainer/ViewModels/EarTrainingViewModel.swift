@@ -53,7 +53,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: - Configuration
 
-    let inputTimeout: TimeInterval = 2.0
     let proficiencyThreshold: Double = 0.90
 
     /// Current ear training level (1-5)
@@ -81,8 +80,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var inputProgress: Double {
-        guard inputTimeout > 0 else { return 0 }
-        return inputTimeRemaining / inputTimeout
+        guard currentInputTimeout > 0 else { return 0 }
+        return inputTimeRemaining / currentInputTimeout
     }
 
     var introProgress: String {
@@ -252,14 +251,12 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "."
         playDit()
-        resetInputTimer()
     }
 
     func inputDah() {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "-"
         playDah()
-        resetInputTimer()
     }
 
     // MARK: - Paused Session Management
@@ -305,6 +302,14 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var sessionTimer: Timer?
     private var inputTimer: Timer?
     private var sessionStartTime: Date?
+
+    /// Dynamic timeout based on current target character's pattern length
+    private var currentInputTimeout: TimeInterval {
+        guard let char = targetCharacter else {
+            return TrainingTiming.timeoutForPattern(length: 1)
+        }
+        return TrainingTiming.timeoutForCharacter(char)
+    }
 
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {
@@ -370,7 +375,7 @@ extension EarTrainingViewModel {
     }
 
     func resetInputTimer() {
-        inputTimeRemaining = inputTimeout
+        inputTimeRemaining = currentInputTimeout
         inputTimer?.invalidate()
         inputTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tickInput() }
@@ -386,18 +391,18 @@ extension EarTrainingViewModel {
     }
 
     private func completeCurrentInput() {
-        guard !currentPattern.isEmpty else { return }
         isWaitingForInput = false
 
         let expectedPattern = MorseCode.pattern(for: targetCharacter ?? " ") ?? ""
-        let isCorrect = currentPattern == expectedPattern
+        let isCorrect = !currentPattern.isEmpty && currentPattern == expectedPattern
+        let userPattern = currentPattern.isEmpty ? "(no response)" : currentPattern
 
         recordResponse(expected: targetCharacter ?? " ", wasCorrect: isCorrect)
         showFeedbackAndContinue(
             wasCorrect: isCorrect,
             expectedChar: targetCharacter ?? " ",
             expectedPattern: expectedPattern,
-            userPattern: currentPattern
+            userPattern: userPattern
         )
     }
 
@@ -461,8 +466,9 @@ extension EarTrainingViewModel {
             engine.reset()
             await engine.playCharacter(char)
 
-            // After audio finishes, start accepting input
+            // After audio finishes, start accepting input and start timer
             isWaitingForInput = true
+            resetInputTimer()
         }
     }
 }

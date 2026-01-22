@@ -29,7 +29,7 @@ struct LearnView: View {
 
                 NavigationLink(destination: EarTrainingView()) {
                     HStack {
-                        Image(systemName: "waveform")
+                        Image(systemName: "ear")
                         Text("Start Ear Training")
                     }
                 }
@@ -63,7 +63,7 @@ struct LearnView: View {
 
                 NavigationLink(destination: ReceiveTrainingView()) {
                     HStack {
-                        Image(systemName: "ear")
+                        Image(systemName: "waveform")
                         Text("Start Receive Training")
                     }
                 }

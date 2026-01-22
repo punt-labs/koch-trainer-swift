@@ -149,9 +149,9 @@ struct EarTrainingPhaseView: View {
                 }
 
                 // User's current pattern input
-                Text(viewModel.currentPattern.isEmpty ? "..." : viewModel.currentPattern)
+                Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
                     .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(viewModel.currentPattern.isEmpty ? .secondary.opacity(0.3) : Theme.Colors.primary)
+                    .foregroundColor(Theme.Colors.primary)
                     .frame(height: 60)
 
                 // Progress bar (always present, opacity controlled)
@@ -227,7 +227,7 @@ struct EarFeedbackView: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.xs) {
             if feedback.wasCorrect {
-                Text("\(feedback.expectedPattern) Correct!")
+                Text("Correct!")
                     .font(Typography.headline)
                     .foregroundColor(Theme.Colors.success)
             } else {
