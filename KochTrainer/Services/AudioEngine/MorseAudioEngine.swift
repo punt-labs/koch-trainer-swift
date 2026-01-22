@@ -198,17 +198,15 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         Timing(effectiveWPM: effectiveSpeed)
     }
 
-    /// Play a tone element using the appropriate mode (continuous or discrete).
+    /// Play a tone element using continuous audio mode.
     private func playToneElement(duration: TimeInterval) async {
-        if isSessionActive {
-            // Continuous mode: activate/deactivate tone flag
-            toneGenerator.activateTone(frequency: frequency)
-            await toneGenerator.playSilence(duration: duration)
-            toneGenerator.deactivateTone()
-        } else {
-            // Discrete mode: use playTone which starts/stops audio engine
-            await toneGenerator.playTone(frequency: frequency, duration: duration)
+        // Ensure session is active (auto-start if needed)
+        if !isSessionActive {
+            startSession()
         }
+        toneGenerator.activateTone(frequency: frequency)
+        await toneGenerator.playSilence(duration: duration)
+        toneGenerator.deactivateTone()
     }
 
 }

@@ -38,6 +38,7 @@
 		4832D76D61CB52A4406CFEA0 /* ProgressStorePausedSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DEDA26B902C6973704CDDE /* ProgressStorePausedSessionTests.swift */; };
 		48CAEF427F40EDABDE39F263 /* VocabularyGroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7249301AEE33D45A458011B6 /* VocabularyGroupGenerator.swift */; };
 		51E503A6CFE15A32297177C2 /* LearnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF3B37AA24122827621118C /* LearnView.swift */; };
+		5205998DBE7550192BE61BA9 /* RadioModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D2E568FF5F2FAD1C09B897 /* RadioModeTests.swift */; };
 		5383BF913CEE062CEB15B91D /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE61188FF7955447386AE139 /* ResultsView.swift */; };
 		5B1BB87C1A47AFDAE0B9B1E1 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42355AF5590EE366C95B2A0F /* Theme.swift */; };
 		5B2E346FFE9395107BB85CC8 /* MorseDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF316E778E239B8B9BEE15 /* MorseDecoderTests.swift */; };
@@ -60,6 +61,7 @@
 		7BA86FFFC62FBCEFE6B59F40 /* QSOEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65AA21DEA3C5F0E9CF6FCECF /* QSOEngine.swift */; };
 		7BD10683E55559D3A00B0035 /* MorseCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8505513FAC9BA060C1AD4B2B /* MorseCode.swift */; };
 		7E8227D6BB6A5FFAC76CFF5B /* ToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8C8F73B5415DAE4B859C79 /* ToneGenerator.swift */; };
+		8148A7A785DEC4E283895556 /* ReceiveTrainingViewModel+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0412141D301A22F315A7DCD7 /* ReceiveTrainingViewModel+Helpers.swift */; };
 		82C5E485701143EDE9CA5456 /* ProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86594EFB29EB98D7D77B6E4 /* ProgressStore.swift */; };
 		836EED5ADA714DFC42A5A2F0 /* IntervalCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75236B7E0368E267D3B6891D /* IntervalCalculatorTests.swift */; };
 		83FE839A13957EC0978244F4 /* QSOTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A9BC1EA1F93A1143D08D515 /* QSOTemplateTests.swift */; };
@@ -88,9 +90,11 @@
 		B88424C52862FABAA508BB05 /* BandConditionsProcessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9145C1BD8515A86E59BC029C /* BandConditionsProcessorTests.swift */; };
 		B9DA1D0450C3D62D24425FD6 /* MorseAudioEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D88B4D4610F340F8FF6905 /* MorseAudioEngineTests.swift */; };
 		B9E21B960E5BE46794F9C698 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30E39178817F40F4AA07D72 /* AppSettings.swift */; };
+		BC60E75DF0D5523647275592 /* RadioMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8066FAB7E02BA0637232FE /* RadioMode.swift */; };
 		C002EF687CC4BB4E49AAE21E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BC14AF6458B728B1D6F1580 /* Assets.xcassets */; };
 		C233FD0E9146D9F38934A581 /* ProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A89800850CEDA49637158DA /* ProgressStoreTests.swift */; };
 		C4B0F0A381BE4BF3F9CD7B36 /* StudentProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CD768AEED253F0A22D4D6B /* StudentProgress.swift */; };
+		C4E8DA0091059861013114FF /* SendTrainingViewModel+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372793ACC275D09718E42CBF /* SendTrainingViewModel+Helpers.swift */; };
 		C943590E06B23977053B00B2 /* GracefulDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C4CB5E13019098812F0AA62 /* GracefulDecoder.swift */; };
 		CB0D725E52A1E689A705D119 /* QSOTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2D87EBD40D052EAD4CCD1B /* QSOTemplate.swift */; };
 		CD0CAA1E13951AA0FCE43096 /* KochTrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9E80F76DFEAE1D76AC2CD3 /* KochTrainerTests.swift */; };
@@ -133,6 +137,7 @@
 		002165E81D48FCE65DB54CB9 /* KochTrainerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KochTrainerApp.swift; sourceTree = "<group>"; };
 		01F6AA0F56542CBF62A84A0D /* MorseQSOViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseQSOViewModelTests.swift; sourceTree = "<group>"; };
 		03D7ADDFD818AD9C12165E74 /* SessionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResult.swift; sourceTree = "<group>"; };
+		0412141D301A22F315A7DCD7 /* ReceiveTrainingViewModel+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReceiveTrainingViewModel+Helpers.swift"; sourceTree = "<group>"; };
 		07013AE211BBD8EBC65C9C28 /* MorseQSOResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseQSOResult.swift; sourceTree = "<group>"; };
 		07F3F7690B4EEFE8F612EBF2 /* VocabularyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyView.swift; sourceTree = "<group>"; };
 		08E8DAD009FDD4DC117DB5CF /* CharacterGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterGridView.swift; sourceTree = "<group>"; };
@@ -144,6 +149,7 @@
 		15D44175E4725C4BC8D71B3B /* QSOViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOViewModelTests.swift; sourceTree = "<group>"; };
 		19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingView.swift; sourceTree = "<group>"; };
 		1A9BC1EA1F93A1143D08D515 /* QSOTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOTemplateTests.swift; sourceTree = "<group>"; };
+		1B8066FAB7E02BA0637232FE /* RadioMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioMode.swift; sourceTree = "<group>"; };
 		2178F2133ED71F057D8616FD /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		28E2F2CE2BA8A0424645A8DE /* QSOState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOState.swift; sourceTree = "<group>"; };
 		2ABCB027383DC4E72387285E /* QSOView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOView.swift; sourceTree = "<group>"; };
@@ -151,6 +157,7 @@
 		2E1BF0DD82107E6F0ACDAE5B /* QSOCompletedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOCompletedView.swift; sourceTree = "<group>"; };
 		2F7261D01A93BDA6B9BDA46A /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
 		3268C3EF73321AADA6C7CA54 /* ReceiveTrainingViewModelInputTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingViewModelInputTests.swift; sourceTree = "<group>"; };
+		372793ACC275D09718E42CBF /* SendTrainingViewModel+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendTrainingViewModel+Helpers.swift"; sourceTree = "<group>"; };
 		383D96DE00AC3BFBDF1CE172 /* ToneGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneGeneratorTests.swift; sourceTree = "<group>"; };
 		3A31B4C5717DD34A90DF5E95 /* ProgressStoreVocabularyQSOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStoreVocabularyQSOTests.swift; sourceTree = "<group>"; };
 		3A89800850CEDA49637158DA /* ProgressStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStoreTests.swift; sourceTree = "<group>"; };
@@ -190,6 +197,7 @@
 		7BC14AF6458B728B1D6F1580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7BFDF29DF9BF6B67A2F93594 /* WordStatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordStatTests.swift; sourceTree = "<group>"; };
 		7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModel.swift; sourceTree = "<group>"; };
+		80D2E568FF5F2FAD1C09B897 /* RadioModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioModeTests.swift; sourceTree = "<group>"; };
 		83D11D6C4D9790BEDD6F49A2 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		8505513FAC9BA060C1AD4B2B /* MorseCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCode.swift; sourceTree = "<group>"; };
 		85CD768AEED253F0A22D4D6B /* StudentProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentProgress.swift; sourceTree = "<group>"; };
@@ -458,6 +466,7 @@
 				F9B68BC97DCBDB153717E6C3 /* NotificationSettingsTests.swift */,
 				66E6556A3CBE5C091DBF2739 /* PausedSessionTests.swift */,
 				61646CC951F313ADD0B6F32A /* QSOStateTests.swift */,
+				80D2E568FF5F2FAD1C09B897 /* RadioModeTests.swift */,
 				F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */,
 				6CD09C44BCD391959078B978 /* StudentProgressTests.swift */,
 				4F5BB57C072242009B88EF52 /* VocabularySetTests.swift */,
@@ -475,6 +484,7 @@
 				AC37A38805458CDFFB61E5D8 /* NotificationSettings.swift */,
 				6B2954CF1027D368A87B4474 /* PausedSession.swift */,
 				42E9C5CC48B26ED90748F52F /* PracticeSchedule.swift */,
+				1B8066FAB7E02BA0637232FE /* RadioMode.swift */,
 				03D7ADDFD818AD9C12165E74 /* SessionResult.swift */,
 				85CD768AEED253F0A22D4D6B /* StudentProgress.swift */,
 				1111BA0D5DEF631542D63644 /* TrainingTiming.swift */,
@@ -571,7 +581,9 @@
 				DC31258AA99162DE5FFF1584 /* MorseQSOViewModel.swift */,
 				F479EEB8605B2C50CAE2700D /* QSOViewModel.swift */,
 				3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */,
+				0412141D301A22F315A7DCD7 /* ReceiveTrainingViewModel+Helpers.swift */,
 				7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */,
+				372793ACC275D09718E42CBF /* SendTrainingViewModel+Helpers.swift */,
 				AB9A8860F89210C47A628B0C /* VocabularyTrainingViewModel.swift */,
 			);
 			path = ViewModels;
@@ -760,10 +772,13 @@
 				CB0D725E52A1E689A705D119 /* QSOTemplate.swift in Sources */,
 				3F17A277328CB4A7C7DAD025 /* QSOView.swift in Sources */,
 				5F0DA3F91C7D3983104D49ED /* QSOViewModel.swift in Sources */,
+				BC60E75DF0D5523647275592 /* RadioMode.swift in Sources */,
 				2BBF8A4F8DF9913922139270 /* ReceiveTrainingView.swift in Sources */,
+				8148A7A785DEC4E283895556 /* ReceiveTrainingViewModel+Helpers.swift in Sources */,
 				733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */,
 				5383BF913CEE062CEB15B91D /* ResultsView.swift in Sources */,
 				18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */,
+				C4E8DA0091059861013114FF /* SendTrainingViewModel+Helpers.swift in Sources */,
 				8F969AC17120BCDA9814D527 /* SendTrainingViewModel.swift in Sources */,
 				CD78C4B876DF6324DBF213C8 /* SessionHistoryView.swift in Sources */,
 				8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */,
@@ -818,6 +833,7 @@
 				9212E6AD03F9E860122FAA37 /* QSOStateTests.swift in Sources */,
 				83FE839A13957EC0978244F4 /* QSOTemplateTests.swift in Sources */,
 				5B89F166F0A8216E3C6FA3C1 /* QSOViewModelTests.swift in Sources */,
+				5205998DBE7550192BE61BA9 /* RadioModeTests.swift in Sources */,
 				7955259369B40EEB0B631BB7 /* ReceiveTrainingViewModelInputTests.swift in Sources */,
 				DC5AE896B12BFF78199601A4 /* ReceiveTrainingViewModelTests.swift in Sources */,
 				A5B26729247712BBB5A8FF24 /* SendTrainingViewModelTests.swift in Sources */,

@@ -167,11 +167,8 @@ final class MorseQSOViewModel: ObservableObject {
         totalCharactersKeyed = 0
         correctCharactersKeyed = 0
 
-        // Start continuous audio session if band conditions enabled
-        if settingsStore?.settings.bandConditionsEnabled == true {
-            audioEngine.startSession()
-            // Radio starts in receiving mode
-        }
+        // Start continuous audio session (radio starts in receiving mode)
+        audioEngine.startSession()
 
         if aiStarts {
             // AI calls CQ first, user responds

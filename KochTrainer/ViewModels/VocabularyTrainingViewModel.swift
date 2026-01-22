@@ -121,11 +121,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         isPlaying = true
         phase = .training
 
-        // Start continuous audio session if band conditions enabled
-        if settingsStore?.settings.bandConditionsEnabled == true {
-            audioEngine.startSession()
-            // Radio starts in receiving mode
-        }
+        // Start continuous audio session (radio starts in receiving mode)
+        audioEngine.startSession()
 
         showNextWord()
     }
