@@ -240,6 +240,74 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.interferenceLevel, 1.0)
     }
 
+    // MARK: - Setter Clamping Tests
+
+    func testSetToneFrequencyTooHigh() {
+        var settings = AppSettings()
+        settings.toneFrequency = 1000
+        XCTAssertEqual(settings.toneFrequency, 800, "Setter should clamp to 800")
+    }
+
+    func testSetToneFrequencyTooLow() {
+        var settings = AppSettings()
+        settings.toneFrequency = 100
+        XCTAssertEqual(settings.toneFrequency, 400, "Setter should clamp to 400")
+    }
+
+    func testSetEffectiveSpeedTooHigh() {
+        var settings = AppSettings()
+        settings.effectiveSpeed = 50
+        XCTAssertEqual(settings.effectiveSpeed, 18, "Setter should clamp to 18")
+    }
+
+    func testSetEffectiveSpeedTooLow() {
+        var settings = AppSettings()
+        settings.effectiveSpeed = 5
+        XCTAssertEqual(settings.effectiveSpeed, 10, "Setter should clamp to 10")
+    }
+
+    func testSetNoiseLevelTooHigh() {
+        var settings = AppSettings()
+        settings.noiseLevel = 2.0
+        XCTAssertEqual(settings.noiseLevel, 1.0, "Setter should clamp to 1.0")
+    }
+
+    func testSetNoiseLevelTooLow() {
+        var settings = AppSettings()
+        settings.noiseLevel = -0.5
+        XCTAssertEqual(settings.noiseLevel, 0.0, "Setter should clamp to 0.0")
+    }
+
+    func testSetFadingDepthTooHigh() {
+        var settings = AppSettings()
+        settings.fadingDepth = 2.0
+        XCTAssertEqual(settings.fadingDepth, 1.0, "Setter should clamp to 1.0")
+    }
+
+    func testSetFadingRateTooHigh() {
+        var settings = AppSettings()
+        settings.fadingRate = 1.0
+        XCTAssertEqual(settings.fadingRate, 0.5, "Setter should clamp to 0.5")
+    }
+
+    func testSetFadingRateTooLow() {
+        var settings = AppSettings()
+        settings.fadingRate = 0.001
+        XCTAssertEqual(settings.fadingRate, 0.01, "Setter should clamp to 0.01")
+    }
+
+    func testSetInterferenceLevelTooHigh() {
+        var settings = AppSettings()
+        settings.interferenceLevel = 1.5
+        XCTAssertEqual(settings.interferenceLevel, 1.0, "Setter should clamp to 1.0")
+    }
+
+    func testSetUserCallsignUppercases() {
+        var settings = AppSettings()
+        settings.userCallsign = "w1aw"
+        XCTAssertEqual(settings.userCallsign, "W1AW", "Setter should uppercase callsign")
+    }
+
     // MARK: - Equatable Tests
 
     func testEquatableIdenticalSettings() {
