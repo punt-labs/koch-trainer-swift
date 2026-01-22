@@ -14,6 +14,7 @@ protocol ProgressStoreProtocol: AnyObject {
     // Paused session management
     var pausedReceiveSession: PausedSession? { get }
     var pausedSendSession: PausedSession? { get }
+    var pausedEarTrainingSession: PausedSession? { get }
     func savePausedSession(_ session: PausedSession)
     func clearPausedSession(for sessionType: SessionType)
     func pausedSession(for sessionType: SessionType) -> PausedSession?
@@ -40,6 +41,7 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     @Published var progress: StudentProgress
     @Published private(set) var pausedReceiveSession: PausedSession?
     @Published private(set) var pausedSendSession: PausedSession?
+    @Published private(set) var pausedEarTrainingSession: PausedSession?
 
     /// Overall accuracy as a whole percentage (0-100)
     var overallAccuracyPercentage: Int {
@@ -181,21 +183,22 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         var updated = progress
         updated.updateStats(from: result)
 
-        // Only allow advancement for standard sessions (not custom or vocabulary)
-        let didAdvance: Bool = if result.sessionType.canAdvanceLevel {
-            updated.advanceIfEligible(
+        let didAdvance: Bool
+
+        // Ear training has its own level progression (1-5) and doesn't affect schedule/streaks
+        if result.sessionType == .earTraining {
+            didAdvance = advanceEarTrainingIfEligible(&updated, accuracy: result.accuracy)
+            // No schedule/streak updates for ear training
+        } else if result.sessionType.canAdvanceLevel {
+            // Standard receive/send sessions
+            didAdvance = updated.advanceIfEligible(
                 sessionAccuracy: result.accuracy,
                 sessionType: result.sessionType.baseType
             )
-        } else {
-            false
-        }
-
-        // Only update schedule for Learn sessions (standard receive/send)
-        // Custom, Vocabulary, and QSO sessions contribute to stats but don't affect
-        // the spaced repetition schedule or notifications
-        if result.sessionType.canAdvanceLevel {
             updateSchedule(for: &updated, result: result, didAdvance: didAdvance)
+        } else {
+            // Custom, Vocabulary, QSO - no advancement or schedule changes
+            didAdvance = false
         }
 
         save(updated)
@@ -207,13 +210,20 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     func savePausedSession(_ session: PausedSession) {
         do {
             let data = try JSONEncoder().encode(session)
-            let key = pausedSessionKey(for: session.sessionType.baseType)
+            let key = pausedSessionKey(for: session.sessionType)
             defaults.set(data, forKey: key)
 
-            switch session.sessionType.baseType {
-            case .receive:
+            switch session.sessionType {
+            case .earTraining:
+                pausedEarTrainingSession = session
+            case .receive,
+                 .receiveCustom,
+                 .receiveVocabulary:
                 pausedReceiveSession = session
-            case .send:
+            case .send,
+                 .sendCustom,
+                 .sendVocabulary,
+                 .qso:
                 pausedSendSession = session
             }
         } catch {
@@ -222,22 +232,36 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     }
 
     func clearPausedSession(for sessionType: SessionType) {
-        let key = pausedSessionKey(for: sessionType.baseType)
+        let key = pausedSessionKey(for: sessionType)
         defaults.removeObject(forKey: key)
 
-        switch sessionType.baseType {
-        case .receive:
+        switch sessionType {
+        case .earTraining:
+            pausedEarTrainingSession = nil
+        case .receive,
+             .receiveCustom,
+             .receiveVocabulary:
             pausedReceiveSession = nil
-        case .send:
+        case .send,
+             .sendCustom,
+             .sendVocabulary,
+             .qso:
             pausedSendSession = nil
         }
     }
 
     func pausedSession(for sessionType: SessionType) -> PausedSession? {
-        switch sessionType.baseType {
-        case .receive:
+        switch sessionType {
+        case .earTraining:
+            return pausedEarTrainingSession
+        case .receive,
+             .receiveCustom,
+             .receiveVocabulary:
             return pausedReceiveSession
-        case .send:
+        case .send,
+             .sendCustom,
+             .sendVocabulary,
+             .qso:
             return pausedSendSession
         }
     }
@@ -247,15 +271,32 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     private let key = "studentProgress"
     private let pausedReceiveKey = "pausedReceiveSession"
     private let pausedSendKey = "pausedSendSession"
+    private let pausedEarTrainingKey = "pausedEarTrainingSession"
     private let defaults: UserDefaults
     private let backupManager: BackupManager
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ProgressStore")
 
-    private func pausedSessionKey(for baseType: BaseSessionType) -> String {
-        switch baseType {
-        case .receive:
+    /// Check and advance ear training level if eligible.
+    /// Requires ≥90% accuracy with sufficient attempts.
+    private func advanceEarTrainingIfEligible(_ progress: inout StudentProgress, accuracy: Double) -> Bool {
+        guard accuracy >= 0.90 else { return false }
+        guard progress.earTrainingLevel < MorseCode.maxEarTrainingLevel else { return false }
+        progress.earTrainingLevel += 1
+        return true
+    }
+
+    private func pausedSessionKey(for sessionType: SessionType) -> String {
+        switch sessionType {
+        case .earTraining:
+            return pausedEarTrainingKey
+        case .receive,
+             .receiveCustom,
+             .receiveVocabulary:
             return pausedReceiveKey
-        case .send:
+        case .send,
+             .sendCustom,
+             .sendVocabulary,
+             .qso:
             return pausedSendKey
         }
     }
@@ -263,6 +304,7 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     private func loadPausedSessions() {
         pausedReceiveSession = loadPausedSession(forKey: pausedReceiveKey)
         pausedSendSession = loadPausedSession(forKey: pausedSendKey)
+        pausedEarTrainingSession = loadPausedSession(forKey: pausedEarTrainingKey)
 
         // Clear expired sessions
         if let receive = pausedReceiveSession, receive.isExpired {
@@ -270,6 +312,9 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         }
         if let send = pausedSendSession, send.isExpired {
             clearPausedSession(for: .send)
+        }
+        if let earTraining = pausedEarTrainingSession, earTraining.isExpired {
+            clearPausedSession(for: .earTraining)
         }
     }
 

@@ -26,7 +26,10 @@ final class QSOEngineTests: XCTestCase {
             }
         }
 
+        func playDit() async {}
+        func playDah() async {}
         func stop() {}
+        func reset() {}
         func setFrequency(_ frequency: Double) {
             self.frequency = frequency
         }

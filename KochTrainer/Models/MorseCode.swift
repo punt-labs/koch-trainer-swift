@@ -76,6 +76,26 @@ enum MorseCode {
         return result
     }()
 
+    // MARK: - Ear Training (Pattern Length)
+
+    /// Characters grouped by pattern length for ear training.
+    /// Level 1 = 1-element patterns, Level 2 = 2-element, etc.
+    static let patternLengthGroups: [[Character]] = [
+        // Length 1: 2 characters
+        ["E", "T"],
+        // Length 2: 4 characters
+        ["A", "I", "M", "N"],
+        // Length 3: 8 characters
+        ["D", "G", "K", "O", "R", "S", "U", "W"],
+        // Length 4: 12 characters
+        ["B", "C", "F", "H", "J", "L", "P", "Q", "V", "X", "Y", "Z"],
+        // Length 5: 10 numbers
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    ]
+
+    /// Maximum ear training level (pattern length 5).
+    static let maxEarTrainingLevel = 5
+
     /// Returns characters unlocked at a given level (1-26).
     /// Level 1 = [K], Level 2 = [K, M], etc.
     static func characters(forLevel level: Int) -> [Character] {
@@ -91,6 +111,21 @@ enum MorseCode {
     /// Decodes a Morse pattern to a character, or nil if invalid.
     static func character(for pattern: String) -> Character? {
         decoding[pattern]
+    }
+
+    /// Returns all characters unlocked up to and including a given pattern length level (1-5).
+    /// Level 1 = length-1 patterns (E, T)
+    /// Level 2 = length-1 + length-2 patterns (E, T, A, I, M, N)
+    /// Level 3 = length-1 + length-2 + length-3 patterns, etc.
+    static func charactersByPatternLength(upToLevel level: Int) -> [Character] {
+        let clampedLevel = max(1, min(level, patternLengthGroups.count))
+        return patternLengthGroups.prefix(clampedLevel).flatMap { $0 }
+    }
+
+    /// Returns characters at exactly this pattern length level (not cumulative).
+    static func charactersAtPatternLength(_ level: Int) -> [Character] {
+        guard level >= 1, level <= patternLengthGroups.count else { return [] }
+        return patternLengthGroups[level - 1]
     }
 
 }

@@ -9,7 +9,10 @@ protocol AudioEngineProtocol {
     func playCharacter(_ char: Character) async
     func playGroup(_ group: String) async
     func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async
+    func playDit() async
+    func playDah() async
     func stop()
+    func reset()
     func setFrequency(_ frequency: Double)
     func setEffectiveSpeed(_ wpm: Int)
     func configureBandConditions(from settings: AppSettings)

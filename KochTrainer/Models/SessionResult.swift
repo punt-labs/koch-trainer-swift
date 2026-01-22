@@ -21,6 +21,7 @@ enum SessionType: String, Codable {
     case receiveVocabulary
     case sendVocabulary
     case qso
+    case earTraining
 
     // MARK: Internal
 
@@ -33,6 +34,7 @@ enum SessionType: String, Codable {
         case .receiveVocabulary: return "Vocabulary Receive"
         case .sendVocabulary: return "Vocabulary Send"
         case .qso: return "QSO"
+        case .earTraining: return "Ear Training"
         }
     }
 
@@ -40,7 +42,8 @@ enum SessionType: String, Codable {
     var canAdvanceLevel: Bool {
         switch self {
         case .receive,
-             .send: return true
+             .send,
+             .earTraining: return true
         case .receiveCustom,
              .sendCustom,
              .receiveVocabulary,
@@ -50,6 +53,7 @@ enum SessionType: String, Codable {
     }
 
     /// The base session type (receive or send direction)
+    /// Note: earTraining is a hybrid mode but maps to .send for audio feedback behavior
     var baseType: BaseSessionType {
         switch self {
         case .receive,
@@ -58,7 +62,8 @@ enum SessionType: String, Codable {
         case .send,
              .sendCustom,
              .sendVocabulary,
-             .qso: return .send
+             .qso,
+             .earTraining: return .send
         }
     }
 }

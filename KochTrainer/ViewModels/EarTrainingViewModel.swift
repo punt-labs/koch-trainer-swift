@@ -1,12 +1,13 @@
 import Foundation
 import SwiftUI
 
-// MARK: - SendTrainingViewModel
+// MARK: - EarTrainingViewModel
 
-/// ViewModel for send training sessions.
-/// Displays characters, accepts paddle/keyboard input, decodes Morse patterns with audio feedback.
+/// ViewModel for ear training sessions.
+/// Plays Morse audio, user reproduces pattern via dit/dah buttons.
+/// Levels are based on pattern length (1-5), not Koch order.
 @MainActor
-final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
+final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
@@ -20,42 +21,45 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         case introduction(characterIndex: Int)
         case training
         case paused
-        case completed(didAdvance: Bool, newCharacter: Character?)
+        case completed(didAdvance: Bool, newCharacters: [Character]?)
     }
 
     struct Feedback: Equatable {
         let wasCorrect: Bool
         let expectedCharacter: Character
-        let sentPattern: String
-        let decodedCharacter: Character?
+        let expectedPattern: String
+        let userPattern: String
     }
 
+    // MARK: - Published State
+
     @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
+    @Published var timeRemaining: TimeInterval = 300 // 5 minutes
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+
+    // Introduction state
     @Published var introCharacters: [Character] = []
     @Published var currentIntroCharacter: Character?
-    @Published var targetCharacter: Character = "K"
+
+    // Training state
+    @Published var targetCharacter: Character?
     @Published var currentPattern: String = ""
     @Published var lastFeedback: Feedback?
-    @Published var isWaitingForInput: Bool = true
+    @Published var isWaitingForInput: Bool = false
     @Published var inputTimeRemaining: TimeInterval = 0
+
+    // MARK: - Configuration
 
     let proficiencyThreshold: Double = 0.90
 
-    /// Custom characters for practice mode (nil = use level-based characters)
-    private(set) var customCharacters: [Character]?
+    /// Current ear training level (1-5)
+    private(set) var currentLevel: Int = 1
 
-    /// Minimum attempts scales with character count (5 per character, floor of 15)
-    var minimumAttemptsForProficiency: Int {
-        max(15, 5 * introCharacters.count)
-    }
-
-    /// Whether this is a custom practice session (no level advancement)
-    var isCustomSession: Bool { customCharacters != nil }
+    /// Fixed minimum attempts for proficiency check
+    let minimumAttemptsForProficiency: Int = 20
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -111,29 +115,19 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
-        currentLevel = progressStore.progress.sendLevel
+        currentLevel = progressStore.progress.earTrainingLevel
         audioEngine.setFrequency(settingsStore.settings.toneFrequency)
         audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         audioEngine.configureBandConditions(from: settingsStore.settings)
 
-        introCharacters = MorseCode.characters(forLevel: currentLevel)
+        introCharacters = MorseCode.charactersByPatternLength(upToLevel: currentLevel)
     }
 
-    /// Configure for custom practice with specific characters (no level advancement)
-    func configure(progressStore: ProgressStore, settingsStore: SettingsStore, customCharacters: [Character]) {
-        self.progressStore = progressStore
-        self.settingsStore = settingsStore
-        self.customCharacters = customCharacters
-        currentLevel = progressStore.progress.sendLevel
-        audioEngine.setFrequency(settingsStore.settings.toneFrequency)
-        audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
-        audioEngine.configureBandConditions(from: settingsStore.settings)
+    // MARK: - Session Lifecycle
 
-        // For custom practice, use the selected characters as intro
-        introCharacters = customCharacters
+    func startSession() {
+        startIntroduction()
     }
-
-    // MARK: - Introduction Phase
 
     func startIntroduction() {
         guard !introCharacters.isEmpty else {
@@ -165,10 +159,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    func startSession() {
-        startIntroduction()
-    }
-
     func pause() {
         guard case .training = phase else { return }
         isPlaying = false
@@ -178,78 +168,20 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
         isWaitingForInput = false
 
-        // Only persist paused session if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
-        }
-    }
-
-    // MARK: - Paused Session Management
-
-    func createPausedSessionSnapshot() -> PausedSession? {
-        guard let startTime = sessionStartTime else { return nil }
-
-        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
-        return PausedSession(
-            sessionType: sessionType,
-            startTime: startTime,
-            pausedAt: Date(),
-            correctCount: correctCount,
-            totalAttempts: totalAttempts,
-            characterStats: characterStats,
-            introCharacters: introCharacters,
-            introCompleted: isIntroCompleted,
-            customCharacters: customCharacters,
-            currentLevel: currentLevel
-        )
-    }
-
-    func restoreFromPausedSession(_ session: PausedSession) {
-        // Validate level matches current level
-        guard session.currentLevel == currentLevel else {
-            // Level changed since pause - don't restore
-            return
-        }
-
-        // Validate custom session type matches
-        let currentIsCustom = customCharacters != nil
-        guard session.isCustomSession == currentIsCustom else { return }
-
-        // If custom session, validate custom characters match
-        if currentIsCustom {
-            guard session.customCharacters == customCharacters else {
-                // Custom characters differ from paused session - don't restore
-                return
-            }
-        }
-
-        // Restore state
-        correctCount = session.correctCount
-        totalAttempts = session.totalAttempts
-        characterStats = session.characterStats
-        introCharacters = session.introCharacters
-        sessionStartTime = session.startTime
-
-        if session.introCompleted {
-            // Resume in paused state, user will tap "Resume" to continue training
-            phase = .paused
-        } else {
-            // Restart from introduction
-            phase = .introduction(characterIndex: 0)
         }
     }
 
     func resume() {
         guard phase == .paused else { return }
 
-        // Clear the paused session now that user is actively resuming
-        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
-        progressStore?.clearPausedSession(for: sessionType)
+        progressStore?.clearPausedSession(for: .earTraining)
 
         phase = .training
         isPlaying = true
         startSessionTimer()
-        showNextCharacter()
+        playNextCharacter()
     }
 
     func endSession() {
@@ -259,35 +191,33 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.stop()
         isWaitingForInput = false
 
-        // Clear any paused session since we're ending
-        let sessionType: SessionType = isCustomSession ? .sendCustom : .send
-        progressStore?.clearPausedSession(for: sessionType)
+        progressStore?.clearPausedSession(for: .earTraining)
 
         guard let store = progressStore, let startTime = sessionStartTime else {
-            phase = .completed(didAdvance: false, newCharacter: nil)
+            phase = .completed(didAdvance: false, newCharacters: nil)
             return
         }
 
-        // Don't record sessions with no attempts (e.g., immediately cancelled)
         guard totalAttempts > 0 else {
-            phase = .completed(didAdvance: false, newCharacter: nil)
+            phase = .completed(didAdvance: false, newCharacters: nil)
             return
         }
 
         let duration = Date().timeIntervalSince(startTime)
         let result = SessionResult(
-            sessionType: sessionType,
+            sessionType: .earTraining,
             duration: duration,
             totalAttempts: totalAttempts,
             correctCount: correctCount,
             characterStats: characterStats
         )
 
-        // Record session and check for advancement (custom sessions can't advance)
         let didAdvance = store.recordSession(result)
-        let newCharacter: Character? = didAdvance ? store.progress.unlockedCharacters(for: .send).last : nil
+        let newCharacters: [Character]? = didAdvance
+            ? MorseCode.charactersAtPatternLength(store.progress.earTrainingLevel)
+            : nil
 
-        phase = .completed(didAdvance: didAdvance, newCharacter: newCharacter)
+        phase = .completed(didAdvance: didAdvance, newCharacters: newCharacters)
     }
 
     func cleanup() {
@@ -317,32 +247,65 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     func inputDit() {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "."
-        lastInputTime = Date()
         playDit()
     }
 
     func inputDah() {
         guard isPlaying, isWaitingForInput else { return }
         currentPattern += "-"
-        lastInputTime = Date()
         playDah()
+    }
+
+    // MARK: - Paused Session Management
+
+    func createPausedSessionSnapshot() -> PausedSession? {
+        guard let startTime = sessionStartTime else { return nil }
+
+        return PausedSession(
+            sessionType: .earTraining,
+            startTime: startTime,
+            pausedAt: Date(),
+            correctCount: correctCount,
+            totalAttempts: totalAttempts,
+            characterStats: characterStats,
+            introCharacters: introCharacters,
+            introCompleted: isIntroCompleted,
+            customCharacters: nil,
+            currentLevel: currentLevel
+        )
+    }
+
+    func restoreFromPausedSession(_ session: PausedSession) {
+        guard session.currentLevel == currentLevel else { return }
+
+        correctCount = session.correctCount
+        totalAttempts = session.totalAttempts
+        characterStats = session.characterStats
+        introCharacters = session.introCharacters
+        sessionStartTime = session.startTime
+
+        if session.introCompleted {
+            phase = .paused
+        } else {
+            phase = .introduction(characterIndex: 0)
+        }
     }
 
     // MARK: Private
 
     private let audioEngine: AudioEngineProtocol
-    private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?
     private var inputTimer: Timer?
     private var sessionStartTime: Date?
-    private var currentLevel: Int = 1
-    private var lastInputTime: Date?
 
     /// Dynamic timeout based on current target character's pattern length
     private var currentInputTimeout: TimeInterval {
-        TrainingTiming.timeoutForCharacter(targetCharacter)
+        guard let char = targetCharacter else {
+            return TrainingTiming.timeoutForPattern(length: 1)
+        }
+        return TrainingTiming.timeoutForCharacter(char)
     }
 
     private func showIntroCharacter(at index: Int) {
@@ -354,7 +317,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         currentIntroCharacter = introCharacters[index]
         phase = .introduction(characterIndex: index)
 
-        // Auto-play after a short delay
         Task {
             try? await Task.sleep(nanoseconds: TrainingTiming.introAutoPlayDelay)
             playCurrentIntroCharacter()
@@ -366,7 +328,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionStartTime = Date()
         isPlaying = true
         startSessionTimer()
-        showNextCharacter()
+        playNextCharacter()
     }
 
     private func checkForProficiency() {
@@ -391,7 +353,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
 // MARK: - Private Helpers
 
-extension SendTrainingViewModel {
+extension EarTrainingViewModel {
     func startSessionTimer() {
         sessionTimer?.invalidate()
         sessionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -400,7 +362,8 @@ extension SendTrainingViewModel {
     }
 
     private func tickSession() {
-        guard timeRemaining > 0 else { endSession()
+        guard timeRemaining > 0 else {
+            endSession()
             return
         }
         timeRemaining -= 1
@@ -425,74 +388,81 @@ extension SendTrainingViewModel {
     private func completeCurrentInput() {
         isWaitingForInput = false
 
-        let decodedChar = currentPattern.isEmpty ? nil : MorseCode.character(for: currentPattern)
-        let isCorrect = !currentPattern.isEmpty && decodedChar == targetCharacter
-        let displayPattern = currentPattern.isEmpty ? "(no response)" : currentPattern
-        recordResponse(expected: targetCharacter, wasCorrect: isCorrect, pattern: displayPattern, decoded: decodedChar)
+        let expectedPattern = MorseCode.pattern(for: targetCharacter ?? " ") ?? ""
+        let isCorrect = !currentPattern.isEmpty && currentPattern == expectedPattern
+        let userPattern = currentPattern.isEmpty ? "(no response)" : currentPattern
+
+        recordResponse(expected: targetCharacter ?? " ", wasCorrect: isCorrect)
         showFeedbackAndContinue(
             wasCorrect: isCorrect,
-            expected: targetCharacter,
-            pattern: displayPattern,
-            decoded: decodedChar
+            expectedChar: targetCharacter ?? " ",
+            expectedPattern: expectedPattern,
+            userPattern: userPattern
         )
     }
 
-    func recordResponse(expected: Character, wasCorrect: Bool, pattern: String, decoded: Character?) {
+    func recordResponse(expected: Character, wasCorrect: Bool) {
         totalAttempts += 1
         if wasCorrect { correctCount += 1 }
 
-        var stat = characterStats[expected] ?? CharacterStat()
-        stat.sendAttempts += 1
-        if wasCorrect { stat.sendCorrect += 1 }
+        var stat = characterStats[expected] ?? CharacterStat(
+            earTrainingAttempts: 0,
+            earTrainingCorrect: 0
+        )
+        stat.earTrainingAttempts += 1
+        if wasCorrect { stat.earTrainingCorrect += 1 }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
 
-    func showFeedbackAndContinue(wasCorrect: Bool, expected: Character, pattern: String, decoded: Character?) {
+    func showFeedbackAndContinue(
+        wasCorrect: Bool,
+        expectedChar: Character,
+        expectedPattern: String,
+        userPattern: String
+    ) {
         lastFeedback = Feedback(
             wasCorrect: wasCorrect,
-            expectedCharacter: expected,
-            sentPattern: pattern,
-            decodedCharacter: decoded
+            expectedCharacter: expectedChar,
+            expectedPattern: expectedPattern,
+            userPattern: userPattern
         )
 
         Task {
             if !wasCorrect {
+                // Show feedback briefly, then replay correct pattern
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if isPlaying { await audioEngine.playCharacter(expected) }
+                if isPlaying {
+                    await audioEngine.playCharacter(expectedChar)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
             checkForProficiency()
-            if isPlaying { showNextCharacter() }
+            if isPlaying { playNextCharacter() }
         }
     }
 
-    func showNextCharacter() {
-        var combinedStats = progressStore?.progress.characterStats ?? [:]
-        for (char, sessionStat) in characterStats {
-            if var existing = combinedStats[char] {
-                existing.merge(sessionStat)
-                combinedStats[char] = existing
-            } else {
-                combinedStats[char] = sessionStat
-            }
-        }
-
-        let group = GroupGenerator.generateMixedGroup(
-            level: currentLevel,
-            characterStats: combinedStats,
-            sessionType: .send,
-            groupLength: 1,
-            availableCharacters: customCharacters
-        )
-
-        if let char = group.first { targetCharacter = char }
+    func playNextCharacter() {
+        // Pick random character from current level's character pool
+        let availableChars = MorseCode.charactersByPatternLength(upToLevel: currentLevel)
+        targetCharacter = availableChars.randomElement()
         currentPattern = ""
         lastFeedback = nil
-        isWaitingForInput = true
-        resetInputTimer()
+        isWaitingForInput = false
+        inputTimeRemaining = 0
+
+        // Play the character audio
+        Task {
+            guard let char = targetCharacter else { return }
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
+
+            // After audio finishes, start accepting input and start timer
+            isWaitingForInput = true
+            resetInputTimer()
+        }
     }
 }
