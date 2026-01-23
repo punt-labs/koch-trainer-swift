@@ -61,26 +61,26 @@ final class LearnPage: BasePage {
 
     /// Navigate to Ear Training.
     @discardableResult
-    func goToEarTraining() -> TrainingPage {
+    func goToEarTraining() -> EarTrainingPage {
         _ = earTrainingButton.waitForExistence(timeout: 5)
         earTrainingButton.tap()
-        return TrainingPage(app: app)
+        return EarTrainingPage(app: app)
     }
 
     /// Navigate to Receive Training.
     @discardableResult
-    func goToReceiveTraining() -> TrainingPage {
+    func goToReceiveTraining() -> ReceiveTrainingPage {
         _ = receiveTrainingButton.waitForExistence(timeout: 5)
         receiveTrainingButton.tap()
-        return TrainingPage(app: app)
+        return ReceiveTrainingPage(app: app)
     }
 
     /// Navigate to Send Training.
     @discardableResult
-    func goToSendTraining() -> TrainingPage {
+    func goToSendTraining() -> SendTrainingPage {
         _ = sendTrainingButton.waitForExistence(timeout: 5)
         sendTrainingButton.tap()
-        return TrainingPage(app: app)
+        return SendTrainingPage(app: app)
     }
 
     // MARK: - Assertions
