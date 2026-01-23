@@ -35,6 +35,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var isPlaying: Bool = false
     @Published var correctCount: Int = 0
     @Published var totalAttempts: Int = 0
+    // Note: internal access needed for +Helpers extension (fileprivate doesn't work across files)
     @Published var characterStats: [Character: CharacterStat] = [:]
     @Published var introCharacters: [Character] = []
     @Published var currentIntroCharacter: Character?
@@ -194,9 +195,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
 
-        // Turn off radio
+        // Turn off radio (continuous audio outputs silence, engine keeps running)
         audioEngine.setRadioMode(.off)
-        audioEngine.stop()
         isWaitingForInput = false
 
         // Only persist paused session if there's actual progress

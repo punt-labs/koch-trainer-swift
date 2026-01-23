@@ -134,9 +134,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer?.invalidate()
         inputTimer?.invalidate()
 
-        // Turn off radio
+        // Turn off radio (continuous audio outputs silence, engine keeps running)
         audioEngine.setRadioMode(.off)
-        audioEngine.stop()
         isWaitingForResponse = false
 
         // Save paused session snapshot only if there's actual progress

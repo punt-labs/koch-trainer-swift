@@ -116,14 +116,14 @@ signals) or transmits (sends outgoing signals), but not both simultaneously.
 This fundamental constraint shapes the audio experience during training.
 
 \begin{zed}
-RadioMode ::= radioOff | radioReceiving | radioTransmitting
+RadioMode ::= off | receiving | transmitting
 \end{zed}
 
 \begin{itemize}
-\item \emph{radioOff}: Radio not active (session not started, paused, or completed)
-\item \emph{radioReceiving}: Radio on, listening---continuous noise floor with
+\item \emph{off}: Radio not active (session not started, paused, or completed)
+\item \emph{receiving}: Radio on, listening---continuous noise floor with
       band conditions (QRN, QSB, QRM), incoming Morse signals audible
-\item \emph{radioTransmitting}: Radio on, sending---sidetone only, receiver muted
+\item \emph{transmitting}: Radio on, sending---sidetone only, receiver muted
       (no noise or band conditions)
 \end{itemize}
 
@@ -705,11 +705,11 @@ introIndex \leq characterCount \\
 sessionCorrect \leq sessionAttempts \\
 sessionAttempts \leq 1000 \\
 % Radio mode constraints (half-duplex behavior)
-phase \in \{introduction, paused, completed\} \implies radioMode = radioOff \\
-(phase = training \land direction = receive) \implies radioMode = radioReceiving \\
-radioMode = radioTransmitting \implies direction = send \\
+phase \in \{introduction, paused, completed\} \implies radioMode = off \\
+(phase = training \land direction = receive) \implies radioMode = receiving \\
+radioMode = transmitting \implies direction = send \\
 % Tone constraints
-radioMode = radioOff \implies toneActive = zfalse
+radioMode = off \implies toneActive = zfalse
 \end{schema}
 
 The \emph{characterCount} is the number of unlocked characters for this session's
@@ -735,7 +735,7 @@ level? \geq minLevel \\
 level? \leq maxLevel \\
 phase' = introduction \\
 direction' = direction? \\
-radioMode' = radioOff \\
+radioMode' = off \\
 toneActive' = zfalse \\
 characterCount' = level? \\
 introIndex' = 0 \\
@@ -769,7 +769,7 @@ sessionCorrect' = sessionCorrect
 phase = introduction \\
 introIndex = characterCount \\
 phase' = training \\
-radioMode' = radioReceiving \\
+radioMode' = receiving \\
 toneActive' = zfalse \\
 introIndex' = introIndex \\
 direction' = direction \\
@@ -824,7 +824,7 @@ within \emph{responseTimeoutMs} (3 seconds).
 \where
 phase = training \\
 phase' = paused \\
-radioMode' = radioOff \\
+radioMode' = off \\
 toneActive' = zfalse \\
 direction' = direction \\
 characterCount' = characterCount \\
@@ -838,7 +838,7 @@ sessionCorrect' = sessionCorrect
 \where
 phase = paused \\
 phase' = training \\
-radioMode' = radioReceiving \\
+radioMode' = receiving \\
 toneActive' = zfalse \\
 direction' = direction \\
 characterCount' = characterCount \\
@@ -861,8 +861,8 @@ nature of amateur radio.
 \where
 phase = training \\
 direction = send \\
-radioMode = radioReceiving \\
-radioMode' = radioTransmitting \\
+radioMode = receiving \\
+radioMode' = transmitting \\
 toneActive' = toneActive \\
 phase' = phase \\
 direction' = direction \\
@@ -877,8 +877,8 @@ sessionCorrect' = sessionCorrect
 \where
 phase = training \\
 direction = send \\
-radioMode = radioTransmitting \\
-radioMode' = radioReceiving \\
+radioMode = transmitting \\
+radioMode' = receiving \\
 toneActive' = zfalse \\
 phase' = phase \\
 direction' = direction \\
@@ -900,15 +900,15 @@ tone generator. The \emph{toneActive} flag controls whether audio is currently
 being produced. The audio output depends on the current radio mode:
 
 \begin{itemize}
-\item \emph{radioReceiving}: Tone mixed with noise floor and band conditions (QRN, QSB, QRM)
-\item \emph{radioTransmitting}: Clean sidetone only (no noise or band conditions)
-\item \emph{radioOff}: No audio output (toneActive must be false)
+\item \emph{receiving}: Tone mixed with noise floor and band conditions (QRN, QSB, QRM)
+\item \emph{transmitting}: Clean sidetone only (no noise or band conditions)
+\item \emph{off}: No audio output (toneActive must be false)
 \end{itemize}
 
 \begin{schema}{ActivateTone}
 \Delta SessionState
 \where
-radioMode \neq radioOff \\
+radioMode \neq off \\
 toneActive = zfalse \\
 toneActive' = ztrue \\
 phase' = phase \\
@@ -981,7 +981,7 @@ calls this after each response to determine whether to end the session.
 \where
 phase = training \\
 phase' = completed \\
-radioMode' = radioOff \\
+radioMode' = off \\
 toneActive' = zfalse \\
 direction' = direction \\
 characterCount' = characterCount \\

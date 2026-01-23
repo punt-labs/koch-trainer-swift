@@ -165,7 +165,6 @@ final class ToneGenerator: @unchecked Sendable {
     private var sourceNode: AVAudioSourceNode?
     private let sampleRate: Double = 44100
 
-    private var currentPhase: Double = 0
     private let stateLock = NSLock()
     private var _isPlaying = false
 
@@ -174,7 +173,6 @@ final class ToneGenerator: @unchecked Sendable {
 
     // Continuous session state
     private var isSessionActive = false
-    private var currentFrequency: Double = 600
     private var wasInterrupted = false
 
     // Radio mode (thread-safe for audio callback access)
@@ -184,6 +182,14 @@ final class ToneGenerator: @unchecked Sendable {
     // Tone active flag (thread-safe for audio callback access)
     private let toneActiveLock = NSLock()
     private var _isToneActive = false
+
+    // Frequency (thread-safe for audio callback access)
+    private let frequencyLock = NSLock()
+    private var _currentFrequency: Double = 600
+
+    // Phase (thread-safe for audio callback access)
+    private let phaseLock = NSLock()
+    private var _currentPhase: Double = 0
 
     private var isPlaying: Bool {
         get {
@@ -195,6 +201,32 @@ final class ToneGenerator: @unchecked Sendable {
             stateLock.lock()
             _isPlaying = newValue
             stateLock.unlock()
+        }
+    }
+
+    private var currentFrequency: Double {
+        get {
+            frequencyLock.lock()
+            defer { frequencyLock.unlock() }
+            return _currentFrequency
+        }
+        set {
+            frequencyLock.lock()
+            _currentFrequency = newValue
+            frequencyLock.unlock()
+        }
+    }
+
+    private var currentPhase: Double {
+        get {
+            phaseLock.lock()
+            defer { phaseLock.unlock() }
+            return _currentPhase
+        }
+        set {
+            phaseLock.lock()
+            _currentPhase = newValue
+            phaseLock.unlock()
         }
     }
 

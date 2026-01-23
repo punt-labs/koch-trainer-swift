@@ -166,9 +166,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
 
-        // Turn off radio
+        // Turn off radio (continuous audio outputs silence, engine keeps running)
         audioEngine.setRadioMode(.off)
-        audioEngine.stop()
         isWaitingForInput = false
 
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
