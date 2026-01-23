@@ -40,7 +40,7 @@ final class EarTrainingViewModelTests: XCTestCase {
     }
 
     func testIntroCharactersSetFromLevel() {
-        let expectedChars = MorseCode.charactersByPatternLength(upToLevel: 1)
+        let expectedChars = MorseCode.charactersByPatternLength(upToLevel: progressStore.progress.earTrainingLevel)
         XCTAssertEqual(viewModel.introCharacters, expectedChars)
     }
 
