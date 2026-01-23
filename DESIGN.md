@@ -8,7 +8,8 @@ This document captures architectural decisions, design rationale, and implementa
 2. [Architecture](#architecture)
 3. [Core Concepts](#core-concepts)
 4. [Feature Design](#feature-design)
-5. [Outstanding Work](#outstanding-work-design-notes)
+5. [Testing Strategy](#testing-strategy)
+6. [Outstanding Work](#outstanding-work-design-notes)
 
 ---
 
@@ -252,6 +253,185 @@ Anti-nag policy prevents notification fatigue:
 - Streak Reminder: 8 PM if no practice today and streak ≥3
 - Level Review: 7 days after level-up
 - Welcome Back: 7+ days inactive
+
+---
+
+## Testing Strategy
+
+### Test Pyramid
+
+```
+        ┌─────────────┐
+        │   UI Tests  │  ← Slow, integration-level
+        │  (32 tests) │    Tests full user flows
+        ├─────────────┤
+        │  Unit Tests │  ← Fast, isolated
+        │ (921 tests) │    Tests logic in isolation
+        └─────────────┘
+```
+
+### Unit Tests
+
+**Philosophy**: Test business logic in isolation. ViewModels and Services contain the logic; Views are thin wrappers.
+
+**What We Test:**
+- ViewModels: State transitions, input handling, calculated properties
+- Services: Persistence, calculations, audio timing
+- Models: Encoding/decoding, computed properties, validation
+
+**What We Don't Test:**
+- Views directly (tested via UI tests instead)
+- Third-party framework behavior
+- Trivial getters/setters
+
+**Test Organization:**
+```
+KochTrainerTests/
+├── Models/
+│   ├── StudentProgressTests.swift
+│   ├── CharacterStatTests.swift
+│   └── MorseCodeTests.swift
+├── ViewModels/
+│   ├── ReceiveTrainingViewModelTests.swift
+│   ├── SendTrainingViewModelTests.swift
+│   └── EarTrainingViewModelTests.swift
+└── Services/
+    ├── ProgressStoreTests.swift
+    ├── IntervalCalculatorTests.swift
+    └── StreakCalculatorTests.swift
+```
+
+### UI Tests
+
+**Philosophy**: Test user flows end-to-end. UI tests verify that views, view models, and services work together correctly.
+
+**What We Test:**
+- Navigation between screens
+- Training flow phases (intro → training → paused → completed)
+- Button interactions and state changes
+- Accessibility identifier presence (enables VoiceOver testing)
+
+**Page Object Pattern:**
+
+UI tests use page objects to encapsulate element queries and actions:
+
+```swift
+// Page object encapsulates element access
+class LearnPage: BasePage {
+    var earTrainingButton: XCUIElement {
+        button(id: AccessibilityID.Learn.earTrainingButton)
+    }
+
+    func goToEarTraining() -> EarTrainingPage {
+        earTrainingButton.tap()
+        return EarTrainingPage(app: app)
+    }
+}
+
+// Test reads like a user story
+func testCompleteTrainingFlow() throws {
+    let learnPage = LearnPage(app: app).waitForPage()
+    let trainingPage = learnPage.goToEarTraining()
+        .waitForIntro()
+        .skipIntroduction()
+        .waitForTraining()
+
+    trainingPage.pause()
+    trainingPage.endSession()
+    trainingPage.tapDone()
+        .assertDisplayed()
+}
+```
+
+**Page Object Hierarchy:**
+```
+KochTrainerUITests/
+├── Pages/
+│   ├── BasePage.swift           ← Common element accessors
+│   ├── LearnPage.swift          ← Home/Learn screen
+│   ├── TrainingPage.swift       ← Shared training elements
+│   ├── ReceiveTrainingPage.swift
+│   ├── SendTrainingPage.swift
+│   └── EarTrainingPage.swift
+├── ReceiveTrainingUITests.swift
+├── SendTrainingUITests.swift
+└── EarTrainingUITests.swift
+```
+
+### Accessibility Identifiers for UI Testing
+
+**Problem**: SwiftUI's accessibility identifier inheritance can cause parent identifiers to propagate to children, making elements untestable.
+
+**Solution**: Use `.accessibilityElement(children: .contain)` on container views:
+
+```swift
+// Without .contain, section's identifier propagates to button
+VStack {
+    NavigationLink { ... }
+        .accessibilityIdentifier("button-id")  // ❌ Gets overwritten
+}
+.accessibilityIdentifier("section-id")
+
+// With .contain, each element keeps its own identifier
+VStack {
+    NavigationLink { ... }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("button-id")  // ✓ Preserved
+}
+.accessibilityElement(children: .contain)
+.accessibilityIdentifier("section-id")
+```
+
+**Centralized Identifiers:**
+
+All accessibility identifiers are defined in `AccessibilityID.swift`:
+
+```swift
+enum AccessibilityID {
+    enum Learn {
+        static let view = "learn-view"
+        static let earTrainingButton = "learn-ear-training-start-button"
+        static let receiveTrainingButton = "learn-receive-training-start-button"
+        // ...
+    }
+
+    enum Training {
+        static let introView = "training-intro-view"
+        static let nextCharacterButton = "training-next-character-button"
+        static let pauseButton = "training-pause-button"
+        // ...
+    }
+}
+```
+
+### Test Launch Configuration
+
+UI tests launch with `--uitesting` argument to reset state:
+
+```swift
+override func setUpWithError() throws {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["--uitesting"]
+    app.launch()
+}
+```
+
+The app checks this flag to:
+- Reset progress to level 1
+- Clear any paused sessions
+- Use predictable test data
+
+### Coverage Targets
+
+| Component | Current | Target |
+|-----------|---------|--------|
+| ViewModels | 75-86% | 90%+ |
+| Services | 82-97% | 95%+ |
+| Models | 70-100% | 85%+ |
+| UI Flows | 32 tests | All critical paths |
+
+**Total**: 921 unit tests + 32 UI tests
 
 ---
 
