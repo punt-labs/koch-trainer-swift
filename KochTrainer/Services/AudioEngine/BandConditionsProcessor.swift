@@ -115,8 +115,10 @@ final class BandConditionsProcessor: @unchecked Sendable {
     private var fadingTargetGain: Double = 0.5 // Target gain for interpolation
     private var fadingSamplesUntilUpdate: Int = 0 // Countdown to next random walk step
 
-    /// Precomputed interpolation rate for ~10ms gain ramp (avoids per-sample calculation)
-    private lazy var fadingInterpolationRate: Double = 1.0 / (sampleRate * 0.01)
+    /// Interpolation rate for ~10ms gain ramp, derived from the current sample rate
+    private var fadingInterpolationRate: Double {
+        1.0 / (sampleRate * 0.01)
+    }
 
     // Interference state
     private var interferenceActive: Bool = false
