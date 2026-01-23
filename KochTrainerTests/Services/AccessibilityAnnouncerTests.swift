@@ -78,66 +78,82 @@ final class AccessibilityAnnouncerTests: XCTestCase {
     /// requires manual testing on device.
 
     func testAnnounceCorrectDoesNotCrash() {
-        AccessibilityAnnouncer.announceCorrect()
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceCorrect()
     }
 
     func testAnnounceIncorrectWithExpectedDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrect(expected: "K")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrect(expected: "K")
     }
 
     func testAnnounceIncorrectWithUserEnteredDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrect(userEntered: "M", expected: "K")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrect(userEntered: "M", expected: "K")
     }
 
     func testAnnounceIncorrectPatternDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrectPattern(sent: "-.-", expected: "K")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrectPattern(sent: "-.-", expected: "K")
     }
 
     func testAnnounceIncorrectPatternWithUnrecognizedPatternDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrectPattern(sent: "-----", expected: "K")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrectPattern(sent: "-----", expected: "K")
     }
 
     func testAnnounceTimeoutDoesNotCrash() {
-        AccessibilityAnnouncer.announceTimeout()
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceTimeout()
     }
 
     func testAnnounceTimeoutWithExpectedDoesNotCrash() {
-        AccessibilityAnnouncer.announceTimeout(expected: "K")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceTimeout(expected: "K")
     }
 
     func testAnnounceLevelUpWithSingleCharacterDoesNotCrash() {
-        AccessibilityAnnouncer.announceLevelUp(newCharacter: "R")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceLevelUp(newCharacter: "R")
     }
 
     func testAnnounceLevelUpWithMultipleCharactersDoesNotCrash() {
-        AccessibilityAnnouncer.announceLevelUp(newCharacters: ["A", "I", "M", "N"])
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceLevelUp(newCharacters: ["A", "I", "M", "N"])
     }
 
     func testAnnounceSessionCompleteDoesNotCrash() {
-        AccessibilityAnnouncer.announceSessionComplete(accuracy: 85)
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceSessionComplete(accuracy: 85)
     }
 
     func testAnnouncePausedDoesNotCrash() {
-        AccessibilityAnnouncer.announcePaused()
+        let announcer = AccessibilityAnnouncer()
+        announcer.announcePaused()
     }
 
     func testAnnounceResumedDoesNotCrash() {
-        AccessibilityAnnouncer.announceResumed()
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceResumed()
     }
 
     func testAnnounceCorrectWordDoesNotCrash() {
-        AccessibilityAnnouncer.announceCorrectWord()
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceCorrectWord()
     }
 
     func testAnnounceIncorrectWordDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrectWord(expected: "CQ", userEntered: "DE")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrectWord(expected: "CQ", userEntered: "DE")
     }
 
     func testAnnounceIncorrectWordWithTimeoutDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrectWord(expected: "CQ", userEntered: "(timeout)")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrectWord(expected: "CQ", userEntered: "(timeout)")
     }
 
     func testAnnounceIncorrectWordWithEmptyInputDoesNotCrash() {
-        AccessibilityAnnouncer.announceIncorrectWord(expected: "CQ", userEntered: "")
+        let announcer = AccessibilityAnnouncer()
+        announcer.announceIncorrectWord(expected: "CQ", userEntered: "")
     }
 }

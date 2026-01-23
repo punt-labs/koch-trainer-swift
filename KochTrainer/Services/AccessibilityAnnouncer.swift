@@ -36,6 +36,16 @@ final class AccessibilityAnnouncer {
 
     // MARK: Internal
 
+    /// Convert pattern to spoken form: ".-" becomes "dit dah"
+    static func spokenPattern(_ pattern: String) -> String {
+        pattern.map { $0 == "." ? "dit" : "dah" }.joined(separator: " ")
+    }
+
+    /// Spell out word for clarity (e.g., callsigns)
+    static func spelledOut(_ word: String) -> String {
+        word.map { String($0) }.joined(separator: " ")
+    }
+
     // MARK: - Announcement Methods
 
     /// Announce a correct response.
@@ -76,7 +86,7 @@ final class AccessibilityAnnouncer {
     /// Announce level advancement with new character.
     func announceLevelUp(newCharacter: Character) {
         let pattern = MorseCode.pattern(for: newCharacter) ?? ""
-        post("Level up! New character: \(newCharacter). Pattern: \(spokenPattern(pattern))")
+        post("Level up! New character: \(newCharacter). Pattern: \(Self.spokenPattern(pattern))")
     }
 
     /// Announce level advancement (ear training with multiple characters).
@@ -110,9 +120,9 @@ final class AccessibilityAnnouncer {
     /// Announce incorrect word response.
     func announceIncorrectWord(expected: String, userEntered: String) {
         if userEntered.isEmpty || userEntered == "(timeout)" {
-            post("Time's up. The word was \(spelledOut(expected))")
+            post("Time's up. The word was \(Self.spelledOut(expected))")
         } else {
-            post("Incorrect. The word was \(spelledOut(expected))")
+            post("Incorrect. The word was \(Self.spelledOut(expected))")
         }
     }
 
@@ -123,15 +133,5 @@ final class AccessibilityAnnouncer {
     private func post(_ message: String) {
         guard accessibility.isVoiceOverRunning else { return }
         accessibility.post(notification: .announcement, argument: message)
-    }
-
-    /// Convert pattern to spoken form: ".-" becomes "dit dah"
-    private func spokenPattern(_ pattern: String) -> String {
-        pattern.map { $0 == "." ? "dit" : "dah" }.joined(separator: " ")
-    }
-
-    /// Spell out word for clarity (e.g., callsigns)
-    private func spelledOut(_ word: String) -> String {
-        word.map { String($0) }.joined(separator: " ")
     }
 }

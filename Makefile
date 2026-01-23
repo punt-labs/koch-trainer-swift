@@ -2,11 +2,15 @@
 # Usage: make <target>
 
 SCHEME = KochTrainer
-DESTINATION = platform=iOS Simulator,name=iPhone 17 Pro
+# Derive unique simulator name from branch to avoid worktree contention
+BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-')
+SIM_BASE = iPhone 17 Pro
+SIM_NAME = $(SIM_BASE) - $(BRANCH_NAME)
+DESTINATION = platform=iOS Simulator,name=$(SIM_NAME)
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
 
-.PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list
+.PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
 help:
 	@echo "Available commands:"
@@ -36,6 +40,14 @@ help:
 	@echo "    make worktree-remove BRANCH=feature/foo       - Remove worktree"
 	@echo "    make worktree-list                            - List active worktrees"
 
+# Ensure branch-specific simulator exists (clones base if needed)
+ensure-sim:
+	@if ! xcrun simctl list devices | grep -q "$(SIM_NAME)"; then \
+		echo "Creating simulator clone: $(SIM_NAME)"; \
+		xcrun simctl clone "$(SIM_BASE)" "$(SIM_NAME)" || \
+		(echo "Failed to clone simulator. Ensure '$(SIM_BASE)' exists." && exit 1); \
+	fi
+
 generate:
 	@echo "Generating Xcode project..."
 	xcodegen generate
@@ -60,16 +72,16 @@ lint:
 		exit 1; \
 	fi
 
-build: generate format lint
-	@echo "Building $(SCHEME)..."
+build: generate format lint ensure-sim
+	@echo "Building $(SCHEME) on $(SIM_NAME)..."
 	xcodebuild build \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
 		-derivedDataPath $(DERIVED_DATA) \
 		-quiet
 
-test: generate
-	@echo "Running tests..."
+test: generate ensure-sim
+	@echo "Running tests on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
@@ -83,16 +95,16 @@ clean:
 	@echo "Clean complete."
 
 run: build
-	@echo "Launching simulator..."
-	xcrun simctl boot "iPhone 17 Pro" 2>/dev/null || true
+	@echo "Launching simulator $(SIM_NAME)..."
+	xcrun simctl boot "$(SIM_NAME)" 2>/dev/null || true
 	open -a Simulator
 	@echo "Installing app..."
 	xcrun simctl install booted $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app
 	@echo "Launching app..."
 	xcrun simctl launch booted com.kochtrainer.app
 
-coverage: generate
-	@echo "Running tests with coverage..."
+coverage: generate ensure-sim
+	@echo "Running tests with coverage on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
