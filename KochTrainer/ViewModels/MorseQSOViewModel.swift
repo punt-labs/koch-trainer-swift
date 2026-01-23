@@ -167,6 +167,9 @@ final class MorseQSOViewModel: ObservableObject {
         totalCharactersKeyed = 0
         correctCharactersKeyed = 0
 
+        // Start continuous audio session (radio starts in receiving mode)
+        audioEngine.startSession()
+
         if aiStarts {
             // AI calls CQ first, user responds
             Task {
@@ -183,14 +186,14 @@ final class MorseQSOViewModel: ObservableObject {
         isSessionActive = false
         turnState = .completed
         inputTimer?.invalidate()
-        audioEngine.stop()
+        audioEngine.endSession()
         saveSession()
     }
 
     func cleanup() {
         inputTimer?.invalidate()
         inputTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Input Handling
@@ -209,6 +212,9 @@ final class MorseQSOViewModel: ObservableObject {
     func inputDit() {
         guard turnState == .userKeying else { return }
         currentPattern += "."
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDit()
         resetInputTimer()
     }
@@ -216,6 +222,9 @@ final class MorseQSOViewModel: ObservableObject {
     func inputDah() {
         guard turnState == .userKeying else { return }
         currentPattern += "-"
+
+        // Switch to transmit mode for sidetone
+        audioEngine.setRadioMode(.transmitting)
         playDah()
         resetInputTimer()
     }
@@ -410,17 +419,17 @@ final class MorseQSOViewModel: ObservableObject {
 
     private func playDit() {
         Task {
-            if let engine = audioEngine as? MorseAudioEngine {
-                await engine.playDit()
-            }
+            await audioEngine.playDit()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
     }
 
     private func playDah() {
         Task {
-            if let engine = audioEngine as? MorseAudioEngine {
-                await engine.playDah()
-            }
+            await audioEngine.playDah()
+            // Return to receiving mode after sidetone
+            audioEngine.setRadioMode(.receiving)
         }
     }
 }

@@ -90,6 +90,7 @@ private struct CharacterCell: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(AccessibilityID.Practice.characterCell(character))
     }
 
     // MARK: Private

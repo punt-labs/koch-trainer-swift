@@ -167,6 +167,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         audioEngine.stop()
+        audioEngine.setRadioMode(.off)
         isWaitingForInput = false
         announcer.announcePaused()
 
@@ -183,6 +184,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         isPlaying = true
         announcer.announceResumed()
+        audioEngine.setRadioMode(.receiving)
         startSessionTimer()
         playNextCharacter()
     }
@@ -236,7 +238,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Input Handling

@@ -12,6 +12,9 @@ final class QSOEngineTests: XCTestCase {
         var playedGroups: [String] = []
         var frequency: Double = 600
         var effectiveSpeed: Int = 12
+        private(set) var storedRadioMode: RadioMode = .off
+
+        var radioMode: RadioMode { storedRadioMode }
 
         func playCharacter(_ char: Character) async {}
         func playGroup(_ group: String) async {
@@ -20,7 +23,6 @@ final class QSOEngineTests: XCTestCase {
 
         func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
             playedGroups.append(group)
-            // Call callback for each character to simulate playback
             for (index, char) in group.enumerated() {
                 onCharacterPlayed?(char, index)
             }
@@ -39,6 +41,10 @@ final class QSOEngineTests: XCTestCase {
         }
 
         func configureBandConditions(from settings: AppSettings) {}
+
+        func startSession() { storedRadioMode = .receiving }
+        func endSession() { storedRadioMode = .off }
+        func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
     }
 
     // MARK: - Tests

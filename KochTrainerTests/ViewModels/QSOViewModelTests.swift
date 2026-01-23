@@ -103,7 +103,13 @@ final class QSOViewModelTests: XCTestCase {
     }
 
     func testSubmitInputClearsUserInput() async {
-        let viewModel = QSOViewModel(style: .contest, callsign: "W5ABC")
+        let silentEngine = SilentAudioEngine()
+        let viewModel = QSOViewModel(
+            style: .contest,
+            callsign: "W5ABC",
+            audioEngine: silentEngine,
+            aiResponseDelay: 0
+        )
         viewModel.startSession()
         viewModel.userInput = "CQ CQ DE W5ABC K"
 
@@ -113,7 +119,13 @@ final class QSOViewModelTests: XCTestCase {
     }
 
     func testSubmitInputClearsHint() async {
-        let viewModel = QSOViewModel(style: .contest, callsign: "W5ABC")
+        let silentEngine = SilentAudioEngine()
+        let viewModel = QSOViewModel(
+            style: .contest,
+            callsign: "W5ABC",
+            audioEngine: silentEngine,
+            aiResponseDelay: 0
+        )
         viewModel.startSession()
         viewModel.userInput = "CQ CQ DE W5ABC K"
         viewModel.showHint = true

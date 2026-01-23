@@ -185,6 +185,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         responseTimer?.invalidate()
         audioEngine.stop()
+        audioEngine.setRadioMode(.off)
         isWaitingForResponse = false
         announcer.announcePaused()
 
@@ -259,6 +260,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         isPlaying = true
         announcer.announceResumed()
+        audioEngine.setRadioMode(.receiving)
         startSessionTimer()
         playNextGroup()
     }
@@ -314,7 +316,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         responseTimer?.invalidate()
         responseTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Input Handling

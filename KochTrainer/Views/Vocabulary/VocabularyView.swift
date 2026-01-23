@@ -62,6 +62,7 @@ struct VocabularyView: View {
         .padding(Theme.Spacing.lg)
         .navigationTitle("Vocabulary")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier(AccessibilityID.Vocab.view)
     }
 
     // MARK: Private

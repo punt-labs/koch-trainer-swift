@@ -12,6 +12,9 @@ final class QSOEnginePhaseTests: XCTestCase {
         var effectiveSpeed: Int = 12
         var stopCalled = false
         var bandConditionsConfigured = false
+        private(set) var storedRadioMode: RadioMode = .off
+
+        var radioMode: RadioMode { storedRadioMode }
 
         func playCharacter(_: Character) async {}
         func playGroup(_ group: String) async {
@@ -40,13 +43,17 @@ final class QSOEnginePhaseTests: XCTestCase {
         func configureBandConditions(from _: AppSettings) {
             bandConditionsConfigured = true
         }
+
+        func startSession() { storedRadioMode = .receiving }
+        func endSession() { storedRadioMode = .off }
+        func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
     }
 
     // MARK: - processUserInput Phase Transition Tests
 
     func testProcessUserInputFromCallingCQToAwaitingResponse() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
         XCTAssertEqual(engine.state.phase, .callingCQ)
 
@@ -60,7 +67,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testProcessUserInputFromReceivedCallToAwaitingExchange() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         // Start with AI calling CQ (puts us in receivedCall)
         _ = engine.startWithAICQ()
@@ -75,7 +82,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testProcessUserInputEmptyStringReturnsNil() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
 
         let result = await engine.processUserInput("", playAudio: false)
@@ -86,7 +93,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testProcessUserInputWhitespaceOnlyReturnsNil() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
 
         let result = await engine.processUserInput("   ", playAudio: false)
@@ -97,7 +104,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testProcessUserInputUppercasesInput() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
 
         _ = await engine.processUserInput("cq cq de w5abc", playAudio: false)
@@ -107,7 +114,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testProcessUserInputCompletesContestQSO() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         // Start with AI calling CQ - puts us in receivedCall
         _ = engine.startWithAICQ()
@@ -126,7 +133,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testConfigureAudioSetsFrequency() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.configureAudio(frequency: 700, effectiveSpeed: 15, settings: AppSettings())
 
@@ -135,7 +142,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testConfigureAudioSetsEffectiveSpeed() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.configureAudio(frequency: 600, effectiveSpeed: 15, settings: AppSettings())
 
@@ -144,7 +151,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testConfigureAudioConfiguresBandConditions() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.configureAudio(frequency: 600, effectiveSpeed: 12, settings: AppSettings())
 
@@ -155,7 +162,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testAddTranscriptMessageFromUser() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.addTranscriptMessage(from: .user, text: "TEST MESSAGE")
 
@@ -166,7 +173,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testAddTranscriptMessageFromStation() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.addTranscriptMessage(from: .station, text: "AI RESPONSE")
 
@@ -179,7 +186,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testStopAudioCallsStop() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         engine.stopAudio()
 
@@ -191,7 +198,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testValidationResultValidForCorrectInput() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
 
         _ = await engine.processUserInput("CQ CQ DE W5ABC K", playAudio: false)
@@ -201,7 +208,7 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testValidationResultInvalidForIncorrectInput() async {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
         engine.startQSO()
 
         // In callingCQ phase, input must contain "CQ" and callsign
@@ -214,14 +221,14 @@ final class QSOEnginePhaseTests: XCTestCase {
 
     func testRagChewStyleInitialization() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .ragChew, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .ragChew, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         XCTAssertEqual(engine.state.style, .ragChew)
     }
 
     func testContestStyleInitialization() {
         let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio)
+        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
 
         XCTAssertEqual(engine.state.style, .contest)
     }

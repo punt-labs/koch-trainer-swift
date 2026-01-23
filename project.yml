@@ -50,18 +50,34 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.tests
         GENERATE_INFOPLIST_FILE: YES
 
+  KochTrainerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: KochTrainerUITests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: KochTrainer
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   KochTrainer:
     build:
       targets:
         KochTrainer: all
         KochTrainerTests: [test]
+        KochTrainerUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
         - KochTrainerTests
+        - KochTrainerUITests
     profile:
       config: Release
     analyze:

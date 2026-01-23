@@ -9,8 +9,18 @@ final class QSOViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(style: QSOStyle, callsign: String) {
-        engine = QSOEngine(style: style, myCallsign: callsign)
+    init(
+        style: QSOStyle,
+        callsign: String,
+        audioEngine: AudioEngineProtocol? = nil,
+        aiResponseDelay: TimeInterval = 1.5
+    ) {
+        engine = QSOEngine(
+            style: style,
+            myCallsign: callsign,
+            audioEngine: audioEngine,
+            aiResponseDelay: aiResponseDelay
+        )
     }
 
     // MARK: Internal

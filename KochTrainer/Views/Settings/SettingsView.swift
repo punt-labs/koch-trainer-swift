@@ -213,6 +213,7 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .accessibilityIdentifier(AccessibilityID.Settings.view)
         .alert("Reset Progress?", isPresented: $showResetConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive) {
@@ -277,11 +278,14 @@ struct SettingsView: View {
         previewAudioEngine.setFrequency(settingsStore.settings.toneFrequency)
         previewAudioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
         previewAudioEngine.configureBandConditions(from: settingsStore.settings)
-        previewAudioEngine.reset()
+
+        // Use continuous audio session for realistic preview
+        previewAudioEngine.startSession()
 
         Task {
-            // Play "CQ" to demonstrate band conditions
+            // Play "CQ CQ" to demonstrate band conditions with continuous noise
             await previewAudioEngine.playGroup("CQ CQ")
+            previewAudioEngine.endSession()
             isPreviewingBandConditions = false
         }
     }

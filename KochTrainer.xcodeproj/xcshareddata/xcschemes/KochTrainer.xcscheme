@@ -35,6 +35,20 @@
                ReferencedContainer = "container:KochTrainer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4199376494D0896EA3C84028"
+               BuildableName = "KochTrainerUITests.xctest"
+               BlueprintName = "KochTrainerUITests"
+               ReferencedContainer = "container:KochTrainer.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -61,6 +75,17 @@
                BlueprintIdentifier = "C3754BE0CB04635A1C22733D"
                BuildableName = "KochTrainerTests.xctest"
                BlueprintName = "KochTrainerTests"
+               ReferencedContainer = "container:KochTrainer.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4199376494D0896EA3C84028"
+               BuildableName = "KochTrainerUITests.xctest"
+               BlueprintName = "KochTrainerUITests"
                ReferencedContainer = "container:KochTrainer.xcodeproj">
             </BuildableReference>
          </TestableReference>
