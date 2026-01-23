@@ -19,7 +19,7 @@ final class QSOEngine: ObservableObject {
     ) {
         state = QSOState(style: style, myCallsign: myCallsign)
         station = VirtualStation.randomOrPreset()
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.aiResponseDelay = aiResponseDelay
     }
 
