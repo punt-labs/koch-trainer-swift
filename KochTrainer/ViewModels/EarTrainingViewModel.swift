@@ -11,8 +11,9 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil) {
+    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -165,10 +166,10 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
-
-        // Turn off radio (continuous audio outputs silence, engine keeps running)
+        audioEngine.stop()
         audioEngine.setRadioMode(.off)
         isWaitingForInput = false
+        announcer.announcePaused()
 
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
@@ -182,10 +183,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
-
-        // Resume receiving mode
+        announcer.announceResumed()
         audioEngine.setRadioMode(.receiving)
-
         startSessionTimer()
         playNextCharacter()
     }
@@ -194,7 +193,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.endSession()
+        audioEngine.stop()
         isWaitingForInput = false
 
         progressStore?.clearPausedSession(for: .earTraining)
@@ -222,6 +221,13 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         let newCharacters: [Character]? = didAdvance
             ? MorseCode.charactersAtPatternLength(store.progress.earTrainingLevel)
             : nil
+
+        // Announce completion for VoiceOver
+        if didAdvance, let chars = newCharacters {
+            announcer.announceLevelUp(newCharacters: chars)
+        } else {
+            announcer.announceSessionComplete(accuracy: accuracyPercentage)
+        }
 
         phase = .completed(didAdvance: didAdvance, newCharacters: newCharacters)
     }
@@ -300,6 +306,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: Private
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?
@@ -333,10 +340,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         sessionStartTime = Date()
         isPlaying = true
-
-        // Start continuous audio session (radio starts in receiving mode)
-        audioEngine.startSession()
-
         startSessionTimer()
         playNextCharacter()
     }
@@ -437,6 +440,15 @@ extension EarTrainingViewModel {
             expectedPattern: expectedPattern,
             userPattern: userPattern
         )
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            announcer.announceCorrect()
+        } else if userPattern == "(no response)" {
+            announcer.announceTimeout(expected: expectedChar)
+        } else {
+            announcer.announceIncorrectPattern(sent: userPattern, expected: expectedChar)
+        }
 
         Task {
             if !wasCorrect {

@@ -15,11 +15,13 @@ final class VocabularyTrainingViewModel: ObservableObject {
     init(
         vocabularySet: VocabularySet,
         sessionType: SessionType,
-        audioEngine: AudioEngineProtocol? = nil
+        audioEngine: AudioEngineProtocol? = nil,
+        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
         self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.announcer = announcer
     }
 
     // MARK: Internal
@@ -120,10 +122,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
         sessionStartTime = Date()
         isPlaying = true
         phase = .training
-
-        // Start continuous audio session (radio starts in receiving mode)
-        audioEngine.startSession()
-
         showNextWord()
     }
 
@@ -133,10 +131,10 @@ final class VocabularyTrainingViewModel: ObservableObject {
         phase = .paused
         responseTimer?.invalidate()
         inputTimer?.invalidate()
-
-        // Turn off radio (continuous audio outputs silence, engine keeps running)
+        audioEngine.stop()
         audioEngine.setRadioMode(.off)
         isWaitingForResponse = false
+        announcer.announcePaused()
 
         // Save paused session snapshot only if there's actual progress
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -148,10 +146,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         guard phase == .paused else { return }
         phase = .training
         isPlaying = true
-
-        // Resume receiving mode
+        announcer.announceResumed()
         audioEngine.setRadioMode(.receiving)
-
         showNextWord()
     }
 
@@ -198,7 +194,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         isPlaying = false
         responseTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.endSession()
+        audioEngine.stop()
         isWaitingForResponse = false
 
         // Clear any paused session since we're ending
@@ -216,6 +212,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
             }
             progressStore?.save(progress)
         }
+
+        // Announce completion for VoiceOver
+        announcer.announceSessionComplete(accuracy: accuracyPercentage)
 
         phase = .completed
     }
@@ -275,9 +274,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
     func inputDit() {
         guard isPlaying, isWaitingForResponse else { return }
         currentPattern += "."
-
-        // Switch to transmit mode for sidetone
-        audioEngine.setRadioMode(.transmitting)
         playDit()
         resetInputTimer()
     }
@@ -285,9 +281,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
     func inputDah() {
         guard isPlaying, isWaitingForResponse else { return }
         currentPattern += "-"
-
-        // Switch to transmit mode for sidetone
-        audioEngine.setRadioMode(.transmitting)
         playDah()
         resetInputTimer()
     }
@@ -297,6 +290,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let audioEngine: AudioEngineProtocol
+    private let announcer: AccessibilityAnnouncer
     private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
@@ -311,17 +305,15 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     private func playDit() {
         Task {
-            await audioEngine.playDit()
-            // Return to receiving mode after sidetone
-            audioEngine.setRadioMode(.receiving)
+            guard let engine = audioEngine as? MorseAudioEngine else { return }
+            await engine.playDit()
         }
     }
 
     private func playDah() {
         Task {
-            await audioEngine.playDah()
-            // Return to receiving mode after sidetone
-            audioEngine.setRadioMode(.receiving)
+            guard let engine = audioEngine as? MorseAudioEngine else { return }
+            await engine.playDah()
         }
     }
 
@@ -447,6 +439,13 @@ extension VocabularyTrainingViewModel {
 
     func showFeedbackAndContinue(wasCorrect: Bool, expected: String, userAnswer: String) {
         lastFeedback = Feedback(wasCorrect: wasCorrect, expectedWord: expected, userAnswer: userAnswer)
+
+        // Announce feedback for VoiceOver
+        if wasCorrect {
+            announcer.announceCorrectWord()
+        } else {
+            announcer.announceIncorrectWord(expected: expected, userEntered: userAnswer)
+        }
 
         Task {
             if !wasCorrect {
