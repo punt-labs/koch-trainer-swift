@@ -10,11 +10,11 @@ final class MorseQSOViewModel: ObservableObject {
 
     // MARK: Lifecycle
 
-    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: AudioEngineProtocol? = nil) {
+    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: (any AudioEngineProtocol)? = nil) {
         self.style = style
         myCallsign = callsign
         self.aiStarts = aiStarts
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         engine = QSOEngine(style: style, myCallsign: callsign, audioEngine: self.audioEngine)
     }
 

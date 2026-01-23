@@ -15,12 +15,12 @@ final class VocabularyTrainingViewModel: ObservableObject {
     init(
         vocabularySet: VocabularySet,
         sessionType: SessionType,
-        audioEngine: AudioEngineProtocol? = nil,
+        audioEngine: (any AudioEngineProtocol)? = nil,
         announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
     }
 
