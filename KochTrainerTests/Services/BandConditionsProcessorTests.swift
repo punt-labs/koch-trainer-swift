@@ -146,8 +146,9 @@ final class BandConditionsProcessorTests: XCTestCase {
         var outputs1: [Float] = []
         var outputs2: [Float] = []
 
-        // Process 2 seconds of audio
-        for i in 0 ..< 88200 {
+        // Process 2 seconds of audio at 44.1 kHz (2 * 44,100 = 88,200 samples)
+        let totalSamples = 88200
+        for i in 0 ..< totalSamples {
             outputs1.append(processor1.processSample(inputSample, at: i))
             outputs2.append(processor2.processSample(inputSample, at: i))
         }
