@@ -8,12 +8,19 @@
 \documentclass[a4paper,10pt,fleqn]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{fuzz}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
 \begin{document}
 
 \title{Koch Trainer: A Z Specification}
 \author{Formal Model of Morse Code Learning Progress}
 \date{January 2026}
+\hypersetup{
+  pdftitle={Koch Trainer: A Z Specification},
+  pdfauthor={Formal Model of Morse Code Learning Progress},
+  pdfsubject={Z Specification for Morse Code Learning},
+  pdfcreator={fuzz/probcli}
+}
 \maketitle
 
 \tableofcontents
@@ -415,25 +422,27 @@ over-practice. Low accuracy signals struggle, so we reset to daily practice.
 The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
-\Delta State \\
-accuracy? : \nat \\
-daysSinceStart? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
-    \THEN habitMaxInterval \ELSE maxInterval @
-(receiveInterval * 2 \leq effectiveMax \land
-    receiveInterval' = receiveInterval * 2) \lor
-(receiveInterval * 2 > effectiveMax \land
-    receiveInterval' = effectiveMax) \\
-sendInterval' = sendInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat \\
+  daysSinceStart? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  \LET effectiveMax == \\
+  \t1 \IF daysSinceStart? < habitFormationDays \\
+  \t1 \THEN habitMaxInterval \\
+  \t1 \ELSE maxInterval @
+  (receiveInterval * 2 \leq effectiveMax \\
+  \t1 \land receiveInterval' = receiveInterval * 2) \\
+  \lor (receiveInterval * 2 > effectiveMax \\
+  \t1 \land receiveInterval' = effectiveMax) \\
+  sendInterval' = sendInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalMedium}
@@ -474,25 +483,27 @@ allows the habit formation cap to be applied during the first 14 days.
 Symmetric operations exist for send training:
 
 \begin{schema}{UpdateSendIntervalHigh}
-\Delta State \\
-accuracy? : \nat \\
-daysSinceStart? : \nat
-\where
-accuracy? \geq advanceThreshold \\
-accuracy? \leq 100 \\
-\LET effectiveMax == \IF daysSinceStart? < habitFormationDays
-    \THEN habitMaxInterval \ELSE maxInterval @
-(sendInterval * 2 \leq effectiveMax \land
-    sendInterval' = sendInterval * 2) \lor
-(sendInterval * 2 > effectiveMax \land
-    sendInterval' = effectiveMax) \\
-receiveInterval' = receiveInterval \\
-currentStreak' = currentStreak \\
-longestStreak' = longestStreak \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State \\
+  accuracy? : \nat \\
+  daysSinceStart? : \nat
+  \where
+  accuracy? \geq advanceThreshold \\
+  accuracy? \leq 100 \\
+  \LET effectiveMax == \\
+  \t1 \IF daysSinceStart? < habitFormationDays \\
+  \t1 \THEN habitMaxInterval \\
+  \t1 \ELSE maxInterval @
+  (sendInterval * 2 \leq effectiveMax \\
+  \t1 \land sendInterval' = sendInterval * 2) \\
+  \lor (sendInterval * 2 > effectiveMax \\
+  \t1 \land sendInterval' = effectiveMax) \\
+  receiveInterval' = receiveInterval \\
+  currentStreak' = currentStreak \\
+  longestStreak' = longestStreak \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalMedium}
@@ -567,35 +578,35 @@ Streaks measure consecutive calendar days with at least one completed session.
 They provide motivation through gamification without affecting learning outcomes.
 
 \begin{schema}{IncrementStreak}
-\Delta State
-\where
-currentStreak' = currentStreak + 1 \\
-(currentStreak + 1 > longestStreak \land
-    longestStreak' = currentStreak + 1) \lor
-(currentStreak + 1 \leq longestStreak \land
-    longestStreak' = longestStreak) \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State
+  \where
+  currentStreak' = currentStreak + 1 \\
+  (currentStreak + 1 > longestStreak \\
+  \t1 \land longestStreak' = currentStreak + 1) \\
+  \lor (currentStreak + 1 \leq longestStreak \\
+  \t1 \land longestStreak' = longestStreak) \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 The streak increments when the student practices on the calendar day following
 their last practice. The longest streak updates if the current streak exceeds it.
 
 \begin{schema}{ResetStreak}
-\Delta State
-\where
-currentStreak' = 0 \\
-longestStreak' = longestStreak \\
-receiveInterval' = receiveInterval \\
-sendInterval' = sendInterval \\
-receiveLevel' = receiveLevel \\
-sendLevel' = sendLevel \\
-earLevel' = earLevel \\
-sessionCount' = sessionCount
+  \Delta State
+  \where
+  currentStreak' = 0 \\
+  longestStreak' = longestStreak \\
+  receiveInterval' = receiveInterval \\
+  sendInterval' = sendInterval \\
+  receiveLevel' = receiveLevel \\
+  sendLevel' = sendLevel \\
+  earLevel' = earLevel \\
+  sessionCount' = sessionCount
 \end{schema}
 
 The streak resets to zero when a calendar day passes without any practice.
@@ -606,42 +617,48 @@ Note that the longest streak is preserved---it represents the all-time record.
 During training, each character attempt updates the per-character statistics.
 
 \begin{schema}{RecordReceiveAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-receiveAttempts' = receiveAttempts + 1 \\
-(correct? = ztrue \land receiveCorrect' = receiveCorrect + 1) \lor
-(correct? = zfalse \land receiveCorrect' = receiveCorrect) \\
-sendAttempts' = sendAttempts \\
-sendCorrect' = sendCorrect \\
-earAttempts' = earAttempts \\
-earCorrect' = earCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  receiveAttempts' = receiveAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land receiveCorrect' = receiveCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land receiveCorrect' = receiveCorrect) \\
+  sendAttempts' = sendAttempts \\
+  sendCorrect' = sendCorrect \\
+  earAttempts' = earAttempts \\
+  earCorrect' = earCorrect
 \end{schema}
 
 \begin{schema}{RecordSendAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-sendAttempts' = sendAttempts + 1 \\
-(correct? = ztrue \land sendCorrect' = sendCorrect + 1) \lor
-(correct? = zfalse \land sendCorrect' = sendCorrect) \\
-receiveAttempts' = receiveAttempts \\
-receiveCorrect' = receiveCorrect \\
-earAttempts' = earAttempts \\
-earCorrect' = earCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  sendAttempts' = sendAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land sendCorrect' = sendCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land sendCorrect' = sendCorrect) \\
+  receiveAttempts' = receiveAttempts \\
+  receiveCorrect' = receiveCorrect \\
+  earAttempts' = earAttempts \\
+  earCorrect' = earCorrect
 \end{schema}
 
 \begin{schema}{RecordEarAttempt}
-\Delta CharacterStat \\
-correct? : ZBOOL
-\where
-earAttempts' = earAttempts + 1 \\
-(correct? = ztrue \land earCorrect' = earCorrect + 1) \lor
-(correct? = zfalse \land earCorrect' = earCorrect) \\
-receiveAttempts' = receiveAttempts \\
-receiveCorrect' = receiveCorrect \\
-sendAttempts' = sendAttempts \\
-sendCorrect' = sendCorrect
+  \Delta CharacterStat \\
+  correct? : ZBOOL
+  \where
+  earAttempts' = earAttempts + 1 \\
+  (correct? = ztrue \\
+  \t1 \land earCorrect' = earCorrect + 1) \\
+  \lor (correct? = zfalse \\
+  \t1 \land earCorrect' = earCorrect) \\
+  receiveAttempts' = receiveAttempts \\
+  receiveCorrect' = receiveCorrect \\
+  sendAttempts' = sendAttempts \\
+  sendCorrect' = sendCorrect
 \end{schema}
 
 %==============================================================================
@@ -957,18 +974,24 @@ The session ends automatically when the student achieves proficiency:
 $\geq 90\%$ accuracy over at least $\max(15, 5 \times characterCount)$ attempts.
 
 \begin{schema}{CheckProficiencyMet}
-\Xi SessionState \\
-proficiencyMet! : ZBOOL
-\where
-phase = training \\
-\LET minAttempts == \IF baseMinimumAttempts > attemptsPerCharacter * characterCount
-    \THEN baseMinimumAttempts
-    \ELSE attemptsPerCharacter * characterCount @
-\LET accuracyPercent == (sessionCorrect * 100) \div sessionAttempts @
-(sessionAttempts \geq minAttempts \land accuracyPercent \geq proficiencyThreshold
-    \land proficiencyMet! = ztrue) \lor
-(sessionAttempts < minAttempts \land proficiencyMet! = zfalse) \lor
-(accuracyPercent < proficiencyThreshold \land proficiencyMet! = zfalse)
+  \Xi SessionState \\
+  proficiencyMet! : ZBOOL
+  \where
+  phase = training \\
+  \LET minAttempts == \\
+  \t1 \IF baseMinimumAttempts \\
+  \t2 > attemptsPerCharacter * characterCount \\
+  \t1 \THEN baseMinimumAttempts \\
+  \t1 \ELSE attemptsPerCharacter * characterCount @
+  \LET accuracyPercent == \\
+  \t1 (sessionCorrect * 100) \div sessionAttempts @
+  (sessionAttempts \geq minAttempts \\
+  \t1 \land accuracyPercent \geq proficiencyThreshold \\
+  \t1 \land proficiencyMet! = ztrue) \\
+  \lor (sessionAttempts < minAttempts \\
+  \t1 \land proficiencyMet! = zfalse) \\
+  \lor (accuracyPercent < proficiencyThreshold \\
+  \t1 \land proficiencyMet! = zfalse)
 \end{schema}
 
 This is a query operation ($\Xi$ indicates no state change). The implementation
