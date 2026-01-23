@@ -170,9 +170,8 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
         }
     }
 

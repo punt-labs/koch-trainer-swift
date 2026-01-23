@@ -41,9 +41,8 @@ extension ReceiveTrainingViewModel {
         lastFeedback = nil
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            audioEngine.reset()
+            await audioEngine.playCharacter(char)
             if isPlaying { startResponseTimer() }
         }
     }
@@ -87,7 +86,7 @@ extension ReceiveTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playCharacter(expected) }
+                if isPlaying { await audioEngine.playCharacter(expected) }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

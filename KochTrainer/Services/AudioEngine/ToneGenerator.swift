@@ -362,10 +362,11 @@ final class ToneGenerator: @unchecked Sendable {
         sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
             guard let self else { return noErr }
 
-            // Read thread-safe state
+            // Read thread-safe state once at callback start (avoid lock contention in loop)
             let mode = radioMode
             let toneActive = isToneActive
             let frequency = currentFrequency
+            var phase = currentPhase
             let phaseIncrement = twoPi * frequency / sampleRate
 
             let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
@@ -381,10 +382,10 @@ final class ToneGenerator: @unchecked Sendable {
                     // Radio receiving: noise + optional incoming signal + band conditions
                     if toneActive {
                         // Generate tone
-                        value = Float(sin(currentPhase))
-                        currentPhase += phaseIncrement
-                        if currentPhase >= twoPi {
-                            currentPhase -= twoPi
+                        value = Float(sin(phase))
+                        phase += phaseIncrement
+                        if phase >= twoPi {
+                            phase -= twoPi
                         }
                         value *= 0.5
                     } else {
@@ -397,10 +398,10 @@ final class ToneGenerator: @unchecked Sendable {
                 case .transmitting:
                     // Radio transmitting: sidetone only (no band conditions)
                     if toneActive {
-                        value = Float(sin(currentPhase))
-                        currentPhase += phaseIncrement
-                        if currentPhase >= twoPi {
-                            currentPhase -= twoPi
+                        value = Float(sin(phase))
+                        phase += phaseIncrement
+                        if phase >= twoPi {
+                            phase -= twoPi
                         }
                         value *= 0.5
                     } else {
@@ -417,6 +418,9 @@ final class ToneGenerator: @unchecked Sendable {
                     buf?[frame] = value
                 }
             }
+
+            // Write phase back once at callback end
+            currentPhase = phase
             return noErr
         }
 

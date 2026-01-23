@@ -7,14 +7,14 @@ import Foundation
 ///
 /// From Z specification (docs/koch_trainer.tex):
 /// ```
-/// RadioMode ::= radioOff | radioReceiving | radioTransmitting
+/// RadioMode ::= off | receiving | transmitting
 /// ```
 ///
 /// Constraints:
-/// - Non-training phases (introduction, paused, completed) → radioOff
-/// - Receive training → always radioReceiving
-/// - Send training → radioReceiving (waiting) or radioTransmitting (keying)
-/// - radioTransmitting requires direction = send
+/// - Non-training phases (introduction, paused, completed) → off
+/// - Receive training → always receiving
+/// - Send training → receiving (waiting) or transmitting (keying)
+/// - transmitting requires direction = send
 enum RadioMode: Equatable, Sendable {
     /// Radio not active (session not started, paused, or completed)
     case off
