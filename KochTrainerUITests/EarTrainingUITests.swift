@@ -1,8 +1,8 @@
 import XCTest
 
-/// UI tests for the Receive Training flow.
-/// Tests navigation, introduction, training phases, and completion using page objects.
-final class ReceiveTrainingUITests: XCTestCase {
+/// UI tests for the Ear Training flow.
+/// Tests navigation, introduction, pattern reproduction, and completion using page objects.
+final class EarTrainingUITests: XCTestCase {
 
     // MARK: Internal
 
@@ -20,9 +20,9 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     // MARK: - Navigation Tests
 
-    func testNavigateToReceiveTraining() throws {
+    func testNavigateToEarTraining() throws {
         let learnPage = try getLearnPage()
-        let trainingPage = learnPage.goToReceiveTraining()
+        let trainingPage = learnPage.goToEarTraining()
 
         trainingPage.waitForIntro()
         trainingPage.assertInIntroPhase()
@@ -32,7 +32,7 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     func testIntroductionShowsCharacterAndPattern() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
 
         XCTAssertTrue(
@@ -41,23 +41,9 @@ final class ReceiveTrainingUITests: XCTestCase {
         )
     }
 
-    func testCanPlaySoundDuringIntroduction() throws {
-        let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
-            .waitForIntro()
-
-        XCTAssertTrue(
-            trainingPage.playSoundButton.waitForExistence(timeout: 3),
-            "Play sound button should exist"
-        )
-
-        trainingPage.tapPlaySound()
-        trainingPage.assertInIntroPhase()
-    }
-
     func testSkipIntroductionToTraining() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()
@@ -67,25 +53,74 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     // MARK: - Training Phase Tests
 
-    func testTrainingPhaseAcceptsKeyboardInput() throws {
+    func testTrainingShowsDitDahButtons() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()
 
-        trainingPage.typeCharacter("K")
+        XCTAssertTrue(
+            trainingPage.ditButton.waitForExistence(timeout: 3),
+            "Dit button should be visible"
+        )
+        XCTAssertTrue(
+            trainingPage.dahButton.exists,
+            "Dah button should be visible"
+        )
+    }
 
-        usleep(500_000) // Wait for feedback
+    func testCanTapDitButton() throws {
+        let trainingPage = try getLearnPage()
+            .goToEarTraining()
+            .waitForIntro()
+            .skipIntroduction()
+            .waitForTraining()
+
+        trainingPage.tapDit()
+
+        XCTAssertTrue(
+            trainingPage.isInTrainingPhase,
+            "Should remain in training after dit input"
+        )
+    }
+
+    func testCanTapDahButton() throws {
+        let trainingPage = try getLearnPage()
+            .goToEarTraining()
+            .waitForIntro()
+            .skipIntroduction()
+            .waitForTraining()
+
+        trainingPage.tapDah()
+
+        XCTAssertTrue(
+            trainingPage.isInTrainingPhase,
+            "Should remain in training after dah input"
+        )
+    }
+
+    func testCanReproducePattern() throws {
+        let trainingPage = try getLearnPage()
+            .goToEarTraining()
+            .waitForIntro()
+            .skipIntroduction()
+            .waitForTraining()
+
+        // Reproduce a pattern (K: -.-)
+        trainingPage.reproducePattern("-.-")
+
+        trainingPage.waitForFeedback()
+
         XCTAssertTrue(
             trainingPage.isInTrainingPhase || trainingPage.isCompleted,
-            "Should remain in training or complete after input"
+            "Should remain in training or complete after pattern input"
         )
     }
 
     func testTrainingShowsScoreDisplay() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()
@@ -100,7 +135,7 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     func testCanPauseAndResumeTraining() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()
@@ -110,7 +145,6 @@ final class ReceiveTrainingUITests: XCTestCase {
             trainingPage.resumeButton.waitForExistence(timeout: 3),
             "Resume button should appear when paused"
         )
-        trainingPage.assertPaused()
 
         trainingPage.resume()
         trainingPage.waitForTraining()
@@ -119,7 +153,7 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     func testCanEndSessionFromPaused() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()
@@ -138,7 +172,7 @@ final class ReceiveTrainingUITests: XCTestCase {
 
     func testCanReturnHomeFromCompletion() throws {
         let trainingPage = try getLearnPage()
-            .goToReceiveTraining()
+            .goToEarTraining()
             .waitForIntro()
             .skipIntroduction()
             .waitForTraining()

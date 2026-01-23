@@ -224,6 +224,7 @@ struct EarTrainingPhaseView: View {
             .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
 }
@@ -294,6 +295,7 @@ struct EarPausedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.pausedView)
     }
 }
@@ -395,6 +397,7 @@ struct EarCompletedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
 }

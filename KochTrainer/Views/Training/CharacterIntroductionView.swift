@@ -54,6 +54,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                     .font(Typography.headline)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
                 .accessibilityIdentifier(AccessibilityID.Training.playSoundButton)
 
                 Button {
@@ -63,6 +64,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                         .font(Typography.headline)
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityElement(children: .combine)
                 .accessibilityIdentifier(
                     viewModel.isLastIntroCharacter
                         ? AccessibilityID.Training.startTrainingButton
@@ -74,6 +76,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.introView)
     }
 }
