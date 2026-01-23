@@ -129,6 +129,7 @@ struct EarTrainingPhaseView: View {
                 Text(viewModel.proficiencyProgress)
                     .font(Typography.body)
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
             }
 
             Spacer()
@@ -153,12 +154,14 @@ struct EarTrainingPhaseView: View {
                     .font(.system(size: 48, weight: .bold, design: .monospaced))
                     .foregroundColor(Theme.Colors.primary)
                     .frame(height: 60)
+                    .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
 
                 // Progress bar (always present, opacity controlled)
                 TimeoutProgressBar(progress: viewModel.inputProgress)
                     .frame(height: 8)
                     .padding(.horizontal, Theme.Spacing.xl)
                     .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
+                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
             }
             .frame(height: 200)
 
@@ -183,6 +186,7 @@ struct EarTrainingPhaseView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!viewModel.isWaitingForInput)
+                .accessibilityIdentifier(AccessibilityID.Send.ditButton)
 
                 // Dah button
                 Button {
@@ -196,6 +200,7 @@ struct EarTrainingPhaseView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!viewModel.isWaitingForInput)
+                .accessibilityIdentifier(AccessibilityID.Send.dahButton)
             }
             .frame(height: 120)
             .cornerRadius(12)
@@ -204,8 +209,10 @@ struct EarTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                    .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
             }
             .font(Typography.body)
 
@@ -214,8 +221,10 @@ struct EarTrainingPhaseView: View {
                 viewModel.pause()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
 }
 
@@ -255,12 +264,14 @@ struct EarPausedView: View {
 
             Text("Paused")
                 .font(Typography.largeTitle)
+                .accessibilityIdentifier(AccessibilityID.Training.pausedTitle)
 
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Level \(viewModel.currentLevel)/\(MorseCode.maxEarTrainingLevel)")
                     .font(Typography.headline)
                 Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
                     .font(Typography.body)
+                    .accessibilityIdentifier(AccessibilityID.Training.pausedScore)
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
                     .font(Typography.body)
                     .foregroundColor(.secondary)
@@ -272,15 +283,18 @@ struct EarPausedView: View {
                 viewModel.resume()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.resumeButton)
 
             Button("End Session") {
                 viewModel.endSession()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Training.endSessionButton)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.pausedView)
     }
 }
 
@@ -303,6 +317,7 @@ struct EarCompletedView: View {
                     Text("Level Up!")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(Theme.Colors.success)
+                        .accessibilityIdentifier(AccessibilityID.Training.levelUpTitle)
 
                     if let chars = newCharacters, !chars.isEmpty {
                         Text("New patterns unlocked:")
@@ -324,12 +339,14 @@ struct EarCompletedView: View {
                                 }
                             }
                         }
+                        .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
                     }
                 }
             } else {
                 // Session complete without advancement
                 Text("Session Complete")
                     .font(Typography.largeTitle)
+                    .accessibilityIdentifier(AccessibilityID.Training.sessionCompleteTitle)
             }
 
             Spacer()
@@ -338,10 +355,12 @@ struct EarCompletedView: View {
             VStack(spacing: Theme.Spacing.sm) {
                 Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.Training.finalScore)
 
                 Text("\(viewModel.accuracyPercentage)% accuracy")
                     .font(Typography.body)
                     .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
+                    .accessibilityIdentifier(AccessibilityID.Training.finalAccuracy)
 
                 if !didAdvance, viewModel.accuracyPercentage < 90 {
                     Text("Need 90% to advance")
@@ -358,21 +377,25 @@ struct EarCompletedView: View {
                     dismiss()
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.continueButton)
             } else {
                 Button("Try Again") {
                     dismiss()
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.tryAgainButton)
 
                 Button("Done") {
                     dismiss()
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.doneButton)
             }
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
 }
 
