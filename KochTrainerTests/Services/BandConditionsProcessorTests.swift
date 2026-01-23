@@ -127,6 +127,44 @@ final class BandConditionsProcessorTests: XCTestCase {
         XCTAssertGreaterThan(maxOutput - minOutput, 0.1)
     }
 
+    func testFadingIsIrregularNotPeriodic() {
+        // Verifies the new filtered random noise approach produces non-deterministic fading.
+        // Two runs with identical settings should produce different output patterns.
+        let processor1 = BandConditionsProcessor()
+        let processor2 = BandConditionsProcessor()
+
+        for processor in [processor1, processor2] {
+            processor.isEnabled = true
+            processor.noiseLevel = 0
+            processor.fadingEnabled = true
+            processor.fadingDepth = 1.0
+            processor.fadingRate = 1.0
+            processor.interferenceEnabled = false
+        }
+
+        let inputSample: Float = 1.0
+        var outputs1: [Float] = []
+        var outputs2: [Float] = []
+
+        // Process 2 seconds of audio
+        for i in 0 ..< 88200 {
+            outputs1.append(processor1.processSample(inputSample, at: i))
+            outputs2.append(processor2.processSample(inputSample, at: i))
+        }
+
+        // Count samples where outputs differ significantly (> 1% difference)
+        var differenceCount = 0
+        for i in 0 ..< outputs1.count {
+            if abs(outputs1[i] - outputs2[i]) > 0.01 {
+                differenceCount += 1
+            }
+        }
+
+        // With random fading, most samples should differ between the two runs
+        // Expect at least 50% to be different
+        XCTAssertGreaterThan(differenceCount, outputs1.count / 2)
+    }
+
     func testFadingDisabledPassesThrough() {
         processor.isEnabled = true
         processor.noiseLevel = 0

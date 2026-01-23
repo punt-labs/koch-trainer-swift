@@ -58,10 +58,17 @@ final class BandConditionsProcessor: @unchecked Sendable {
 
     /// Reset all internal state (call when starting new audio session)
     func reset() {
-        fadingPhase = 0
+        // Fading state
+        fadingCurrentGain = 0.5
+        fadingTargetGain = 0.5
+        fadingSamplesUntilUpdate = 0
+
+        // Interference state
         interferenceActive = false
         interferencePhase = 0
         interferenceSamplesRemaining = 0
+
+        // Noise state
         crashSamplesRemaining = 0
         crashAmplitude = 0
         pinkB0 = 0
@@ -101,8 +108,15 @@ final class BandConditionsProcessor: @unchecked Sendable {
 
     // MARK: - Internal State
 
-    private var fadingPhase: Double = 0
     private var sampleRate: Double = 44100
+
+    // Fading state (random walk approach)
+    private var fadingCurrentGain: Double = 0.5 // Current interpolated gain (0-1)
+    private var fadingTargetGain: Double = 0.5 // Target gain for interpolation
+    private var fadingSamplesUntilUpdate: Int = 0 // Countdown to next random walk step
+
+    /// Precomputed interpolation rate for ~10ms gain ramp (avoids per-sample calculation)
+    private lazy var fadingInterpolationRate: Double = 1.0 / (sampleRate * 0.01)
 
     // Interference state
     private var interferenceActive: Bool = false
@@ -122,21 +136,42 @@ final class BandConditionsProcessor: @unchecked Sendable {
 
     // MARK: - Fading (QSB)
 
-    /// Apply sinusoidal amplitude fading to simulate QSB.
-    /// Real QSB has periods of 2-30 seconds. We use a sine wave modulation.
+    /// Apply random walk fading to simulate realistic QSB.
+    /// Real ionospheric fading drifts irregularly as propagation conditions change.
+    /// We use a bounded random walk that can reach extremes over time.
     private func applyFading(to sample: Float) -> Float {
-        // Amplitude envelope: 1.0 - depth * (0.5 + 0.5 * sin(phase))
-        // This oscillates between (1.0 - depth) and 1.0
-        let envelope = 1.0 - fadingDepth * (0.5 + 0.5 * sin(fadingPhase))
-
-        // Advance phase
-        let phaseIncrement = 2.0 * Double.pi * fadingRate / sampleRate
-        fadingPhase += phaseIncrement
-        if fadingPhase >= 2.0 * Double.pi {
-            fadingPhase -= 2.0 * Double.pi
+        // Check if we need to take a random walk step
+        fadingSamplesUntilUpdate -= 1
+        if fadingSamplesUntilUpdate <= 0 {
+            updateFadingTarget()
         }
 
+        // Interpolate current gain toward target (linear ramp over ~10ms)
+        if fadingCurrentGain < fadingTargetGain {
+            fadingCurrentGain = min(fadingCurrentGain + fadingInterpolationRate, fadingTargetGain)
+        } else if fadingCurrentGain > fadingTargetGain {
+            fadingCurrentGain = max(fadingCurrentGain - fadingInterpolationRate, fadingTargetGain)
+        }
+
+        // Apply gain: oscillates between (1.0 - depth) and 1.0
+        let envelope = 1.0 - fadingDepth * (1.0 - fadingCurrentGain)
         return sample * Float(envelope)
+    }
+
+    /// Take a random walk step to drift the fading target.
+    /// The walk is bounded to [0, 1] and can reach extremes over time,
+    /// producing more dramatic and realistic fading than averaging.
+    private func updateFadingTarget() {
+        // Random walk: drift the target by a small random amount
+        // Step size of ±0.15 allows noticeable movement while staying smooth
+        fadingTargetGain += Double.random(in: -0.15 ... 0.15)
+        fadingTargetGain = max(0, min(1, fadingTargetGain))
+
+        // Schedule next step based on fading rate
+        // fadingRate 0.1 Hz = slow drift, 1.0 Hz = faster drift; at least 2 steps/sec
+        let stepsPerSecond = max(2.0, fadingRate * 20.0)
+        let samplesPerStep = Int(sampleRate / stepsPerSecond)
+        fadingSamplesUntilUpdate = samplesPerStep
     }
 
     // MARK: - Noise (QRN)

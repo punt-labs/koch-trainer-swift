@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Character grid cells now use circular backgrounds for visual consistency
 - QSO text reveal now syncs with audio playback (character appears as it plays)
+- **Realistic QSB fading**: Band conditions fading now uses filtered random noise instead of predictable sine wave, better simulating real ionospheric conditions
 
 ### Fixed
 - Custom and Vocabulary sessions no longer affect Learn mode spaced repetition schedule
