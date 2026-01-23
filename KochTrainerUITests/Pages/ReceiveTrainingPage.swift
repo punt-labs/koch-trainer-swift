@@ -54,10 +54,10 @@ final class ReceiveTrainingPage: TrainingPage {
         return self
     }
 
-    /// Wait for the listening state (speaker icon visible).
+    /// Brief delay to allow audio to start playing.
+    /// Note: This is a fixed 200ms delay, not a true wait on UI state.
     @discardableResult
-    func waitForListening(timeout: TimeInterval = 5) -> Self {
-        // Wait briefly for the audio to start playing
+    func waitForListening() -> Self {
         usleep(200_000) // 200ms
         return self
     }

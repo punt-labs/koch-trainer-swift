@@ -75,6 +75,7 @@
 		8693131068361C6540C51824 /* IntervalCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5976B14C96DDADF69F86E7E /* IntervalCalculator.swift */; };
 		871CC10C74706F8EDAB701DE /* GroupGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF77D0D40CEBBDF8D8DCAB /* GroupGeneratorTests.swift */; };
 		8A8AB076624F048DDFB0891C /* VocabularyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F3F7690B4EEFE8F612EBF2 /* VocabularyView.swift */; };
+		8AB57D9DCAE7E9855D32FB9D /* MorseInputPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E777C9ED33AD1EB63E6D6D0 /* MorseInputPage.swift */; };
 		8B13FAA723D2B5202EB446B2 /* VocabularyTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68314A69DCAAEBF19B178525 /* VocabularyTrainingView.swift */; };
 		8D1BF986A50A61DB23A740C1 /* QSOEnginePhaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2BB16AE36DB3BD9F1EF6EA /* QSOEnginePhaseTests.swift */; };
 		8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D7ADDFD818AD9C12165E74 /* SessionResult.swift */; };
@@ -222,6 +223,7 @@
 		93801142040EBF4673C25DF1 /* AudioEngineFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineFactory.swift; sourceTree = "<group>"; };
 		93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
 		996BF2A5F179BABCA29A0EC9 /* TrainingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPage.swift; sourceTree = "<group>"; };
+		9E777C9ED33AD1EB63E6D6D0 /* MorseInputPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseInputPage.swift; sourceTree = "<group>"; };
 		A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KochTrainerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A33E29502EA253B330912F3D /* BasePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasePage.swift; sourceTree = "<group>"; };
 		A3A1B36164B2C6167B7D5B45 /* UITestingConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestingConfiguration.swift; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				A33E29502EA253B330912F3D /* BasePage.swift */,
 				8957E813D3D1E5FEEF24D6C2 /* EarTrainingPage.swift */,
 				F0737F2255CDEFBF18EA6EFF /* LearnPage.swift */,
+				9E777C9ED33AD1EB63E6D6D0 /* MorseInputPage.swift */,
 				1605DB0C34FD7A7118F95BA5 /* ReceiveTrainingPage.swift */,
 				64933EFB40338F1D8279DF32 /* SendTrainingPage.swift */,
 				996BF2A5F179BABCA29A0EC9 /* TrainingPage.swift */,
@@ -899,6 +902,7 @@
 				9258F9176E40B8E7D91A4003 /* BasePage.swift in Sources */,
 				EC07860BBAADC5126EFD43A7 /* EarTrainingPage.swift in Sources */,
 				6036BBAF3A77680FD7BF90C5 /* LearnPage.swift in Sources */,
+				8AB57D9DCAE7E9855D32FB9D /* MorseInputPage.swift in Sources */,
 				25C836B4836378F4C58C6A24 /* ReceiveTrainingPage.swift in Sources */,
 				90B87E5E90257E291BA8D8CD /* ReceiveTrainingUITests.swift in Sources */,
 				AC6B7A5571E4443A83253469 /* SendTrainingPage.swift in Sources */,
