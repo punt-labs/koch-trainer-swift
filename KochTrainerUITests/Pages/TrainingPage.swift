@@ -199,8 +199,9 @@ class TrainingPage: BasePage {
     }
 
     /// Skip through all introduction characters to start training.
+    /// - Parameter maxIterations: Safety limit. Default 40 covers max possible characters (26 letters + 10 digits).
     @discardableResult
-    func skipIntroduction(maxIterations: Int = 50) -> Self {
+    func skipIntroduction(maxIterations: Int = 40) -> Self {
         for _ in 0 ..< maxIterations {
             // Check for Start Training button (appears on last intro character)
             if startTrainingButton.waitForExistence(timeout: 0.5) {
