@@ -227,6 +227,7 @@ struct TrainingPhaseView: View {
             .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
 }
@@ -270,6 +271,7 @@ struct PausedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.pausedView)
     }
 }
@@ -363,6 +365,7 @@ struct CompletedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
 }

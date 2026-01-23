@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Training Flow UI Tests**: Comprehensive UI test coverage for Receive, Send, and Ear training flows using page object pattern
 - **Data Migration Safety**: Progress data is now protected with rolling backups and graceful degradation. If data becomes corrupted, the app recovers from backups instead of losing all progress. Schema versioning enables safe future updates.
 - **Pause and Resume Training**: Paused sessions persist and automatically restore when returning to training (within 24 hours)
 - Character proficiency indicators showing per-character accuracy as circular progress rings
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Realistic QSB fading**: Band conditions fading now uses filtered random noise instead of predictable sine wave, better simulating real ionospheric conditions
 
 ### Fixed
+- **Accessibility identifier inheritance**: Training view elements now correctly expose their own identifiers in the accessibility tree (fixed by adding `.accessibilityElement(children: .contain)` to container views)
 - Custom and Vocabulary sessions no longer affect Learn mode spaced repetition schedule
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions

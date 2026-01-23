@@ -34,9 +34,10 @@ struct LearnView: View {
                         Image(systemName: "ear")
                         Text("Start Ear Training")
                     }
-                    .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
 
                 HStack {
                     let chars = MorseCode.charactersByPatternLength(
@@ -52,6 +53,7 @@ struct LearnView: View {
             .padding(Theme.Spacing.md)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.Learn.earTrainingSection)
 
             // Receive training section
@@ -71,9 +73,10 @@ struct LearnView: View {
                         Image(systemName: "waveform")
                         Text("Start Receive Training")
                     }
-                    .accessibilityIdentifier(AccessibilityID.Learn.receiveTrainingButton)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Learn.receiveTrainingButton)
 
                 HStack {
                     Text(
@@ -90,6 +93,7 @@ struct LearnView: View {
             .padding(Theme.Spacing.md)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.Learn.receiveSection)
 
             // Send training section
@@ -109,9 +113,10 @@ struct LearnView: View {
                         Image(systemName: "hand.tap")
                         Text("Start Send Training")
                     }
-                    .accessibilityIdentifier(AccessibilityID.Learn.sendTrainingButton)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Learn.sendTrainingButton)
 
                 HStack {
                     Text(
@@ -128,6 +133,7 @@ struct LearnView: View {
             .padding(Theme.Spacing.md)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.Learn.sendSection)
 
             Spacer()
@@ -135,6 +141,7 @@ struct LearnView: View {
         .padding(Theme.Spacing.lg)
         .navigationTitle("Learn")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Learn.view)
     }
 
