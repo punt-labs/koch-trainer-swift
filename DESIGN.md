@@ -224,12 +224,18 @@ func playElement(_ element: MorseElement) {
 
 ### Band Conditions Simulation
 
-**Current Implementation** (BandConditionsProcessor.swift):
-- **QRN (Noise)**: Gaussian noise + occasional static crashes
-- **QSB (Fading)**: Sinusoidal amplitude modulation
+**Implementation** (BandConditionsProcessor.swift):
+- **QRN (Noise)**: Pink noise filter for atmospheric simulation (more realistic than white noise)
+- **QSB (Fading)**: Filtered random noise modulation (replaced sine wave for irregular, natural fading)
 - **QRM (Interference)**: Random tones at offset frequencies
+- **Continuous audio**: Half-duplex radio simulation with background noise during silence
 
-**Known Limitation**: Audio effects don't sound fully realistic. See [Outstanding Work](#band-conditions-tuning-beads-koch-trainer-swift-vh1) for research needed.
+**Design rationale**: Real HF conditions have irregular fading patterns and frequency-shaped noise. Pure sine wave QSB and white noise sound artificial. Pink noise (1/f spectrum) better matches atmospheric noise characteristics, and filtered random modulation produces the gradual, unpredictable fading heard on real bands.
+
+**Files:**
+- `BandConditionsProcessor.swift` - DSP processing for band conditions
+- `ToneGenerator.swift` - Integrates via `processSample()`
+- Settings view provides "Preview Sound" button for tuning
 
 ### Notification System
 
@@ -253,32 +259,13 @@ Anti-nag policy prevents notification fatigue:
 
 This section contains design notes for planned features tracked in beads. Use `bd show <id>` for current status.
 
-### Band Conditions Tuning (beads: koch-trainer-swift-vh1)
-
-**Problem**: Current DSP implementation sounds artificial compared to real HF conditions.
-
-**Research Needed:**
-- Study real HF band recordings for reference waveforms
-- Investigate pink noise vs white noise for atmospheric simulation
-- Research proper QSB fading curves (not pure sine wave—real fading is irregular)
-- Study impulse noise characteristics for static crashes
-- Compare with Morse Runner's audio processing approach
-
-**Implementation Notes:**
-- All DSP in `BandConditionsProcessor.swift`
-- Integrated into `ToneGenerator` via `processSample()`
-- User will provide specific feedback on what sounds wrong
-
-**Related beads issues:**
-- `koch-trainer-swift-7cy`: Research HF band recordings
-- `koch-trainer-swift-yc6`: Investigate pink vs white noise
-- `koch-trainer-swift-653`: Study Morse Runner's approach
-
----
-
 ### Accessibility Compliance (beads: koch-trainer-swift-cem)
 
 **Why This Matters**: Morse code has historical significance for people with visual impairments. The app should be fully accessible.
+
+**Completed:**
+- Training feedback VoiceOver announcements (PR #17)
+- Accessibility identifiers on testable UI elements (PR #21)
 
 **iOS Accessibility Modifiers:**
 ```swift
@@ -290,32 +277,23 @@ This section contains design notes for planned features tracked in beads. Use `b
 .accessibilityHidden(_:)     // Hide decorative/hidden elements
 ```
 
-**Views Requiring Audit:**
+**Remaining Work:**
 
-| View | Concern |
-|------|---------|
-| CharacterGridView | Letter + proficiency description |
-| ReceiveTrainingView | Feedback announcements, timer status |
-| SendTrainingView | Dit/dah button labels, pattern feedback |
-| QSOSessionView | Message transcript, phase announcements |
-| SettingsView | Slider values, toggle states |
-| ResultsView | Statistics grouped logically |
+| Task | Issue | Status |
+|------|-------|--------|
+| Full view accessibility audit | `koch-trainer-swift-mfr` | Open |
+| Image-only button labels | `koch-trainer-swift-v0x` | Open |
+| VoiceOver navigation testing | `koch-trainer-swift-5ge` | Open |
+| Dynamic Type support | `koch-trainer-swift-qc3` | Open |
+| Hide text from VoiceOver in copy-by-ear | `koch-trainer-swift-j3i` | Open (bug) |
 
-**VoiceOver Behaviors to Implement:**
+**VoiceOver Behaviors Already Implemented:**
+- Training feedback: Announces "Correct" or "Incorrect, the letter was K"
 
-1. **Training Feedback**: Announce "Correct" or "Incorrect, the letter was K"
-2. **Character Introduction**: "Letter K, dash dot dash" pattern description
-3. **Progress Indicators**: Announce accuracy percentage and attempt count
-4. **Character Grid**: "K, 85% proficiency" when navigating
-
-**Critical Bug** (beads: koch-trainer-swift-j3i): QSO copy-by-ear mode uses visual opacity only. VoiceOver still reads "hidden" text. Need `accessibilityHidden(true)` modifier.
-
-**Related beads issues:**
-- `koch-trainer-swift-mfr`: Audit all views
-- `koch-trainer-swift-v0x`: Add accessibilityLabel to image-only buttons
-- `koch-trainer-swift-9mb`: Training feedback announcements
-- `koch-trainer-swift-5ge`: Test VoiceOver navigation
-- `koch-trainer-swift-qc3`: Support Dynamic Type
+**VoiceOver Behaviors Remaining:**
+- Character introduction pattern descriptions
+- Progress indicator announcements
+- Character grid proficiency descriptions
 
 **References:**
 - [iOS Accessibility Guidelines 2025](https://medium.com/@david-auerbach/ios-accessibility-guidelines-best-practices-for-2025-6ed0d256200e)
@@ -326,46 +304,37 @@ This section contains design notes for planned features tracked in beads. Use `b
 
 ### Test Coverage Plan (beads: koch-trainer-swift-jto)
 
-**Current**: ~38% coverage, 519 tests
-**Target**: 80% coverage
+**Current**: 922 tests
+**Target**: 90%+ on non-View code (Views tested via XCUITest)
 
-**Priority Order:**
-1. ViewModels (highest value per line)
-2. Services (critical paths)
-3. Models (business logic)
-4. Views (lower priority, need testing strategy decision)
+**Strategy Decision (Completed):**
+View testing uses XCUITest integration tests rather than unit-level ViewInspector or snapshot testing. This provides comprehensive end-to-end coverage of user flows.
 
-**Coverage by Component:**
+**Completed Test Suites:**
 
-| Component | Current | Target | Status |
-|-----------|---------|--------|--------|
-| NotificationManager | 97% | 95%+ | Done |
-| Models (WordStat, QSOState, etc.) | 100% | 100% | Done |
-| ReceiveTrainingViewModel | 86% | 90%+ | Done |
-| VocabularyTrainingViewModel | 75% | 90%+ | Pending |
-| SendTrainingViewModel | 79% | 90%+ | Pending |
-| StudentProgress | 70% | 85%+ | Pending |
-| Services (QSOEngine, etc.) | 82-91% | 95%+ | Pending |
-| Views | 0-1% | 50%+ | Blocked on strategy |
+| Component | Issue | Status |
+|-----------|-------|--------|
+| NotificationManager | — | Done (97%+) |
+| Models (WordStat, QSOState, etc.) | — | Done (100%) |
+| ReceiveTrainingViewModel | — | Done |
+| VocabularyTrainingViewModel | `koch-trainer-swift-bzx` | Done |
+| SendTrainingViewModel | `koch-trainer-swift-g1g` | Done |
+| StudentProgress | `koch-trainer-swift-eho` | Done |
+| AppSettings | `koch-trainer-swift-819` | Done |
+| QSOEngine | `koch-trainer-swift-69q` | Done |
+| MorseDecoder | `koch-trainer-swift-2h5` | Done |
+| MorseAudioEngine | `koch-trainer-swift-82u` | Done |
+| StreakCalculator | `koch-trainer-swift-sdq` | Done |
 
-**View Testing Strategy** (beads: koch-trainer-swift-ex7):
+**UI Test Infrastructure (Completed):**
+- Page object base classes (PR #27)
+- Training-specific page objects (PR #28)
+- UITesting configuration with silent audio engine (PR #24)
 
-Options to evaluate:
-1. **ViewInspector**: Unit-style testing, inspect view hierarchy
-2. **Snapshot testing**: Catch visual regressions
-3. **UI tests**: Integration-level, slower but comprehensive
-
-Decision needed before writing 12+ view test files.
-
-**Related beads issues:**
-- `koch-trainer-swift-bzx`: VocabularyTrainingViewModelTests
-- `koch-trainer-swift-g1g`: SendTrainingViewModelTests
-- `koch-trainer-swift-eho`: StudentProgressTests
-- `koch-trainer-swift-819`: AppSettingsTests
-- `koch-trainer-swift-69q`: QSOEngineTests
-- `koch-trainer-swift-2h5`: MorseDecoderTests
-- `koch-trainer-swift-82u`: MorseAudioEngineTests
-- `koch-trainer-swift-sdq`: StreakCalculatorTests
+**Remaining Work:**
+- `koch-trainer-swift-0nx`: UI test coverage for core flows
+- `koch-trainer-swift-ae4`: Pause/resume tests
+- `koch-trainer-swift-atl`: Edge case UI tests
 
 ---
 
