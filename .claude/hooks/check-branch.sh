@@ -3,7 +3,20 @@
 # Reminds Claude to follow the worktree workflow in CLAUDE.md
 # Exit code 0 = allow, exit code 2 = block
 
-cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || cd "$(dirname "$0")/../.."
+# Parse the file path from stdin JSON (for Write/Edit tools)
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | grep -o '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+
+# Determine which directory to check
+if [[ -n "$FILE_PATH" && -d "$(dirname "$FILE_PATH")" ]]; then
+    # Check the git context of the file being edited
+    CHECK_DIR="$(dirname "$FILE_PATH")"
+else
+    # Fall back to project directory
+    CHECK_DIR="$CLAUDE_PROJECT_DIR"
+fi
+
+cd "$CHECK_DIR" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || cd "$(dirname "$0")/../.."
 
 BRANCH=$(git branch --show-current 2>/dev/null)
 
