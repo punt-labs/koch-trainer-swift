@@ -23,9 +23,9 @@ enum AccessibilityID {
         static let earTrainingSection = "learn-ear-training-section"
         static let receiveSection = "learn-receive-section"
         static let sendSection = "learn-send-section"
-        static let earTrainingButton = "ear-training-start-button"
-        static let receiveTrainingButton = "receive-training-start-button"
-        static let sendTrainingButton = "send-training-start-button"
+        static let earTrainingButton = "learn-ear-training-start-button"
+        static let receiveTrainingButton = "learn-receive-training-start-button"
+        static let sendTrainingButton = "learn-send-training-start-button"
         static let earTrainingLevel = "learn-ear-training-level"
         static let receiveLevel = "learn-receive-level"
         static let sendLevel = "learn-send-level"
@@ -97,9 +97,10 @@ enum AccessibilityID {
         static let characterGrid = "practice-character-grid"
         static let receiveButton = "practice-receive-button"
         static let sendButton = "practice-send-button"
-        static let selectedCount = "practice-selected-count"
+        static let instructionText = "practice-instruction-text"
 
         /// Returns identifier for a character cell in the practice grid.
+        /// The character is lowercased in the identifier (e.g., 'K' → "practice-character-k").
         static func characterCell(_ char: Character) -> String {
             "practice-character-\(char.lowercased())"
         }
@@ -109,18 +110,11 @@ enum AccessibilityID {
 
     enum Vocab {
         static let view = "vocab-view"
-        static let qsoButton = "vocab-qso-button"
-        static let callsignReceiveButton = "vocab-callsign-receive-button"
-        static let callsignSendButton = "vocab-callsign-send-button"
-        static let wordsReceiveButton = "vocab-words-receive-button"
-        static let wordsSendButton = "vocab-words-send-button"
     }
 
     // MARK: - Settings View
 
     enum Settings {
         static let view = "settings-view"
-        static let historyButton = "settings-history-button"
-        static let resetButton = "settings-reset-button"
     }
 }

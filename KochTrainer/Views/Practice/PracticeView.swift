@@ -13,7 +13,7 @@ struct PracticeView: View {
             Text("Select characters to practice")
                 .font(Typography.body)
                 .foregroundColor(.secondary)
-                .accessibilityIdentifier(AccessibilityID.Practice.selectedCount)
+                .accessibilityIdentifier(AccessibilityID.Practice.instructionText)
 
             CharacterGridView(
                 selectedCharacters: $selectedCharacters,
