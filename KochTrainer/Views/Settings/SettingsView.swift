@@ -213,6 +213,7 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .accessibilityIdentifier(AccessibilityID.Settings.view)
         .alert("Reset Progress?", isPresented: $showResetConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive) {

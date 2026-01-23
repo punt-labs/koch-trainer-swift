@@ -8,15 +8,17 @@ final class EarTrainingViewModelTests: XCTestCase {
     // MARK: Internal
 
     override func setUp() async throws {
+        testDefaults.removePersistentDomain(forName: "TestEarTrainingVM")
         mockAudioEngine = MockAudioEngine()
         viewModel = EarTrainingViewModel(audioEngine: mockAudioEngine)
-        progressStore = ProgressStore()
-        settingsStore = SettingsStore()
+        progressStore = ProgressStore(defaults: testDefaults)
+        settingsStore = SettingsStore(defaults: testDefaults)
         viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
     }
 
     override func tearDown() async throws {
         viewModel.cleanup()
+        testDefaults.removePersistentDomain(forName: "TestEarTrainingVM")
     }
 
     // MARK: - Initialization Tests
@@ -526,6 +528,7 @@ final class EarTrainingViewModelTests: XCTestCase {
     private var mockAudioEngine = MockAudioEngine()
     private var progressStore = ProgressStore()
     private var settingsStore = SettingsStore()
+    private var testDefaults = UserDefaults(suiteName: "TestEarTrainingVM") ?? .standard
 
     /// Waits for the async Task in playNextCharacter to complete and set isWaitingForInput.
     /// With MockAudioEngine, playCharacter returns immediately, so this just needs

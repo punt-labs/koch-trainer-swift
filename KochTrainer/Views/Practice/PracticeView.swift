@@ -13,12 +13,14 @@ struct PracticeView: View {
             Text("Select characters to practice")
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.Practice.instructionText)
 
             CharacterGridView(
                 selectedCharacters: $selectedCharacters,
                 characterStats: progressStore.progress.characterStats,
                 onCharacterSelected: playCharacter
             )
+            .accessibilityIdentifier(AccessibilityID.Practice.characterGrid)
 
             Spacer()
 
@@ -31,6 +33,7 @@ struct PracticeView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(selectedCharacters.count < 2)
+                .accessibilityIdentifier(AccessibilityID.Practice.receiveButton)
 
                 NavigationLink(destination: SendTrainingView(customCharacters: Array(selectedCharacters))) {
                     HStack {
@@ -40,6 +43,7 @@ struct PracticeView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(selectedCharacters.count < 2)
+                .accessibilityIdentifier(AccessibilityID.Practice.sendButton)
             }
 
             if selectedCharacters.count < 2 {
@@ -51,6 +55,7 @@ struct PracticeView: View {
         .padding(Theme.Spacing.lg)
         .navigationTitle("Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier(AccessibilityID.Practice.view)
         .onAppear {
             audioEngine.setFrequency(settingsStore.settings.toneFrequency)
             audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
