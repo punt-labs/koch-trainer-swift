@@ -120,8 +120,6 @@ final class AccessibilityAnnouncer {
 
     private let accessibility: AccessibilityProtocol
 
-    // MARK: - Private Helpers
-
     private func post(_ message: String) {
         guard accessibility.isVoiceOverRunning else { return }
         accessibility.post(notification: .announcement, argument: message)

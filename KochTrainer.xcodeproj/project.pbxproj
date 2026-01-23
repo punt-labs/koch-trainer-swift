@@ -50,6 +50,7 @@
 		6926CAFE0A66E17ED418A11E /* PausedSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E6556A3CBE5C091DBF2739 /* PausedSessionTests.swift */; };
 		69FEED19449943623183DA30 /* QSOSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A595D8E54B39F3D8F4B46685 /* QSOSessionView.swift */; };
 		6BBE45CC3DA500743E840305 /* MorseDecoderEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E492901DB5D67716F0F385 /* MorseDecoderEdgeCaseTests.swift */; };
+		6C52DE164D723D8A1ADA2F4A /* AccessibilityAnnouncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85F5053579CD26688B03FBA /* AccessibilityAnnouncerTests.swift */; };
 		6D9F252591FB2193CF59E786 /* VirtualStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C19546866846BD084D6E01 /* VirtualStation.swift */; };
 		718342D8BAA896E1D49AE80A /* VocabularyTrainingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695EF4BBFCDACBB7FAE88254 /* VocabularyTrainingViewModelTests.swift */; };
 		733495FEF6A1D701287020A1 /* ReceiveTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEBAC59B51C9914A50C23DC /* ReceiveTrainingViewModel.swift */; };
@@ -195,6 +196,7 @@
 		A595D8E54B39F3D8F4B46685 /* QSOSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOSessionView.swift; sourceTree = "<group>"; };
 		A6DEDA26B902C6973704CDDE /* ProgressStorePausedSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStorePausedSessionTests.swift; sourceTree = "<group>"; };
 		A7798C72A68405B53C0541B1 /* MorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseDecoder.swift; sourceTree = "<group>"; };
+		A85F5053579CD26688B03FBA /* AccessibilityAnnouncerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAnnouncerTests.swift; sourceTree = "<group>"; };
 		A92100D1EF3F00D425E4C6D9 /* VocabularySet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySet.swift; sourceTree = "<group>"; };
 		AB9A8860F89210C47A628B0C /* VocabularyTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTrainingViewModel.swift; sourceTree = "<group>"; };
 		AC37A38805458CDFFB61E5D8 /* NotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettings.swift; sourceTree = "<group>"; };
@@ -296,6 +298,7 @@
 			children = (
 				6AA51AAE2AF64CD1E7DECAA4 /* AudioEngine */,
 				BA5E9C7AA1793F2F86C03663 /* QSO */,
+				A85F5053579CD26688B03FBA /* AccessibilityAnnouncerTests.swift */,
 				4DF322665DDF89F3596D47FA /* BackupManagerTests.swift */,
 				9145C1BD8515A86E59BC029C /* BandConditionsProcessorTests.swift */,
 				5FE85DFEC0A64AB0EB5BB9BF /* GracefulDecoderTests.swift */,
@@ -740,6 +743,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C52DE164D723D8A1ADA2F4A /* AccessibilityAnnouncerTests.swift in Sources */,
 				17616F94E9292D782B4ED80F /* AppSettingsCodableTests.swift in Sources */,
 				314119842B76B80D28154954 /* AppSettingsTests.swift in Sources */,
 				AB9D02A4BA7E3F0221419220 /* BackupManagerTests.swift in Sources */,
