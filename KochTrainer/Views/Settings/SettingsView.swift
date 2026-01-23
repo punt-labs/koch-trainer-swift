@@ -231,7 +231,7 @@ struct SettingsView: View {
     @EnvironmentObject private var notificationManager: NotificationManager
     @State private var showResetConfirmation = false
     @State private var isPreviewingBandConditions = false
-    @StateObject private var previewAudioEngine = MorseAudioEngine()
+    @StateObject private var previewAudioEngineWrapper = ObservableAudioEngine()
 
     /// Binding that converts between hour/minute Ints and Date for the DatePicker
     private var preferredTimeBinding: Binding<Date> {
@@ -275,17 +275,17 @@ struct SettingsView: View {
 
     private func previewBandConditions() {
         isPreviewingBandConditions = true
-        previewAudioEngine.setFrequency(settingsStore.settings.toneFrequency)
-        previewAudioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
-        previewAudioEngine.configureBandConditions(from: settingsStore.settings)
+        previewAudioEngineWrapper.engine.setFrequency(settingsStore.settings.toneFrequency)
+        previewAudioEngineWrapper.engine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+        previewAudioEngineWrapper.engine.configureBandConditions(from: settingsStore.settings)
 
         // Use continuous audio session for realistic preview
-        previewAudioEngine.startSession()
+        previewAudioEngineWrapper.engine.startSession()
 
         Task {
             // Play "CQ CQ" to demonstrate band conditions with continuous noise
-            await previewAudioEngine.playGroup("CQ CQ")
-            previewAudioEngine.endSession()
+            await previewAudioEngineWrapper.engine.playGroup("CQ CQ")
+            previewAudioEngineWrapper.engine.endSession()
             isPreviewingBandConditions = false
         }
     }

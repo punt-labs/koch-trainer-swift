@@ -20,7 +20,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
     }
 

@@ -14,7 +14,7 @@ final class MorseQSOViewModel: ObservableObject {
         self.style = style
         myCallsign = callsign
         self.aiStarts = aiStarts
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         engine = QSOEngine(style: style, myCallsign: callsign, audioEngine: self.audioEngine)
     }
 

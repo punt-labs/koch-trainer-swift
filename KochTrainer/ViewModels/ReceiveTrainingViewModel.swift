@@ -11,7 +11,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: Lifecycle
 
     init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
-        self.audioEngine = audioEngine ?? MorseAudioEngine()
+        self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
     }
 

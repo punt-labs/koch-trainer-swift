@@ -57,9 +57,9 @@ struct PracticeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier(AccessibilityID.Practice.view)
         .onAppear {
-            audioEngine.setFrequency(settingsStore.settings.toneFrequency)
-            audioEngine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
-            audioEngine.configureBandConditions(from: settingsStore.settings)
+            audioEngineWrapper.engine.setFrequency(settingsStore.settings.toneFrequency)
+            audioEngineWrapper.engine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
+            audioEngineWrapper.engine.configureBandConditions(from: settingsStore.settings)
         }
     }
 
@@ -68,12 +68,12 @@ struct PracticeView: View {
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var settingsStore: SettingsStore
     @State private var selectedCharacters: Set<Character> = []
-    @StateObject private var audioEngine = MorseAudioEngine()
+    @StateObject private var audioEngineWrapper = ObservableAudioEngine()
 
     private func playCharacter(_ character: Character) {
         Task {
-            audioEngine.reset()
-            await audioEngine.playCharacter(character)
+            audioEngineWrapper.engine.reset()
+            await audioEngineWrapper.engine.playCharacter(character)
         }
     }
 }
