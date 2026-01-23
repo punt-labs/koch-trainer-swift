@@ -93,11 +93,12 @@ final class SendTrainingPage: TrainingPage, MorseInputPage {
         return self
     }
 
-    /// Wait for the input timeout to complete (pattern submission).
+    /// Wait for feedback to appear after pattern submission.
     @discardableResult
-    func waitForPatternSubmission(timeout: TimeInterval = 3) -> Self {
-        // The app auto-submits the pattern after the timeout elapses
-        Thread.sleep(forTimeInterval: timeout)
+    func waitForFeedback(timeout: TimeInterval = 5) -> Self {
+        // Wait until feedback appears rather than sleeping
+        _ = feedbackCorrect.waitForExistence(timeout: timeout)
+            || feedbackIncorrect.waitForExistence(timeout: 0.1)
         return self
     }
 }

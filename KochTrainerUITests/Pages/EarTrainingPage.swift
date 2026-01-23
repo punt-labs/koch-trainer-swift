@@ -83,10 +83,10 @@ final class EarTrainingPage: TrainingPage, MorseInputPage {
     // MARK: - Combined Actions
 
     /// Reproduce a pattern after hearing it.
-    /// Waits briefly for audio to finish, then inputs the pattern.
+    /// Waits for input to be ready, then inputs the pattern.
     @discardableResult
-    func reproducePattern(_ pattern: String, waitTime: TimeInterval = 1) -> Self {
-        Thread.sleep(forTimeInterval: waitTime)
+    func reproducePattern(_ pattern: String, timeout: TimeInterval = 5) -> Self {
+        _ = waitForInputReady(timeout: timeout)
         _ = inputPattern(pattern)
         return self
     }
@@ -99,10 +99,12 @@ final class EarTrainingPage: TrainingPage, MorseInputPage {
         return self
     }
 
-    /// Wait for the input timeout to complete (pattern submission).
+    /// Wait for feedback to appear after pattern submission.
     @discardableResult
-    func waitForPatternSubmission(timeout: TimeInterval = 3) -> Self {
-        Thread.sleep(forTimeInterval: timeout)
+    func waitForFeedback(timeout: TimeInterval = 5) -> Self {
+        // Wait until feedback appears rather than sleeping
+        _ = feedbackCorrect.waitForExistence(timeout: timeout)
+            || feedbackIncorrect.waitForExistence(timeout: 0.1)
         return self
     }
 }

@@ -106,12 +106,12 @@ final class ReceiveTrainingPage: TrainingPage {
         return self
     }
 
-    /// Wait for timeout without answering.
+    /// Wait for timeout feedback to appear (without answering).
     @discardableResult
-    func waitForTimeout(duration: TimeInterval = 4) -> Self {
+    func waitForTimeout(timeout: TimeInterval = 5) -> Self {
         waitForPrompt()
-        // Wait longer than the 3-second timeout
-        Thread.sleep(forTimeInterval: duration)
+        // Wait until timeout feedback appears
+        _ = feedbackTimeout.waitForExistence(timeout: timeout)
         return self
     }
 }
