@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SwiftFormat/SwiftLint configuration alignment for multi-line conditions
 - **Notification timezone bug**: Preferred reminder time now preserves local hour/minute across timezone changes
 - **Vocabulary receive auto-submit**: Answers now submit automatically when typed character count matches the expected word length, matching Learn mode behavior
+- **Secondary button tap targets**: Outlined buttons (Next Character, etc.) now respond to taps across the entire button surface, not just near the text
 
 ## [0.7.0] - 2026-01-19
 

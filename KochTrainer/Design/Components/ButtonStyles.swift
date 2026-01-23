@@ -29,6 +29,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, Theme.Spacing.md)
             .padding(.horizontal, Theme.Spacing.lg)
+            .contentShape(Rectangle())
             .background(Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.CornerRadius.large)
