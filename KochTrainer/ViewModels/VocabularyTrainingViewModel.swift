@@ -15,7 +15,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     init(
         vocabularySet: VocabularySet,
         sessionType: SessionType,
-        audioEngine: (any AudioEngineProtocol)? = nil,
+        audioEngine: AudioEngineProtocol? = nil,
         announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()
     ) {
         self.vocabularySet = vocabularySet

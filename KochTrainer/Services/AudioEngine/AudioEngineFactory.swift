@@ -8,7 +8,7 @@ enum AudioEngineFactory {
     @MainActor
     static func makeEngine() -> any AudioEngineProtocol {
         if UITestingConfiguration.isUITesting {
-            return SilentAudioEngine()
+            return UITestAudioEngine()
         }
         return MorseAudioEngine()
     }

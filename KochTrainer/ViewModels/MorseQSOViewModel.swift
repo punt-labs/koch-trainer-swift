@@ -10,7 +10,7 @@ final class MorseQSOViewModel: ObservableObject {
 
     // MARK: Lifecycle
 
-    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: (any AudioEngineProtocol)? = nil) {
+    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: AudioEngineProtocol? = nil) {
         self.style = style
         myCallsign = callsign
         self.aiStarts = aiStarts

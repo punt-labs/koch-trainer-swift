@@ -10,7 +10,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: (any AudioEngineProtocol)? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
+    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
         self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
     }

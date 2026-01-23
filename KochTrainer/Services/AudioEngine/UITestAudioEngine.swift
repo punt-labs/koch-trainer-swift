@@ -2,8 +2,9 @@ import Foundation
 
 /// A silent implementation of AudioEngineProtocol for UI testing.
 /// All methods return immediately without playing audio.
+/// Named UITestAudioEngine to distinguish from the test helper SilentAudioEngine.
 @MainActor
-final class SilentAudioEngine: AudioEngineProtocol, ObservableObject {
+final class UITestAudioEngine: AudioEngineProtocol, ObservableObject {
 
     // MARK: Internal
 
@@ -23,7 +24,7 @@ final class SilentAudioEngine: AudioEngineProtocol, ObservableObject {
 
     func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async {
         // Call the callback for each character if provided (for progress tracking)
-        for (index, char) in group.enumerated() where !char.isWhitespace {
+        for (index, char) in group.enumerated() {
             onCharacterPlayed?(char, index)
         }
     }
