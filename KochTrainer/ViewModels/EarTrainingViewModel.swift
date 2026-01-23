@@ -165,7 +165,9 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.stop()
+
+        // Turn off radio (continuous audio outputs silence, engine keeps running)
+        audioEngine.setRadioMode(.off)
         isWaitingForInput = false
 
         if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
@@ -180,6 +182,10 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         phase = .training
         isPlaying = true
+
+        // Resume receiving mode
+        audioEngine.setRadioMode(.receiving)
+
         startSessionTimer()
         playNextCharacter()
     }
@@ -188,7 +194,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
-        audioEngine.stop()
+        audioEngine.endSession()
         isWaitingForInput = false
 
         progressStore?.clearPausedSession(for: .earTraining)
@@ -226,7 +232,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
-        audioEngine.stop()
+        audioEngine.endSession()
     }
 
     // MARK: - Input Handling
@@ -327,6 +333,10 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         sessionStartTime = Date()
         isPlaying = true
+
+        // Start continuous audio session (radio starts in receiving mode)
+        audioEngine.startSession()
+
         startSessionTimer()
         playNextCharacter()
     }

@@ -9,8 +9,12 @@ final class MockAudioEngine: AudioEngineProtocol {
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
     var stopCalled = false
+    var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
+    private(set) var storedRadioMode: RadioMode = .off
+
+    var radioMode: RadioMode { storedRadioMode }
 
     func playCharacter(_ char: Character) async {
         playCharacterCalls.append(char)
@@ -56,6 +60,13 @@ final class MockAudioEngine: AudioEngineProtocol {
     func playDah() async {
         // No-op for testing
     }
+
+    func startSession() { storedRadioMode = .receiving }
+    func endSession() { storedRadioMode = .off
+        endSessionCalled = true
+    }
+
+    func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
 }
 
 // MARK: - ReceiveTrainingViewModelTests
@@ -310,7 +321,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         // Verify paused state
         XCTAssertEqual(viewModel.phase, .paused)
         XCTAssertFalse(viewModel.isPlaying)
-        XCTAssertTrue(mockAudioEngine.stopCalled)
+        // Pause sets radio mode to .off instead of calling stop()
+        XCTAssertEqual(mockAudioEngine.storedRadioMode, .off)
     }
 
     func testPauseDuringIntroductionIsNoOp() {
@@ -467,7 +479,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
         viewModel.cleanup()
 
-        XCTAssertTrue(mockAudioEngine.stopCalled)
+        XCTAssertTrue(mockAudioEngine.endSessionCalled)
     }
 
     func testCleanupSetsIsPlayingFalse() {

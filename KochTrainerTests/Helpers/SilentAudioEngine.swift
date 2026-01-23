@@ -9,6 +9,14 @@ final class SilentAudioEngine: AudioEngineProtocol {
     private(set) var playedCharacters: [Character] = []
     private(set) var playedGroups: [String] = []
 
+    // MARK: - Continuous Session API
+
+    private(set) var storedRadioMode: RadioMode = .off
+
+    var radioMode: RadioMode {
+        storedRadioMode
+    }
+
     func playCharacter(_ char: Character) async {
         playedCharacters.append(char)
     }
@@ -52,5 +60,17 @@ final class SilentAudioEngine: AudioEngineProtocol {
 
     func configureBandConditions(from settings: AppSettings) {
         // Silent - no-op
+    }
+
+    func startSession() {
+        storedRadioMode = .receiving
+    }
+
+    func endSession() {
+        storedRadioMode = .off
+    }
+
+    func setRadioMode(_ mode: RadioMode) {
+        storedRadioMode = mode
     }
 }

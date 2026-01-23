@@ -42,7 +42,7 @@ final class EarTrainingViewModelTests: XCTestCase {
     }
 
     func testIntroCharactersSetFromLevel() {
-        let expectedChars = MorseCode.charactersByPatternLength(upToLevel: 1)
+        let expectedChars = MorseCode.charactersByPatternLength(upToLevel: progressStore.progress.earTrainingLevel)
         XCTAssertEqual(viewModel.introCharacters, expectedChars)
     }
 
@@ -128,7 +128,8 @@ final class EarTrainingViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.phase, .paused)
         XCTAssertFalse(viewModel.isPlaying)
-        XCTAssertTrue(mockAudioEngine.stopCalled)
+        // Pause sets radio mode to .off instead of calling stop()
+        XCTAssertEqual(mockAudioEngine.storedRadioMode, .off)
     }
 
     func testPauseDuringIntroductionIsNoOp() {
@@ -320,11 +321,11 @@ final class EarTrainingViewModelTests: XCTestCase {
 
     func testCleanupStopsAudio() {
         viewModel.startSession()
-        mockAudioEngine.stopCalled = false
+        mockAudioEngine.endSessionCalled = false
 
         viewModel.cleanup()
 
-        XCTAssertTrue(mockAudioEngine.stopCalled)
+        XCTAssertTrue(mockAudioEngine.endSessionCalled)
     }
 
     func testCleanupSetsIsPlayingToFalse() {
