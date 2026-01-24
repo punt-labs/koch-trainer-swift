@@ -98,15 +98,16 @@ and level numbers 1--26 implicitly identify the character set unlocked at each l
 Training occurs in three distinct directions, each developing a different skill:
 
 \begin{zed}
-Direction ::= receive | send | ear
+Direction ::= receive | send | receiveEar
 \end{zed}
 
 In \emph{receive} mode, the student hears Morse audio and types the corresponding
 letter---training auditory pattern recognition. In \emph{send} mode, the student
 sees a letter and keys the Morse pattern using dit/dah inputs---training motor
-memory and timing. In \emph{ear} mode, the student hears a Morse pattern and
-reproduces it by tapping dit/dah---training the ear-to-hand reflex without
-letter identification.
+memory and timing. In \emph{receiveEar} mode, the student hears a Morse pattern
+and reproduces it by tapping dit/dah---training the ear-to-hand reflex without
+letter identification. This is a variant of receiving where only the pattern
+matters, not the letter.
 
 These skills progress independently. A student may excel at receiving while
 struggling with sending, or vice versa. Separate tracking prevents frustration
@@ -506,7 +507,7 @@ accuracy? : \nat
 \where
 % Can only advance after completing an ear training session
 phase = completed \\
-direction = ear \\
+direction = receiveEar \\
 sessionAttempts > 0 \\
 accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
@@ -839,7 +840,7 @@ During training, each character attempt updates the per-character statistics.
   \where
   % Ear training requires active ear training session
   phase = training \\
-  direction = ear \\
+  direction = receiveEar \\
   earAttempts' = earAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land earCorrect' = earCorrect + 1) \\
