@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-01-24
+
 ### Added
 - **Ear Training Mode**: New training mode for pattern recognition—hear Morse audio and reproduce the pattern using dit/dah buttons. Progression by pattern length (1-5 elements) rather than Koch order.
 - **Training Flow UI Tests**: Comprehensive UI test coverage for Receive, Send, and Ear training flows using page object pattern
@@ -66,5 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SwiftLint and SwiftFormat for code quality
 - GitHub Actions CI pipeline
 
-[Unreleased]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...HEAD
+
+[0.9.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...v0.9.0
 [0.7.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0
