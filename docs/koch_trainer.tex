@@ -395,6 +395,26 @@ The \emph{radioMode} models half-duplex radio behavior:
 \item Transmitting is only valid in send mode (cannot transmit during receive training)
 \end{itemize}
 
+\subsection{Direction Semantics}
+
+The \emph{direction} field serves a dual purpose:
+\begin{enumerate}
+\item \textbf{During an active session}: indicates the current training mode
+      (receive, send, or receiveEar)
+\item \textbf{After session completion}: indicates which session just completed,
+      enabling the correct \emph{Advance} and \emph{UpdateInterval} operations
+\end{enumerate}
+
+When $phase = completed$, the \emph{direction} value determines which level can
+advance and which interval updates. For example, after completing a receive
+session, $direction = receive$ enables $AdvanceReceiveLevel$ while blocking
+$AdvanceSendLevel$. The $phase$ gates availability; the $direction$ selects
+which operation applies.
+
+In the $idle$ state (after initialization, before any session), \emph{direction}
+has a default value but is operationally irrelevant since $phase = idle$ blocks
+all completion-dependent operations.
+
 %==============================================================================
 \section{Koch Trainer State}
 %==============================================================================
