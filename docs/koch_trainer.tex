@@ -95,16 +95,19 @@ and level numbers 1--26 implicitly identify the character set unlocked at each l
 
 \subsection{Training Direction}
 
-Training occurs in two distinct directions, each developing a different skill:
+Training occurs in three distinct directions, each developing a different skill:
 
 \begin{zed}
-Direction ::= receive | send
+Direction ::= receive | send | receiveEar
 \end{zed}
 
 In \emph{receive} mode, the student hears Morse audio and types the corresponding
 letter---training auditory pattern recognition. In \emph{send} mode, the student
 sees a letter and keys the Morse pattern using dit/dah inputs---training motor
-memory and timing.
+memory and timing. In \emph{receiveEar} mode, the student hears a Morse pattern
+and reproduces it by tapping dit/dah---training the ear-to-hand reflex without
+letter identification. This is a variant of receiving where only the pattern
+matters, not the letter.
 
 These skills progress independently. A student may excel at receiving while
 struggling with sending, or vice versa. Separate tracking prevents frustration
@@ -141,6 +144,22 @@ When the radio is on and the operator is not transmitting, they are receiving.
 This models real amateur radio behavior where the receiver is always active
 unless explicitly transmitting.
 
+\subsection{Session Phase}
+
+A training session progresses through distinct phases:
+
+\begin{zed}
+SessionPhase ::= idle | introduction | training | paused | completed
+\end{zed}
+
+\begin{itemize}
+\item \emph{idle}: No active session (initial state or session cancelled)
+\item \emph{introduction}: Showing unlocked characters with audio playback
+\item \emph{training}: Active call-and-response practice
+\item \emph{paused}: Session suspended mid-training
+\item \emph{completed}: Session ended with results ready to record
+\end{itemize}
+
 %==============================================================================
 \section{Global Constants}
 %==============================================================================
@@ -174,6 +193,39 @@ students have truly mastered current characters before encountering new ones.
 This high bar is intentional: the Koch method's effectiveness depends on
 learning characters correctly at full speed from the start.
 
+\subsection{Model Bounds}
+
+The following constants exist solely to enable finite model checking and animation
+with probcli. They are \emph{not} system constraints---the application does not
+enforce these limits. Values are chosen small enough for practical state space
+exploration.
+
+\begin{axdef}
+MODEL\_BOUND : \nat
+\where
+MODEL\_BOUND = 3
+\end{axdef}
+
+When this specification refers to $MODEL\_BOUND$, understand that the constraint
+exists for the model checker, not the implementation.
+
+\subsection{Session Constants}
+
+\begin{axdef}
+proficiencyThreshold : \nat \\
+baseMinimumAttempts : \nat \\
+attemptsPerCharacter : \nat \\
+responseTimeoutMs : \nat
+\where
+proficiencyThreshold = 90 \\
+baseMinimumAttempts = 15 \\
+attemptsPerCharacter = 5 \\
+responseTimeoutMs = 3000
+\end{axdef}
+
+The proficiency threshold (90\%) matches the level advancement threshold.
+Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
+
 %==============================================================================
 \section{Character Statistics}
 %==============================================================================
@@ -198,13 +250,14 @@ earCorrect : \nat
 receiveCorrect \leq receiveAttempts \\
 sendCorrect \leq sendAttempts \\
 earCorrect \leq earAttempts \\
-receiveAttempts \leq 10000 \\
-sendAttempts \leq 10000 \\
-earAttempts \leq 10000
+receiveAttempts \leq MODEL\_BOUND \\
+sendAttempts \leq MODEL\_BOUND \\
+earAttempts \leq MODEL\_BOUND
 \end{schema}
 
 The invariants ensure that correct counts never exceed attempt counts---a
-fundamental data integrity property. Upper bounds support finite model checking.
+fundamental data integrity property. The $MODEL\_BOUND$ constraints enable
+finite model checking; the application does not enforce these limits.
 
 The \emph{earAttempts} and \emph{earCorrect} fields track ear training mode,
 where students reproduce heard patterns rather than identify letters.
@@ -228,7 +281,7 @@ correctCount : \nat \\
 timestamp : TIMESTAMP
 \where
 correctCount \leq totalAttempts \\
-totalAttempts \leq 1000
+totalAttempts \leq MODEL\_BOUND
 \end{schema}
 
 Session results form the historical record used for:
@@ -248,7 +301,7 @@ affect level advancement and spaced repetition intervals.
 The central state schema captures all persistent student progress. We flatten
 the schedule fields into the main state for ProB animation compatibility.
 
-\begin{schema}{State}
+\begin{schema}{StudentProgress}
 receiveLevel : \nat \\
 sendLevel : \nat \\
 earLevel : \nat \\
@@ -264,13 +317,13 @@ sendLevel \geq minLevel \\
 sendLevel \leq maxLevel \\
 earLevel \geq 1 \\
 earLevel \leq 5 \\
-sessionCount \leq 10000 \\
+sessionCount \leq MODEL\_BOUND \\
 receiveInterval \geq minInterval \\
 receiveInterval \leq maxInterval \\
 sendInterval \geq minInterval \\
 sendInterval \leq maxInterval \\
 currentStreak \leq longestStreak \\
-longestStreak \leq 365
+longestStreak \leq MODEL\_BOUND
 \end{schema}
 
 \subsection{Level Semantics}
@@ -300,15 +353,93 @@ session (either direction counts). The longest streak persists as a personal
 record for motivation.
 
 %==============================================================================
+\section{Training Session}
+%==============================================================================
+
+Training session state is separate from persistent student progress. In the
+implementation, this lives in the ViewModel; here we model it as a distinct
+schema.
+
+\begin{schema}{TrainingSession}
+phase : SessionPhase \\
+direction : Direction \\
+radioMode : RadioMode \\
+toneActive : ZBOOL \\
+characterCount : \nat \\
+introIndex : \nat \\
+sessionAttempts : \nat \\
+sessionCorrect : \nat
+\where
+characterCount \geq 1 \\
+characterCount \leq maxLevel \\
+introIndex \leq characterCount \\
+sessionCorrect \leq sessionAttempts \\
+sessionAttempts \leq MODEL\_BOUND \\
+% Radio mode constraints (half-duplex behavior)
+phase \in \{idle, introduction, paused, completed\} \implies radioMode = off \\
+(phase = training \land direction = receive) \implies radioMode = receiving \\
+radioMode = transmitting \implies direction = send \\
+% Tone constraints
+radioMode = off \implies toneActive = zfalse
+\end{schema}
+
+The \emph{characterCount} is the number of unlocked characters for this session's
+direction (equal to the current level). The \emph{introIndex} tracks progress
+through the introduction phase.
+
+The \emph{radioMode} models half-duplex radio behavior:
+\begin{itemize}
+\item During introduction, pause, or completion: radio is off (no audio)
+\item During receive training: radio always receiving (user listens to incoming Morse)
+\item During send training: user toggles between receiving (waiting) and transmitting (keying)
+\item Transmitting is only valid in send mode (cannot transmit during receive training)
+\end{itemize}
+
+\subsection{Direction Semantics}
+
+The \emph{direction} field serves a dual purpose:
+\begin{enumerate}
+\item \textbf{During an active session}: indicates the current training mode
+      (receive, send, or receiveEar)
+\item \textbf{After session completion}: indicates which session just completed,
+      enabling the correct \emph{Advance} and \emph{UpdateInterval} operations
+\end{enumerate}
+
+When $phase = completed$, the \emph{direction} value determines which level can
+advance and which interval updates. For example, after completing a receive
+session, $direction = receive$ enables $AdvanceReceiveLevel$ while blocking
+$AdvanceSendLevel$. The $phase$ gates availability; the $direction$ selects
+which operation applies.
+
+In the $idle$ state (after initialization, before any session), \emph{direction}
+has a default value but is operationally irrelevant since $phase = idle$ blocks
+all completion-dependent operations.
+
+%==============================================================================
+\section{Koch Trainer State}
+%==============================================================================
+
+The complete machine state combines persistent student progress with training
+session state. Defining this as an explicit schema (rather than using schema
+conjunction) ensures ProB tracks all variables during animation.
+
+\begin{schema}{KochTrainerState}
+StudentProgress \\
+TrainingSession
+\end{schema}
+
+%==============================================================================
 \section{Initialization}
 %==============================================================================
 
 A new student begins at level 1 in all directions with 1-day intervals and
-no streak history.
+no streak history. The session state initializes to an ``idle'' configuration
+representing no active session.
 
 \begin{schema}{Init}
-State'
+KochTrainerState'
 \where
+% Persistent state initialization
 receiveLevel' = minLevel \\
 sendLevel' = minLevel \\
 earLevel' = 1 \\
@@ -316,7 +447,16 @@ sessionCount' = 0 \\
 receiveInterval' = minInterval \\
 sendInterval' = minInterval \\
 currentStreak' = 0 \\
-longestStreak' = 0
+longestStreak' = 0 \\
+% Session state initialization (no active session)
+phase' = idle \\
+direction' = receive \\
+radioMode' = off \\
+toneActive' = zfalse \\
+characterCount' = minLevel \\
+introIndex' = 0 \\
+sessionAttempts' = 0 \\
+sessionCorrect' = 0
 \end{schema}
 
 %==============================================================================
@@ -330,9 +470,16 @@ over at least 20 attempts in a session, they advance to the next level, unlockin
 one additional character.
 
 \begin{schema}{AdvanceReceiveLevel}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+% Can only advance after completing a receive session
+phase = completed \\
+direction = receive \\
+sessionAttempts > 0 \\
+% Accuracy must match session results (avoiding division)
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 receiveLevel < maxLevel \\
@@ -347,9 +494,16 @@ longestStreak' = longestStreak
 \end{schema}
 
 \begin{schema}{AdvanceSendLevel}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+% Can only advance after completing a send session
+phase = completed \\
+direction = send \\
+sessionAttempts > 0 \\
+% Accuracy must match session results (avoiding division)
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 sendLevel < maxLevel \\
@@ -367,9 +521,15 @@ The precondition $receiveLevel < maxLevel$ (or $sendLevel < maxLevel$) ensures
 we cannot advance beyond the 26 available characters.
 
 \begin{schema}{AdvanceEarLevel}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+% Can only advance after completing an ear training session
+phase = completed \\
+direction = receiveEar \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 earLevel < 5 \\
@@ -392,8 +552,10 @@ ear training does not affect spaced repetition scheduling or streaks.
 Each completed session increments the session count for analytics.
 
 \begin{schema}{RecordSession}
-\Delta State
+\Xi TrainingSession \\
+\Delta StudentProgress
 \where
+phase = completed \\
 sessionCount' = sessionCount + 1 \\
 receiveLevel' = receiveLevel \\
 sendLevel' = sendLevel \\
@@ -425,10 +587,15 @@ over-practice. Low accuracy signals struggle, so we reset to daily practice.
 The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
-  \Delta State \\
+  \Xi TrainingSession \\
+  \Delta StudentProgress \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
+  phase = completed \\
+  direction = receive \\
+  sessionAttempts > 0 \\
+  accuracy? * sessionAttempts = sessionCorrect * 100 \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -449,9 +616,14 @@ The middle range maintains the current schedule.
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalMedium}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = receive \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 receiveInterval' = receiveInterval \\
@@ -465,9 +637,14 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalLow}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = receive \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? < 70 \\
 receiveInterval' = minInterval \\
 sendInterval' = sendInterval \\
@@ -486,10 +663,15 @@ allows the habit formation cap to be applied during the first 14 days.
 Symmetric operations exist for send training:
 
 \begin{schema}{UpdateSendIntervalHigh}
-  \Delta State \\
+  \Xi TrainingSession \\
+  \Delta StudentProgress \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
+  phase = completed \\
+  direction = send \\
+  sessionAttempts > 0 \\
+  accuracy? * sessionAttempts = sessionCorrect * 100 \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -510,9 +692,14 @@ Symmetric operations exist for send training:
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalMedium}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = send \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 sendInterval' = sendInterval \\
@@ -526,9 +713,14 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalLow}
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = send \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? < 70 \\
 sendInterval' = minInterval \\
 receiveInterval' = receiveInterval \\
@@ -546,7 +738,7 @@ If a student misses practice for more than twice their current interval,
 skill decay is assumed and the interval resets to daily practice.
 
 \begin{schema}{ResetReceiveIntervalOnMissedPractice}
-\Delta State \\
+\Delta StudentProgress \\
 daysSinceLastPractice? : \nat
 \where
 daysSinceLastPractice? > receiveInterval * missedPracticeMultiplier \\
@@ -561,7 +753,7 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{ResetSendIntervalOnMissedPractice}
-\Delta State \\
+\Delta StudentProgress \\
 daysSinceLastPractice? : \nat
 \where
 daysSinceLastPractice? > sendInterval * missedPracticeMultiplier \\
@@ -581,8 +773,10 @@ Streaks measure consecutive calendar days with at least one completed session.
 They provide motivation through gamification without affecting learning outcomes.
 
 \begin{schema}{IncrementStreak}
-  \Delta State
+  \Xi TrainingSession \\
+  \Delta StudentProgress
   \where
+  phase = completed \\
   currentStreak' = currentStreak + 1 \\
   (currentStreak + 1 > longestStreak \\
   \t1 \land longestStreak' = currentStreak + 1) \\
@@ -600,8 +794,10 @@ The streak increments when the student practices on the calendar day following
 their last practice. The longest streak updates if the current streak exceeds it.
 
 \begin{schema}{ResetStreak}
-  \Delta State
+  \Xi TrainingSession \\
+  \Delta StudentProgress
   \where
+  phase = completed \\
   currentStreak' = 0 \\
   longestStreak' = longestStreak \\
   receiveInterval' = receiveInterval \\
@@ -620,9 +816,13 @@ Note that the longest streak is preserved---it represents the all-time record.
 During training, each character attempt updates the per-character statistics.
 
 \begin{schema}{RecordReceiveAttempt}
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Can only record receive attempts during receive training
+  phase = training \\
+  direction = receive \\
   receiveAttempts' = receiveAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land receiveCorrect' = receiveCorrect + 1) \\
@@ -635,9 +835,13 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordSendAttempt}
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Can only record send attempts during send training
+  phase = training \\
+  direction = send \\
   sendAttempts' = sendAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land sendCorrect' = sendCorrect + 1) \\
@@ -650,9 +854,13 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordEarAttempt}
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Ear training requires active ear training session
+  phase = training \\
+  direction = receiveEar \\
   earAttempts' = earAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land earCorrect' = earCorrect + 1) \\
@@ -668,91 +876,23 @@ During training, each character attempt updates the per-character statistics.
 \section{Session Flow}
 %==============================================================================
 
-This section models the state machine for training sessions. While persistent
-state (levels, streaks, intervals) survives across sessions, session state
-exists only during active training.
-
-\subsection{Session Phase}
-
-A training session progresses through distinct phases:
-
-\begin{zed}
-SessionPhase ::= introduction | training | paused | completed
-\end{zed}
-
-\begin{itemize}
-\item \emph{introduction}: Showing unlocked characters with audio playback
-\item \emph{training}: Active call-and-response practice
-\item \emph{paused}: Session suspended mid-training
-\item \emph{completed}: Session ended, results recorded
-\end{itemize}
-
-\subsection{Session Constants}
-
-\begin{axdef}
-proficiencyThreshold : \nat \\
-baseMinimumAttempts : \nat \\
-attemptsPerCharacter : \nat \\
-responseTimeoutMs : \nat
-\where
-proficiencyThreshold = 90 \\
-baseMinimumAttempts = 15 \\
-attemptsPerCharacter = 5 \\
-responseTimeoutMs = 3000
-\end{axdef}
-
-The proficiency threshold (90\%) matches the level advancement threshold.
-Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
-
-\subsection{Session State}
-
-Session state is separate from persistent progress state. In the implementation,
-this lives in the ViewModel; here we model it as a distinct schema.
-
-\begin{schema}{SessionState}
-phase : SessionPhase \\
-direction : Direction \\
-radioMode : RadioMode \\
-toneActive : ZBOOL \\
-characterCount : \nat \\
-introIndex : \nat \\
-sessionAttempts : \nat \\
-sessionCorrect : \nat
-\where
-characterCount \geq 1 \\
-characterCount \leq maxLevel \\
-introIndex \leq characterCount \\
-sessionCorrect \leq sessionAttempts \\
-sessionAttempts \leq 1000 \\
-% Radio mode constraints (half-duplex behavior)
-phase \in \{introduction, paused, completed\} \implies radioMode = off \\
-(phase = training \land direction = receive) \implies radioMode = receiving \\
-radioMode = transmitting \implies direction = send \\
-% Tone constraints
-radioMode = off \implies toneActive = zfalse
-\end{schema}
-
-The \emph{characterCount} is the number of unlocked characters for this session's
-direction (equal to the current level). The \emph{introIndex} tracks progress
-through the introduction phase.
-
-The \emph{radioMode} models half-duplex radio behavior:
-\begin{itemize}
-\item During introduction, pause, or completion: radio is off (no audio)
-\item During receive training: radio always receiving (user listens to incoming Morse)
-\item During send training: user toggles between receiving (waiting) and transmitting (keying)
-\item Transmitting is only valid in send mode (cannot transmit during receive training)
-\end{itemize}
+This section models the operations for training sessions. The $SessionState$
+schema was defined earlier; here we specify the operations that transition
+between session phases.
 
 \subsection{Session Initialization}
 
 \begin{schema}{InitSession}
-SessionState' \\
+\Xi StudentProgress \\
+\Delta TrainingSession \\
 direction? : Direction \\
 level? : \nat
 \where
-level? \geq minLevel \\
-level? \leq maxLevel \\
+% Can only start a new session when no session is active
+phase \in \{idle, completed\} \\
+% Level must match current progress for the chosen direction
+(direction? = receive \land level? = receiveLevel) \\
+\lor (direction? = send \land level? = sendLevel) \\
 phase' = introduction \\
 direction' = direction? \\
 radioMode' = off \\
@@ -763,13 +903,15 @@ sessionAttempts' = 0 \\
 sessionCorrect' = 0
 \end{schema}
 
-A session begins in the introduction phase with the radio off. The radio
-activates when training begins (transitioning to receiving mode).
+A session begins in the introduction phase with the radio off. The precondition
+$phase = completed$ ensures we can only start a new session when no session is
+active (the ``idle'' state). The radio activates when training begins
+(transitioning to receiving mode).
 
 \subsection{Introduction Phase Operations}
 
 \begin{schema}{NextIntroCharacter}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = introduction \\
 introIndex < characterCount \\
@@ -784,7 +926,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{CompleteIntroduction}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = introduction \\
 introIndex = characterCount \\
@@ -807,7 +949,7 @@ During training, the student responds to character prompts. Each response
 (correct, incorrect, or timeout) is recorded.
 
 \begin{schema}{RecordCorrectResponse}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 sessionAttempts' = sessionAttempts + 1 \\
@@ -821,7 +963,7 @@ introIndex' = introIndex
 \end{schema}
 
 \begin{schema}{RecordIncorrectResponse}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 sessionAttempts' = sessionAttempts + 1 \\
@@ -840,7 +982,7 @@ within \emph{responseTimeoutMs} (3 seconds).
 \subsection{Pause and Resume}
 
 \begin{schema}{PauseSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 phase' = paused \\
@@ -854,7 +996,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{ResumeSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = paused \\
 phase' = training \\
@@ -877,7 +1019,7 @@ and transmitting (actively keying). These transitions model the half-duplex
 nature of amateur radio.
 
 \begin{schema}{EnterTransmitMode}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 direction = send \\
@@ -893,7 +1035,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{ExitTransmitMode}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 direction = send \\
@@ -926,9 +1068,9 @@ being produced. The audio output depends on the current radio mode:
 \end{itemize}
 
 \begin{schema}{ActivateTone}
-\Delta SessionState
+\Delta TrainingSession
 \where
-radioMode \neq off \\
+radioMode = transmitting \\
 toneActive = zfalse \\
 toneActive' = ztrue \\
 phase' = phase \\
@@ -940,11 +1082,12 @@ sessionAttempts' = sessionAttempts \\
 sessionCorrect' = sessionCorrect
 \end{schema}
 
-$ActivateTone$ requires the radio to be on (either receiving or transmitting).
+$ActivateTone$ requires the radio to be transmitting---modeling half-duplex
+behavior where sidetone is only generated when the operator keys.
 The precondition $toneActive = zfalse$ prevents double activation.
 
 \begin{schema}{DeactivateTone}
-\Delta SessionState
+\Delta TrainingSession
 \where
 toneActive = ztrue \\
 toneActive' = zfalse \\
@@ -977,10 +1120,11 @@ The session ends automatically when the student achieves proficiency:
 $\geq 90\%$ accuracy over at least $\max(15, 5 \times characterCount)$ attempts.
 
 \begin{schema}{CheckProficiencyMet}
-  \Xi SessionState \\
+  \Xi TrainingSession \\
   proficiencyMet! : ZBOOL
   \where
   phase = training \\
+  sessionAttempts > 0 \\
   \LET minAttempts == \\
   \t1 \IF baseMinimumAttempts \\
   \t2 > attemptsPerCharacter * characterCount \\
@@ -1003,7 +1147,7 @@ calls this after each response to determine whether to end the session.
 \subsection{Session Completion}
 
 \begin{schema}{CompleteSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 phase' = completed \\
@@ -1091,10 +1235,13 @@ This specification has been validated with:
 \begin{itemize}
 \item \textbf{fuzz}: Type-checking passes with no errors
 \item \textbf{probcli -init}: Initialization succeeds
-\item \textbf{probcli -animate}: All operations covered
+\item \textbf{probcli -cbc\_deadlock}: No deadlock states found
+\item \textbf{probcli -cbc\_assertions}: All assertions hold
 \end{itemize}
 
-The flattened state schema and bounded inputs ensure ProB can explore the
-state space without unbounded enumeration warnings.
+The $MODEL\_BOUND$ constant (currently 3) enables finite model checking. Increase
+this value for more thorough exploration at the cost of longer runtimes. The
+unbounded given sets (SESSIONID, TIMESTAMP) can be constrained using probcli's
+\texttt{-p DEFAULT\_SETSIZE} option.
 
 \end{document}
