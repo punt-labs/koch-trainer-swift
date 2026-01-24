@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "additionalDirectories": [
+      "../koch-trainer-worktrees"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
