@@ -48,6 +48,8 @@ struct VocabularyView: View {
                     }
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Vocab.qsoButton)
 
                 Text("Practice realistic ham radio conversations")
                     .font(Typography.caption)
@@ -56,12 +58,14 @@ struct VocabularyView: View {
             .padding(Theme.Spacing.md)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
         .navigationTitle("Vocabulary")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Vocab.view)
     }
 

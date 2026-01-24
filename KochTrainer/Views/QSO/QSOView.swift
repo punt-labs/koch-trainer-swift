@@ -60,6 +60,7 @@ struct QSOView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .accessibilityIdentifier(AccessibilityID.QSO.startModePicker)
 
                     Text(startMode.description)
                         .font(Typography.caption)
@@ -83,6 +84,7 @@ struct QSOView: View {
                         .foregroundColor(.secondary)
                     Text(userCallsign)
                         .font(Typography.headline)
+                        .accessibilityIdentifier(AccessibilityID.QSO.callsignDisplay)
 
                     if settingsStore.settings.userCallsign.isEmpty {
                         Text("Set your callsign in Settings")
@@ -108,11 +110,14 @@ struct QSOView: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.QSO.startButton)
             }
             .padding(Theme.Spacing.lg)
         }
         .navigationTitle("QSO")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier(AccessibilityID.QSO.view)
     }
 
     // MARK: Private
@@ -167,6 +172,7 @@ struct QSOView: View {
             .cornerRadius(12)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(AccessibilityID.QSO.styleCard(style.rawValue))
     }
 }
 

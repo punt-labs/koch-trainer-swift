@@ -110,6 +110,65 @@ enum AccessibilityID {
 
     enum Vocab {
         static let view = "vocab-view"
+        static let qsoButton = "vocab-qso-button"
+        static let commonWordsReceiveButton = "vocab-common-words-receive-button"
+        static let commonWordsSendButton = "vocab-common-words-send-button"
+        static let callsignReceiveButton = "vocab-callsign-receive-button"
+        static let callsignSendButton = "vocab-callsign-send-button"
+    }
+
+    // MARK: - QSO Views
+
+    enum QSO {
+        // QSOView (mode selection)
+        static let view = "qso-view"
+        static let startModePicker = "qso-start-mode-picker"
+        static let startButton = "qso-start-button"
+        static let callsignDisplay = "qso-callsign-display"
+
+        // MorseQSOView (session)
+        static let sessionView = "qso-session-view"
+        static let endButton = "qso-end-button"
+        static let statusBar = "qso-status-bar"
+        static let stationCallsign = "qso-station-callsign"
+        static let turnStatus = "qso-turn-status"
+        static let audioIndicator = "qso-audio-indicator"
+
+        // AI message area
+        static let aiMessageView = "qso-ai-message-view"
+        static let aiTextToggle = "qso-ai-text-toggle"
+        static let revealedText = "qso-revealed-text"
+
+        // User keying area
+        static let userKeyingView = "qso-user-keying-view"
+        static let typedScript = "qso-typed-script"
+        static let currentCharacter = "qso-current-character"
+        static let currentPattern = "qso-current-pattern"
+        static let wpmDisplay = "qso-wpm-display"
+        static let lastKeyedFeedback = "qso-last-keyed-feedback"
+
+        // Input area
+        static let inputArea = "qso-input-area"
+        static let ditButton = "qso-dit-button"
+        static let dahButton = "qso-dah-button"
+        static let keyboardHint = "qso-keyboard-hint"
+
+        // Accuracy footer
+        static let keyedCount = "qso-keyed-count"
+        static let accuracyDisplay = "qso-accuracy-display"
+
+        // Completed view
+        static let completedView = "qso-completed-view"
+        static let completedTitle = "qso-completed-title"
+        static let completedCallsign = "qso-completed-callsign"
+        static let doneButton = "qso-done-button"
+        static let statsCard = "qso-stats-card"
+
+        /// Returns identifier for a QSO style card (e.g., "qso-style-firstContact")
+        static func styleCard(_ style: String) -> String {
+            "qso-style-\(style)"
+        }
+
     }
 
     // MARK: - Settings View

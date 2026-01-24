@@ -58,6 +58,7 @@ struct MorseQSOView: View {
                         viewModel.endSession()
                         dismiss()
                     }
+                    .accessibilityIdentifier(AccessibilityID.QSO.endButton)
                 }
             }
         }
@@ -146,6 +147,7 @@ private struct MorseQSOSessionView: View {
                     .foregroundColor(.secondary)
                 Text(viewModel.theirCallsign.isEmpty ? "Calling CQ..." : viewModel.theirCallsign)
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.QSO.stationCallsign)
             }
 
             Spacer()
@@ -158,6 +160,7 @@ private struct MorseQSOSessionView: View {
                 Text(turnStateText)
                     .font(Typography.caption)
                     .foregroundColor(Theme.Colors.primary)
+                    .accessibilityIdentifier(AccessibilityID.QSO.turnStatus)
             }
 
             // Audio indicator
@@ -165,10 +168,12 @@ private struct MorseQSOSessionView: View {
                 Image(systemName: "speaker.wave.2.fill")
                     .foregroundColor(Theme.Colors.primary)
                     .padding(.leading, Theme.Spacing.sm)
+                    .accessibilityIdentifier(AccessibilityID.QSO.audioIndicator)
             }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.secondaryBackground)
+        .accessibilityIdentifier(AccessibilityID.QSO.statusBar)
     }
 
     // MARK: - AI Message View
@@ -192,6 +197,7 @@ private struct MorseQSOSessionView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.QSO.aiTextToggle)
             }
 
             // Progressive reveal text (or hidden indicator)
@@ -200,6 +206,7 @@ private struct MorseQSOSessionView: View {
                     .font(.system(.body, design: .monospaced))
                     .foregroundColor(Theme.Colors.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier(AccessibilityID.QSO.revealedText)
             } else {
                 Text("Text hidden - listen to copy")
                     .font(Typography.caption)
@@ -211,6 +218,8 @@ private struct MorseQSOSessionView: View {
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.primary.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.QSO.aiMessageView)
     }
 
     // MARK: - User Keying View
@@ -231,6 +240,7 @@ private struct MorseQSOSessionView: View {
                         Text("\(viewModel.currentBlockWPM) WPM")
                             .font(Typography.caption)
                             .foregroundColor(Theme.Colors.primary)
+                            .accessibilityIdentifier(AccessibilityID.QSO.wpmDisplay)
                     }
                 }
 
@@ -239,6 +249,7 @@ private struct MorseQSOSessionView: View {
                     Text(viewModel.typedScript)
                         .font(.system(.body, design: .monospaced))
                         .foregroundColor(Theme.Colors.success)
+                        .accessibilityIdentifier(AccessibilityID.QSO.typedScript)
 
                     if let expected = viewModel.currentExpectedCharacter {
                         Text(String(expected))
@@ -259,11 +270,13 @@ private struct MorseQSOSessionView: View {
                 VStack(spacing: Theme.Spacing.sm) {
                     Text("Current: \(String(expected))")
                         .font(Typography.headline)
+                        .accessibilityIdentifier(AccessibilityID.QSO.currentCharacter)
 
                     Text(viewModel.currentPattern.isEmpty ? "..." : viewModel.currentPattern)
                         .font(.system(size: 24, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                         .frame(height: 32)
+                        .accessibilityIdentifier(AccessibilityID.QSO.currentPattern)
 
                     // Input timeout bar
                     if viewModel.inputTimeRemaining > 0 {
@@ -281,8 +294,11 @@ private struct MorseQSOSessionView: View {
                     Image(systemName: viewModel.lastKeyedWasCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                         .foregroundColor(viewModel.lastKeyedWasCorrect ? Theme.Colors.success : Theme.Colors.error)
                 }
+                .accessibilityIdentifier(AccessibilityID.QSO.lastKeyedFeedback)
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.QSO.userKeyingView)
     }
 
     // MARK: - Input Area
@@ -293,6 +309,7 @@ private struct MorseQSOSessionView: View {
             Text("Keyboard: . or F = dit, - or J = dah")
                 .font(Typography.caption)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.QSO.keyboardHint)
 
             // Paddle buttons
             HStack(spacing: 2) {
@@ -306,6 +323,7 @@ private struct MorseQSOSessionView: View {
                         .background(Theme.Colors.primary.opacity(0.8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.QSO.ditButton)
 
                 Button {
                     viewModel.inputDah()
@@ -317,6 +335,7 @@ private struct MorseQSOSessionView: View {
                         .background(Theme.Colors.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.QSO.dahButton)
             }
             .frame(height: 100)
             .cornerRadius(12)
@@ -324,6 +343,8 @@ private struct MorseQSOSessionView: View {
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.secondaryBackground)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.QSO.inputArea)
     }
 
     // MARK: - Accuracy Footer
@@ -331,8 +352,10 @@ private struct MorseQSOSessionView: View {
     private var accuracyFooter: some View {
         HStack {
             Text("Keyed: \(viewModel.correctCharactersKeyed)/\(viewModel.totalCharactersKeyed)")
+                .accessibilityIdentifier(AccessibilityID.QSO.keyedCount)
             Spacer()
             Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                .accessibilityIdentifier(AccessibilityID.QSO.accuracyDisplay)
         }
         .font(Typography.caption)
         .foregroundColor(.secondary)
@@ -358,10 +381,12 @@ private struct MorseQSOCompletedView: View {
 
                 Text("QSO Complete!")
                     .font(Typography.largeTitle)
+                    .accessibilityIdentifier(AccessibilityID.QSO.completedTitle)
 
                 Text("73 de \(result.theirCallsign)")
                     .font(Typography.headline)
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.QSO.completedCallsign)
             }
 
             Spacer()
@@ -387,6 +412,8 @@ private struct MorseQSOCompletedView: View {
             .padding(Theme.Spacing.lg)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.QSO.statsCard)
 
             Spacer()
 
@@ -394,10 +421,12 @@ private struct MorseQSOCompletedView: View {
                 onDismiss()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.QSO.doneButton)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityIdentifier(AccessibilityID.QSO.completedView)
     }
 }
 
