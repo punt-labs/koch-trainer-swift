@@ -146,14 +146,15 @@ unless explicitly transmitting.
 A training session progresses through distinct phases:
 
 \begin{zed}
-SessionPhase ::= introduction | training | paused | completed
+SessionPhase ::= idle | introduction | training | paused | completed
 \end{zed}
 
 \begin{itemize}
+\item \emph{idle}: No active session (initial state or session cancelled)
 \item \emph{introduction}: Showing unlocked characters with audio playback
 \item \emph{training}: Active call-and-response practice
 \item \emph{paused}: Session suspended mid-training
-\item \emph{completed}: Session ended, results recorded
+\item \emph{completed}: Session ended with results ready to record
 \end{itemize}
 
 %==============================================================================
@@ -372,7 +373,7 @@ introIndex \leq characterCount \\
 sessionCorrect \leq sessionAttempts \\
 sessionAttempts \leq MODEL\_BOUND \\
 % Radio mode constraints (half-duplex behavior)
-phase \in \{introduction, paused, completed\} \implies radioMode = off \\
+phase \in \{idle, introduction, paused, completed\} \implies radioMode = off \\
 (phase = training \land direction = receive) \implies radioMode = receiving \\
 radioMode = transmitting \implies direction = send \\
 % Tone constraints
@@ -424,8 +425,8 @@ receiveInterval' = minInterval \\
 sendInterval' = minInterval \\
 currentStreak' = 0 \\
 longestStreak' = 0 \\
-% Session state initialization (idle - no active session)
-phase' = completed \\
+% Session state initialization (no active session)
+phase' = idle \\
 direction' = receive \\
 radioMode' = off \\
 toneActive' = zfalse \\
@@ -864,7 +865,7 @@ direction? : Direction \\
 level? : \nat
 \where
 % Can only start a new session when no session is active
-phase = completed \\
+phase \in \{idle, completed\} \\
 % Level must match current progress for the chosen direction
 (direction? = receive \land level? = receiveLevel) \\
 \lor (direction? = send \land level? = sendLevel) \\
