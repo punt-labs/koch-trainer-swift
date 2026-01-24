@@ -347,9 +347,13 @@ over at least 20 attempts in a session, they advance to the next level, unlockin
 one additional character.
 
 \begin{schema}{AdvanceReceiveLevel}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+% Can only advance after completing a receive session
+phase = completed \\
+direction = receive \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 receiveLevel < maxLevel \\
@@ -364,9 +368,13 @@ longestStreak' = longestStreak
 \end{schema}
 
 \begin{schema}{AdvanceSendLevel}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+% Can only advance after completing a send session
+phase = completed \\
+direction = send \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 sendLevel < maxLevel \\
@@ -384,9 +392,12 @@ The precondition $receiveLevel < maxLevel$ (or $sendLevel < maxLevel$) ensures
 we cannot advance beyond the 26 available characters.
 
 \begin{schema}{AdvanceEarLevel}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+% Can only advance after completing a session
+phase = completed \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 earLevel < 5 \\
@@ -409,8 +420,10 @@ ear training does not affect spaced repetition scheduling or streaks.
 Each completed session increments the session count for analytics.
 
 \begin{schema}{RecordSession}
+\Xi SessionState \\
 \Delta State
 \where
+phase = completed \\
 sessionCount' = sessionCount + 1 \\
 receiveLevel' = receiveLevel \\
 sendLevel' = sendLevel \\
@@ -442,10 +455,13 @@ over-practice. Low accuracy signals struggle, so we reset to daily practice.
 The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
+  \Xi SessionState \\
   \Delta State \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
+  phase = completed \\
+  direction = receive \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -466,9 +482,12 @@ The middle range maintains the current schedule.
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalMedium}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = receive \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 receiveInterval' = receiveInterval \\
@@ -482,9 +501,12 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalLow}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = receive \\
 accuracy? < 70 \\
 receiveInterval' = minInterval \\
 sendInterval' = sendInterval \\
@@ -503,10 +525,13 @@ allows the habit formation cap to be applied during the first 14 days.
 Symmetric operations exist for send training:
 
 \begin{schema}{UpdateSendIntervalHigh}
+  \Xi SessionState \\
   \Delta State \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
+  phase = completed \\
+  direction = send \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -527,9 +552,12 @@ Symmetric operations exist for send training:
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalMedium}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = send \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 sendInterval' = sendInterval \\
@@ -543,9 +571,12 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalLow}
+\Xi SessionState \\
 \Delta State \\
 accuracy? : \nat
 \where
+phase = completed \\
+direction = send \\
 accuracy? < 70 \\
 sendInterval' = minInterval \\
 receiveInterval' = receiveInterval \\
@@ -598,8 +629,10 @@ Streaks measure consecutive calendar days with at least one completed session.
 They provide motivation through gamification without affecting learning outcomes.
 
 \begin{schema}{IncrementStreak}
+  \Xi SessionState \\
   \Delta State
   \where
+  phase = completed \\
   currentStreak' = currentStreak + 1 \\
   (currentStreak + 1 > longestStreak \\
   \t1 \land longestStreak' = currentStreak + 1) \\
@@ -617,8 +650,10 @@ The streak increments when the student practices on the calendar day following
 their last practice. The longest streak updates if the current streak exceeds it.
 
 \begin{schema}{ResetStreak}
+  \Xi SessionState \\
   \Delta State
   \where
+  phase = completed \\
   currentStreak' = 0 \\
   longestStreak' = longestStreak \\
   receiveInterval' = receiveInterval \\
@@ -637,9 +672,13 @@ Note that the longest streak is preserved---it represents the all-time record.
 During training, each character attempt updates the per-character statistics.
 
 \begin{schema}{RecordReceiveAttempt}
+  \Xi SessionState \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Can only record receive attempts during receive training
+  phase = training \\
+  direction = receive \\
   receiveAttempts' = receiveAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land receiveCorrect' = receiveCorrect + 1) \\
@@ -652,9 +691,13 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordSendAttempt}
+  \Xi SessionState \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Can only record send attempts during send training
+  phase = training \\
+  direction = send \\
   sendAttempts' = sendAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land sendCorrect' = sendCorrect + 1) \\
@@ -667,9 +710,13 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordEarAttempt}
+  \Xi SessionState \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
+  % Ear training requires active training phase
+  % Note: Ear training is a separate mode in the app; this is simplified
+  phase = training \\
   earAttempts' = earAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land earCorrect' = earCorrect + 1) \\
@@ -764,12 +811,14 @@ The \emph{radioMode} models half-duplex radio behavior:
 \subsection{Session Initialization}
 
 \begin{schema}{InitSession}
+\Xi State \\
 SessionState' \\
 direction? : Direction \\
 level? : \nat
 \where
-level? \geq minLevel \\
-level? \leq maxLevel \\
+% Level must match current progress for the chosen direction
+(direction? = receive \land level? = receiveLevel) \\
+\lor (direction? = send \land level? = sendLevel) \\
 phase' = introduction \\
 direction' = direction? \\
 radioMode' = off \\
