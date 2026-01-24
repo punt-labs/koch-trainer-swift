@@ -354,6 +354,9 @@ accuracy? : \nat
 % Can only advance after completing a receive session
 phase = completed \\
 direction = receive \\
+sessionAttempts > 0 \\
+% Accuracy must match session results (avoiding division)
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 receiveLevel < maxLevel \\
@@ -375,6 +378,9 @@ accuracy? : \nat
 % Can only advance after completing a send session
 phase = completed \\
 direction = send \\
+sessionAttempts > 0 \\
+% Accuracy must match session results (avoiding division)
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 sendLevel < maxLevel \\
@@ -398,6 +404,8 @@ accuracy? : \nat
 \where
 % Can only advance after completing a session
 phase = completed \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
 accuracy? \leq 100 \\
 earLevel < 5 \\
@@ -462,6 +470,8 @@ The middle range maintains the current schedule.
   \where
   phase = completed \\
   direction = receive \\
+  sessionAttempts > 0 \\
+  accuracy? * sessionAttempts = sessionCorrect * 100 \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -488,6 +498,8 @@ accuracy? : \nat
 \where
 phase = completed \\
 direction = receive \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 receiveInterval' = receiveInterval \\
@@ -507,6 +519,8 @@ accuracy? : \nat
 \where
 phase = completed \\
 direction = receive \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? < 70 \\
 receiveInterval' = minInterval \\
 sendInterval' = sendInterval \\
@@ -532,6 +546,8 @@ Symmetric operations exist for send training:
   \where
   phase = completed \\
   direction = send \\
+  sessionAttempts > 0 \\
+  accuracy? * sessionAttempts = sessionCorrect * 100 \\
   accuracy? \geq advanceThreshold \\
   accuracy? \leq 100 \\
   \LET effectiveMax == \\
@@ -558,6 +574,8 @@ accuracy? : \nat
 \where
 phase = completed \\
 direction = send \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq 70 \\
 accuracy? < advanceThreshold \\
 sendInterval' = sendInterval \\
@@ -577,6 +595,8 @@ accuracy? : \nat
 \where
 phase = completed \\
 direction = send \\
+sessionAttempts > 0 \\
+accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? < 70 \\
 sendInterval' = minInterval \\
 receiveInterval' = receiveInterval \\
