@@ -118,9 +118,7 @@ final class Radio: @unchecked Sendable {
         _isKeying = false
     }
 
-    // MARK: Private
-
-    // MARK: - Thread-safe State Access
+    // MARK: - Private State
 
     private let lock = NSLock()
     private var _mode: RadioMode = .off
