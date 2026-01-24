@@ -297,7 +297,7 @@ affect level advancement and spaced repetition intervals.
 The central state schema captures all persistent student progress. We flatten
 the schedule fields into the main state for ProB animation compatibility.
 
-\begin{schema}{State}
+\begin{schema}{StudentProgress}
 receiveLevel : \nat \\
 sendLevel : \nat \\
 earLevel : \nat \\
@@ -349,13 +349,14 @@ session (either direction counts). The longest streak persists as a personal
 record for motivation.
 
 %==============================================================================
-\section{Session State}
+\section{Training Session}
 %==============================================================================
 
-Session state is separate from persistent progress state. In the implementation,
-this lives in the ViewModel; here we model it as a distinct schema.
+Training session state is separate from persistent student progress. In the
+implementation, this lives in the ViewModel; here we model it as a distinct
+schema.
 
-\begin{schema}{SessionState}
+\begin{schema}{TrainingSession}
 phase : SessionPhase \\
 direction : Direction \\
 radioMode : RadioMode \\
@@ -391,15 +392,17 @@ The \emph{radioMode} models half-duplex radio behavior:
 \end{itemize}
 
 %==============================================================================
-\section{Machine State}
+\section{Koch Trainer State}
 %==============================================================================
 
-The complete machine state combines persistent progress with session state.
-This gives ProB a single state schema to track during animation.
+The complete machine state combines persistent student progress with training
+session state. Defining this as an explicit schema (rather than using schema
+conjunction) ensures ProB tracks all variables during animation.
 
-\begin{zed}
-MachineState \defs State \land SessionState
-\end{zed}
+\begin{schema}{KochTrainerState}
+StudentProgress \\
+TrainingSession
+\end{schema}
 
 %==============================================================================
 \section{Initialization}
@@ -410,7 +413,7 @@ no streak history. The session state initializes to an ``idle'' configuration
 representing no active session.
 
 \begin{schema}{Init}
-MachineState'
+KochTrainerState'
 \where
 % Persistent state initialization
 receiveLevel' = minLevel \\
@@ -443,8 +446,8 @@ over at least 20 attempts in a session, they advance to the next level, unlockin
 one additional character.
 
 \begin{schema}{AdvanceReceiveLevel}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 % Can only advance after completing a receive session
@@ -467,8 +470,8 @@ longestStreak' = longestStreak
 \end{schema}
 
 \begin{schema}{AdvanceSendLevel}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 % Can only advance after completing a send session
@@ -494,8 +497,8 @@ The precondition $receiveLevel < maxLevel$ (or $sendLevel < maxLevel$) ensures
 we cannot advance beyond the 26 available characters.
 
 \begin{schema}{AdvanceEarLevel}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 % Can only advance after completing a session
@@ -524,8 +527,8 @@ ear training does not affect spaced repetition scheduling or streaks.
 Each completed session increments the session count for analytics.
 
 \begin{schema}{RecordSession}
-\Xi SessionState \\
-\Delta State
+\Xi TrainingSession \\
+\Delta StudentProgress
 \where
 phase = completed \\
 sessionCount' = sessionCount + 1 \\
@@ -559,8 +562,8 @@ over-practice. Low accuracy signals struggle, so we reset to daily practice.
 The middle range maintains the current schedule.
 
 \begin{schema}{UpdateReceiveIntervalHigh}
-  \Xi SessionState \\
-  \Delta State \\
+  \Xi TrainingSession \\
+  \Delta StudentProgress \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
@@ -588,8 +591,8 @@ The middle range maintains the current schedule.
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalMedium}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 phase = completed \\
@@ -609,8 +612,8 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateReceiveIntervalLow}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 phase = completed \\
@@ -635,8 +638,8 @@ allows the habit formation cap to be applied during the first 14 days.
 Symmetric operations exist for send training:
 
 \begin{schema}{UpdateSendIntervalHigh}
-  \Xi SessionState \\
-  \Delta State \\
+  \Xi TrainingSession \\
+  \Delta StudentProgress \\
   accuracy? : \nat \\
   daysSinceStart? : \nat
   \where
@@ -664,8 +667,8 @@ Symmetric operations exist for send training:
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalMedium}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 phase = completed \\
@@ -685,8 +688,8 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{UpdateSendIntervalLow}
-\Xi SessionState \\
-\Delta State \\
+\Xi TrainingSession \\
+\Delta StudentProgress \\
 accuracy? : \nat
 \where
 phase = completed \\
@@ -710,7 +713,7 @@ If a student misses practice for more than twice their current interval,
 skill decay is assumed and the interval resets to daily practice.
 
 \begin{schema}{ResetReceiveIntervalOnMissedPractice}
-\Delta State \\
+\Delta StudentProgress \\
 daysSinceLastPractice? : \nat
 \where
 daysSinceLastPractice? > receiveInterval * missedPracticeMultiplier \\
@@ -725,7 +728,7 @@ sessionCount' = sessionCount
 \end{schema}
 
 \begin{schema}{ResetSendIntervalOnMissedPractice}
-\Delta State \\
+\Delta StudentProgress \\
 daysSinceLastPractice? : \nat
 \where
 daysSinceLastPractice? > sendInterval * missedPracticeMultiplier \\
@@ -745,8 +748,8 @@ Streaks measure consecutive calendar days with at least one completed session.
 They provide motivation through gamification without affecting learning outcomes.
 
 \begin{schema}{IncrementStreak}
-  \Xi SessionState \\
-  \Delta State
+  \Xi TrainingSession \\
+  \Delta StudentProgress
   \where
   phase = completed \\
   currentStreak' = currentStreak + 1 \\
@@ -766,8 +769,8 @@ The streak increments when the student practices on the calendar day following
 their last practice. The longest streak updates if the current streak exceeds it.
 
 \begin{schema}{ResetStreak}
-  \Xi SessionState \\
-  \Delta State
+  \Xi TrainingSession \\
+  \Delta StudentProgress
   \where
   phase = completed \\
   currentStreak' = 0 \\
@@ -788,7 +791,7 @@ Note that the longest streak is preserved---it represents the all-time record.
 During training, each character attempt updates the per-character statistics.
 
 \begin{schema}{RecordReceiveAttempt}
-  \Xi SessionState \\
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
@@ -807,7 +810,7 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordSendAttempt}
-  \Xi SessionState \\
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
@@ -826,7 +829,7 @@ During training, each character attempt updates the per-character statistics.
 \end{schema}
 
 \begin{schema}{RecordEarAttempt}
-  \Xi SessionState \\
+  \Xi TrainingSession \\
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
@@ -855,8 +858,8 @@ between session phases.
 \subsection{Session Initialization}
 
 \begin{schema}{InitSession}
-\Xi State \\
-\Delta SessionState \\
+\Xi StudentProgress \\
+\Delta TrainingSession \\
 direction? : Direction \\
 level? : \nat
 \where
@@ -883,7 +886,7 @@ active (the ``idle'' state). The radio activates when training begins
 \subsection{Introduction Phase Operations}
 
 \begin{schema}{NextIntroCharacter}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = introduction \\
 introIndex < characterCount \\
@@ -898,7 +901,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{CompleteIntroduction}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = introduction \\
 introIndex = characterCount \\
@@ -921,7 +924,7 @@ During training, the student responds to character prompts. Each response
 (correct, incorrect, or timeout) is recorded.
 
 \begin{schema}{RecordCorrectResponse}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 sessionAttempts' = sessionAttempts + 1 \\
@@ -935,7 +938,7 @@ introIndex' = introIndex
 \end{schema}
 
 \begin{schema}{RecordIncorrectResponse}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 sessionAttempts' = sessionAttempts + 1 \\
@@ -954,7 +957,7 @@ within \emph{responseTimeoutMs} (3 seconds).
 \subsection{Pause and Resume}
 
 \begin{schema}{PauseSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 phase' = paused \\
@@ -968,7 +971,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{ResumeSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = paused \\
 phase' = training \\
@@ -991,7 +994,7 @@ and transmitting (actively keying). These transitions model the half-duplex
 nature of amateur radio.
 
 \begin{schema}{EnterTransmitMode}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 direction = send \\
@@ -1007,7 +1010,7 @@ sessionCorrect' = sessionCorrect
 \end{schema}
 
 \begin{schema}{ExitTransmitMode}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 direction = send \\
@@ -1040,7 +1043,7 @@ being produced. The audio output depends on the current radio mode:
 \end{itemize}
 
 \begin{schema}{ActivateTone}
-\Delta SessionState
+\Delta TrainingSession
 \where
 radioMode = transmitting \\
 toneActive = zfalse \\
@@ -1059,7 +1062,7 @@ behavior where sidetone is only generated when the operator keys.
 The precondition $toneActive = zfalse$ prevents double activation.
 
 \begin{schema}{DeactivateTone}
-\Delta SessionState
+\Delta TrainingSession
 \where
 toneActive = ztrue \\
 toneActive' = zfalse \\
@@ -1092,7 +1095,7 @@ The session ends automatically when the student achieves proficiency:
 $\geq 90\%$ accuracy over at least $\max(15, 5 \times characterCount)$ attempts.
 
 \begin{schema}{CheckProficiencyMet}
-  \Xi SessionState \\
+  \Xi TrainingSession \\
   proficiencyMet! : ZBOOL
   \where
   phase = training \\
@@ -1119,7 +1122,7 @@ calls this after each response to determine whether to end the session.
 \subsection{Session Completion}
 
 \begin{schema}{CompleteSession}
-\Delta SessionState
+\Delta TrainingSession
 \where
 phase = training \\
 phase' = completed \\
