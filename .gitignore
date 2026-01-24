@@ -119,3 +119,4 @@ docs/*.mf
 docs/*.pk
 docs/*.tfm
 docs/*.sty
+docs/*.*pk
