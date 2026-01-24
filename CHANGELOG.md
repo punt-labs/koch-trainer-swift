@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Ear Training Mode**: New training mode for pattern recognition—hear Morse audio and reproduce the pattern using dit/dah buttons. Progression by pattern length (1-5 elements) rather than Koch order.
 - **Training Flow UI Tests**: Comprehensive UI test coverage for Receive, Send, and Ear training flows using page object pattern
 - **Data Migration Safety**: Progress data is now protected with rolling backups and graceful degradation. If data becomes corrupted, the app recovers from backups instead of losing all progress. Schema versioning enables safe future updates.
 - **Pause and Resume Training**: Paused sessions persist and automatically restore when returning to training (within 24 hours)
@@ -28,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Character grid cells now use circular backgrounds for visual consistency
 - QSO text reveal now syncs with audio playback (character appears as it plays)
 - **Realistic QSB fading**: Band conditions fading now uses filtered random noise instead of predictable sine wave, better simulating real ionospheric conditions
+- **Pink noise for QRN**: Atmospheric noise now uses pink noise filter for more realistic HF band simulation
+- **Continuous band audio**: Background noise plays continuously with half-duplex radio behavior (noise fades during transmission)
 
 ### Fixed
 - **Accessibility identifier inheritance**: Training view elements now correctly expose their own identifiers in the accessibility tree (fixed by adding `.accessibilityElement(children: .contain)` to container views)
