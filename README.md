@@ -4,9 +4,9 @@ An iOS app for learning Morse code using the Koch method—the scientifically-pr
 
 <p align="center">
   <img src="docs/screenshot-learn.png" alt="Learn" width="180">
+  <img src="docs/screenshot-ear.png" alt="Ear Training" width="180">
   <img src="docs/screenshot-receive.png" alt="Receive Training" width="180">
   <img src="docs/screenshot-send.png" alt="Send Training" width="180">
-  <img src="docs/screenshot-ear.png" alt="Ear Training" width="180">
 </p>
 <p align="center">
   <img src="docs/screenshot-practice.png" alt="Practice" width="180">
