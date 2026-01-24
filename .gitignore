@@ -106,3 +106,16 @@ Thumbs.db
 # Local TODO/planning files
 .TODO.md
 TestResults.xcresult
+
+# LaTeX build                                                                                                                                     
+  artifacts
+docs/*.aux
+docs/*.fuzz
+docs/*.log
+docs/*.out
+docs/*.synctex.gz
+docs/*.toc
+docs/*.mf
+docs/*.pk
+docs/*.tfm
+docs/*.sty
