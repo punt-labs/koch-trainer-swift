@@ -95,16 +95,18 @@ and level numbers 1--26 implicitly identify the character set unlocked at each l
 
 \subsection{Training Direction}
 
-Training occurs in two distinct directions, each developing a different skill:
+Training occurs in three distinct directions, each developing a different skill:
 
 \begin{zed}
-Direction ::= receive | send
+Direction ::= receive | send | ear
 \end{zed}
 
 In \emph{receive} mode, the student hears Morse audio and types the corresponding
 letter---training auditory pattern recognition. In \emph{send} mode, the student
 sees a letter and keys the Morse pattern using dit/dah inputs---training motor
-memory and timing.
+memory and timing. In \emph{ear} mode, the student hears a Morse pattern and
+reproduces it by tapping dit/dah---training the ear-to-hand reflex without
+letter identification.
 
 These skills progress independently. A student may excel at receiving while
 struggling with sending, or vice versa. Separate tracking prevents frustration
@@ -502,8 +504,9 @@ we cannot advance beyond the 26 available characters.
 \Delta StudentProgress \\
 accuracy? : \nat
 \where
-% Can only advance after completing a session
+% Can only advance after completing an ear training session
 phase = completed \\
+direction = ear \\
 sessionAttempts > 0 \\
 accuracy? * sessionAttempts = sessionCorrect * 100 \\
 accuracy? \geq advanceThreshold \\
@@ -834,9 +837,9 @@ During training, each character attempt updates the per-character statistics.
   \Delta CharacterStat \\
   correct? : ZBOOL
   \where
-  % Ear training requires active training phase
-  % Note: Ear training is a separate mode in the app; this is simplified
+  % Ear training requires active ear training session
   phase = training \\
+  direction = ear \\
   earAttempts' = earAttempts + 1 \\
   (correct? = ztrue \\
   \t1 \land earCorrect' = earCorrect + 1) \\
