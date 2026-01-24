@@ -120,110 +120,108 @@ struct EarTrainingPhaseView: View {
     @ObservedObject var viewModel: EarTrainingViewModel
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            // Level and progress display
-            HStack {
-                Text("Level \(viewModel.currentLevel)/\(MorseCode.maxEarTrainingLevel)")
-                    .font(Typography.headline)
-                Spacer()
-                Text(viewModel.proficiencyProgress)
-                    .font(Typography.body)
+        ScrollView {
+            VStack(spacing: Theme.Spacing.lg) {
+                // Level and progress display
+                HStack {
+                    Text("Level \(viewModel.currentLevel)/\(MorseCode.maxEarTrainingLevel)")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text(viewModel.proficiencyProgress)
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                        .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
+                }
+
+                // Main display area - fixed slots prevent layout shifts
+                VStack(spacing: Theme.Spacing.md) {
+                    // Instruction or feedback
+                    if let feedback = viewModel.lastFeedback {
+                        EarFeedbackView(feedback: feedback)
+                    } else if viewModel.isWaitingForInput {
+                        Text("Reproduce the pattern")
+                            .font(Typography.headline)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Listen...")
+                            .font(Typography.headline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // User's current pattern input
+                    Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
+                        .font(.system(size: 48, weight: .bold, design: .monospaced))
+                        .foregroundColor(Theme.Colors.primary)
+                        .frame(height: 60)
+                        .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
+
+                    // Progress bar (always present, opacity controlled)
+                    TimeoutProgressBar(progress: viewModel.inputProgress)
+                        .frame(height: 8)
+                        .padding(.horizontal, Theme.Spacing.xl)
+                        .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
+                        .accessibilityIdentifier(AccessibilityID.Training.progressBar)
+                }
+                .frame(height: 200)
+
+                // Keyboard hint
+                Text("Keyboard: . or F = dit, - or J = dah")
+                    .font(Typography.caption)
                     .foregroundColor(.secondary)
-                    .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
-            }
 
-            Spacer()
+                // Paddle area
+                HStack(spacing: 2) {
+                    // Dit button
+                    Button {
+                        viewModel.inputDit()
+                    } label: {
+                        Text("dit")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Theme.Colors.primary.opacity(0.8))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!viewModel.isWaitingForInput)
+                    .accessibilityIdentifier(AccessibilityID.Send.ditButton)
 
-            // Main display area - fixed slots prevent layout shifts
-            VStack(spacing: Theme.Spacing.md) {
-                // Instruction or feedback
-                if let feedback = viewModel.lastFeedback {
-                    EarFeedbackView(feedback: feedback)
-                } else if viewModel.isWaitingForInput {
-                    Text("Reproduce the pattern")
-                        .font(Typography.headline)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text("Listen...")
-                        .font(Typography.headline)
-                        .foregroundColor(.secondary)
+                    // Dah button
+                    Button {
+                        viewModel.inputDah()
+                    } label: {
+                        Text("dah")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Theme.Colors.primary)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!viewModel.isWaitingForInput)
+                    .accessibilityIdentifier(AccessibilityID.Send.dahButton)
                 }
+                .frame(height: 120)
+                .cornerRadius(12)
+                .clipped()
 
-                // User's current pattern input
-                Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(Theme.Colors.primary)
-                    .frame(height: 60)
-                    .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
-
-                // Progress bar (always present, opacity controlled)
-                TimeoutProgressBar(progress: viewModel.inputProgress)
-                    .frame(height: 8)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                    .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
-                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
-            }
-            .frame(height: 200)
-
-            Spacer()
-
-            // Keyboard hint
-            Text("Keyboard: . or F = dit, - or J = dah")
-                .font(Typography.caption)
-                .foregroundColor(.secondary)
-
-            // Paddle area
-            HStack(spacing: 2) {
-                // Dit button
-                Button {
-                    viewModel.inputDit()
-                } label: {
-                    Text("dit")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Theme.Colors.primary.opacity(0.8))
+                // Score display
+                HStack {
+                    Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                        .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
+                    Spacer()
+                    Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                        .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
                 }
-                .buttonStyle(.plain)
-                .disabled(!viewModel.isWaitingForInput)
-                .accessibilityIdentifier(AccessibilityID.Send.ditButton)
+                .font(Typography.body)
 
-                // Dah button
-                Button {
-                    viewModel.inputDah()
-                } label: {
-                    Text("dah")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Theme.Colors.primary)
+                // Pause button
+                Button("Pause") {
+                    viewModel.pause()
                 }
-                .buttonStyle(.plain)
-                .disabled(!viewModel.isWaitingForInput)
-                .accessibilityIdentifier(AccessibilityID.Send.dahButton)
+                .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
             }
-            .frame(height: 120)
-            .cornerRadius(12)
-            .clipped()
-
-            // Score display
-            HStack {
-                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
-                    .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
-                Spacer()
-                Text("Accuracy: \(viewModel.accuracyPercentage)%")
-                    .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
-            }
-            .font(Typography.body)
-
-            // Pause button
-            Button("Pause") {
-                viewModel.pause()
-            }
-            .buttonStyle(SecondaryButtonStyle())
-            .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
+            .padding(Theme.Spacing.lg)
         }
-        .padding(Theme.Spacing.lg)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }

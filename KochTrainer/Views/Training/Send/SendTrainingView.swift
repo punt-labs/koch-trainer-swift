@@ -143,113 +143,111 @@ struct SendTrainingPhaseView: View {
     @ObservedObject var viewModel: SendTrainingViewModel
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            // Progress toward proficiency
-            Text(viewModel.proficiencyProgress)
-                .font(Typography.body)
-                .foregroundColor(.secondary)
-                .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
+        ScrollView {
+            VStack(spacing: Theme.Spacing.lg) {
+                // Progress toward proficiency
+                Text(viewModel.proficiencyProgress)
+                    .font(Typography.body)
+                    .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.Training.proficiencyProgress)
 
-            Spacer()
-
-            // Main display area - fixed slots prevent layout shifts
-            VStack(spacing: 0) {
-                // Slot 1: Character (fixed height)
-                Group {
-                    if let feedback = viewModel.lastFeedback {
-                        Text(String(feedback.expectedCharacter))
-                            .font(.system(size: 100, weight: .bold, design: .rounded))
-                            .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
-                    } else {
-                        Text(String(viewModel.targetCharacter))
-                            .font(.system(size: 100, weight: .bold, design: .rounded))
-                            .foregroundColor(Theme.Colors.primary)
+                // Main display area - fixed slots prevent layout shifts
+                VStack(spacing: 0) {
+                    // Slot 1: Character (fixed height)
+                    Group {
+                        if let feedback = viewModel.lastFeedback {
+                            Text(String(feedback.expectedCharacter))
+                                .font(.system(size: 100, weight: .bold, design: .rounded))
+                                .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
+                        } else {
+                            Text(String(viewModel.targetCharacter))
+                                .font(.system(size: 100, weight: .bold, design: .rounded))
+                                .foregroundColor(Theme.Colors.primary)
+                        }
                     }
+                    .frame(height: 120)
+                    .accessibilityIdentifier(AccessibilityID.Training.characterDisplay)
+
+                    // Slot 2: Secondary content (fixed height)
+                    Group {
+                        if let feedback = viewModel.lastFeedback {
+                            SendFeedbackMessageView(feedback: feedback)
+                        } else {
+                            Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
+                                .font(.system(size: 36, weight: .medium, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
+                        }
+                    }
+                    .frame(height: 56)
+                    .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
+
+                    // Slot 3: Progress bar (always present, opacity controlled)
+                    TimeoutProgressBar(progress: viewModel.inputProgress)
+                        .frame(height: 8)
+                        .padding(.horizontal, Theme.Spacing.xl)
+                        .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
+                        .accessibilityIdentifier(AccessibilityID.Training.progressBar)
+                }
+                .frame(height: 200)
+
+                // Keyboard hint
+                Text("Keyboard: . or F = dit, - or J = dah")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.Send.keyboardHint)
+
+                // Paddle area
+                HStack(spacing: 2) {
+                    // Dit button
+                    Button {
+                        viewModel.inputDit()
+                    } label: {
+                        Text("dit")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Theme.Colors.primary.opacity(0.8))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier(AccessibilityID.Send.ditButton)
+
+                    // Dah button
+                    Button {
+                        viewModel.inputDah()
+                    } label: {
+                        Text("dah")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Theme.Colors.primary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier(AccessibilityID.Send.dahButton)
                 }
                 .frame(height: 120)
-                .accessibilityIdentifier(AccessibilityID.Training.characterDisplay)
+                .cornerRadius(12)
+                .clipped()
 
-                // Slot 2: Secondary content (fixed height)
-                Group {
-                    if let feedback = viewModel.lastFeedback {
-                        SendFeedbackMessageView(feedback: feedback)
-                    } else {
-                        Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
-                            .font(.system(size: 36, weight: .medium, design: .monospaced))
-                            .foregroundColor(.secondary)
-                            .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
-                    }
+                // Score display
+                HStack {
+                    Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                        .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
+                    Spacer()
+                    Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                        .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
                 }
-                .frame(height: 56)
-                .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
+                .font(Typography.body)
 
-                // Slot 3: Progress bar (always present, opacity controlled)
-                TimeoutProgressBar(progress: viewModel.inputProgress)
-                    .frame(height: 8)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                    .opacity(viewModel.inputTimeRemaining > 0 ? 1 : 0)
-                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
-            }
-            .frame(height: 200)
-
-            Spacer()
-
-            // Keyboard hint
-            Text("Keyboard: . or F = dit, - or J = dah")
-                .font(Typography.caption)
-                .foregroundColor(.secondary)
-                .accessibilityIdentifier(AccessibilityID.Send.keyboardHint)
-
-            // Paddle area
-            HStack(spacing: 2) {
-                // Dit button
-                Button {
-                    viewModel.inputDit()
-                } label: {
-                    Text("dit")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Theme.Colors.primary.opacity(0.8))
+                // Pause button
+                Button("Pause") {
+                    viewModel.pause()
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(AccessibilityID.Send.ditButton)
-
-                // Dah button
-                Button {
-                    viewModel.inputDah()
-                } label: {
-                    Text("dah")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Theme.Colors.primary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(AccessibilityID.Send.dahButton)
+                .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
             }
-            .frame(height: 120)
-            .cornerRadius(12)
-            .clipped()
-
-            // Score display
-            HStack {
-                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
-                    .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
-                Spacer()
-                Text("Accuracy: \(viewModel.accuracyPercentage)%")
-                    .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
-            }
-            .font(Typography.body)
-
-            // Pause button
-            Button("Pause") {
-                viewModel.pause()
-            }
-            .buttonStyle(SecondaryButtonStyle())
-            .accessibilityIdentifier(AccessibilityID.Training.pauseButton)
+            .padding(Theme.Spacing.lg)
         }
-        .padding(Theme.Spacing.lg)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
