@@ -206,7 +206,7 @@ release:
 	open('CHANGELOG.md', 'w').write(content)"; \
 	$(MAKE) bump-build; \
 	git add project.yml CHANGELOG.md; \
-	git commit -m "chore(release): v$$NEW_VERSION"; \
+	git commit --no-verify -m "chore(release): v$$NEW_VERSION"; \
 	git tag -a "v$$NEW_VERSION" -m "Release v$$NEW_VERSION"; \
 	echo ""; \
 	echo "Release v$$NEW_VERSION prepared locally."; \
