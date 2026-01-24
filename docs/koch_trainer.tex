@@ -141,6 +141,21 @@ When the radio is on and the operator is not transmitting, they are receiving.
 This models real amateur radio behavior where the receiver is always active
 unless explicitly transmitting.
 
+\subsection{Session Phase}
+
+A training session progresses through distinct phases:
+
+\begin{zed}
+SessionPhase ::= introduction | training | paused | completed
+\end{zed}
+
+\begin{itemize}
+\item \emph{introduction}: Showing unlocked characters with audio playback
+\item \emph{training}: Active call-and-response practice
+\item \emph{paused}: Session suspended mid-training
+\item \emph{completed}: Session ended, results recorded
+\end{itemize}
+
 %==============================================================================
 \section{Global Constants}
 %==============================================================================
@@ -189,6 +204,23 @@ MODEL\_BOUND = 3
 
 When this specification refers to $MODEL\_BOUND$, understand that the constraint
 exists for the model checker, not the implementation.
+
+\subsection{Session Constants}
+
+\begin{axdef}
+proficiencyThreshold : \nat \\
+baseMinimumAttempts : \nat \\
+attemptsPerCharacter : \nat \\
+responseTimeoutMs : \nat
+\where
+proficiencyThreshold = 90 \\
+baseMinimumAttempts = 15 \\
+attemptsPerCharacter = 5 \\
+responseTimeoutMs = 3000
+\end{axdef}
+
+The proficiency threshold (90\%) matches the level advancement threshold.
+Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
 
 %==============================================================================
 \section{Character Statistics}
@@ -315,6 +347,48 @@ adapt based on performance, implementing a simplified spaced repetition algorith
 The streak tracks consecutive \emph{calendar days} with at least one completed
 session (either direction counts). The longest streak persists as a personal
 record for motivation.
+
+%==============================================================================
+\section{Session State}
+%==============================================================================
+
+Session state is separate from persistent progress state. In the implementation,
+this lives in the ViewModel; here we model it as a distinct schema.
+
+\begin{schema}{SessionState}
+phase : SessionPhase \\
+direction : Direction \\
+radioMode : RadioMode \\
+toneActive : ZBOOL \\
+characterCount : \nat \\
+introIndex : \nat \\
+sessionAttempts : \nat \\
+sessionCorrect : \nat
+\where
+characterCount \geq 1 \\
+characterCount \leq maxLevel \\
+introIndex \leq characterCount \\
+sessionCorrect \leq sessionAttempts \\
+sessionAttempts \leq MODEL\_BOUND \\
+% Radio mode constraints (half-duplex behavior)
+phase \in \{introduction, paused, completed\} \implies radioMode = off \\
+(phase = training \land direction = receive) \implies radioMode = receiving \\
+radioMode = transmitting \implies direction = send \\
+% Tone constraints
+radioMode = off \implies toneActive = zfalse
+\end{schema}
+
+The \emph{characterCount} is the number of unlocked characters for this session's
+direction (equal to the current level). The \emph{introIndex} tracks progress
+through the introduction phase.
+
+The \emph{radioMode} models half-duplex radio behavior:
+\begin{itemize}
+\item During introduction, pause, or completion: radio is off (no audio)
+\item During receive training: radio always receiving (user listens to incoming Morse)
+\item During send training: user toggles between receiving (waiting) and transmitting (keying)
+\item Transmitting is only valid in send mode (cannot transmit during receive training)
+\end{itemize}
 
 %==============================================================================
 \section{Initialization}
@@ -752,81 +826,9 @@ During training, each character attempt updates the per-character statistics.
 \section{Session Flow}
 %==============================================================================
 
-This section models the state machine for training sessions. While persistent
-state (levels, streaks, intervals) survives across sessions, session state
-exists only during active training.
-
-\subsection{Session Phase}
-
-A training session progresses through distinct phases:
-
-\begin{zed}
-SessionPhase ::= introduction | training | paused | completed
-\end{zed}
-
-\begin{itemize}
-\item \emph{introduction}: Showing unlocked characters with audio playback
-\item \emph{training}: Active call-and-response practice
-\item \emph{paused}: Session suspended mid-training
-\item \emph{completed}: Session ended, results recorded
-\end{itemize}
-
-\subsection{Session Constants}
-
-\begin{axdef}
-proficiencyThreshold : \nat \\
-baseMinimumAttempts : \nat \\
-attemptsPerCharacter : \nat \\
-responseTimeoutMs : \nat
-\where
-proficiencyThreshold = 90 \\
-baseMinimumAttempts = 15 \\
-attemptsPerCharacter = 5 \\
-responseTimeoutMs = 3000
-\end{axdef}
-
-The proficiency threshold (90\%) matches the level advancement threshold.
-Minimum attempts scale with character count: $\max(15, 5 \times characterCount)$.
-
-\subsection{Session State}
-
-Session state is separate from persistent progress state. In the implementation,
-this lives in the ViewModel; here we model it as a distinct schema.
-
-\begin{schema}{SessionState}
-phase : SessionPhase \\
-direction : Direction \\
-radioMode : RadioMode \\
-toneActive : ZBOOL \\
-characterCount : \nat \\
-introIndex : \nat \\
-sessionAttempts : \nat \\
-sessionCorrect : \nat
-\where
-characterCount \geq 1 \\
-characterCount \leq maxLevel \\
-introIndex \leq characterCount \\
-sessionCorrect \leq sessionAttempts \\
-sessionAttempts \leq MODEL\_BOUND \\
-% Radio mode constraints (half-duplex behavior)
-phase \in \{introduction, paused, completed\} \implies radioMode = off \\
-(phase = training \land direction = receive) \implies radioMode = receiving \\
-radioMode = transmitting \implies direction = send \\
-% Tone constraints
-radioMode = off \implies toneActive = zfalse
-\end{schema}
-
-The \emph{characterCount} is the number of unlocked characters for this session's
-direction (equal to the current level). The \emph{introIndex} tracks progress
-through the introduction phase.
-
-The \emph{radioMode} models half-duplex radio behavior:
-\begin{itemize}
-\item During introduction, pause, or completion: radio is off (no audio)
-\item During receive training: radio always receiving (user listens to incoming Morse)
-\item During send training: user toggles between receiving (waiting) and transmitting (keying)
-\item Transmitting is only valid in send mode (cannot transmit during receive training)
-\end{itemize}
+This section models the operations for training sessions. The $SessionState$
+schema was defined earlier; here we specify the operations that transition
+between session phases.
 
 \subsection{Session Initialization}
 
