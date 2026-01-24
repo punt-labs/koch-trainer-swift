@@ -391,15 +391,28 @@ The \emph{radioMode} models half-duplex radio behavior:
 \end{itemize}
 
 %==============================================================================
+\section{Machine State}
+%==============================================================================
+
+The complete machine state combines persistent progress with session state.
+This gives ProB a single state schema to track during animation.
+
+\begin{zed}
+MachineState \defs State \land SessionState
+\end{zed}
+
+%==============================================================================
 \section{Initialization}
 %==============================================================================
 
 A new student begins at level 1 in all directions with 1-day intervals and
-no streak history.
+no streak history. The session state initializes to an ``idle'' configuration
+representing no active session.
 
 \begin{schema}{Init}
-State'
+MachineState'
 \where
+% Persistent state initialization
 receiveLevel' = minLevel \\
 sendLevel' = minLevel \\
 earLevel' = 1 \\
@@ -407,7 +420,16 @@ sessionCount' = 0 \\
 receiveInterval' = minInterval \\
 sendInterval' = minInterval \\
 currentStreak' = 0 \\
-longestStreak' = 0
+longestStreak' = 0 \\
+% Session state initialization (idle - no active session)
+phase' = completed \\
+direction' = receive \\
+radioMode' = off \\
+toneActive' = zfalse \\
+characterCount' = minLevel \\
+introIndex' = 0 \\
+sessionAttempts' = 0 \\
+sessionCorrect' = 0
 \end{schema}
 
 %==============================================================================
@@ -834,10 +856,12 @@ between session phases.
 
 \begin{schema}{InitSession}
 \Xi State \\
-SessionState' \\
+\Delta SessionState \\
 direction? : Direction \\
 level? : \nat
 \where
+% Can only start a new session when no session is active
+phase = completed \\
 % Level must match current progress for the chosen direction
 (direction? = receive \land level? = receiveLevel) \\
 \lor (direction? = send \land level? = sendLevel) \\
@@ -851,8 +875,10 @@ sessionAttempts' = 0 \\
 sessionCorrect' = 0
 \end{schema}
 
-A session begins in the introduction phase with the radio off. The radio
-activates when training begins (transitioning to receiving mode).
+A session begins in the introduction phase with the radio off. The precondition
+$phase = completed$ ensures we can only start a new session when no session is
+active (the ``idle'' state). The radio activates when training begins
+(transitioning to receiving mode).
 
 \subsection{Introduction Phase Operations}
 
