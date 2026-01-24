@@ -202,8 +202,7 @@ release:
 	content = open('CHANGELOG.md').read(); \
 	content = re.sub(r'## \[Unreleased\]', '## [Unreleased]\\n\\n## [$$NEW_VERSION] - $$DATE', content, count=1); \
 	content = re.sub(r'\[Unreleased\]: (.*/compare/)v[0-9.]+\.\.\.HEAD', '[Unreleased]: \\1v$$NEW_VERSION...HEAD', content); \
-	if '[$$NEW_VERSION]:' not in content and '$$PREV_VERSION' != '': \
-	    content = re.sub(r'(\[Unreleased\]: [^\n]+)', '\\1\\n[$$NEW_VERSION]: https://github.com/punt-labs/koch-trainer-swift/compare/v$$PREV_VERSION...v$$NEW_VERSION', content); \
+	content = re.sub(r'(\[Unreleased\]: [^\n]+)', '\\1\\n[$$NEW_VERSION]: https://github.com/punt-labs/koch-trainer-swift/compare/v$$PREV_VERSION...v$$NEW_VERSION', content) if '[$$NEW_VERSION]:' not in content and '$$PREV_VERSION' != '' else content; \
 	open('CHANGELOG.md', 'w').write(content)"; \
 	$(MAKE) bump-build; \
 	git add project.yml CHANGELOG.md; \
