@@ -30,11 +30,13 @@ final class ToneGenerator: @unchecked Sendable {
     /// Band conditions processor for simulating HF conditions (QRN, QSB, QRM)
     let bandConditionsProcessor = BandConditionsProcessor()
 
-    /// Current radio mode (thread-safe read)
+    /// Half-duplex radio state machine for mode management.
+    /// Enforces Z specification invariants via throwing methods.
+    let radio = Radio()
+
+    /// Current radio mode (thread-safe read via Radio's internal lock)
     var radioMode: RadioMode {
-        radioModeLock.lock()
-        defer { radioModeLock.unlock() }
-        return _radioMode
+        radio.mode
     }
 
     /// Whether a tone is currently being generated (for continuous mode)
@@ -138,10 +140,28 @@ final class ToneGenerator: @unchecked Sendable {
     /// - `.off`: Radio not active (silence)
     /// - `.receiving`: Noise + incoming signals + band conditions
     /// - `.transmitting`: Sidetone only (no noise, no band conditions)
+    ///
+    /// Note: This method wraps the Radio's throwing API for backward compatibility.
+    /// Mode transitions automatically stop the radio first if needed.
     func setRadioMode(_ mode: RadioMode) {
-        radioModeLock.lock()
-        _radioMode = mode
-        radioModeLock.unlock()
+        // If already in target mode, nothing to do
+        guard radio.mode != mode else { return }
+
+        // First, transition to off if not already off
+        if radio.mode != .off {
+            try? radio.stop()
+        }
+
+        // Then transition to target mode
+        switch mode {
+        case .off:
+            // Already off from above
+            break
+        case .receiving:
+            try? radio.startReceiving()
+        case .transmitting:
+            try? radio.startTransmitting()
+        }
     }
 
     /// Activate tone generation at the specified frequency (for continuous mode)
@@ -174,10 +194,6 @@ final class ToneGenerator: @unchecked Sendable {
     // Continuous session state
     private var isSessionActive = false
     private var wasInterrupted = false
-
-    // Radio mode (thread-safe for audio callback access)
-    private let radioModeLock = NSLock()
-    private var _radioMode: RadioMode = .off
 
     // Tone active flag (thread-safe for audio callback access)
     private let toneActiveLock = NSLock()
