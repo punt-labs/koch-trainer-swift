@@ -15,6 +15,11 @@ import Foundation
 /// ```
 ///
 /// Thread-safe: uses internal locking for audio callback access.
+///
+/// NOTE: `Radio` is declared `@unchecked Sendable` instead of being modeled
+/// as an `actor` because it is read from real-time audio render callbacks
+/// where async actor isolation is not permitted. All mutable state (`_mode`,
+/// `_isKeying`) is value-typed and accessed only while holding `lock`.
 final class Radio: @unchecked Sendable {
 
     // MARK: Internal

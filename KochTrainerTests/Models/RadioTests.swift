@@ -316,4 +316,47 @@ final class RadioTests: XCTestCase {
             _ = radio.isKeying
         }
     }
+
+    // MARK: - Concurrent Access
+
+    /// Verifies thread safety under concurrent load.
+    /// Multiple tasks rapidly key/unkey while the main thread reads state.
+    func testConcurrentAccess_maintainsInvariants() async throws {
+        let radio = Radio()
+        try radio.startTransmitting()
+
+        let iterations = 1000
+        let expectation = XCTestExpectation(description: "Concurrent access completes")
+        expectation.expectedFulfillmentCount = 2
+
+        // Task 1: Rapidly key/unkey
+        Task {
+            for _ in 0 ..< iterations {
+                try? radio.key()
+                try? radio.unkey()
+            }
+            expectation.fulfill()
+        }
+
+        // Task 2: Rapidly read state and verify invariants
+        Task {
+            for _ in 0 ..< iterations {
+                let mode = radio.mode
+                let keying = radio.isKeying
+
+                // Invariant: if keying, must be transmitting
+                if keying {
+                    XCTAssertEqual(mode, .transmitting, "Invariant violated: keying while not transmitting")
+                }
+            }
+            expectation.fulfill()
+        }
+
+        await fulfillment(of: [expectation], timeout: 5.0)
+
+        // Final state should be consistent
+        try radio.stop()
+        XCTAssertEqual(radio.mode, .off)
+        XCTAssertFalse(radio.isKeying)
+    }
 }
