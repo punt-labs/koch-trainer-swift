@@ -1016,7 +1016,7 @@ being produced. The audio output depends on the current radio mode:
 \begin{schema}{ActivateTone}
 \Delta SessionState
 \where
-radioMode \neq off \\
+radioMode = transmitting \\
 toneActive = zfalse \\
 toneActive' = ztrue \\
 phase' = phase \\
@@ -1028,7 +1028,8 @@ sessionAttempts' = sessionAttempts \\
 sessionCorrect' = sessionCorrect
 \end{schema}
 
-$ActivateTone$ requires the radio to be on (either receiving or transmitting).
+$ActivateTone$ requires the radio to be transmitting---modeling half-duplex
+behavior where sidetone is only generated when the operator keys.
 The precondition $toneActive = zfalse$ prevents double activation.
 
 \begin{schema}{DeactivateTone}
