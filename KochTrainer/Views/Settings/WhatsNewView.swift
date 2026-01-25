@@ -26,6 +26,12 @@ struct WhatsNewView: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                     FeatureRow(
                         icon: "ear",
+                        title: "Ear Training",
+                        description: "Learn patterns by length, starting with shortest"
+                    )
+
+                    FeatureRow(
+                        icon: "waveform",
                         title: "Receive Training",
                         description: "Listen to Morse code and identify characters"
                     )
