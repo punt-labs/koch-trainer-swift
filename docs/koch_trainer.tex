@@ -1244,4 +1244,181 @@ this value for more thorough exploration at the cost of longer runtimes. The
 unbounded given sets (SESSIONID, TIMESTAMP) can be constrained using probcli's
 \texttt{-p DEFAULT\_SETSIZE} option.
 
+%==============================================================================
+\section{Practical Impact Assessment}
+%==============================================================================
+
+This section documents the observed effects of maintaining a Z specification
+alongside the Swift implementation of Koch Trainer. The assessment is based on
+a systematic audit comparing specification constraints against test coverage.
+
+%------------------------------------------------------------------------------
+\subsection{Where Formal Modeling Helped}
+%------------------------------------------------------------------------------
+
+\paragraph{Domain Model Discovery.}
+The specification identified two abstractions that were missing from the
+codebase:
+
+\begin{enumerate}
+\item \textbf{Radio state machine}: The specification's constraint
+      $\lnot(radioMode = receiving \land toneActive)$ revealed that
+      \texttt{radioMode} and \texttt{toneActive} were coupled state that
+      should be owned by a single type. The implementation had allowed
+      independent mutation of these fields, relying on defensive rendering
+      to mask invalid combinations. A new \texttt{Radio} type was extracted
+      with throwing methods that enforce half-duplex invariants.
+
+\item \textbf{Session counter}: The invariant $sessionCorrect \leq sessionAttempts$
+      was duplicated across four ViewModels as separate \texttt{@Published}
+      properties. A \texttt{SessionCounter} type was extracted where the
+      \texttt{recordAttempt(wasCorrect:)} API makes violation impossible---
+      correct can only increment when attempts also increments.
+\end{enumerate}
+
+\paragraph{Test Coverage Improvement.}
+Prior to the domain model extraction, an audit identified 63 specification
+constraints. Test coverage was:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\textbf{Category} & \textbf{Covered} & \textbf{Total} & \textbf{Coverage} \\
+\hline
+Invariants & 8 & 12 & 67\% \\
+Preconditions & 18 & 24 & 75\% \\
+Effects & 15 & 21 & 71\% \\
+Bounds & 4 & 6 & 67\% \\
+\textbf{Total} & \textbf{45} & \textbf{63} & \textbf{71\%} \\
+\end{tabular}
+\end{center}
+
+After extracting the \texttt{Radio} and \texttt{SessionCounter} domain models
+with corresponding test suites, coverage improved:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\textbf{Category} & \textbf{Covered} & \textbf{Total} & \textbf{Coverage} \\
+\hline
+Invariants & 11 & 12 & 92\% \\
+Preconditions & 22 & 24 & 92\% \\
+Effects & 18 & 21 & 86\% \\
+Bounds & 4 & 6 & 67\% \\
+\textbf{Total} & \textbf{55} & \textbf{63} & \textbf{87\%} \\
+\end{tabular}
+\end{center}
+
+\paragraph{API Design Guidance.}
+The specification's operation schemas directly informed API design:
+
+\begin{itemize}
+\item Preconditions became throwing methods (e.g., \texttt{Radio.key()} throws
+      unless \texttt{mode == .transmitting})
+\item Postconditions became testable assertions
+\item State invariants guided which properties to make \texttt{private(set)}
+\end{itemize}
+
+\paragraph{Structural Enforcement.}
+Several constraints are now enforced by type structure rather than runtime
+checks:
+
+\begin{itemize}
+\item Direction constraints (\texttt{AdvanceEarLevel: direction = receiveEar})
+      are enforced because \texttt{EarTrainingViewModel} only exposes ear-level
+      operations
+\item The constraint \texttt{phase = idle $\Rightarrow$ sessionAttempts = 0}
+      is enforced because ViewModels create fresh \texttt{SessionCounter}
+      instances per session
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Where Formal Modeling Did Not Help}
+%------------------------------------------------------------------------------
+
+\paragraph{Real-Time Audio Behavior.}
+The specification explicitly excludes audio timing (dit/dah durations,
+Farnsworth spacing). These properties depend on audio hardware, buffer sizes,
+and scheduling---details that resist state-based modeling. Testing audio
+correctness requires different techniques (integration tests, human
+verification).
+
+\paragraph{UI State Transitions.}
+Screen navigation, input focus, and animation states are not modeled.
+SwiftUI's declarative model handles much of this, and the state is transient
+rather than persistent. Formal modeling would add cost without proportional
+benefit for this domain.
+
+\paragraph{QSO Protocol Simulation.}
+The virtual station exchanges involve probabilistic behavior, template
+selection, and timing that would require a different modeling approach
+(perhaps process algebra or timed automata) than Z's state-based schemas.
+
+\paragraph{Notification Policies.}
+Anti-nag rules (maximum notifications per day, quiet hours) involve real-world
+time and user preferences that are better validated through behavioral testing
+than formal proof.
+
+\paragraph{Remaining Gaps.}
+Some constraints remain untested:
+
+\begin{itemize}
+\item \texttt{ResetSession: phase = completed}---UI guards prevent this
+      transition; no explicit test exists
+\item Initialization bounds (\texttt{receiveLevel $\leq$ MODEL\_BOUND} at
+      init)---levels are clamped on mutation, but not tested at construction
+\end{itemize}
+
+These are low-risk gaps where structural enforcement or UI constraints
+provide adequate protection.
+
+%------------------------------------------------------------------------------
+\subsection{Cost-Benefit Observations}
+%------------------------------------------------------------------------------
+
+\paragraph{Costs.}
+\begin{itemize}
+\item Initial specification took approximately 4 hours to write
+\item Learning Z notation requires investment (mitigated by tooling that
+      generates code from specs)
+\item Specification maintenance is an ongoing cost, though changes have
+      been infrequent since the core state model is stable
+\end{itemize}
+
+\paragraph{Benefits.}
+\begin{itemize}
+\item Identified two missing domain abstractions that improved code quality
+\item Provided systematic audit methodology for test coverage
+\item Throwing methods document invariants in the type system
+\item Refactoring is safer when tests verify specification constraints
+\end{itemize}
+
+\paragraph{Scope Matters.}
+The specification focuses on persistent state that affects learning outcomes.
+This narrow scope (levels, intervals, streaks, session counts) proved
+tractable to model and high-value to verify. Attempting to model all
+application behavior would have been disproportionately expensive.
+
+%------------------------------------------------------------------------------
+\subsection{Conclusion}
+%------------------------------------------------------------------------------
+
+Combining Z specification with Swift implementation yielded measurable
+improvements in test coverage (71\% to 87\%) and code structure (two new
+domain types). The formal model's primary value was identifying coupled state
+that should be encapsulated in domain types with invariant-enforcing APIs.
+
+The approach worked well for persistent state with clear invariants. It
+provided less value for transient UI state, real-time audio behavior, and
+probabilistic simulation---domains where different verification techniques
+are more appropriate.
+
+For similar projects, we recommend:
+\begin{enumerate}
+\item Scope the specification to state that affects core outcomes
+\item Use the specification to discover missing domain abstractions
+\item Prefer structural enforcement (API design) over runtime checks
+\item Audit test coverage against specification constraints periodically
+\item Accept that some domains (audio, UI, simulation) are better verified
+      through other means
+\end{enumerate}
+
 \end{document}
