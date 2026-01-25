@@ -167,11 +167,15 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Settings.sessionHistoryLink)
 
                 Button("Reset All Progress", role: .destructive) {
                     showResetConfirmation = true
                 }
+                .accessibilityIdentifier(AccessibilityID.Settings.resetProgressButton)
             }
+            .accessibilityElement(children: .contain)
 
             Section("About") {
                 HStack {
@@ -184,6 +188,7 @@ struct SettingsView: View {
                 NavigationLink(destination: WhatsNewView()) {
                     Label("What's New", systemImage: "sparkles")
                 }
+                .accessibilityIdentifier(AccessibilityID.Settings.whatsNewLink)
 
                 NavigationLink(destination: LicenseView()) {
                     Label("License", systemImage: "doc.text")
@@ -192,6 +197,7 @@ struct SettingsView: View {
                 NavigationLink(destination: AcknowledgmentsView()) {
                     Label("Acknowledgments", systemImage: "heart")
                 }
+                .accessibilityIdentifier(AccessibilityID.Settings.acknowledgementsLink)
 
                 if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/blob/main/PRIVACY.md") {
                     Link(destination: url) {
@@ -211,7 +217,9 @@ struct SettingsView: View {
                     }
                 }
             }
+            .accessibilityElement(children: .contain)
         }
+        .accessibilityElement(children: .contain)
         .navigationTitle("Settings")
         .accessibilityIdentifier(AccessibilityID.Settings.view)
         .alert("Reset Progress?", isPresented: $showResetConfirmation) {

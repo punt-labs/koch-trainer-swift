@@ -222,5 +222,24 @@ enum AccessibilityID {
 
     enum Settings {
         static let view = "settings-view"
+        static let sessionHistoryLink = "settings-session-history-link"
+        static let whatsNewLink = "settings-whats-new-link"
+        static let acknowledgementsLink = "settings-acknowledgements-link"
+        static let resetProgressButton = "settings-reset-progress-button"
+    }
+
+    // MARK: - Session History View
+
+    enum SessionHistory {
+        static let view = "session-history-view"
+        static let emptyState = "session-history-empty"
+        static let sessionList = "session-history-list"
+        static let nextPracticeSection = "session-history-next-practice"
+        static let maintenanceSection = "session-history-maintenance"
+        static let sessionsSection = "session-history-sessions"
+        static let deleteInvalidButton = "session-history-delete-invalid-button"
+        static let recalculateButton = "session-history-recalculate-button"
+        static let invalidSessionCount = "session-history-invalid-count"
+        static let sessionCount = "session-history-session-count"
     }
 }
