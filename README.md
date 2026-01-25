@@ -98,6 +98,7 @@ The iOS App Store has several excellent Morse code apps. Here's how Koch Trainer
 - **Ear Training mode** — Inspired by language learning apps, you hear a pattern and reproduce it with dit/dah taps. This builds the ear-to-hand reflex that's essential for sending.
 - **Completely free** — No ads, no subscriptions, no locked features. MIT licensed and open source.
 - **Native SwiftUI** — Clean, modern iOS interface that feels at home on your device.
+- **Lightweight** — ~3 MB download, no tracking SDKs, no analytics, works fully offline. Just Morse code training.
 - **Focused scope** — We do one thing well: teach the Koch method for the first 26 characters.
 
 ### Respect for the Ecosystem

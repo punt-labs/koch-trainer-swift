@@ -263,10 +263,10 @@ Anti-nag policy prevents notification fatigue:
 ```
         ┌─────────────┐
         │   UI Tests  │  ← Slow, integration-level
-        │  (32 tests) │    Tests full user flows
+        │  (~70 tests)│    Tests full user flows
         ├─────────────┤
         │  Unit Tests │  ← Fast, isolated
-        │ (921 tests) │    Tests logic in isolation
+        │ (~950 tests)│    Tests logic in isolation
         └─────────────┘
 ```
 
@@ -429,9 +429,9 @@ The app checks this flag to:
 | ViewModels | 75-86% | 90%+ |
 | Services | 82-97% | 95%+ |
 | Models | 70-100% | 85%+ |
-| UI Flows | 32 tests | All critical paths |
+| UI Flows | ~70 tests | All critical paths |
 
-**Total**: 921 unit tests + 32 UI tests
+**Total**: ~950 unit tests + ~70 UI tests
 
 ---
 
@@ -484,7 +484,7 @@ This section contains design notes for planned features tracked in beads. Use `b
 
 ### Test Coverage Plan (beads: koch-trainer-swift-jto)
 
-**Current**: 922 tests
+**Current**: ~1,020 tests (950 unit + 70 UI)
 **Target**: 90%+ on non-View code (Views tested via XCUITest)
 
 **Strategy Decision (Completed):**
@@ -511,8 +511,10 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 - Training-specific page objects (PR #28)
 - UITesting configuration with silent audio engine (PR #24)
 
+**Completed:**
+- `koch-trainer-swift-0nx`: UI test coverage for core flows (PR #41)
+
 **Remaining Work:**
-- `koch-trainer-swift-0nx`: UI test coverage for core flows
 - `koch-trainer-swift-ae4`: Pause/resume tests
 - `koch-trainer-swift-atl`: Edge case UI tests
 
