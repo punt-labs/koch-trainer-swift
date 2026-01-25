@@ -71,16 +71,6 @@ final class SessionHistoryPage: BasePage {
         return self
     }
 
-    /// Scroll to find an element if needed.
-    private func scrollToElement(_ element: XCUIElement) {
-        if !element.exists {
-            for _ in 0 ..< 3 {
-                if element.exists { break }
-                app.swipeUp()
-            }
-        }
-    }
-
     /// Tap Delete Invalid Sessions button.
     @discardableResult
     func tapDeleteInvalid() -> Self {
@@ -142,4 +132,17 @@ final class SessionHistoryPage: BasePage {
             "Maintenance section should be visible"
         )
     }
+
+    // MARK: Private
+
+    /// Scroll to find an element if needed.
+    private func scrollToElement(_ element: XCUIElement) {
+        if !element.exists {
+            for _ in 0 ..< 3 {
+                if element.exists { break }
+                app.swipeUp()
+            }
+        }
+    }
+
 }
