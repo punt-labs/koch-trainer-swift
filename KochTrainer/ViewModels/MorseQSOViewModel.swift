@@ -214,7 +214,8 @@ final class MorseQSOViewModel: ObservableObject {
         currentPattern += "."
 
         // Switch to transmit mode for sidetone
-        audioEngine.setRadioMode(.transmitting)
+        try? audioEngine.stopRadio()
+        try? audioEngine.startTransmitting()
         playDit()
         resetInputTimer()
     }
@@ -224,7 +225,8 @@ final class MorseQSOViewModel: ObservableObject {
         currentPattern += "-"
 
         // Switch to transmit mode for sidetone
-        audioEngine.setRadioMode(.transmitting)
+        try? audioEngine.stopRadio()
+        try? audioEngine.startTransmitting()
         playDah()
         resetInputTimer()
     }
@@ -421,7 +423,8 @@ final class MorseQSOViewModel: ObservableObject {
         Task {
             await audioEngine.playDit()
             // Return to receiving mode after sidetone
-            audioEngine.setRadioMode(.receiving)
+            try? audioEngine.stopRadio()
+            try? audioEngine.startReceiving()
         }
     }
 
@@ -429,7 +432,8 @@ final class MorseQSOViewModel: ObservableObject {
         Task {
             await audioEngine.playDah()
             // Return to receiving mode after sidetone
-            audioEngine.setRadioMode(.receiving)
+            try? audioEngine.stopRadio()
+            try? audioEngine.startReceiving()
         }
     }
 }
