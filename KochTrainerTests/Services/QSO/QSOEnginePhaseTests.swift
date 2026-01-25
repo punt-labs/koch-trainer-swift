@@ -48,7 +48,6 @@ final class QSOEnginePhaseTests: XCTestCase {
 
         func startSession() { radioState.startSession() }
         func endSession() { radioState.endSession() }
-        func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
         func startReceiving() throws { try radioState.startReceiving() }
         func startTransmitting() throws { try radioState.startTransmitting() }
         func stopRadio() throws { try radioState.stopRadio() }

@@ -65,10 +65,6 @@ final class UITestAudioEngine: AudioEngineProtocol, ObservableObject {
         storedRadioMode = .off
     }
 
-    func setRadioMode(_ mode: RadioMode) {
-        storedRadioMode = mode
-    }
-
     // MARK: - Radio Control API
 
     func startReceiving() throws {

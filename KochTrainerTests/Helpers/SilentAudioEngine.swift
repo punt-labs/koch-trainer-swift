@@ -68,10 +68,6 @@ final class SilentAudioEngine: AudioEngineProtocol {
         radioState.endSession()
     }
 
-    func setRadioMode(_ mode: RadioMode) {
-        radioState.setMode(mode)
-    }
-
     // MARK: - Radio Control API
 
     func startReceiving() throws {

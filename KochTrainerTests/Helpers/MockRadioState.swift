@@ -26,10 +26,6 @@ final class MockRadioState {
         mode = .off
     }
 
-    func setMode(_ newMode: RadioMode) {
-        mode = newMode
-    }
-
     func startSession() {
         mode = .receiving
     }
