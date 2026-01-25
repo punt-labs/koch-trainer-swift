@@ -129,7 +129,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.phase, .paused)
         XCTAssertFalse(viewModel.isPlaying)
         // Pause sets radio mode to .off instead of calling stop()
-        XCTAssertEqual(mockAudioEngine.storedRadioMode, .off)
+        XCTAssertEqual(mockAudioEngine.radioMode, .off)
     }
 
     func testPauseDuringIntroductionIsNoOp() {

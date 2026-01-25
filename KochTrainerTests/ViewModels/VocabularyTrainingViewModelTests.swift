@@ -6,15 +6,17 @@ import XCTest
 
 /// Mock audio engine for vocabulary training tests
 final class VocabularyMockAudioEngine: AudioEngineProtocol {
+
+    // MARK: Internal
+
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
     var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
-    private(set) var storedRadioMode: RadioMode = .off
 
-    var radioMode: RadioMode { storedRadioMode }
+    var radioMode: RadioMode { radioState.mode }
 
     func playCharacter(_ char: Character) async {
         playCharacterCalls.append(char)
@@ -55,12 +57,21 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
 
     func playDah() async {}
 
-    func startSession() { storedRadioMode = .receiving }
-    func endSession() { storedRadioMode = .off
+    func startSession() { radioState.startSession() }
+    func endSession() {
+        radioState.endSession()
         endSessionCalled = true
     }
 
-    func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
+    func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
+    func startReceiving() throws { try radioState.startReceiving() }
+    func startTransmitting() throws { try radioState.startTransmitting() }
+    func stopRadio() throws { try radioState.stopRadio() }
+
+    // MARK: Private
+
+    private let radioState = MockRadioState()
+
 }
 
 // MARK: - VocabularyTrainingViewModelTests
@@ -128,7 +139,7 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPlaying)
         XCTAssertEqual(viewModel.phase, .paused)
         // Pause sets radio mode to .off instead of calling stop()
-        XCTAssertEqual(mockAudioEngine.storedRadioMode, .off)
+        XCTAssertEqual(mockAudioEngine.radioMode, .off)
     }
 
     func testPauseFromCompletedIsNoOp() {

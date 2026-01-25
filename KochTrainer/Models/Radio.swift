@@ -118,6 +118,8 @@ final class Radio: @unchecked Sendable {
         _isKeying = false
     }
 
+    // MARK: Private
+
     // MARK: - Private State
 
     private let lock = NSLock()

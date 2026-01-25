@@ -9,12 +9,14 @@ final class QSOEngineTests: XCTestCase {
     // MARK: - Mock Audio Engine
 
     class MockAudioEngine: AudioEngineProtocol {
+
+        // MARK: Internal
+
         var playedGroups: [String] = []
         var frequency: Double = 600
         var effectiveSpeed: Int = 12
-        private(set) var storedRadioMode: RadioMode = .off
 
-        var radioMode: RadioMode { storedRadioMode }
+        var radioMode: RadioMode { radioState.mode }
 
         func playCharacter(_ char: Character) async {}
         func playGroup(_ group: String) async {
@@ -42,9 +44,17 @@ final class QSOEngineTests: XCTestCase {
 
         func configureBandConditions(from settings: AppSettings) {}
 
-        func startSession() { storedRadioMode = .receiving }
-        func endSession() { storedRadioMode = .off }
-        func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
+        func startSession() { radioState.startSession() }
+        func endSession() { radioState.endSession() }
+        func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
+        func startReceiving() throws { try radioState.startReceiving() }
+        func startTransmitting() throws { try radioState.startTransmitting() }
+        func stopRadio() throws { try radioState.stopRadio() }
+
+        // MARK: Private
+
+        private let radioState = MockRadioState()
+
     }
 
     // MARK: - Tests

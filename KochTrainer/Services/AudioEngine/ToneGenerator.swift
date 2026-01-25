@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import os
 
 /// Generates sine wave audio tones using AVAudioEngine.
 ///
@@ -152,7 +153,7 @@ final class ToneGenerator: @unchecked Sendable {
             do {
                 try radio.stop()
             } catch {
-                print("ToneGenerator.setRadioMode: Failed to stop radio: \(error)")
+                logger.error("setRadioMode: Failed to stop radio: \(error)")
             }
         }
 
@@ -168,7 +169,7 @@ final class ToneGenerator: @unchecked Sendable {
                 try radio.startTransmitting()
             }
         } catch {
-            print("ToneGenerator.setRadioMode: Failed to set mode \(mode): \(error)")
+            logger.error("setRadioMode: Failed to set mode \(String(describing: mode)): \(error)")
         }
     }
 
@@ -189,6 +190,7 @@ final class ToneGenerator: @unchecked Sendable {
 
     // MARK: Private
 
+    private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
     private let audioEngine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
     private let sampleRate: Double = 44100
@@ -260,7 +262,7 @@ final class ToneGenerator: @unchecked Sendable {
             try session.setCategory(.playback, mode: .default)
             try session.setActive(true)
         } catch {
-            print("Failed to setup audio session: \(error)")
+            logger.error("Failed to setup audio session: \(error)")
         }
     }
 
@@ -300,7 +302,7 @@ final class ToneGenerator: @unchecked Sendable {
                         try AVAudioSession.sharedInstance().setActive(true)
                         restartContinuousAudio()
                     } catch {
-                        print("Failed to reactivate audio session: \(error)")
+                        logger.error("Failed to reactivate audio session: \(error)")
                     }
                 }
             }
@@ -369,7 +371,7 @@ final class ToneGenerator: @unchecked Sendable {
             try audioEngine.start()
             isPlaying = true
         } catch {
-            print("Failed to start audio engine: \(error)")
+            logger.error("Failed to start audio engine: \(error)")
         }
     }
 
@@ -457,7 +459,7 @@ final class ToneGenerator: @unchecked Sendable {
             try audioEngine.start()
             isPlaying = true
         } catch {
-            print("Failed to start continuous audio engine: \(error)")
+            logger.error("Failed to start continuous audio engine: \(error)")
         }
     }
 

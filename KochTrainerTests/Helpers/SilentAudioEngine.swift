@@ -6,15 +6,13 @@ import Foundation
 @MainActor
 final class SilentAudioEngine: AudioEngineProtocol {
 
+    // MARK: Internal
+
     private(set) var playedCharacters: [Character] = []
     private(set) var playedGroups: [String] = []
 
-    // MARK: - Continuous Session API
-
-    private(set) var storedRadioMode: RadioMode = .off
-
     var radioMode: RadioMode {
-        storedRadioMode
+        radioState.mode
     }
 
     func playCharacter(_ char: Character) async {
@@ -63,14 +61,35 @@ final class SilentAudioEngine: AudioEngineProtocol {
     }
 
     func startSession() {
-        storedRadioMode = .receiving
+        radioState.startSession()
     }
 
     func endSession() {
-        storedRadioMode = .off
+        radioState.endSession()
     }
 
     func setRadioMode(_ mode: RadioMode) {
-        storedRadioMode = mode
+        radioState.setMode(mode)
     }
+
+    // MARK: - Radio Control API
+
+    func startReceiving() throws {
+        try radioState.startReceiving()
+    }
+
+    func startTransmitting() throws {
+        try radioState.startTransmitting()
+    }
+
+    func stopRadio() throws {
+        try radioState.stopRadio()
+    }
+
+    // MARK: Private
+
+    // MARK: - Radio State (shared helper)
+
+    private let radioState = MockRadioState()
+
 }
