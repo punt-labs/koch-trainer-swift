@@ -223,9 +223,13 @@ private struct ReceiveVocabTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                    .accessibilityLabel(
+                        "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                    )
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)
@@ -342,9 +346,13 @@ private struct SendVocabTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                    .accessibilityLabel(
+                        "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                    )
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)

@@ -243,9 +243,13 @@ struct SendTrainingPhaseView: View {
                 // Score display
                 HStack {
                     Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                        .accessibilityLabel(
+                            "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                        )
                         .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                     Spacer()
                     Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                        .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                         .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
                 }
                 .font(Typography.body)

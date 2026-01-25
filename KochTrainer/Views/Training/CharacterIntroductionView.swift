@@ -30,6 +30,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
             Text("Character \(viewModel.introProgress)")
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityLabel("Introducing character \(viewModel.introProgress)")
                 .accessibilityIdentifier(AccessibilityID.Training.introProgress)
 
             Spacer()

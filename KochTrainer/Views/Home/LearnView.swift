@@ -26,6 +26,9 @@ struct LearnView: View {
                     Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Ear training level \(progressStore.progress.earTrainingLevel) of \(MorseCode.maxEarTrainingLevel)"
+                        )
                         .accessibilityIdentifier(AccessibilityID.Learn.earTrainingLevel)
                 }
 
@@ -46,7 +49,9 @@ struct LearnView: View {
                     Text("Characters: \(chars.map { String($0) }.joined())")
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("Characters: \(chars.map { String($0) }.joined(separator: " "))")
+                        .accessibilityLabel(
+                            "Learning patterns for: \(chars.map { String($0) }.joined(separator: ", "))"
+                        )
 
                     Spacer()
                 }
@@ -62,10 +67,14 @@ struct LearnView: View {
                 HStack {
                     Text("Receive")
                         .font(Typography.headline)
+                        .accessibilityLabel("Receive Training")
                     Spacer()
                     Text("Level \(progressStore.progress.receiveLevel)/26")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Receive level \(progressStore.progress.receiveLevel) of 26"
+                        )
                         .accessibilityIdentifier(AccessibilityID.Learn.receiveLevel)
                 }
 
@@ -84,7 +93,9 @@ struct LearnView: View {
                     Text("Characters: \(receiveChars.map { String($0) }.joined())")
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("Characters: \(receiveChars.map { String($0) }.joined(separator: " "))")
+                        .accessibilityLabel(
+                            "Unlocked characters: \(receiveChars.map { String($0) }.joined(separator: ", "))"
+                        )
 
                     Spacer()
 
@@ -102,10 +113,14 @@ struct LearnView: View {
                 HStack {
                     Text("Send")
                         .font(Typography.headline)
+                        .accessibilityLabel("Send Training")
                     Spacer()
                     Text("Level \(progressStore.progress.sendLevel)/26")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Send level \(progressStore.progress.sendLevel) of 26"
+                        )
                         .accessibilityIdentifier(AccessibilityID.Learn.sendLevel)
                 }
 
@@ -124,7 +139,9 @@ struct LearnView: View {
                     Text("Characters: \(sendChars.map { String($0) }.joined())")
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("Characters: \(sendChars.map { String($0) }.joined(separator: " "))")
+                        .accessibilityLabel(
+                            "Unlocked characters: \(sendChars.map { String($0) }.joined(separator: ", "))"
+                        )
 
                     Spacer()
 
@@ -157,13 +174,19 @@ struct LearnView: View {
     // MARK: - Subviews
 
     private var streakCard: some View {
-        HStack {
+        let isPersonalBest = schedule.currentStreak == schedule.longestStreak && schedule.longestStreak > 1
+        let streakLabel = isPersonalBest
+            ? "\(schedule.currentStreak) day practice streak. This is your personal best!"
+            : "\(schedule.currentStreak) day practice streak"
+
+        return HStack {
             Image(systemName: "flame.fill")
                 .foregroundColor(.orange)
+                .accessibilityHidden(true)
             Text("\(schedule.currentStreak) day streak")
                 .font(Typography.body)
             Spacer()
-            if schedule.currentStreak == schedule.longestStreak, schedule.longestStreak > 1 {
+            if isPersonalBest {
                 Text("Personal best!")
                     .font(Typography.caption)
                     .foregroundColor(.orange)
@@ -172,6 +195,8 @@ struct LearnView: View {
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.secondaryBackground)
         .cornerRadius(12)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(streakLabel)
         .accessibilityIdentifier(AccessibilityID.Learn.streakCard)
     }
 
