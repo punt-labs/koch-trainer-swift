@@ -302,6 +302,17 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
     }
 
     private func loadPausedSessions() {
+        // Clear all paused sessions during UI testing for deterministic test behavior
+        if UITestingConfiguration.isUITesting {
+            defaults.removeObject(forKey: pausedReceiveKey)
+            defaults.removeObject(forKey: pausedSendKey)
+            defaults.removeObject(forKey: pausedEarTrainingKey)
+            pausedReceiveSession = nil
+            pausedSendSession = nil
+            pausedEarTrainingSession = nil
+            return
+        }
+
         pausedReceiveSession = loadPausedSession(forKey: pausedReceiveKey)
         pausedSendSession = loadPausedSession(forKey: pausedSendKey)
         pausedEarTrainingSession = loadPausedSession(forKey: pausedEarTrainingKey)

@@ -17,6 +17,7 @@ struct SessionHistoryView: View {
         }
         .navigationTitle("Session History")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier(AccessibilityID.SessionHistory.view)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if !sessions.isEmpty {
@@ -62,6 +63,7 @@ struct SessionHistoryView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(Theme.Spacing.xl)
+        .accessibilityIdentifier(AccessibilityID.SessionHistory.emptyState)
     }
 
     private var sessionList: some View {
@@ -116,6 +118,7 @@ struct SessionHistoryView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .accessibilityIdentifier(AccessibilityID.SessionHistory.nextPracticeSection)
 
             // Data maintenance section
             Section("Data Maintenance") {
@@ -129,15 +132,19 @@ struct SessionHistoryView: View {
                         Spacer()
                         Text("\(invalidSessionCount) found")
                             .foregroundColor(.secondary)
+                            .accessibilityIdentifier(AccessibilityID.SessionHistory.invalidSessionCount)
                     }
                 }
                 .disabled(invalidSessionCount == 0)
+                .accessibilityIdentifier(AccessibilityID.SessionHistory.deleteInvalidButton)
 
                 Button("Recalculate Schedule from History") {
                     progressStore.recalculateScheduleFromHistory()
                     showRecalculateAlert = true
                 }
+                .accessibilityIdentifier(AccessibilityID.SessionHistory.recalculateButton)
             }
+            .accessibilityIdentifier(AccessibilityID.SessionHistory.maintenanceSection)
 
             // Session history section
             Section("Sessions (\(sessions.count))") {
@@ -146,6 +153,7 @@ struct SessionHistoryView: View {
                 }
                 .onDelete(perform: deleteSessions)
             }
+            .accessibilityIdentifier(AccessibilityID.SessionHistory.sessionsSection)
         }
         .alert("Cleanup Complete", isPresented: $showCleanupAlert) {
             Button("OK", role: .cancel) {}

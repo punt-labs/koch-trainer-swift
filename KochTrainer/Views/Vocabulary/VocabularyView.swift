@@ -20,13 +20,17 @@ struct VocabularyView: View {
                 vocabularySetRow(
                     name: "Common Words",
                     description: "CQ, DE, K, AR, SK, 73, QTH, QSL...",
-                    set: VocabularySet.commonWords
+                    set: VocabularySet.commonWords,
+                    receiveId: AccessibilityID.Vocab.commonWordsReceiveButton,
+                    sendId: AccessibilityID.Vocab.commonWordsSendButton
                 )
 
                 vocabularySetRow(
                     name: "Callsign Patterns",
                     description: "W1AW, K0ABC, VE3XYZ...",
-                    set: VocabularySet.callsignPatterns
+                    set: VocabularySet.callsignPatterns,
+                    receiveId: AccessibilityID.Vocab.callsignReceiveButton,
+                    sendId: AccessibilityID.Vocab.callsignSendButton
                 )
             }
 
@@ -48,6 +52,8 @@ struct VocabularyView: View {
                     }
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Vocab.qsoButton)
 
                 Text("Practice realistic ham radio conversations")
                     .font(Typography.caption)
@@ -56,12 +62,14 @@ struct VocabularyView: View {
             .padding(Theme.Spacing.md)
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
         .navigationTitle("Vocabulary")
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Vocab.view)
     }
 
@@ -110,7 +118,13 @@ struct VocabularyView: View {
         .cornerRadius(12)
     }
 
-    private func vocabularySetRow(name: String, description: String, set: VocabularySet) -> some View {
+    private func vocabularySetRow(
+        name: String,
+        description: String,
+        set: VocabularySet,
+        receiveId: String,
+        sendId: String
+    ) -> some View {
         VStack(spacing: Theme.Spacing.sm) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -131,6 +145,8 @@ struct VocabularyView: View {
                     }
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(receiveId)
 
                 NavigationLink(destination: VocabularyTrainingView(vocabularySet: set, sessionType: .send)) {
                     HStack {
@@ -139,11 +155,14 @@ struct VocabularyView: View {
                     }
                 }
                 .buttonStyle(SecondaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(sendId)
             }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.secondaryBackground)
         .cornerRadius(12)
+        .accessibilityElement(children: .contain)
     }
 }
 

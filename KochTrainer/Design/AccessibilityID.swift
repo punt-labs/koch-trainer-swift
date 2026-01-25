@@ -110,11 +110,136 @@ enum AccessibilityID {
 
     enum Vocab {
         static let view = "vocab-view"
+        static let qsoButton = "vocab-qso-button"
+        static let commonWordsReceiveButton = "vocab-common-words-receive-button"
+        static let commonWordsSendButton = "vocab-common-words-send-button"
+        static let callsignReceiveButton = "vocab-callsign-receive-button"
+        static let callsignSendButton = "vocab-callsign-send-button"
+    }
+
+    // MARK: - Vocabulary Training View
+
+    enum VocabTraining {
+        // Container views by phase
+        static let view = "vocab-training-view"
+        static let receivePhaseView = "vocab-training-receive-phase"
+        static let sendPhaseView = "vocab-training-send-phase"
+        static let pausedView = "vocab-training-paused-view"
+        static let completedView = "vocab-training-completed-view"
+
+        // Common elements
+        static let progressText = "vocab-training-progress"
+        static let scoreText = "vocab-training-score"
+        static let accuracyText = "vocab-training-accuracy"
+
+        // Receive mode elements
+        static let replayButton = "vocab-training-replay-button"
+        static let listeningIndicator = "vocab-training-listening"
+        static let waitingIndicator = "vocab-training-waiting"
+        static let userInputDisplay = "vocab-training-user-input"
+
+        // Send mode elements
+        static let targetWord = "vocab-training-target-word"
+        static let patternProgress = "vocab-training-pattern-progress"
+        static let ditButton = "vocab-training-dit-button"
+        static let dahButton = "vocab-training-dah-button"
+        static let keyboardHint = "vocab-training-keyboard-hint"
+
+        // Feedback
+        static let feedbackView = "vocab-training-feedback"
+        static let feedbackWord = "vocab-training-feedback-word"
+        static let feedbackResult = "vocab-training-feedback-result"
+
+        // Paused state
+        static let pauseButton = "vocab-training-pause-button"
+        static let resumeButton = "vocab-training-resume-button"
+        static let endSessionButton = "vocab-training-end-session-button"
+        static let pausedTitle = "vocab-training-paused-title"
+        static let pausedScore = "vocab-training-paused-score"
+
+        // Completed state
+        static let completedTitle = "vocab-training-completed-title"
+        static let completedStats = "vocab-training-completed-stats"
+        static let doneButton = "vocab-training-done-button"
+        static let setName = "vocab-training-set-name"
+    }
+
+    // MARK: - QSO Views
+
+    enum QSO {
+        // QSOView (mode selection)
+        static let view = "qso-view"
+        static let startModePicker = "qso-start-mode-picker"
+        static let startButton = "qso-start-button"
+        static let callsignDisplay = "qso-callsign-display"
+
+        // MorseQSOView (session)
+        static let sessionView = "qso-session-view"
+        static let endButton = "qso-end-button"
+        static let statusBar = "qso-status-bar"
+        static let stationCallsign = "qso-station-callsign"
+        static let turnStatus = "qso-turn-status"
+        static let audioIndicator = "qso-audio-indicator"
+
+        // AI message area
+        static let aiMessageView = "qso-ai-message-view"
+        static let aiTextToggle = "qso-ai-text-toggle"
+        static let revealedText = "qso-revealed-text"
+
+        // User keying area
+        static let userKeyingView = "qso-user-keying-view"
+        static let typedScript = "qso-typed-script"
+        static let currentCharacter = "qso-current-character"
+        static let currentPattern = "qso-current-pattern"
+        static let wpmDisplay = "qso-wpm-display"
+        static let lastKeyedFeedback = "qso-last-keyed-feedback"
+
+        // Input area
+        static let inputArea = "qso-input-area"
+        static let ditButton = "qso-dit-button"
+        static let dahButton = "qso-dah-button"
+        static let keyboardHint = "qso-keyboard-hint"
+
+        // Accuracy footer
+        static let keyedCount = "qso-keyed-count"
+        static let accuracyDisplay = "qso-accuracy-display"
+
+        // Completed view
+        static let completedView = "qso-completed-view"
+        static let completedTitle = "qso-completed-title"
+        static let completedCallsign = "qso-completed-callsign"
+        static let doneButton = "qso-done-button"
+        static let statsCard = "qso-stats-card"
+
+        /// Returns identifier for a QSO style card (e.g., "qso-style-firstContact")
+        static func styleCard(_ style: String) -> String {
+            "qso-style-\(style)"
+        }
+
     }
 
     // MARK: - Settings View
 
     enum Settings {
         static let view = "settings-view"
+        static let sessionHistoryLink = "settings-session-history-link"
+        static let whatsNewLink = "settings-whats-new-link"
+        static let acknowledgementsLink = "settings-acknowledgements-link"
+        static let resetProgressButton = "settings-reset-progress-button"
+    }
+
+    // MARK: - Session History View
+
+    enum SessionHistory {
+        static let view = "session-history-view"
+        static let emptyState = "session-history-empty"
+        static let sessionList = "session-history-list"
+        static let nextPracticeSection = "session-history-next-practice"
+        static let maintenanceSection = "session-history-maintenance"
+        static let sessionsSection = "session-history-sessions"
+        static let deleteInvalidButton = "session-history-delete-invalid-button"
+        static let recalculateButton = "session-history-recalculate-button"
+        static let invalidSessionCount = "session-history-invalid-count"
+        static let sessionCount = "session-history-session-count"
     }
 }
