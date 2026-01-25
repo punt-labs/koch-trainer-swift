@@ -180,20 +180,30 @@ struct LearnView: View {
         let identifier = sessionType == .receive
             ? AccessibilityID.Learn.receivePracticeDue
             : AccessibilityID.Learn.sendPracticeDue
+        let modeName = sessionType == .receive ? "receive" : "send"
         if let nextDate = schedule.nextDate(for: sessionType.baseType) {
-            let isPastDue = nextDate < Date()
-            if isPastDue {
+            if nextDate < Date() {
                 Text("Due now")
                     .font(Typography.caption)
                     .foregroundColor(Theme.Colors.warning)
+                    .accessibilityLabel("\(modeName.capitalized) practice due now")
                     .accessibilityIdentifier(identifier)
             } else {
                 Text("Next: \(nextDate, style: .relative)")
                     .font(Typography.caption)
                     .foregroundColor(.secondary)
+                    .accessibilityLabel(
+                        "Next \(modeName) practice due \(relativeTimeString(for: nextDate))"
+                    )
                     .accessibilityIdentifier(identifier)
             }
         }
+    }
+
+    private func relativeTimeString(for date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 
