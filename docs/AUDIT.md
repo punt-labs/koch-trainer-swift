@@ -1,16 +1,32 @@
 # Z Specification Test Coverage Audit
 
-*Generated: 2026-01-24*
+*Generated: 2026-01-25*
 
 ## Summary
 
 | Category | Covered | Total | Coverage |
 |----------|---------|-------|----------|
-| Invariants | 8 | 12 | 67% |
-| Preconditions | 18 | 24 | 75% |
-| Effects | 15 | 21 | 71% |
+| Invariants | 11 | 12 | 92% |
+| Preconditions | 22 | 24 | 92% |
+| Effects | 18 | 21 | 86% |
 | Bounds | 4 | 6 | 67% |
-| **Total** | **45** | **63** | **71%** |
+| **Total** | **55** | **63** | **87%** |
+
+## Recent Changes
+
+### Domain Model Enforcement (PRs #38-45)
+
+Two domain models were introduced to structurally enforce Z specification invariants:
+
+1. **Radio** (`KochTrainer/Models/Radio.swift`) — Half-duplex state machine
+   - Enforces: `¬(radioMode = receiving ∧ isKeying)`, `¬(radioMode = off ∧ isKeying)`
+   - Throwing methods enforce transition preconditions
+   - Tests: `RadioTests.swift`
+
+2. **SessionCounter** (`KochTrainer/Models/SessionCounter.swift`) — Attempt counter
+   - Enforces: `correct ≤ attempts`
+   - API design makes violation impossible (`recordAttempt` always increments attempts first)
+   - Tests: `SessionCounterTests.swift`
 
 ## Coverage by Category
 
@@ -25,11 +41,11 @@
 | `sendInterval ∈ 1..30` | PracticeSchedule | IntervalCalculatorTests | ✅ High |
 | `currentStreak ≥ 0` | PracticeSchedule | StreakCalculatorTests | ✅ High |
 | `longestStreak ≥ currentStreak` | PracticeSchedule | StreakCalculatorTests | ✅ High |
-| `sessionCorrect ≤ sessionAttempts` | TrainingSession | — | ❌ None |
-| `radioMode ∈ {off, receiving, transmitting}` | TrainingSession | RadioModeTests | ✅ High |
-| `¬(radioMode = receiving ∧ toneActive)` | TrainingSession | — | ❌ None |
-| `¬(radioMode = off ∧ toneActive)` | TrainingSession | — | ❌ None |
-| `phase = idle ⇒ sessionAttempts = 0` | TrainingSession | — | ❌ None |
+| `sessionCorrect ≤ sessionAttempts` | SessionCounter | SessionCounterTests | ✅ High |
+| `radioMode ∈ {off, receiving, transmitting}` | Radio | RadioTests | ✅ High |
+| `¬(radioMode = receiving ∧ toneActive)` | Radio | RadioTests | ✅ High |
+| `¬(radioMode = off ∧ toneActive)` | Radio | RadioTests | ✅ High |
+| `phase = idle ⇒ sessionAttempts = 0` | TrainingSession | — | ⚠️ Structural |
 
 ### Preconditions
 
@@ -40,21 +56,21 @@
 | `AdvanceSendLevel: sendLevel < 26` | AdvanceSendLevel | StudentProgressTests | ✅ High |
 | `AdvanceSendLevel: direction = send` | AdvanceSendLevel | StudentProgressTests | ⚠️ Medium |
 | `AdvanceEarLevel: earLevel < 26` | AdvanceEarLevel | StudentProgressTests | ✅ High |
-| `AdvanceEarLevel: direction = receiveEar` | AdvanceEarLevel | — | ❌ None |
+| `AdvanceEarLevel: direction = receiveEar` | AdvanceEarLevel | — | ⚠️ Type-level |
 | `RecordReceiveAttempt: direction = receive` | RecordReceiveAttempt | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `RecordSendAttempt: direction = send` | RecordSendAttempt | SendTrainingViewModelTests | ⚠️ Medium |
-| `RecordEarAttempt: direction = receiveEar` | RecordEarAttempt | — | ❌ None |
+| `RecordEarAttempt: direction = receiveEar` | RecordEarAttempt | — | ⚠️ Type-level |
 | `RecordSession: phase = completed` | RecordSession | ProgressStoreTests | ⚠️ Medium |
 | `IncrementStreak: phase = completed` | IncrementStreak | StreakCalculatorTests | ⚠️ Medium |
-| `ActivateTone: radioMode = transmitting` | ActivateTone | — | ❌ None |
-| `DeactivateTone: toneActive` | DeactivateTone | ToneGeneratorTests | ⚠️ Medium |
-| `StartReceiving: radioMode = off` | StartReceiving | — | ❌ None |
-| `StartTransmitting: radioMode = off` | StartTransmitting | — | ❌ None |
-| `StopRadio: radioMode ≠ off` | StopRadio | — | ❌ None |
+| `ActivateTone: radioMode = transmitting` | Radio.key() | RadioTests | ✅ High |
+| `DeactivateTone: toneActive` | Radio.unkey() | RadioTests | ✅ High |
+| `StartReceiving: radioMode = off` | Radio.startReceiving() | RadioTests | ✅ High |
+| `StartTransmitting: radioMode = off` | Radio.startTransmitting() | RadioTests | ✅ High |
+| `StopRadio: radioMode ≠ off` | Radio.stop() | RadioTests | ✅ High |
 | `StartIntroduction: phase = idle` | StartIntroduction | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `StartTraining: phase = introduction` | StartTraining | ReceiveTrainingViewModelTests | ⚠️ Medium |
-| `PauseTraining: phase = training` | PauseTraining | — | ❌ None |
-| `ResumeTraining: phase = paused` | ResumeTraining | — | ❌ None |
+| `PauseTraining: phase = training` | PauseTraining | ReceiveTrainingViewModelTests | ✅ High |
+| `ResumeTraining: phase = paused` | ResumeTraining | ReceiveTrainingViewModelTests | ✅ High |
 | `CompleteSession: phase ∈ {training, paused}` | CompleteSession | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `ResetSession: phase = completed` | ResetSession | — | ❌ None |
 | `UpdateReceiveInterval: accuracy provided` | UpdateReceiveInterval | IntervalCalculatorTests | ✅ High |
@@ -70,15 +86,15 @@
 | `RecordReceiveAttempt: sessionAttempts' = sessionAttempts + 1` | RecordReceiveAttempt | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `RecordReceiveAttempt: correct ⇒ sessionCorrect' = sessionCorrect + 1` | RecordReceiveAttempt | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `RecordSendAttempt: sessionAttempts' = sessionAttempts + 1` | RecordSendAttempt | SendTrainingViewModelTests | ⚠️ Medium |
-| `RecordEarAttempt: sessionAttempts' = sessionAttempts + 1` | RecordEarAttempt | — | ❌ None |
+| `RecordEarAttempt: sessionAttempts' = sessionAttempts + 1` | RecordEarAttempt | EarTrainingViewModelTests | ⚠️ Medium |
 | `IncrementStreak: currentStreak' = currentStreak + 1` | IncrementStreak | StreakCalculatorTests | ✅ High |
 | `IncrementStreak: longestStreak' = max(longestStreak, currentStreak')` | IncrementStreak | StreakCalculatorTests | ✅ High |
 | `ResetStreak: currentStreak' = 1` | ResetStreak | StreakCalculatorTests | ✅ High |
-| `ActivateTone: toneActive' = true` | ActivateTone | ToneGeneratorTests | ⚠️ Medium |
-| `DeactivateTone: toneActive' = false` | DeactivateTone | ToneGeneratorTests | ⚠️ Medium |
-| `StartReceiving: radioMode' = receiving` | StartReceiving | — | ❌ None |
-| `StartTransmitting: radioMode' = transmitting` | StartTransmitting | — | ❌ None |
-| `StopRadio: radioMode' = off` | StopRadio | — | ❌ None |
+| `ActivateTone: toneActive' = true` | Radio.key() | RadioTests | ✅ High |
+| `DeactivateTone: toneActive' = false` | Radio.unkey() | RadioTests | ✅ High |
+| `StartReceiving: radioMode' = receiving` | Radio.startReceiving() | RadioTests | ✅ High |
+| `StartTransmitting: radioMode' = transmitting` | Radio.startTransmitting() | RadioTests | ✅ High |
+| `StopRadio: radioMode' = off` | Radio.stop() | RadioTests | ✅ High |
 | `StartIntroduction: phase' = introduction` | StartIntroduction | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `StartTraining: phase' = training` | StartTraining | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `CompleteSession: phase' = completed` | CompleteSession | ReceiveTrainingViewModelTests | ⚠️ Medium |
@@ -97,89 +113,61 @@
 | `sendInterval ≤ 30` | UpdateSendInterval | IntervalCalculatorTests | ✅ High |
 | `currentStreak capped during habit formation` | UpdateStreak | IntervalCalculatorTests | ⚠️ Medium |
 
-## Uncovered Constraints (High Priority)
+## Remaining Uncovered Constraints
 
-These constraints from the Z specification have no corresponding test coverage:
+### 1. ResetSession Phase Guard
 
-### 1. Session Invariant: `sessionCorrect ≤ sessionAttempts`
+**Constraint**: `ResetSession: phase = completed`
 
-**Risk**: Could record more correct answers than attempts.
+**Status**: Not explicitly tested. The UI doesn't expose a reset operation from non-completed states.
 
-**Suggested Test**:
-```swift
-func testSessionCorrect_neverExceedsAttempts() {
-    // Verify invariant holds across all recording operations
-}
-```
+**Risk**: Low — UI guards prevent this transition.
 
-### 2. Radio/Tone Half-Duplex Invariants
-
-**Constraints**:
-- `¬(radioMode = receiving ∧ toneActive)`
-- `¬(radioMode = off ∧ toneActive)`
-
-**Risk**: Violating half-duplex behavior (playing sidetone while receiving).
-
-**Suggested Test**:
-```swift
-func testToneActive_requiresTransmitting() {
-    // Verify toneActive is false whenever radioMode ≠ transmitting
-}
-```
-
-### 3. Phase Transition Guards
-
-**Constraints**:
-- `PauseTraining: phase = training`
-- `ResumeTraining: phase = paused`
-- `ResetSession: phase = completed`
-
-**Risk**: Invalid phase transitions.
-
-**Suggested Tests**:
-```swift
-func testPauseTraining_requiresTrainingPhase()
-func testResumeTraining_requiresPausedPhase()
-func testResetSession_requiresCompletedPhase()
-```
-
-### 4. Radio Mode Transitions
-
-**Constraints**:
-- `StartReceiving: radioMode = off`
-- `StartTransmitting: radioMode = off`
-- `StopRadio: radioMode ≠ off`
-
-**Risk**: Invalid radio state machine transitions.
-
-**Suggested Tests**:
-```swift
-func testStartReceiving_requiresRadioOff()
-func testStartTransmitting_requiresRadioOff()
-func testStopRadio_requiresRadioOn()
-```
-
-### 5. Ear Training Direction
+### 2. Type-Level Direction Enforcement
 
 **Constraints**:
 - `AdvanceEarLevel: direction = receiveEar`
 - `RecordEarAttempt: direction = receiveEar`
 
-**Risk**: Ear level advancing from wrong training mode.
+**Status**: Enforced at the type level. `EarTrainingViewModel` is a separate type that only records ear attempts. There's no way to call receive/send recording methods from it.
 
-**Suggested Test**:
-```swift
-func testAdvanceEarLevel_requiresReceiveEarDirection()
-```
+**Risk**: None — structurally impossible to violate.
+
+### 3. Idle Phase Implies Zero Attempts
+
+**Constraint**: `phase = idle ⇒ sessionAttempts = 0`
+
+**Status**: Structurally enforced. SessionCounter starts at zero and ViewModels create fresh counters for each session.
+
+**Risk**: None — structurally enforced by initialization.
+
+### 4. Model Bounds
+
+**Constraints**:
+- `receiveLevel ≤ MODEL_BOUND`
+- `sendLevel ≤ MODEL_BOUND`
+
+**Status**: Not explicitly tested at initialization. The `recordSession` method clamps levels to valid range.
+
+**Risk**: Low — levels are clamped on mutation.
 
 ## Recommendations
 
-1. **Add RadioMode state machine tests**: The radio state machine (off → receiving/transmitting → off) lacks transition guard tests.
+1. ✅ **DONE**: Add RadioMode state machine tests with transition guards
+2. ✅ **DONE**: Add SessionCounter invariant tests (`correct ≤ attempts`)
+3. ✅ **DONE**: Add half-duplex tests (keying requires transmitting mode)
+4. ✅ **DONE**: Add phase transition guard tests (pause/resume)
+5. ⚠️ **LOW PRIORITY**: Add explicit bounds tests at initialization
 
-2. **Add TrainingSession invariant tests**: The `sessionCorrect ≤ sessionAttempts` invariant should be explicitly tested.
+## Conclusion
 
-3. **Add half-duplex tests**: Verify `toneActive` is only true when `radioMode = transmitting`.
+Coverage improved from 71% to 87% through domain model enforcement:
 
-4. **Add phase transition guard tests**: Each phase transition should verify its precondition.
+- **Radio** type makes half-duplex violations impossible (throwing methods)
+- **SessionCounter** type makes `correct > attempts` impossible (API design)
+- Phase transition guards are tested in ViewModel tests
 
-5. **Add ear training direction tests**: Verify `receiveEar` direction is required for ear-specific operations.
+The remaining uncovered constraints are either:
+- Type-level enforced (direction constraints)
+- Structurally enforced (idle phase implies zero attempts)
+- Low risk (bounds at initialization)
