@@ -8,9 +8,9 @@
 |----------|---------|-------|----------|
 | Invariants | 11 | 12 | 92% |
 | Preconditions | 22 | 24 | 92% |
-| Effects | 18 | 21 | 86% |
+| Effects | 19 | 21 | 90% |
 | Bounds | 4 | 6 | 67% |
-| **Total** | **55** | **63** | **87%** |
+| **Total** | **56** | **63** | **89%** |
 
 ## Recent Changes
 
@@ -98,6 +98,7 @@ Two domain models were introduced to structurally enforce Z specification invari
 | `StartIntroduction: phase' = introduction` | StartIntroduction | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `StartTraining: phase' = training` | StartTraining | ReceiveTrainingViewModelTests | ⚠️ Medium |
 | `CompleteSession: phase' = completed` | CompleteSession | ReceiveTrainingViewModelTests | ⚠️ Medium |
+| `NextIntroCharacter: introIndex' = introIndex + 1` | NextIntroCharacter | ReceiveTrainingViewModelTests | ✅ High |
 | `ResetSession: phase' = idle` | ResetSession | — | ❌ None |
 | `UpdateReceiveInterval: interval doubles if accuracy ≥ 90%` | UpdateReceiveInterval | IntervalCalculatorTests | ✅ High |
 | `UpdateReceiveInterval: interval resets to 1 if accuracy < 70%` | UpdateReceiveInterval | IntervalCalculatorTests | ✅ High |
