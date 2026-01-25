@@ -7,14 +7,16 @@ final class QSOEnginePhaseTests: XCTestCase {
     // MARK: - Mock Audio Engine
 
     class MockAudioEngine: AudioEngineProtocol {
+
+        // MARK: Internal
+
         var playedGroups: [String] = []
         var frequency: Double = 600
         var effectiveSpeed: Int = 12
         var stopCalled = false
         var bandConditionsConfigured = false
-        private(set) var storedRadioMode: RadioMode = .off
 
-        var radioMode: RadioMode { storedRadioMode }
+        var radioMode: RadioMode { radioState.mode }
 
         func playCharacter(_: Character) async {}
         func playGroup(_ group: String) async {
@@ -44,30 +46,17 @@ final class QSOEnginePhaseTests: XCTestCase {
             bandConditionsConfigured = true
         }
 
-        func startSession() { storedRadioMode = .receiving }
-        func endSession() { storedRadioMode = .off }
-        func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
+        func startSession() { radioState.startSession() }
+        func endSession() { radioState.endSession() }
+        func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
+        func startReceiving() throws { try radioState.startReceiving() }
+        func startTransmitting() throws { try radioState.startTransmitting() }
+        func stopRadio() throws { try radioState.stopRadio() }
 
-        func startReceiving() throws {
-            guard storedRadioMode == .off else {
-                throw Radio.RadioError.mustBeOff(current: storedRadioMode)
-            }
-            storedRadioMode = .receiving
-        }
+        // MARK: Private
 
-        func startTransmitting() throws {
-            guard storedRadioMode == .off else {
-                throw Radio.RadioError.mustBeOff(current: storedRadioMode)
-            }
-            storedRadioMode = .transmitting
-        }
+        private let radioState = MockRadioState()
 
-        func stopRadio() throws {
-            guard storedRadioMode != .off else {
-                throw Radio.RadioError.alreadyOff
-            }
-            storedRadioMode = .off
-        }
     }
 
     // MARK: - processUserInput Phase Transition Tests

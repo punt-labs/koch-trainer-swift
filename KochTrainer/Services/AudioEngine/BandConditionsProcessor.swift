@@ -115,11 +115,6 @@ final class BandConditionsProcessor: @unchecked Sendable {
     private var fadingTargetGain: Double = 0.5 // Target gain for interpolation
     private var fadingSamplesUntilUpdate: Int = 0 // Countdown to next random walk step
 
-    /// Interpolation rate for ~10ms gain ramp, derived from the current sample rate
-    private var fadingInterpolationRate: Double {
-        1.0 / (sampleRate * 0.01)
-    }
-
     // Interference state
     private var interferenceActive: Bool = false
     private var interferenceFrequency: Double = 0
@@ -135,6 +130,11 @@ final class BandConditionsProcessor: @unchecked Sendable {
     private var pinkB0: Float = 0
     private var pinkB1: Float = 0
     private var pinkB2: Float = 0
+
+    /// Interpolation rate for ~10ms gain ramp, derived from the current sample rate
+    private var fadingInterpolationRate: Double {
+        1.0 / (sampleRate * 0.01)
+    }
 
     // MARK: - Fading (QSB)
 

@@ -6,15 +6,17 @@ import XCTest
 
 /// Mock audio engine for testing without actual audio playback.
 final class MockAudioEngine: AudioEngineProtocol {
+
+    // MARK: Internal
+
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
     var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
-    private(set) var storedRadioMode: RadioMode = .off
 
-    var radioMode: RadioMode { storedRadioMode }
+    var radioMode: RadioMode { radioState.mode }
 
     func playCharacter(_ char: Character) async {
         playCharacterCalls.append(char)
@@ -61,33 +63,21 @@ final class MockAudioEngine: AudioEngineProtocol {
         // No-op for testing
     }
 
-    func startSession() { storedRadioMode = .receiving }
-    func endSession() { storedRadioMode = .off
+    func startSession() { radioState.startSession() }
+    func endSession() {
+        radioState.endSession()
         endSessionCalled = true
     }
 
-    func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
+    func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
+    func startReceiving() throws { try radioState.startReceiving() }
+    func startTransmitting() throws { try radioState.startTransmitting() }
+    func stopRadio() throws { try radioState.stopRadio() }
 
-    func startReceiving() throws {
-        guard storedRadioMode == .off else {
-            throw Radio.RadioError.mustBeOff(current: storedRadioMode)
-        }
-        storedRadioMode = .receiving
-    }
+    // MARK: Private
 
-    func startTransmitting() throws {
-        guard storedRadioMode == .off else {
-            throw Radio.RadioError.mustBeOff(current: storedRadioMode)
-        }
-        storedRadioMode = .transmitting
-    }
+    private let radioState = MockRadioState()
 
-    func stopRadio() throws {
-        guard storedRadioMode != .off else {
-            throw Radio.RadioError.alreadyOff
-        }
-        storedRadioMode = .off
-    }
 }
 
 // MARK: - ReceiveTrainingViewModelTests
@@ -343,7 +333,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.phase, .paused)
         XCTAssertFalse(viewModel.isPlaying)
         // Pause sets radio mode to .off instead of calling stop()
-        XCTAssertEqual(mockAudioEngine.storedRadioMode, .off)
+        XCTAssertEqual(mockAudioEngine.radioMode, .off)
     }
 
     func testPauseDuringIntroductionIsNoOp() {
