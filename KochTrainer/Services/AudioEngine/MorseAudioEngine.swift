@@ -27,13 +27,6 @@ protocol AudioEngineProtocol {
     /// End the continuous audio session.
     func endSession()
 
-    /// Set the radio mode (controls audio output behavior).
-    /// - Parameter mode: `.off` (silence), `.receiving` (noise + signals), `.transmitting` (sidetone only)
-    ///
-    /// - Note: Deprecated. Use `startReceiving()`, `startTransmitting()`, or `stopRadio()` instead.
-    ///   Those methods expose the Radio's throwing API for explicit constraint violation handling.
-    func setRadioMode(_ mode: RadioMode)
-
     /// Current radio mode.
     var radioMode: RadioMode { get }
 
@@ -202,13 +195,6 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         isStopped = true
         isSessionActive = false
         toneGenerator.endSession()
-    }
-
-    /// Set the radio mode.
-    ///
-    /// - Note: Deprecated. Use `startReceiving()`, `startTransmitting()`, or `stopRadio()` instead.
-    func setRadioMode(_ mode: RadioMode) {
-        toneGenerator.setRadioMode(mode)
     }
 
     // MARK: - Radio Control API

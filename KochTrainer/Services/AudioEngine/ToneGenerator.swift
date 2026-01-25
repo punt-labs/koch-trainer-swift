@@ -8,8 +8,9 @@ import os
 /// 1. **Discrete tones**: Traditional start/stop per tone via `playTone()`
 /// 2. **Continuous session**: Engine runs for session duration with radio mode control
 ///
-/// For continuous mode, use `startSession()` to begin, `setRadioMode(_:)` to control
-/// audio behavior, and `endSession()` to stop.
+/// For continuous mode, use `startSession()` to begin, Radio control methods
+/// (`startReceiving()`, `startTransmitting()`, `stopRadio()`) for audio behavior,
+/// and `endSession()` to stop.
 ///
 /// Thread-safe: uses internal locking and serial queue for synchronization.
 final class ToneGenerator: @unchecked Sendable {
@@ -111,12 +112,16 @@ final class ToneGenerator: @unchecked Sendable {
 
     /// Start a continuous audio session.
     /// The audio engine runs continuously until `endSession()` is called.
-    /// Use `setRadioMode(_:)` to control audio output behavior.
+    /// Use Radio control methods to manage audio output behavior.
     func startSession() {
         guard !isSessionActive else { return }
 
         bandConditionsProcessor.reset()
-        setRadioMode(.receiving)
+        do {
+            try radio.startReceiving()
+        } catch {
+            logger.error("startSession: Failed to start receiving: \(error)")
+        }
         startContinuousAudio()
         isSessionActive = true
     }
@@ -129,48 +134,13 @@ final class ToneGenerator: @unchecked Sendable {
             return
         }
 
-        setRadioMode(.off)
+        do {
+            try radio.stop()
+        } catch {
+            logger.error("endSession: Failed to stop radio: \(error)")
+        }
         stopContinuousAudio()
         isSessionActive = false
-    }
-
-    /// Set the radio mode for continuous audio.
-    /// - Parameter mode: The desired radio mode
-    ///
-    /// From Z specification:
-    /// - `.off`: Radio not active (silence)
-    /// - `.receiving`: Noise + incoming signals + band conditions
-    /// - `.transmitting`: Sidetone only (no noise, no band conditions)
-    ///
-    /// Note: This method wraps the Radio's throwing API for backward compatibility.
-    /// Mode transitions automatically stop the radio first if needed.
-    func setRadioMode(_ mode: RadioMode) {
-        // If already in target mode, nothing to do
-        guard radio.mode != mode else { return }
-
-        // First, transition to off if not already off
-        if radio.mode != .off {
-            do {
-                try radio.stop()
-            } catch {
-                logger.error("setRadioMode: Failed to stop radio: \(error)")
-            }
-        }
-
-        // Then transition to target mode
-        do {
-            switch mode {
-            case .off:
-                // Already off from above
-                break
-            case .receiving:
-                try radio.startReceiving()
-            case .transmitting:
-                try radio.startTransmitting()
-            }
-        } catch {
-            logger.error("setRadioMode: Failed to set mode \(String(describing: mode)): \(error)")
-        }
     }
 
     /// Activate tone generation at the specified frequency (for continuous mode)

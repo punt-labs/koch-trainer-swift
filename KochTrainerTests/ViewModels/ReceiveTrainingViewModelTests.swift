@@ -69,7 +69,6 @@ final class MockAudioEngine: AudioEngineProtocol {
         endSessionCalled = true
     }
 
-    func setRadioMode(_ mode: RadioMode) { radioState.setMode(mode) }
     func startReceiving() throws { try radioState.startReceiving() }
     func startTransmitting() throws { try radioState.startTransmitting() }
     func stopRadio() throws { try radioState.stopRadio() }
