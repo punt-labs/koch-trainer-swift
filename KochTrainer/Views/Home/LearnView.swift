@@ -46,6 +46,7 @@ struct LearnView: View {
                     Text("Characters: \(chars.map { String($0) }.joined())")
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("Characters: \(chars.map { String($0) }.joined(separator: " "))")
 
                     Spacer()
                 }
@@ -79,11 +80,11 @@ struct LearnView: View {
                 .accessibilityIdentifier(AccessibilityID.Learn.receiveTrainingButton)
 
                 HStack {
-                    Text(
-                        "Characters: \(progressStore.progress.unlockedCharacters(for: .receive).map { String($0) }.joined())"
-                    )
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
+                    let receiveChars = progressStore.progress.unlockedCharacters(for: .receive)
+                    Text("Characters: \(receiveChars.map { String($0) }.joined())")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                        .accessibilityLabel("Characters: \(receiveChars.map { String($0) }.joined(separator: " "))")
 
                     Spacer()
 
@@ -119,11 +120,11 @@ struct LearnView: View {
                 .accessibilityIdentifier(AccessibilityID.Learn.sendTrainingButton)
 
                 HStack {
-                    Text(
-                        "Characters: \(progressStore.progress.unlockedCharacters(for: .send).map { String($0) }.joined())"
-                    )
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
+                    let sendChars = progressStore.progress.unlockedCharacters(for: .send)
+                    Text("Characters: \(sendChars.map { String($0) }.joined())")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                        .accessibilityLabel("Characters: \(sendChars.map { String($0) }.joined(separator: " "))")
 
                     Spacer()
 
