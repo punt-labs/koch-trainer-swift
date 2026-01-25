@@ -34,9 +34,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var phase: SessionPhase = .introduction(characterIndex: 0)
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
     @Published var isPlaying: Bool = false
-    @Published var correctCount: Int = 0
-    @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+
+    /// Session attempt counter with invariant enforcement.
+    let counter = SessionCounter()
     @Published var introCharacters: [Character] = []
     @Published var currentIntroCharacter: Character?
     @Published var targetCharacter: Character = "K"
@@ -65,13 +66,11 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var accuracyPercentage: Int {
-        guard totalAttempts > 0 else { return 0 }
-        return Int((Double(correctCount) / Double(totalAttempts) * 100).rounded())
+        Int((counter.accuracy * 100).rounded())
     }
 
     var accuracy: Double {
-        guard totalAttempts > 0 else { return 0 }
-        return Double(correctCount) / Double(totalAttempts)
+        counter.accuracy
     }
 
     var inputProgress: Double {
@@ -94,8 +93,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var proficiencyProgress: String {
-        if totalAttempts < minimumAttemptsForProficiency {
-            return "\(totalAttempts)/\(minimumAttemptsForProficiency) attempts"
+        if counter.attempts < minimumAttemptsForProficiency {
+            return "\(counter.attempts)/\(minimumAttemptsForProficiency) attempts"
         } else {
             return "\(accuracyPercentage)% (need \(Int(proficiencyThreshold * 100))%)"
         }
@@ -182,7 +181,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         announcer.announcePaused()
 
         // Only persist paused session if there's actual progress
-        if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
+        if counter.attempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
         }
     }
@@ -197,8 +196,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
             sessionType: sessionType,
             startTime: startTime,
             pausedAt: Date(),
-            correctCount: correctCount,
-            totalAttempts: totalAttempts,
+            correctCount: counter.correct,
+            totalAttempts: counter.attempts,
             characterStats: characterStats,
             introCharacters: introCharacters,
             introCompleted: isIntroCompleted,
@@ -227,8 +226,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
 
         // Restore state
-        correctCount = session.correctCount
-        totalAttempts = session.totalAttempts
+        counter.restore(correct: session.correctCount, attempts: session.totalAttempts)
+
         characterStats = session.characterStats
         introCharacters = session.introCharacters
         sessionStartTime = session.startTime
@@ -275,7 +274,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
 
         // Don't record sessions with no attempts (e.g., immediately cancelled)
-        guard totalAttempts > 0 else {
+        guard counter.attempts > 0 else {
             phase = .completed(didAdvance: false, newCharacter: nil)
             return
         }
@@ -284,8 +283,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         let result = SessionResult(
             sessionType: sessionType,
             duration: duration,
-            totalAttempts: totalAttempts,
-            correctCount: correctCount,
+            totalAttempts: counter.attempts,
+            correctCount: counter.correct,
             characterStats: characterStats
         )
 
@@ -384,7 +383,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     private func checkForProficiency() {
-        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard counter.attempts >= minimumAttemptsForProficiency else { return }
         guard accuracy >= proficiencyThreshold else { return }
 
         endSession()
@@ -452,8 +451,7 @@ extension SendTrainingViewModel {
     }
 
     func recordResponse(expected: Character, wasCorrect: Bool, pattern: String, decoded: Character?) {
-        totalAttempts += 1
-        if wasCorrect { correctCount += 1 }
+        counter.recordAttempt(wasCorrect: wasCorrect)
 
         var stat = characterStats[expected] ?? CharacterStat()
         stat.sendAttempts += 1

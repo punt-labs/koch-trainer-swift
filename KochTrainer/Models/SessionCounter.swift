@@ -46,4 +46,18 @@ final class SessionCounter: ObservableObject {
         attempts = 0
         correct = 0
     }
+
+    /// Restore counters from saved state.
+    /// - Parameters:
+    ///   - correct: Number of correct attempts to restore.
+    ///   - attempts: Total number of attempts to restore.
+    /// - Precondition: `correct <= attempts` (invariant must be satisfied).
+    ///
+    /// Use this when restoring from a paused session. The invariant is validated
+    /// before setting values.
+    func restore(correct: Int, attempts: Int) {
+        precondition(correct <= attempts, "Invariant violation: correct (\(correct)) > attempts (\(attempts))")
+        self.attempts = attempts
+        self.correct = correct
+    }
 }

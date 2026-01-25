@@ -142,8 +142,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         // Wait for input timeout to register the attempt
         try? await Task.sleep(nanoseconds: 2_500_000_000)
 
-        let correctBefore = viewModel.correctCount
-        let attemptsBefore = viewModel.totalAttempts
+        let correctBefore = viewModel.counter.correct
+        let attemptsBefore = viewModel.counter.attempts
 
         // Only test if we actually got an attempt registered
         guard attemptsBefore > 0 else {
@@ -155,15 +155,15 @@ final class SendTrainingViewModelTests: XCTestCase {
         viewModel.pause()
 
         // Stats should be preserved
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
 
         // Resume
         viewModel.resume()
 
         // Stats should still be preserved
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
     }
 
     // MARK: - Input Tests
@@ -342,8 +342,8 @@ final class SendTrainingViewModelTests: XCTestCase {
 
         viewModel.restoreFromPausedSession(session)
 
-        XCTAssertEqual(viewModel.correctCount, 15)
-        XCTAssertEqual(viewModel.totalAttempts, 20)
+        XCTAssertEqual(viewModel.counter.correct, 15)
+        XCTAssertEqual(viewModel.counter.attempts, 20)
         XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 10)
         XCTAssertEqual(viewModel.phase, .paused)
     }
@@ -366,8 +366,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         viewModel.restoreFromPausedSession(session)
 
         // Should not restore
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
     }
 
     func testRestoreFromPausedSessionRestartsIntroIfNotCompleted() {
@@ -394,8 +394,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         }
 
         // But stats should be restored
-        XCTAssertEqual(viewModel.correctCount, 5)
-        XCTAssertEqual(viewModel.totalAttempts, 10)
+        XCTAssertEqual(viewModel.counter.correct, 5)
+        XCTAssertEqual(viewModel.counter.attempts, 10)
     }
 
     func testRestoreFromPausedSessionDoesNotRestoreIfCustomCharactersMismatch() {
@@ -421,8 +421,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         vm.restoreFromPausedSession(session)
 
         // Should not restore because custom characters don't match
-        XCTAssertEqual(vm.correctCount, 0)
-        XCTAssertEqual(vm.totalAttempts, 0)
+        XCTAssertEqual(vm.counter.correct, 0)
+        XCTAssertEqual(vm.counter.attempts, 0)
     }
 
     func testIsIntroCompletedFalseInIntroduction() {
@@ -600,8 +600,8 @@ final class SendTrainingViewModelTests: XCTestCase {
 
         viewModel.recordResponse(expected: "K", wasCorrect: true, pattern: "-.-", decoded: "K")
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 1)
         XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 1)
         XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 1)
     }
@@ -614,8 +614,8 @@ final class SendTrainingViewModelTests: XCTestCase {
 
         viewModel.recordResponse(expected: "K", wasCorrect: false, pattern: ".-", decoded: "A")
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 0)
         XCTAssertEqual(viewModel.characterStats["K"]?.sendAttempts, 1)
         XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 0)
     }

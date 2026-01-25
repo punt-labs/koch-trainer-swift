@@ -380,8 +380,8 @@ final class EarTrainingViewModelTests: XCTestCase {
 
         viewModel.restoreFromPausedSession(session)
 
-        XCTAssertEqual(viewModel.correctCount, 15)
-        XCTAssertEqual(viewModel.totalAttempts, 20)
+        XCTAssertEqual(viewModel.counter.correct, 15)
+        XCTAssertEqual(viewModel.counter.attempts, 20)
         XCTAssertEqual(viewModel.characterStats["E"]?.earTrainingAttempts, 10)
         XCTAssertEqual(viewModel.phase, .paused)
     }
@@ -402,8 +402,8 @@ final class EarTrainingViewModelTests: XCTestCase {
 
         viewModel.restoreFromPausedSession(session)
 
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
     }
 
     func testRestoreFromPausedSessionRestartsIntroIfNotCompleted() {
@@ -428,8 +428,8 @@ final class EarTrainingViewModelTests: XCTestCase {
             XCTFail("Expected introduction phase when intro not completed")
         }
 
-        XCTAssertEqual(viewModel.correctCount, 5)
-        XCTAssertEqual(viewModel.totalAttempts, 10)
+        XCTAssertEqual(viewModel.counter.correct, 5)
+        XCTAssertEqual(viewModel.counter.attempts, 10)
     }
 
     // MARK: - Computed Properties Tests
@@ -501,15 +501,15 @@ final class EarTrainingViewModelTests: XCTestCase {
     func testRecordResponseIncrementsTotal() {
         viewModel.recordResponse(expected: "E", wasCorrect: false)
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 0)
     }
 
     func testRecordResponseIncrementsCorrect() {
         viewModel.recordResponse(expected: "E", wasCorrect: true)
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 1)
     }
 
     func testRecordResponseUpdatesCharacterStats() {

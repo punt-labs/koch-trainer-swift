@@ -211,7 +211,7 @@ struct TrainingPhaseView: View {
 
             // Score display
             HStack {
-                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
                     .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
@@ -246,7 +246,7 @@ struct PausedView: View {
                 .accessibilityIdentifier(AccessibilityID.Training.pausedTitle)
 
             VStack(spacing: Theme.Spacing.sm) {
-                Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                Text("Score: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
                     .font(Typography.headline)
                     .accessibilityIdentifier(AccessibilityID.Training.pausedScore)
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
@@ -323,7 +323,7 @@ struct CompletedView: View {
 
             // Stats
             VStack(spacing: Theme.Spacing.sm) {
-                Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
+                Text("\(viewModel.counter.correct)/\(viewModel.counter.attempts) correct")
                     .font(Typography.headline)
                     .accessibilityIdentifier(AccessibilityID.Training.finalScore)
 

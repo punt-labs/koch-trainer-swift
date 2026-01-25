@@ -107,8 +107,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     func testInitialState() {
         XCTAssertEqual(viewModel.phase, .training)
         XCTAssertFalse(viewModel.isPlaying)
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
         XCTAssertEqual(viewModel.accuracyPercentage, 0)
         XCTAssertTrue(viewModel.currentWord.isEmpty)
     }
@@ -198,18 +198,18 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         // Simulate an answer
         viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
 
-        let correctBefore = viewModel.correctCount
-        let attemptsBefore = viewModel.totalAttempts
+        let correctBefore = viewModel.counter.correct
+        let attemptsBefore = viewModel.counter.attempts
 
         viewModel.pause()
 
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
 
         viewModel.resume()
 
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
     }
 
     // MARK: - Answer Submission Tests
@@ -227,8 +227,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
         viewModel.submitAnswer(word)
 
-        XCTAssertEqual(viewModel.correctCount, 1)
-        XCTAssertEqual(viewModel.totalAttempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
     }
 
     func testSubmitIncorrectAnswer() {
@@ -237,8 +237,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
         viewModel.submitAnswer("WRONGANSWER")
 
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
     }
 
     func testSubmitAnswerNotWaitingIsIgnored() {
@@ -247,7 +247,7 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
         viewModel.submitAnswer("CQ")
 
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
     }
 
     func testAnswerNormalization() {
@@ -259,7 +259,7 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         viewModel.submitAnswer(word)
 
         // Should recognize as correct due to normalization
-        XCTAssertEqual(viewModel.totalAttempts, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
     }
 
     // MARK: - Record Response Tests
@@ -270,8 +270,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         viewModel.recordResponse(expected: "CQ", wasCorrect: true, userAnswer: "CQ")
         viewModel.recordResponse(expected: "DE", wasCorrect: false, userAnswer: "KE")
 
-        XCTAssertEqual(viewModel.correctCount, 1)
-        XCTAssertEqual(viewModel.totalAttempts, 2)
+        XCTAssertEqual(viewModel.counter.correct, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 2)
         XCTAssertEqual(viewModel.accuracyPercentage, 50)
     }
 
@@ -678,8 +678,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
         viewModel.restoreFromPausedSession(session)
 
-        XCTAssertEqual(viewModel.correctCount, 5)
-        XCTAssertEqual(viewModel.totalAttempts, 8)
+        XCTAssertEqual(viewModel.counter.correct, 5)
+        XCTAssertEqual(viewModel.counter.attempts, 8)
         XCTAssertEqual(viewModel.phase, .paused)
         XCTAssertEqual(viewModel.wordStats["CQ"]?.receiveAttempts, 5)
     }
@@ -702,8 +702,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         viewModel.restoreFromPausedSession(session)
 
         // Should not restore - starts fresh session instead
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
         XCTAssertEqual(viewModel.phase, .training)
     }
 
