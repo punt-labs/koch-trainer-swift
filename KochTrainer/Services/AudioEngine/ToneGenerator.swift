@@ -9,7 +9,7 @@ import os
 /// 2. **Continuous session**: Engine runs for session duration with radio mode control
 ///
 /// For continuous mode, use `startSession()` to begin, Radio control methods
-/// (`startReceiving()`, `startTransmitting()`, `stop()`) for audio behavior,
+/// (`startReceiving()`, `startTransmitting()`, `stopRadio()`) for audio behavior,
 /// and `endSession()` to stop.
 ///
 /// Thread-safe: uses internal locking and serial queue for synchronization.
