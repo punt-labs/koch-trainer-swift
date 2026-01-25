@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import os
 
 // MARK: - AudioEngineProtocol
 
@@ -28,10 +29,27 @@ protocol AudioEngineProtocol {
 
     /// Set the radio mode (controls audio output behavior).
     /// - Parameter mode: `.off` (silence), `.receiving` (noise + signals), `.transmitting` (sidetone only)
+    ///
+    /// - Note: Deprecated. Use `startReceiving()`, `startTransmitting()`, or `stopRadio()` instead.
+    ///   Those methods expose the Radio's throwing API for explicit constraint violation handling.
     func setRadioMode(_ mode: RadioMode)
 
     /// Current radio mode.
     var radioMode: RadioMode { get }
+
+    // MARK: - Radio Control API (Z Specification Compliant)
+
+    /// Start receiving mode (listening for incoming signals).
+    /// - Throws: `Radio.RadioError.mustBeOff` if radio is not currently off.
+    func startReceiving() throws
+
+    /// Start transmitting mode (preparing to send).
+    /// - Throws: `Radio.RadioError.mustBeOff` if radio is not currently off.
+    func startTransmitting() throws
+
+    /// Stop the radio (transition to off).
+    /// - Throws: `Radio.RadioError.alreadyOff` if radio is already off.
+    func stopRadio() throws
 }
 
 // MARK: - MorseAudioEngine
@@ -94,7 +112,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         guard !isStopped else { return }
 
         guard let pattern = MorseCode.pattern(for: char) else {
-            print("Unknown character: \(char)")
+            logger.warning("Unknown character: \(String(char))")
             return
         }
 
@@ -187,11 +205,32 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     }
 
     /// Set the radio mode.
+    ///
+    /// - Note: Deprecated. Use `startReceiving()`, `startTransmitting()`, or `stopRadio()` instead.
     func setRadioMode(_ mode: RadioMode) {
         toneGenerator.setRadioMode(mode)
     }
 
+    // MARK: - Radio Control API
+
+    /// Start receiving mode.
+    func startReceiving() throws {
+        try toneGenerator.radio.startReceiving()
+    }
+
+    /// Start transmitting mode.
+    func startTransmitting() throws {
+        try toneGenerator.radio.startTransmitting()
+    }
+
+    /// Stop the radio.
+    func stopRadio() throws {
+        try toneGenerator.radio.stop()
+    }
+
     // MARK: Private
+
+    private let logger = Logger(subsystem: "com.kochtrainer", category: "MorseAudioEngine")
 
     private let toneGenerator = ToneGenerator()
     private var frequency: Double = 600

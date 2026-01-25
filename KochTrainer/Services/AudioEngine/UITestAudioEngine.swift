@@ -69,9 +69,30 @@ final class UITestAudioEngine: AudioEngineProtocol, ObservableObject {
         storedRadioMode = mode
     }
 
-    // MARK: Private
+    // MARK: - Radio Control API
 
-    // MARK: - RadioMode
+    func startReceiving() throws {
+        guard storedRadioMode == .off else {
+            throw Radio.RadioError.mustBeOff(current: storedRadioMode)
+        }
+        storedRadioMode = .receiving
+    }
+
+    func startTransmitting() throws {
+        guard storedRadioMode == .off else {
+            throw Radio.RadioError.mustBeOff(current: storedRadioMode)
+        }
+        storedRadioMode = .transmitting
+    }
+
+    func stopRadio() throws {
+        guard storedRadioMode != .off else {
+            throw Radio.RadioError.alreadyOff
+        }
+        storedRadioMode = .off
+    }
+
+    // MARK: Private
 
     private var storedRadioMode: RadioMode = .off
 

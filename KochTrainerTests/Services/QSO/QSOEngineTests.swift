@@ -45,6 +45,27 @@ final class QSOEngineTests: XCTestCase {
         func startSession() { storedRadioMode = .receiving }
         func endSession() { storedRadioMode = .off }
         func setRadioMode(_ mode: RadioMode) { storedRadioMode = mode }
+
+        func startReceiving() throws {
+            guard storedRadioMode == .off else {
+                throw Radio.RadioError.mustBeOff(current: storedRadioMode)
+            }
+            storedRadioMode = .receiving
+        }
+
+        func startTransmitting() throws {
+            guard storedRadioMode == .off else {
+                throw Radio.RadioError.mustBeOff(current: storedRadioMode)
+            }
+            storedRadioMode = .transmitting
+        }
+
+        func stopRadio() throws {
+            guard storedRadioMode != .off else {
+                throw Radio.RadioError.alreadyOff
+            }
+            storedRadioMode = .off
+        }
     }
 
     // MARK: - Tests
