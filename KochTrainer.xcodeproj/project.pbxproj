@@ -27,6 +27,7 @@
 		1D7A3C2809BD606BA0CE26B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB4886489BF491D3156CA3 /* SettingsView.swift */; };
 		1FC3357D859CDBF4A1689A6E /* EarTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3246C8567B10F82A706BAC9 /* EarTrainingView.swift */; };
 		20B9FD5D2D772C067CE4CDF1 /* PausedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2954CF1027D368A87B4474 /* PausedSession.swift */; };
+		2132C287E63D492D67B08686 /* SessionCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5353541700DBABB96971A3 /* SessionCounter.swift */; };
 		22E2F997AFCDAD67141C2FFB /* ProgressStoreScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF57B69F3BA99F8C6C001A89 /* ProgressStoreScheduleTests.swift */; };
 		244D29AFD50DAFBB95F5E4ED /* VocabularyTrainingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22D9CDC6A168B46272F16AE /* VocabularyTrainingUITests.swift */; };
 		25C836B4836378F4C58C6A24 /* ReceiveTrainingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1605DB0C34FD7A7118F95BA5 /* ReceiveTrainingPage.swift */; };
@@ -110,6 +111,7 @@
 		B9DA1D0450C3D62D24425FD6 /* MorseAudioEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D88B4D4610F340F8FF6905 /* MorseAudioEngineTests.swift */; };
 		B9E21B960E5BE46794F9C698 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30E39178817F40F4AA07D72 /* AppSettings.swift */; };
 		BC60E75DF0D5523647275592 /* RadioMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8066FAB7E02BA0637232FE /* RadioMode.swift */; };
+		BDF8F51A7CC2437A3BF80887 /* SessionCounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D53C2C6946BF79D6CEDF5D4 /* SessionCounterTests.swift */; };
 		BEFFC1A9549A3F09654F496D /* Radio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC1AC68E549024CDF0FD258 /* Radio.swift */; };
 		C002EF687CC4BB4E49AAE21E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BC14AF6458B728B1D6F1580 /* Assets.xcassets */; };
 		C233FD0E9146D9F38934A581 /* ProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A89800850CEDA49637158DA /* ProgressStoreTests.swift */; };
@@ -175,6 +177,7 @@
 		19D59E453CE226B30D509A19 /* ReceiveTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTrainingView.swift; sourceTree = "<group>"; };
 		1A9BC1EA1F93A1143D08D515 /* QSOTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOTemplateTests.swift; sourceTree = "<group>"; };
 		1B8066FAB7E02BA0637232FE /* RadioMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioMode.swift; sourceTree = "<group>"; };
+		1D53C2C6946BF79D6CEDF5D4 /* SessionCounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCounterTests.swift; sourceTree = "<group>"; };
 		2178F2133ED71F057D8616FD /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		22390FA59E09BA09EC0D05F2 /* VocabularyTrainingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTrainingPage.swift; sourceTree = "<group>"; };
 		28E2F2CE2BA8A0424645A8DE /* QSOState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOState.swift; sourceTree = "<group>"; };
@@ -198,6 +201,7 @@
 		44B3C7A7E3A74B8FF64DB201 /* AppSettingsCodableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsCodableTests.swift; sourceTree = "<group>"; };
 		480F67BE8DF373ED8CFE489D /* WordStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordStat.swift; sourceTree = "<group>"; };
 		4DF322665DDF89F3596D47FA /* BackupManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManagerTests.swift; sourceTree = "<group>"; };
+		4F5353541700DBABB96971A3 /* SessionCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCounter.swift; sourceTree = "<group>"; };
 		4F5BB57C072242009B88EF52 /* VocabularySetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySetTests.swift; sourceTree = "<group>"; };
 		52304BFA45E3AB138BDC3DD6 /* SendTrainingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModelTests.swift; sourceTree = "<group>"; };
 		5430A3B6A50FFD7199054A14 /* SessionHistoryPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryPage.swift; sourceTree = "<group>"; };
@@ -549,6 +553,7 @@
 				61646CC951F313ADD0B6F32A /* QSOStateTests.swift */,
 				80D2E568FF5F2FAD1C09B897 /* RadioModeTests.swift */,
 				3835DC1B0CCE11D0678DB6F3 /* RadioTests.swift */,
+				1D53C2C6946BF79D6CEDF5D4 /* SessionCounterTests.swift */,
 				F3A5774715A67E6D517E2FE9 /* SessionResultTests.swift */,
 				6CD09C44BCD391959078B978 /* StudentProgressTests.swift */,
 				4F5BB57C072242009B88EF52 /* VocabularySetTests.swift */,
@@ -568,6 +573,7 @@
 				42E9C5CC48B26ED90748F52F /* PracticeSchedule.swift */,
 				7EC1AC68E549024CDF0FD258 /* Radio.swift */,
 				1B8066FAB7E02BA0637232FE /* RadioMode.swift */,
+				4F5353541700DBABB96971A3 /* SessionCounter.swift */,
 				03D7ADDFD818AD9C12165E74 /* SessionResult.swift */,
 				85CD768AEED253F0A22D4D6B /* StudentProgress.swift */,
 				1111BA0D5DEF631542D63644 /* TrainingTiming.swift */,
@@ -865,6 +871,7 @@
 				5383BF913CEE062CEB15B91D /* ResultsView.swift in Sources */,
 				18EB70135BD0C6A3F542E36B /* SendTrainingView.swift in Sources */,
 				8F969AC17120BCDA9814D527 /* SendTrainingViewModel.swift in Sources */,
+				2132C287E63D492D67B08686 /* SessionCounter.swift in Sources */,
 				CD78C4B876DF6324DBF213C8 /* SessionHistoryView.swift in Sources */,
 				8F7BD05C287E9993E4C8ECA5 /* SessionResult.swift in Sources */,
 				D6ED51A820293916C2EBB9B2 /* SettingsStore.swift in Sources */,
@@ -927,6 +934,7 @@
 				7955259369B40EEB0B631BB7 /* ReceiveTrainingViewModelInputTests.swift in Sources */,
 				DC5AE896B12BFF78199601A4 /* ReceiveTrainingViewModelTests.swift in Sources */,
 				A5B26729247712BBB5A8FF24 /* SendTrainingViewModelTests.swift in Sources */,
+				BDF8F51A7CC2437A3BF80887 /* SessionCounterTests.swift in Sources */,
 				B4B344A5F10DB214363B9606 /* SessionResultTests.swift in Sources */,
 				A23391BC7CF60ECB5166F69C /* SettingsStoreTests.swift in Sources */,
 				75AEB04BC7BDEAA5639DA72F /* SilentAudioEngine.swift in Sources */,
