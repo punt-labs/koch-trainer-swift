@@ -175,7 +175,6 @@ struct SettingsView: View {
                 }
                 .accessibilityIdentifier(AccessibilityID.Settings.resetProgressButton)
             }
-            .accessibilityElement(children: .contain)
 
             Section("About") {
                 HStack {
@@ -217,9 +216,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .accessibilityElement(children: .contain)
         }
-        .accessibilityElement(children: .contain)
         .navigationTitle("Settings")
         .accessibilityIdentifier(AccessibilityID.Settings.view)
         .alert("Reset Progress?", isPresented: $showResetConfirmation) {

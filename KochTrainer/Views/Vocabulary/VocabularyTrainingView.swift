@@ -1,5 +1,12 @@
 import SwiftUI
 
+// MARK: - Accessibility Helper
+
+/// Spells out a word character by character for VoiceOver (e.g., "W1AW" → "W 1 A W")
+private func spellOutWord(_ word: String) -> String {
+    word.map { String($0) }.joined(separator: " ")
+}
+
 // MARK: - VocabularyTrainingView
 
 struct VocabularyTrainingView: View {
@@ -280,6 +287,7 @@ private struct SendVocabTrainingPhaseView: View {
                     Text(viewModel.currentWord)
                         .font(Typography.characterDisplay(size: wordSize))
                         .foregroundColor(Theme.Colors.primary)
+                        .accessibilityLabel(spellOutWord(viewModel.currentWord))
                         .accessibilityIdentifier(AccessibilityID.VocabTraining.targetWord)
 
                     // Current progress through the word
@@ -486,6 +494,7 @@ private struct VocabFeedbackView: View {
             Text(feedback.expectedWord)
                 .font(Typography.characterDisplay(size: wordSize))
                 .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
+                .accessibilityLabel(spellOutWord(feedback.expectedWord))
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackWord)
 
             if feedback.wasCorrect {
@@ -499,6 +508,7 @@ private struct VocabFeedbackView: View {
                         Text("You entered: \(feedback.userAnswer)")
                             .font(Typography.body)
                             .foregroundColor(Theme.Colors.error)
+                            .accessibilityLabel("You entered: \(spellOutWord(feedback.userAnswer))")
                     } else {
                         Text("Too slow!")
                             .font(Typography.headline)
