@@ -106,8 +106,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(vm.phase, .introduction(characterIndex: 0))
         XCTAssertEqual(vm.timeRemaining, 300)
         XCTAssertFalse(vm.isPlaying)
-        XCTAssertEqual(vm.correctCount, 0)
-        XCTAssertEqual(vm.totalAttempts, 0)
+        XCTAssertEqual(vm.counter.correct, 0)
+        XCTAssertEqual(vm.counter.attempts, 0)
         XCTAssertTrue(vm.characterStats.isEmpty)
         XCTAssertNil(vm.currentCharacter)
         XCTAssertNil(vm.lastFeedback)
@@ -428,22 +428,22 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         viewModel.handleKeyPress("K")
         try? await Task.sleep(nanoseconds: 100_000_000)
 
-        let correctBefore = viewModel.correctCount
-        let attemptsBefore = viewModel.totalAttempts
+        let correctBefore = viewModel.counter.correct
+        let attemptsBefore = viewModel.counter.attempts
 
         // Pause
         viewModel.pause()
 
         // Stats should be preserved
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
 
         // Resume
         viewModel.resume()
 
         // Stats should still be preserved
-        XCTAssertEqual(viewModel.correctCount, correctBefore)
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
     }
 
     // MARK: - End Session Tests
@@ -570,8 +570,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
         viewModel.restoreFromPausedSession(session)
 
-        XCTAssertEqual(viewModel.correctCount, 15)
-        XCTAssertEqual(viewModel.totalAttempts, 20)
+        XCTAssertEqual(viewModel.counter.correct, 15)
+        XCTAssertEqual(viewModel.counter.attempts, 20)
         XCTAssertEqual(viewModel.characterStats["K"]?.receiveAttempts, 10)
         XCTAssertEqual(viewModel.phase, .paused)
     }
@@ -594,8 +594,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         viewModel.restoreFromPausedSession(session)
 
         // Should not restore
-        XCTAssertEqual(viewModel.correctCount, 0)
-        XCTAssertEqual(viewModel.totalAttempts, 0)
+        XCTAssertEqual(viewModel.counter.correct, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 0)
     }
 
     func testRestoreFromPausedSessionRestartsIntroIfNotCompleted() {
@@ -622,8 +622,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         }
 
         // But stats should be restored
-        XCTAssertEqual(viewModel.correctCount, 5)
-        XCTAssertEqual(viewModel.totalAttempts, 10)
+        XCTAssertEqual(viewModel.counter.correct, 5)
+        XCTAssertEqual(viewModel.counter.attempts, 10)
     }
 
     func testRestoreFromPausedSessionDoesNotRestoreIfCustomCharactersMismatch() {
@@ -649,8 +649,8 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         vm.restoreFromPausedSession(session)
 
         // Should not restore because custom characters don't match
-        XCTAssertEqual(vm.correctCount, 0)
-        XCTAssertEqual(vm.totalAttempts, 0)
+        XCTAssertEqual(vm.counter.correct, 0)
+        XCTAssertEqual(vm.counter.attempts, 0)
     }
 
     func testIsIntroCompletedFalseInIntroduction() {

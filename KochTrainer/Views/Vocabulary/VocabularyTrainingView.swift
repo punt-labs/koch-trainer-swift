@@ -217,7 +217,7 @@ private struct ReceiveVocabTrainingPhaseView: View {
 
             // Score display
             HStack {
-                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
@@ -325,7 +325,7 @@ private struct SendVocabTrainingPhaseView: View {
 
             // Score display
             HStack {
-                Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
@@ -360,7 +360,7 @@ private struct VocabPausedView: View {
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedTitle)
 
             VStack(spacing: Theme.Spacing.sm) {
-                Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                Text("Score: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
                     .font(Typography.headline)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedScore)
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
@@ -410,7 +410,7 @@ private struct VocabCompletedView: View {
 
             // Stats
             VStack(spacing: Theme.Spacing.sm) {
-                Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
+                Text("\(viewModel.counter.correct)/\(viewModel.counter.attempts) correct")
                     .font(Typography.headline)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
 

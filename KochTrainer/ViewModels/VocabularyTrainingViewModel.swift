@@ -44,9 +44,10 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     @Published var phase: SessionPhase = .training
     @Published var isPlaying: Bool = false
-    @Published var correctCount: Int = 0
-    @Published var totalAttempts: Int = 0
     @Published private(set) var wordStats: [String: WordStat] = [:]
+
+    /// Session attempt counter with invariant enforcement.
+    let counter = SessionCounter()
 
     // Training state
     @Published var currentWord: String = ""
@@ -75,13 +76,11 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     var accuracyPercentage: Int {
-        guard totalAttempts > 0 else { return 0 }
-        return Int((Double(correctCount) / Double(totalAttempts) * 100).rounded())
+        Int((counter.accuracy * 100).rounded())
     }
 
     var accuracy: Double {
-        guard totalAttempts > 0 else { return 0 }
-        return Double(correctCount) / Double(totalAttempts)
+        counter.accuracy
     }
 
     var responseProgress: Double {
@@ -99,7 +98,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     var progressText: String {
-        "\(totalAttempts)/\(minimumAttempts) words"
+        "\(counter.attempts)/\(minimumAttempts) words"
     }
 
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
@@ -137,7 +136,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         announcer.announcePaused()
 
         // Save paused session snapshot only if there's actual progress
-        if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
+        if counter.attempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
         }
     }
@@ -162,8 +161,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
             sessionType: sessionType,
             startTime: startTime,
             pausedAt: Date(),
-            correctCount: correctCount,
-            totalAttempts: totalAttempts,
+            correctCount: counter.correct,
+            totalAttempts: counter.attempts,
             vocabularySetId: vocabularySet.id,
             wordStats: wordStats
         )
@@ -179,8 +178,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         }
 
         sessionStartTime = session.startTime
-        correctCount = session.correctCount
-        totalAttempts = session.totalAttempts
+        counter.restore(correct: session.correctCount, attempts: session.totalAttempts)
 
         // Restore word stats
         if let savedWordStats = session.wordStats {
@@ -423,8 +421,7 @@ extension VocabularyTrainingViewModel {
     }
 
     func recordResponse(expected: String, wasCorrect: Bool, userAnswer: String) {
-        totalAttempts += 1
-        if wasCorrect { correctCount += 1 }
+        counter.recordAttempt(wasCorrect: wasCorrect)
 
         var stat = wordStats[expected] ?? WordStat()
         if isReceiveMode {
@@ -457,7 +454,7 @@ extension VocabularyTrainingViewModel {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
-            if totalAttempts >= minimumAttempts {
+            if counter.attempts >= minimumAttempts {
                 endSession()
             } else if isPlaying {
                 showNextWord()

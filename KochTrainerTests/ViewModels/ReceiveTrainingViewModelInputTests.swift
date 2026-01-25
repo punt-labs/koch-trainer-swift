@@ -37,13 +37,13 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
 
         // Mark as waiting and handle correct key
         viewModel.startResponseTimer()
-        let attemptsBefore = viewModel.totalAttempts
-        let correctBefore = viewModel.correctCount
+        let attemptsBefore = viewModel.counter.attempts
+        let correctBefore = viewModel.counter.correct
 
         viewModel.handleKeyPress(expected)
 
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore + 1)
-        XCTAssertEqual(viewModel.correctCount, correctBefore + 1)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore + 1)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore + 1)
         XCTAssertNotNil(viewModel.lastFeedback)
         XCTAssertTrue(viewModel.lastFeedback?.wasCorrect ?? false)
     }
@@ -62,15 +62,15 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
         }
 
         viewModel.startResponseTimer()
-        let attemptsBefore = viewModel.totalAttempts
-        let correctBefore = viewModel.correctCount
+        let attemptsBefore = viewModel.counter.attempts
+        let correctBefore = viewModel.counter.correct
 
         // Press wrong key
         let wrongKey: Character = expected == "K" ? "M" : "K"
         viewModel.handleKeyPress(wrongKey)
 
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore + 1)
-        XCTAssertEqual(viewModel.correctCount, correctBefore) // Unchanged
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore + 1)
+        XCTAssertEqual(viewModel.counter.correct, correctBefore) // Unchanged
         XCTAssertNotNil(viewModel.lastFeedback)
         XCTAssertFalse(viewModel.lastFeedback?.wasCorrect ?? true)
     }
@@ -106,12 +106,12 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
         // Not waiting for response
         XCTAssertFalse(viewModel.isWaitingForResponse)
 
-        let attemptsBefore = viewModel.totalAttempts
+        let attemptsBefore = viewModel.counter.attempts
 
         viewModel.handleKeyPress("K")
 
         // Should be ignored
-        XCTAssertEqual(viewModel.totalAttempts, attemptsBefore)
+        XCTAssertEqual(viewModel.counter.attempts, attemptsBefore)
     }
 
     // MARK: - Record Response Tests
@@ -121,8 +121,8 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
 
         viewModel.recordResponse(expected: char, wasCorrect: true, userPressed: char)
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 1)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 1)
         XCTAssertNotNil(viewModel.characterStats[char])
         XCTAssertEqual(viewModel.characterStats[char]?.receiveAttempts, 1)
         XCTAssertEqual(viewModel.characterStats[char]?.receiveCorrect, 1)
@@ -133,8 +133,8 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
 
         viewModel.recordResponse(expected: char, wasCorrect: false, userPressed: "K")
 
-        XCTAssertEqual(viewModel.totalAttempts, 1)
-        XCTAssertEqual(viewModel.correctCount, 0)
+        XCTAssertEqual(viewModel.counter.attempts, 1)
+        XCTAssertEqual(viewModel.counter.correct, 0)
         XCTAssertEqual(viewModel.characterStats[char]?.receiveAttempts, 1)
         XCTAssertEqual(viewModel.characterStats[char]?.receiveCorrect, 0)
     }
@@ -146,8 +146,8 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
         viewModel.recordResponse(expected: char, wasCorrect: true, userPressed: char)
         viewModel.recordResponse(expected: char, wasCorrect: false, userPressed: "S")
 
-        XCTAssertEqual(viewModel.totalAttempts, 3)
-        XCTAssertEqual(viewModel.correctCount, 2)
+        XCTAssertEqual(viewModel.counter.attempts, 3)
+        XCTAssertEqual(viewModel.counter.correct, 2)
         XCTAssertEqual(viewModel.characterStats[char]?.receiveAttempts, 3)
         XCTAssertEqual(viewModel.characterStats[char]?.receiveCorrect, 2)
     }

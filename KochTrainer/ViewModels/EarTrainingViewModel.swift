@@ -37,9 +37,10 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var phase: SessionPhase = .introduction(characterIndex: 0)
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes
     @Published var isPlaying: Bool = false
-    @Published var correctCount: Int = 0
-    @Published var totalAttempts: Int = 0
     @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+
+    /// Session attempt counter with invariant enforcement.
+    let counter = SessionCounter()
 
     // Introduction state
     @Published var introCharacters: [Character] = []
@@ -69,13 +70,11 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var accuracyPercentage: Int {
-        guard totalAttempts > 0 else { return 0 }
-        return Int((Double(correctCount) / Double(totalAttempts) * 100).rounded())
+        Int((counter.accuracy * 100).rounded())
     }
 
     var accuracy: Double {
-        guard totalAttempts > 0 else { return 0 }
-        return Double(correctCount) / Double(totalAttempts)
+        counter.accuracy
     }
 
     var inputProgress: Double {
@@ -98,8 +97,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     var proficiencyProgress: String {
-        if totalAttempts < minimumAttemptsForProficiency {
-            return "\(totalAttempts)/\(minimumAttemptsForProficiency) attempts"
+        if counter.attempts < minimumAttemptsForProficiency {
+            return "\(counter.attempts)/\(minimumAttemptsForProficiency) attempts"
         } else {
             return "\(accuracyPercentage)% (need \(Int(proficiencyThreshold * 100))%)"
         }
@@ -171,7 +170,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         isWaitingForInput = false
         announcer.announcePaused()
 
-        if totalAttempts > 0, let snapshot = createPausedSessionSnapshot() {
+        if counter.attempts > 0, let snapshot = createPausedSessionSnapshot() {
             progressStore?.savePausedSession(snapshot)
         }
     }
@@ -204,7 +203,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
             return
         }
 
-        guard totalAttempts > 0 else {
+        guard counter.attempts > 0 else {
             phase = .completed(didAdvance: false, newCharacters: nil)
             return
         }
@@ -213,8 +212,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         let result = SessionResult(
             sessionType: .earTraining,
             duration: duration,
-            totalAttempts: totalAttempts,
-            correctCount: correctCount,
+            totalAttempts: counter.attempts,
+            correctCount: counter.correct,
             characterStats: characterStats
         )
 
@@ -278,8 +277,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
             sessionType: .earTraining,
             startTime: startTime,
             pausedAt: Date(),
-            correctCount: correctCount,
-            totalAttempts: totalAttempts,
+            correctCount: counter.correct,
+            totalAttempts: counter.attempts,
             characterStats: characterStats,
             introCharacters: introCharacters,
             introCompleted: isIntroCompleted,
@@ -291,8 +290,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     func restoreFromPausedSession(_ session: PausedSession) {
         guard session.currentLevel == currentLevel else { return }
 
-        correctCount = session.correctCount
-        totalAttempts = session.totalAttempts
+        counter.restore(correct: session.correctCount, attempts: session.totalAttempts)
         characterStats = session.characterStats
         introCharacters = session.introCharacters
         sessionStartTime = session.startTime
@@ -346,7 +344,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     private func checkForProficiency() {
-        guard totalAttempts >= minimumAttemptsForProficiency else { return }
+        guard counter.attempts >= minimumAttemptsForProficiency else { return }
         guard accuracy >= proficiencyThreshold else { return }
 
         endSession()
@@ -416,8 +414,7 @@ extension EarTrainingViewModel {
     }
 
     func recordResponse(expected: Character, wasCorrect: Bool) {
-        totalAttempts += 1
-        if wasCorrect { correctCount += 1 }
+        counter.recordAttempt(wasCorrect: wasCorrect)
 
         var stat = characterStats[expected] ?? CharacterStat(
             earTrainingAttempts: 0,

@@ -185,4 +185,68 @@ final class SessionCounterTests: XCTestCase {
         XCTAssertEqual(counter.attempts, 1)
         XCTAssertEqual(counter.correct, 0)
     }
+
+    // MARK: - Restore
+
+    func testRestore_setsAttempts() {
+        let counter = SessionCounter()
+
+        counter.restore(correct: 5, attempts: 10)
+
+        XCTAssertEqual(counter.attempts, 10)
+    }
+
+    func testRestore_setsCorrect() {
+        let counter = SessionCounter()
+
+        counter.restore(correct: 5, attempts: 10)
+
+        XCTAssertEqual(counter.correct, 5)
+    }
+
+    func testRestore_updatesAccuracy() {
+        let counter = SessionCounter()
+
+        counter.restore(correct: 3, attempts: 4)
+
+        XCTAssertEqual(counter.accuracy, 0.75, accuracy: 0.001)
+    }
+
+    func testRestore_canRecordAfterRestore() {
+        let counter = SessionCounter()
+        counter.restore(correct: 5, attempts: 10)
+
+        counter.recordAttempt(wasCorrect: true)
+
+        XCTAssertEqual(counter.attempts, 11)
+        XCTAssertEqual(counter.correct, 6)
+    }
+
+    func testRestore_overwritesPreviousState() {
+        let counter = SessionCounter()
+        counter.recordAttempt(wasCorrect: true)
+        counter.recordAttempt(wasCorrect: true)
+
+        counter.restore(correct: 1, attempts: 5)
+
+        XCTAssertEqual(counter.attempts, 5)
+        XCTAssertEqual(counter.correct, 1)
+    }
+
+    func testRestore_allCorrect_valid() {
+        let counter = SessionCounter()
+
+        counter.restore(correct: 10, attempts: 10)
+
+        XCTAssertEqual(counter.correct, counter.attempts)
+    }
+
+    func testRestore_noneCorrect_valid() {
+        let counter = SessionCounter()
+
+        counter.restore(correct: 0, attempts: 10)
+
+        XCTAssertEqual(counter.correct, 0)
+        XCTAssertEqual(counter.attempts, 10)
+    }
 }
