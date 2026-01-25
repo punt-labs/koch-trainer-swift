@@ -1,11 +1,16 @@
 name: CI
 # Caching: Homebrew packages (versioned) + DerivedData (source-hashed)
+# Unit tests run on all PRs and main pushes
+# UI tests run nightly only (they take ~25 minutes)
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Run nightly at 6 AM UTC (10 PM PST / 1 AM EST)
+    - cron: '0 6 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +18,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Build and Test
+    name: Build and Unit Tests
     runs-on: macos-15
 
     steps:
@@ -61,12 +66,13 @@ jobs:
             -derivedDataPath .deriveddata \
             -quiet
 
-      - name: Run Tests
+      - name: Run Unit Tests
         run: |
           xcodebuild test \
             -scheme KochTrainer \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -derivedDataPath .deriveddata \
+            -only-testing:KochTrainerTests \
             -resultBundlePath TestResults.xcresult \
             | xcpretty --color --report junit
 
@@ -74,8 +80,76 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: unit-test-results
           path: TestResults.xcresult
+
+  ui-tests:
+    name: UI Tests (Nightly)
+    runs-on: macos-15
+    # Only run on scheduled (nightly) builds
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get XcodeGen version
+        id: xcodegen-version
+        run: |
+          version=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew/downloads
+            /opt/homebrew/Cellar/xcodegen
+          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.xcodegen-version.outputs.version }}
+          restore-keys: |
+            brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-
+
+      - name: Install XcodeGen
+        run: brew list xcodegen &>/dev/null && brew link --overwrite xcodegen || brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: .deriveddata
+          key: deriveddata-${{ runner.os }}-${{ hashFiles('**/*.swift', 'project.yml') }}
+          restore-keys: |
+            deriveddata-${{ runner.os }}-
+
+      - name: List Available Simulators
+        run: xcrun simctl list devices available | grep iPhone | head -10
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -scheme KochTrainer \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath .deriveddata \
+            -quiet
+
+      - name: Run UI Tests
+        run: |
+          xcodebuild test \
+            -scheme KochTrainer \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath .deriveddata \
+            -only-testing:KochTrainerUITests \
+            -resultBundlePath UITestResults.xcresult \
+            | xcpretty --color --report junit
+
+      - name: Upload UI Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-test-results
+          path: UITestResults.xcresult
 
   lint:
     name: Lint
