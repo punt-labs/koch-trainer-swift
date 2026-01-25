@@ -149,18 +149,26 @@ final class ToneGenerator: @unchecked Sendable {
 
         // First, transition to off if not already off
         if radio.mode != .off {
-            try? radio.stop()
+            do {
+                try radio.stop()
+            } catch {
+                print("ToneGenerator.setRadioMode: Failed to stop radio: \(error)")
+            }
         }
 
         // Then transition to target mode
-        switch mode {
-        case .off:
-            // Already off from above
-            break
-        case .receiving:
-            try? radio.startReceiving()
-        case .transmitting:
-            try? radio.startTransmitting()
+        do {
+            switch mode {
+            case .off:
+                // Already off from above
+                break
+            case .receiving:
+                try radio.startReceiving()
+            case .transmitting:
+                try radio.startTransmitting()
+            }
+        } catch {
+            print("ToneGenerator.setRadioMode: Failed to set mode \(mode): \(error)")
         }
     }
 
