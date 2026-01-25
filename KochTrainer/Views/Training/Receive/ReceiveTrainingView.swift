@@ -94,7 +94,7 @@ struct ReceiveTrainingView: View {
             if let paused = progressStore.pausedSession(for: sessionType),
                !paused.isExpired,
                paused.currentLevel == progressStore.progress.receiveLevel,
-               paused.isCustomSession == (customCharacters != nil) {
+               paused.customCharacters == customCharacters {
                 // Restore directly to paused state - no dialog needed
                 viewModel.restoreFromPausedSession(paused)
 
