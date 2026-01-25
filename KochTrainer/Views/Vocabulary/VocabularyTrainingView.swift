@@ -87,6 +87,8 @@ struct VocabularyTrainingView: View {
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isTrainingActive)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.view)
         .onAppear {
             viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
 
@@ -149,6 +151,7 @@ private struct ReceiveVocabTrainingPhaseView: View {
             Text(viewModel.progressText)
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.progressText)
 
             Spacer()
 
@@ -171,8 +174,11 @@ private struct ReceiveVocabTrainingPhaseView: View {
                             Text(textInput.uppercased())
                                 .font(.system(size: 36, weight: .medium, design: .monospaced))
                                 .foregroundColor(.secondary)
+                                .accessibilityIdentifier(AccessibilityID.VocabTraining.userInputDisplay)
                         }
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.waitingIndicator)
                 } else {
                     VStack(spacing: Theme.Spacing.sm) {
                         Image(systemName: "speaker.wave.2.fill")
@@ -183,6 +189,8 @@ private struct ReceiveVocabTrainingPhaseView: View {
                             .font(Typography.headline)
                             .foregroundColor(.secondary)
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.listeningIndicator)
                 }
 
                 if viewModel.isWaitingForResponse {
@@ -205,12 +213,15 @@ private struct ReceiveVocabTrainingPhaseView: View {
                 }
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.replayButton)
 
             // Score display
             HStack {
                 Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)
 
@@ -219,8 +230,11 @@ private struct ReceiveVocabTrainingPhaseView: View {
                 viewModel.pause()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.receivePhaseView)
     }
 }
 
@@ -235,6 +249,7 @@ private struct SendVocabTrainingPhaseView: View {
             Text(viewModel.progressText)
                 .font(Typography.body)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.progressText)
 
             Spacer()
 
@@ -247,6 +262,7 @@ private struct SendVocabTrainingPhaseView: View {
                     Text(viewModel.currentWord)
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(Theme.Colors.primary)
+                        .accessibilityIdentifier(AccessibilityID.VocabTraining.targetWord)
 
                     // Current progress through the word
                     HStack(spacing: 4) {
@@ -257,6 +273,7 @@ private struct SendVocabTrainingPhaseView: View {
                     }
                     .font(.system(size: 24, weight: .medium, design: .monospaced))
                     .frame(height: 32)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.patternProgress)
                 }
 
                 // Input timeout progress bar
@@ -274,6 +291,7 @@ private struct SendVocabTrainingPhaseView: View {
             Text("Keyboard: . or F = dit, - or J = dah, Space = next char")
                 .font(Typography.caption)
                 .foregroundColor(.secondary)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.keyboardHint)
 
             // Paddle area
             HStack(spacing: 2) {
@@ -287,6 +305,7 @@ private struct SendVocabTrainingPhaseView: View {
                         .background(Theme.Colors.primary.opacity(0.8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.ditButton)
 
                 Button {
                     viewModel.inputDah()
@@ -298,6 +317,7 @@ private struct SendVocabTrainingPhaseView: View {
                         .background(Theme.Colors.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.dahButton)
             }
             .frame(height: 120)
             .cornerRadius(12)
@@ -306,8 +326,10 @@ private struct SendVocabTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)
 
@@ -316,8 +338,11 @@ private struct SendVocabTrainingPhaseView: View {
                 viewModel.pause()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.pauseButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.sendPhaseView)
     }
 }
 
@@ -332,13 +357,16 @@ private struct VocabPausedView: View {
 
             Text("Paused")
                 .font(Typography.largeTitle)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedTitle)
 
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Score: \(viewModel.correctCount)/\(viewModel.totalAttempts)")
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedScore)
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
                     .font(Typography.body)
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
 
             Spacer()
@@ -347,15 +375,19 @@ private struct VocabPausedView: View {
                 viewModel.resume()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.resumeButton)
 
             Button("End Session") {
                 viewModel.endSession()
             }
             .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.endSessionButton)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedView)
     }
 }
 
@@ -372,6 +404,7 @@ private struct VocabCompletedView: View {
 
             Text("Session Complete")
                 .font(Typography.largeTitle)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.completedTitle)
 
             Spacer()
 
@@ -379,15 +412,20 @@ private struct VocabCompletedView: View {
             VStack(spacing: Theme.Spacing.sm) {
                 Text("\(viewModel.correctCount)/\(viewModel.totalAttempts) correct")
                     .font(Typography.headline)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
 
                 Text("\(viewModel.accuracyPercentage)% accuracy")
                     .font(Typography.body)
                     .foregroundColor(viewModel.accuracyPercentage >= 80 ? Theme.Colors.success : .secondary)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
 
                 Text("Set: \(viewModel.vocabularySet.name)")
                     .font(Typography.body)
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.setName)
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.completedStats)
 
             Spacer()
 
@@ -395,10 +433,13 @@ private struct VocabCompletedView: View {
                 dismiss()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.VocabTraining.doneButton)
 
             Spacer()
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.completedView)
     }
 }
 
@@ -412,11 +453,13 @@ private struct VocabFeedbackView: View {
             Text(feedback.expectedWord)
                 .font(.system(size: 48, weight: .bold, design: .rounded))
                 .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackWord)
 
             if feedback.wasCorrect {
                 Text("Correct!")
                     .font(Typography.headline)
                     .foregroundColor(Theme.Colors.success)
+                    .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackResult)
             } else {
                 VStack(spacing: Theme.Spacing.xs) {
                     if feedback.userAnswer != "(timeout)" {
@@ -429,8 +472,11 @@ private struct VocabFeedbackView: View {
                             .foregroundColor(Theme.Colors.error)
                     }
                 }
+                .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackResult)
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackView)
     }
 }
 

@@ -117,6 +117,53 @@ enum AccessibilityID {
         static let callsignSendButton = "vocab-callsign-send-button"
     }
 
+    // MARK: - Vocabulary Training View
+
+    enum VocabTraining {
+        // Container views by phase
+        static let view = "vocab-training-view"
+        static let receivePhaseView = "vocab-training-receive-phase"
+        static let sendPhaseView = "vocab-training-send-phase"
+        static let pausedView = "vocab-training-paused-view"
+        static let completedView = "vocab-training-completed-view"
+
+        // Common elements
+        static let progressText = "vocab-training-progress"
+        static let scoreText = "vocab-training-score"
+        static let accuracyText = "vocab-training-accuracy"
+
+        // Receive mode elements
+        static let replayButton = "vocab-training-replay-button"
+        static let listeningIndicator = "vocab-training-listening"
+        static let waitingIndicator = "vocab-training-waiting"
+        static let userInputDisplay = "vocab-training-user-input"
+
+        // Send mode elements
+        static let targetWord = "vocab-training-target-word"
+        static let patternProgress = "vocab-training-pattern-progress"
+        static let ditButton = "vocab-training-dit-button"
+        static let dahButton = "vocab-training-dah-button"
+        static let keyboardHint = "vocab-training-keyboard-hint"
+
+        // Feedback
+        static let feedbackView = "vocab-training-feedback"
+        static let feedbackWord = "vocab-training-feedback-word"
+        static let feedbackResult = "vocab-training-feedback-result"
+
+        // Paused state
+        static let pauseButton = "vocab-training-pause-button"
+        static let resumeButton = "vocab-training-resume-button"
+        static let endSessionButton = "vocab-training-end-session-button"
+        static let pausedTitle = "vocab-training-paused-title"
+        static let pausedScore = "vocab-training-paused-score"
+
+        // Completed state
+        static let completedTitle = "vocab-training-completed-title"
+        static let completedStats = "vocab-training-completed-stats"
+        static let doneButton = "vocab-training-done-button"
+        static let setName = "vocab-training-set-name"
+    }
+
     // MARK: - QSO Views
 
     enum QSO {
