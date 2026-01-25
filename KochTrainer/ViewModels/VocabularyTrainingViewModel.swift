@@ -132,7 +132,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer?.invalidate()
         inputTimer?.invalidate()
         audioEngine.stop()
-        audioEngine.setRadioMode(.off)
+        try? audioEngine.stopRadio()
         isWaitingForResponse = false
         announcer.announcePaused()
 
@@ -147,7 +147,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         phase = .training
         isPlaying = true
         announcer.announceResumed()
-        audioEngine.setRadioMode(.receiving)
+        try? audioEngine.stopRadio()
+        try? audioEngine.startReceiving()
         showNextWord()
     }
 

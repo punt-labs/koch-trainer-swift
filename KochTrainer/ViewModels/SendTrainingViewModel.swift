@@ -177,7 +177,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         audioEngine.stop()
-        audioEngine.setRadioMode(.off)
+        try? audioEngine.stopRadio()
         isWaitingForInput = false
         announcer.announcePaused()
 
@@ -252,7 +252,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         isPlaying = true
         announcer.announceResumed()
-        audioEngine.setRadioMode(.receiving)
+        try? audioEngine.stopRadio()
+        try? audioEngine.startReceiving()
         startSessionTimer()
         showNextCharacter()
     }
