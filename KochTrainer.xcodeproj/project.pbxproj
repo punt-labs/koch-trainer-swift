@@ -44,6 +44,7 @@
 		3F34775E3AC9381208998175 /* AudioEngineFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93801142040EBF4673C25DF1 /* AudioEngineFactory.swift */; };
 		41A8C114E04665E9E629D724 /* CharacterIntroductionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739FBCD860E35338DF9C3D71 /* CharacterIntroductionView.swift */; };
 		4832D76D61CB52A4406CFEA0 /* ProgressStorePausedSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DEDA26B902C6973704CDDE /* ProgressStorePausedSessionTests.swift */; };
+		4843A7CB95F8B7968D3BC227 /* AccessibilityAuditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8DF68626260BC67B12FA43 /* AccessibilityAuditTests.swift */; };
 		48CAEF427F40EDABDE39F263 /* VocabularyGroupGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7249301AEE33D45A458011B6 /* VocabularyGroupGenerator.swift */; };
 		4DBD8DA897910F5A874C6A16 /* SessionHistoryPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5430A3B6A50FFD7199054A14 /* SessionHistoryPage.swift */; };
 		51E503A6CFE15A32297177C2 /* LearnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF3B37AA24122827621118C /* LearnView.swift */; };
@@ -250,6 +251,7 @@
 		93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
 		996BF2A5F179BABCA29A0EC9 /* TrainingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPage.swift; sourceTree = "<group>"; };
 		9E777C9ED33AD1EB63E6D6D0 /* MorseInputPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseInputPage.swift; sourceTree = "<group>"; };
+		9E8DF68626260BC67B12FA43 /* AccessibilityAuditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuditTests.swift; sourceTree = "<group>"; };
 		A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KochTrainerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A33E29502EA253B330912F3D /* BasePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasePage.swift; sourceTree = "<group>"; };
 		A3A1B36164B2C6167B7D5B45 /* UITestingConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestingConfiguration.swift; sourceTree = "<group>"; };
@@ -464,6 +466,7 @@
 			isa = PBXGroup;
 			children = (
 				0AEDEBFF57BEA64FBD4A2D1E /* Pages */,
+				9E8DF68626260BC67B12FA43 /* AccessibilityAuditTests.swift */,
 				66A966ACFBCAECC2E5599CA7 /* EarTrainingUITests.swift */,
 				F1AC2D2E9F38B016B107C2FC /* QSOUITests.swift */,
 				E999E60360C4F9135FC5E21F /* ReceiveTrainingUITests.swift */,
@@ -952,6 +955,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4843A7CB95F8B7968D3BC227 /* AccessibilityAuditTests.swift in Sources */,
 				9258F9176E40B8E7D91A4003 /* BasePage.swift in Sources */,
 				EC07860BBAADC5126EFD43A7 /* EarTrainingPage.swift in Sources */,
 				69843044173F2853432DF5CF /* EarTrainingUITests.swift in Sources */,

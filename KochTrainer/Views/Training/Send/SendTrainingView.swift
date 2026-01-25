@@ -41,6 +41,7 @@ struct SendTrainingView: View {
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
                     .onChange(of: hiddenInput) { newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
@@ -140,6 +141,9 @@ struct SendTrainingView: View {
 // MARK: - SendTrainingPhaseView
 
 struct SendTrainingPhaseView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: SendTrainingViewModel
 
     var body: some View {
@@ -157,11 +161,11 @@ struct SendTrainingPhaseView: View {
                     Group {
                         if let feedback = viewModel.lastFeedback {
                             Text(String(feedback.expectedCharacter))
-                                .font(.system(size: 100, weight: .bold, design: .rounded))
+                                .font(Typography.characterDisplay(size: characterSize))
                                 .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
                         } else {
                             Text(String(viewModel.targetCharacter))
-                                .font(.system(size: 100, weight: .bold, design: .rounded))
+                                .font(Typography.characterDisplay(size: characterSize))
                                 .foregroundColor(Theme.Colors.primary)
                         }
                     }
@@ -174,8 +178,13 @@ struct SendTrainingPhaseView: View {
                             SendFeedbackMessageView(feedback: feedback)
                         } else {
                             Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
-                                .font(.system(size: 36, weight: .medium, design: .monospaced))
+                                .font(Typography.patternDisplay(size: patternSize))
                                 .foregroundColor(.secondary)
+                                .accessibilityLabel(
+                                    viewModel.currentPattern.isEmpty
+                                        ? ""
+                                        : AccessibilityAnnouncer.spokenPattern(viewModel.currentPattern)
+                                )
                                 .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
                         }
                     }
@@ -210,6 +219,7 @@ struct SendTrainingPhaseView: View {
                             .background(Theme.Colors.primary.opacity(0.8))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityHint("Short Morse element")
                     .accessibilityIdentifier(AccessibilityID.Send.ditButton)
 
                     // Dah button
@@ -223,6 +233,7 @@ struct SendTrainingPhaseView: View {
                             .background(Theme.Colors.primary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityHint("Long Morse element")
                     .accessibilityIdentifier(AccessibilityID.Send.dahButton)
                 }
                 .frame(height: 120)
@@ -251,6 +262,12 @@ struct SendTrainingPhaseView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 100
+    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 36
+
 }
 
 // MARK: - SendPausedView
@@ -300,6 +317,9 @@ struct SendPausedView: View {
 // MARK: - SendCompletedView
 
 struct SendCompletedView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: SendTrainingViewModel
 
     let didAdvance: Bool
@@ -324,13 +344,16 @@ struct SendCompletedView: View {
                             .foregroundColor(.secondary)
 
                         Text(String(char))
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: newCharacterSize))
                             .foregroundColor(Theme.Colors.primary)
                             .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
 
                         Text(MorseCode.pattern(for: char) ?? "")
                             .font(.system(size: 24, weight: .medium, design: .monospaced))
                             .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? "")
+                            )
                     }
                 }
             } else {
@@ -389,6 +412,11 @@ struct SendCompletedView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var newCharacterSize: CGFloat = 80
+
 }
 
 // MARK: - SendFeedbackMessageView
@@ -396,6 +424,9 @@ struct SendCompletedView: View {
 /// Shows just the feedback message text (without the character).
 /// Used in the fixed-slot layout where character is displayed separately.
 struct SendFeedbackMessageView: View {
+
+    // MARK: Internal
+
     let feedback: SendTrainingViewModel.Feedback
 
     var body: some View {
@@ -409,22 +440,36 @@ struct SendFeedbackMessageView: View {
                 Text("You sent: \(feedback.sentPattern)")
                     .font(Typography.caption)
                     .foregroundColor(Theme.Colors.error)
+                    .accessibilityLabel(
+                        "You sent: \(AccessibilityAnnouncer.spokenPattern(feedback.sentPattern))"
+                    )
                     .accessibilityIdentifier(AccessibilityID.Training.feedbackIncorrect)
 
                 if let decoded = feedback.decodedCharacter {
-                    Text(
-                        "(\(String(decoded))) — Should be: \(MorseCode.pattern(for: feedback.expectedCharacter) ?? "")"
-                    )
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
-                } else {
-                    Text("Should be: \(MorseCode.pattern(for: feedback.expectedCharacter) ?? "")")
+                    Text("(\(String(decoded))) — Should be: \(expectedPattern)")
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "\(String(decoded)). Should be: \(AccessibilityAnnouncer.spokenPattern(expectedPattern))"
+                        )
+                } else {
+                    Text("Should be: \(expectedPattern)")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Should be: \(AccessibilityAnnouncer.spokenPattern(expectedPattern))"
+                        )
                 }
             }
         }
     }
+
+    // MARK: Private
+
+    private var expectedPattern: String {
+        MorseCode.pattern(for: feedback.expectedCharacter) ?? ""
+    }
+
 }
 
 #Preview {

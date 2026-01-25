@@ -14,6 +14,7 @@ struct WhatsNewView: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                     Label("Version \(appVersion)", systemImage: "app.badge")
                         .font(Typography.headline)
+                        .accessibilityIdentifier(AccessibilityID.WhatsNew.versionLabel)
 
                     Text("Koch Trainer for iOS")
                         .font(Typography.body)
@@ -87,10 +88,14 @@ struct WhatsNewView: View {
                         Label("View Full Changelog", systemImage: "arrow.up.right.square")
                     }
                     .font(Typography.body)
+                    .accessibilityHint("Opens changelog in browser")
+                    .accessibilityIdentifier(AccessibilityID.WhatsNew.changelogLink)
                 }
             }
             .padding(Theme.Spacing.lg)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.WhatsNew.view)
         .navigationTitle("What's New")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -115,6 +120,7 @@ private struct FeatureRow: View {
                 .font(.title2)
                 .foregroundColor(Theme.Colors.primary)
                 .frame(width: 32)
+                .accessibilityHidden(true) // Decorative; title provides meaning
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -124,6 +130,7 @@ private struct FeatureRow: View {
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

@@ -90,6 +90,7 @@ private struct CharacterCell: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint("Double tap to toggle selection for practice")
         .accessibilityIdentifier(AccessibilityID.Practice.characterCell(character))
     }
 

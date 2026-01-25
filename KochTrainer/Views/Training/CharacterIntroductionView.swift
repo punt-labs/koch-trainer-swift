@@ -18,6 +18,9 @@ protocol CharacterIntroducing: ObservableObject {
 
 /// Shared character introduction view used by both receive and send training
 struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: ViewModel
 
     let trainingType: String
@@ -33,13 +36,14 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
 
             if let char = viewModel.currentIntroCharacter {
                 Text(String(char))
-                    .font(.system(size: 120, weight: .bold, design: .rounded))
+                    .font(Typography.characterDisplay(size: characterSize))
                     .foregroundColor(Theme.Colors.primary)
                     .accessibilityIdentifier(AccessibilityID.Training.introCharacter)
 
                 Text(MorseCode.pattern(for: char) ?? "")
-                    .font(.system(size: 36, weight: .medium, design: .monospaced))
+                    .font(Typography.patternDisplay(size: patternSize))
                     .foregroundColor(.secondary)
+                    .accessibilityLabel(AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? ""))
                     .accessibilityIdentifier(AccessibilityID.Training.introPattern)
 
                 Spacer()
@@ -55,6 +59,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityElement(children: .combine)
+                .accessibilityHint("Plays the Morse code pattern for this character")
                 .accessibilityIdentifier(AccessibilityID.Training.playSoundButton)
 
                 Button {
@@ -79,4 +84,10 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.introView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 120
+    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 36
+
 }
