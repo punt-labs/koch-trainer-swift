@@ -7,6 +7,8 @@ options:
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
   groupSortPosition: top
+  defaultConfig: Debug
+  developmentLanguage: en
 
 settings:
   base:
@@ -31,10 +33,22 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.app
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "Koch Trainer"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: KochTrainer/Info.plist
+      properties:
+        CFBundleDisplayName: Koch Trainer
+        CFBundleLocalizations:
+          - en
+          - en-GB
+          - de
+          - fr
+          - es
+          - it
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
 
   KochTrainerTests:
     type: bundle.unit-test

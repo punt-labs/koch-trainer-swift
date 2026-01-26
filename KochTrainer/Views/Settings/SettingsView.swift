@@ -55,7 +55,8 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading) {
-                            let rateText = String(format: "%.2f", settingsStore.settings.fadingRate)
+                            let rateText = settingsStore.settings.fadingRate
+                                .formatted(.number.precision(.fractionLength(2)))
                             Text("Fading Rate: \(rateText) Hz")
                             Slider(value: $settingsStore.settings.fadingRate, in: 0.02 ... 0.3, step: 0.02)
                         }

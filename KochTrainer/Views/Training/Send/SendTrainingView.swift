@@ -18,12 +18,12 @@ struct SendTrainingView: View {
     var navigationTitle: String {
         switch viewModel.phase {
         case .introduction:
-            return "Learn Characters"
+            return String(localized: "Learn Characters")
         case .training,
              .paused:
-            return "Send Training"
+            return String(localized: "Send Training")
         case .completed:
-            return "Complete!"
+            return String(localized: "Complete!")
         }
     }
 
@@ -52,7 +52,7 @@ struct SendTrainingView: View {
             // Main content based on phase
             switch viewModel.phase {
             case .introduction:
-                CharacterIntroductionView(viewModel: viewModel, trainingType: "Training")
+                CharacterIntroductionView(viewModel: viewModel, startButtonKey: "Start Send Training")
 
             case .training:
                 SendTrainingPhaseView(viewModel: viewModel)

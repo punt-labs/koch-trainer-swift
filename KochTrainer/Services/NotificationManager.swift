@@ -124,8 +124,8 @@ final class NotificationManager: ObservableObject {
                 schedulePracticeNotification(
                     id: NotificationID.practiceReceive,
                     date: adjusted,
-                    title: "Time to Practice",
-                    body: "Your receive training session is ready."
+                    title: String(localized: "notification.practiceDue.title"),
+                    body: String(localized: "notification.practiceDue.body.receive")
                 )
                 scheduledTimes.append(adjusted)
             }
@@ -137,8 +137,8 @@ final class NotificationManager: ObservableObject {
                 schedulePracticeNotification(
                     id: NotificationID.practiceSend,
                     date: adjusted,
-                    title: "Time to Practice",
-                    body: "Your send training session is ready."
+                    title: String(localized: "notification.practiceDue.title"),
+                    body: String(localized: "notification.practiceDue.body.send")
                 )
                 scheduledTimes.append(adjusted)
             }
@@ -219,8 +219,8 @@ final class NotificationManager: ObservableObject {
 
     private func scheduleStreakReminder(date: Date, streak: Int) {
         let content = UNMutableNotificationContent()
-        content.title = "Keep Your Streak Alive!"
-        content.body = "You're on a \(streak)-day streak. Practice today to keep it going."
+        content.title = String(localized: "notification.streakReminder.title")
+        content.body = String(localized: "notification.streakReminder.body \(streak)")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(
@@ -238,8 +238,8 @@ final class NotificationManager: ObservableObject {
 
     private func scheduleLevelReviewNotification(level: Int, date: Date) {
         let content = UNMutableNotificationContent()
-        content.title = "Review Time"
-        content.body = "It's been a week since you reached level \(level). Time for a quick review!"
+        content.title = String(localized: "notification.levelReview.title")
+        content.body = String(localized: "notification.levelReview.body \(level)")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(
@@ -257,8 +257,8 @@ final class NotificationManager: ObservableObject {
 
     private func scheduleWelcomeBackNotification(date: Date) {
         let content = UNMutableNotificationContent()
-        content.title = "We Miss You!"
-        content.body = "Ready to get back to learning Morse code? Your progress is waiting."
+        content.title = String(localized: "notification.welcomeBack.title")
+        content.body = String(localized: "notification.welcomeBack.body")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(
