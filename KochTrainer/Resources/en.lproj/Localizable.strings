@@ -1,0 +1,282 @@
+/*
+  Localizable.strings
+  KochTrainer
+
+  English (US) - Base language
+*/
+
+// MARK: - Tab Bar (ContentView)
+"Learn" = "Learn";
+"Practice" = "Practice";
+"Vocab" = "Vocab";
+"Settings" = "Settings";
+
+// MARK: - LearnView (Home)
+"Koch Trainer" = "Koch Trainer";
+"Ear Training" = "Ear Training";
+// Format: Level X/Y - both are Int so %lld
+"Level %lld/%lld" = "Level %lld/%lld";
+"Start Ear Training" = "Start Ear Training";
+// Characters list is a String
+"Characters: %@" = "Characters: %@";
+"Receive" = "Receive";
+"Start Receive Training" = "Start Receive Training";
+"Send" = "Send";
+"Start Send Training" = "Start Send Training";
+// Streak is Int
+"%lld day streak" = "%lld day streak";
+"Personal best!" = "Personal best!";
+"Due now" = "Due now";
+// Next: uses relative date Text which is already localized
+
+// MARK: - PracticeView
+"Custom Practice" = "Custom Practice";
+"Select characters to practice" = "Select characters to practice";
+"Select at least 2 characters" = "Select at least 2 characters";
+
+// MARK: - VocabularyView
+"Vocabulary" = "Vocabulary";
+"QSO Simulation" = "QSO Simulation";
+"Advanced" = "Advanced";
+"Start QSO Practice" = "Start QSO Practice";
+"Practice realistic ham radio conversations" = "Practice realistic ham radio conversations";
+"Your Callsign" = "Your Callsign";
+
+// MARK: - QSOView
+"QSO" = "QSO";
+"Practice realistic on-air conversations" = "Practice realistic on-air conversations";
+"Start Mode" = "Start Mode";
+"Set your callsign in Settings" = "Set your callsign in Settings";
+"Start QSO" = "Start QSO";
+
+// MARK: - QSOSessionView / MorseQSOView
+"Working:" = "Working:";
+"Phase" = "Phase";
+"Status" = "Status";
+"Suggested:" = "Suggested:";
+"Text hidden - listen to copy" = "Text hidden - listen to copy";
+"Send:" = "Send:";
+// WPM is Int
+"%lld WPM" = "%lld WPM";
+// Current/Last character is String
+"Current: %@" = "Current: %@";
+"Last: %@" = "Last: %@";
+// Keyed count: Int/Int
+"Keyed: %lld/%lld" = "Keyed: %lld/%lld";
+"Accuracy: %lld%%" = "Accuracy: %lld%%";
+"QSO Complete!" = "QSO Complete!";
+// Callsign is String
+"73 de %@" = "73 de %@";
+"End" = "End";
+
+// MARK: - QSOCompletedView
+"Transcript" = "Transcript";
+
+// MARK: - Training Common
+"dit" = "dit";
+"dah" = "dah";
+"Keyboard: . or F = dit, - or J = dah" = "Keyboard: . or F = dit, - or J = dah";
+"Keyboard: . or F = dit, - or J = dah, Space = next char" = "Keyboard: . or F = dit, - or J = dah, Space = next char";
+// Correct count: Int/Int
+"Correct: %lld/%lld" = "Correct: %lld/%lld";
+// Accuracy percentage is Int
+"Accuracy: %lld%%" = "Accuracy: %lld%%";
+"Paused" = "Paused";
+// Score: Int/Int
+"Score: %lld/%lld" = "Score: %lld/%lld";
+"Pause" = "Pause";
+"Resume" = "Resume";
+"End Session" = "End Session";
+"Correct!" = "Correct!";
+
+// MARK: - CharacterIntroductionView
+"Character %@" = "Character %@";
+"Play Sound" = "Play Sound";
+
+// MARK: - ReceiveTrainingView
+"?" = "?";
+"Type the letter you heard" = "Type the letter you heard";
+"Listen..." = "Listen...";
+"Starting..." = "Starting...";
+"You pressed: %@" = "You pressed: %@";
+"Too slow!" = "Too slow!";
+
+// MARK: - SendTrainingView
+"You sent: %@" = "You sent: %@";
+"Should be: %@" = "Should be: %@";
+
+// MARK: - EarTrainingView
+"Reproduce the pattern" = "Reproduce the pattern";
+"Expected: %@" = "Expected: %@";
+"New patterns unlocked:" = "New patterns unlocked:";
+
+// MARK: - VocabularyTrainingView
+"Type what you heard" = "Type what you heard";
+"Replay" = "Replay";
+"Set: %@" = "Set: %@";
+"You entered: %@" = "You entered: %@";
+
+// MARK: - Session Complete / Results
+"Session Complete" = "Session Complete";
+"Level Up!" = "Level Up!";
+"New character unlocked:" = "New character unlocked:";
+// Correct count: Int/Int
+"%lld/%lld correct" = "%lld/%lld correct";
+// Accuracy: Int
+"%lld%% accuracy" = "%lld%% accuracy";
+"Need 90% to advance" = "Need 90% to advance";
+"Continue to Next Level" = "Continue to Next Level";
+"Try Again" = "Try Again";
+"Done" = "Done";
+"Results" = "Results";
+"Excellent work! ≥90% accuracy achieved." = "Excellent work! ≥90% accuracy achieved.";
+"Keep practicing! Need ≥90% to advance." = "Keep practicing! Need ≥90% to advance.";
+
+// MARK: - SettingsView
+"Profile" = "Profile";
+"Audio" = "Audio";
+// SwiftUI LocalizedStringKey: Int interpolation becomes %lld
+"Tone Frequency: %lld Hz" = "Tone Frequency: %lld Hz";
+"Effective Speed: %lld WPM" = "Effective Speed: %lld WPM";
+"Band Conditions" = "Band Conditions";
+"Enable Band Conditions" = "Enable Band Conditions";
+"Noise Level (QRN): %lld%%" = "Noise Level (QRN): %lld%%";
+"Signal Fading (QSB)" = "Signal Fading (QSB)";
+"Fading Depth: %lld%%" = "Fading Depth: %lld%%";
+"Fading Rate: %@ Hz" = "Fading Rate: %@ Hz";
+"Interference (QRM)" = "Interference (QRM)";
+"Interference Level: %lld%%" = "Interference Level: %lld%%";
+"Playing..." = "Playing...";
+"Preview Sound" = "Preview Sound";
+"Apply Preset" = "Apply Preset";
+"Good Conditions" = "Good Conditions";
+"Contest Pileup" = "Contest Pileup";
+"Difficult" = "Difficult";
+"Notifications" = "Notifications";
+"Notifications are disabled. Enable them in Settings." = "Notifications are disabled. Enable them in Settings.";
+"Enable Notifications" = "Enable Notifications";
+"Practice Reminders" = "Practice Reminders";
+"Streak Reminders" = "Streak Reminders";
+"Preferred Time" = "Preferred Time";
+"Quiet Hours (10 PM - 8 AM)" = "Quiet Hours (10 PM - 8 AM)";
+"Progress" = "Progress";
+"Current Level" = "Current Level";
+"%lld of 26" = "%lld of 26";
+"Overall Accuracy" = "Overall Accuracy";
+"Current Streak" = "Current Streak";
+"%lld days" = "%lld days";
+"Longest Streak" = "Longest Streak";
+"Session History" = "Session History";
+"%lld sessions" = "%lld sessions";
+"About" = "About";
+"Version" = "Version";
+"Build %@" = "Build %@";
+"Unknown version" = "Unknown version";
+"What's New" = "What's New";
+"License" = "License";
+"Acknowledgments" = "Acknowledgments";
+"Privacy Policy" = "Privacy Policy";
+"Source Code" = "Source Code";
+"Support & Feedback" = "Support & Feedback";
+"Reset All Progress" = "Reset All Progress";
+"Reset Progress?" = "Reset Progress?";
+"This will delete all your progress and start over from Level 1. This cannot be undone." = "This will delete all your progress and start over from Level 1. This cannot be undone.";
+"Cancel" = "Cancel";
+"Reset" = "Reset";
+
+// MARK: - SessionHistoryView
+"No Sessions Yet" = "No Sessions Yet";
+"Complete a training session to see your history here." = "Complete a training session to see your history here.";
+"Schedule Details" = "Schedule Details";
+"Receive Interval" = "Receive Interval";
+"Send Interval" = "Send Interval";
+"Next Practice" = "Next Practice";
+"Receive: Not scheduled" = "Receive: Not scheduled";
+"Send: Not scheduled" = "Send: Not scheduled";
+"Data Maintenance" = "Data Maintenance";
+"Delete Invalid Sessions" = "Delete Invalid Sessions";
+// Count is Int
+"%lld found" = "%lld found";
+"Recalculate Schedule from History" = "Recalculate Schedule from History";
+// Sessions count is Int
+"Sessions (%lld)" = "Sessions (%lld)";
+"Cleanup Complete" = "Cleanup Complete";
+// Deleted count is Int
+"Deleted %lld invalid session(s)." = "Deleted %lld invalid session(s).";
+"Schedule Recalculated" = "Schedule Recalculated";
+"Next practice dates have been recalculated from your valid session history." = "Next practice dates have been recalculated from your valid session history.";
+"OK" = "OK";
+"nil" = "nil";
+// Accuracy percentage is Int
+"%lld%%" = "%lld%%";
+// Correct/attempts count: Int/Int
+"%lld/%lld" = "%lld/%lld";
+
+// MARK: - WhatsNewView
+"Koch Trainer for iOS" = "Koch Trainer for iOS";
+"Version %@" = "Version %@";
+"View Full Changelog" = "View Full Changelog";
+
+// MARK: - LicenseView
+"MIT License" = "MIT License";
+
+// MARK: - AcknowledgmentsView
+"73 de Koch Trainer" = "73 de Koch Trainer";
+
+// MARK: - Enum Display Names (SessionType)
+"session.type.receive" = "Receive";
+"session.type.send" = "Send";
+"session.type.receiveCustom" = "Custom Receive";
+"session.type.sendCustom" = "Custom Send";
+"session.type.receiveVocabulary" = "Vocabulary Receive";
+"session.type.sendVocabulary" = "Vocabulary Send";
+"session.type.qso" = "QSO";
+"session.type.earTraining" = "Ear Training";
+
+// MARK: - QSO Styles
+"qso.style.firstContact" = "First Contact";
+"qso.style.signalReport" = "Signal Report";
+"qso.style.contest" = "Contest";
+"qso.style.ragChew" = "Rag Chew";
+
+// MARK: - QSO Style Descriptions
+"qso.style.firstContact.description" = "Simple exchange: callsigns, signal report, 73";
+"qso.style.signalReport.description" = "Basic QSO: callsigns, signal report, names, 73";
+"qso.style.contest.description" = "Quick exchanges: signal report and serial number";
+"qso.style.ragChew.description" = "Casual conversation: names, locations, weather";
+
+// MARK: - QSO Difficulty Levels
+"qso.difficulty.beginner" = "Beginner";
+"qso.difficulty.intermediate" = "Intermediate";
+"qso.difficulty.advanced" = "Advanced";
+"qso.difficulty.expert" = "Expert";
+
+// MARK: - QSO Phase User Actions
+"qso.phase.idle.action" = "Start by sending CQ";
+"qso.phase.callingCQ.action" = "Send CQ CQ CQ DE [your call] K";
+"qso.phase.awaitingResponse.action" = "Wait for station to call...";
+"qso.phase.receivedCall.action" = "Acknowledge the calling station";
+"qso.phase.sendingExchange.action" = "Send your exchange";
+"qso.phase.awaitingExchange.action" = "Wait for their exchange...";
+"qso.phase.exchangeReceived.action" = "Copy their exchange and respond";
+"qso.phase.signing.action" = "Send 73 or SK to end";
+"qso.phase.completed.action" = "QSO complete!";
+
+// MARK: - QSO Start Modes
+"qso.startMode.callCQ" = "Call CQ";
+"qso.startMode.callCQ.description" = "You call CQ and wait for a response";
+"qso.startMode.answerCQ" = "Answer CQ";
+"qso.startMode.answerCQ.description" = "Listen for CQ and respond to it";
+
+// MARK: - Notifications
+"notification.practiceDue.title" = "Time to Practice";
+"notification.practiceDue.body.receive" = "Your receive training session is ready.";
+"notification.practiceDue.body.send" = "Your send training session is ready.";
+"notification.streakReminder.title" = "Keep Your Streak Alive!";
+// %lld for Int interpolation
+"notification.streakReminder.body %lld" = "You're on a %lld-day streak. Practice today to keep it going.";
+"notification.levelReview.title" = "Review Time";
+// %lld for Int interpolation
+"notification.levelReview.body %lld" = "It's been a week since you reached level %lld. Time for a quick review!";
+"notification.welcomeBack.title" = "We Miss You!";
+"notification.welcomeBack.body" = "Ready to get back to learning Morse code? Your progress is waiting.";

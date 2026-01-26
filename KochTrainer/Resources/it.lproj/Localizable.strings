@@ -1,0 +1,235 @@
+/*
+  Localizable.strings
+  KochTrainer
+
+  Italian (it) - Full translation
+*/
+
+// MARK: - Tab Bar (ContentView)
+"Learn" = "Impara";
+"Practice" = "Pratica";
+"Vocab" = "Vocabolario";
+"Settings" = "Impostazioni";
+
+// MARK: - LearnView (Home)
+"Koch Trainer" = "Koch Trainer";
+"Ear Training" = "Allenamento uditivo";
+"Start Ear Training" = "Inizia allenamento uditivo";
+"Characters: %@" = "Caratteri: %@";
+"Receive" = "Ricezione";
+"Start Receive Training" = "Inizia allenamento ricezione";
+"Send" = "Trasmissione";
+"Start Send Training" = "Inizia allenamento trasmissione";
+"Personal best!" = "Record personale!";
+"Due now" = "Da fare ora";
+
+// MARK: - PracticeView
+"Custom Practice" = "Pratica personalizzata";
+"Select characters to practice" = "Seleziona i caratteri da praticare";
+"Select at least 2 characters" = "Seleziona almeno 2 caratteri";
+
+// MARK: - VocabularyView
+"Vocabulary" = "Vocabolario";
+"QSO Simulation" = "Simulazione QSO";
+"Advanced" = "Avanzato";
+"Start QSO Practice" = "Inizia pratica QSO";
+"Practice realistic ham radio conversations" = "Pratica conversazioni radioamatoriali realistiche";
+"Your Callsign" = "Il tuo nominativo";
+
+// MARK: - QSOView
+"QSO" = "QSO";
+"Practice realistic on-air conversations" = "Pratica conversazioni radio realistiche";
+"Start Mode" = "Modalità di avvio";
+"Set your callsign in Settings" = "Imposta il nominativo nelle Impostazioni";
+"Start QSO" = "Inizia QSO";
+
+// MARK: - QSOSessionView / MorseQSOView
+"Working:" = "In contatto:";
+"Phase" = "Fase";
+"Status" = "Stato";
+"Suggested:" = "Suggerito:";
+"Text hidden - listen to copy" = "Testo nascosto - ascolta per copiare";
+"Send:" = "Invia:";
+"QSO Complete!" = "QSO completato!";
+"73 de %@" = "73 de %@";
+"End" = "Fine";
+
+// MARK: - QSOCompletedView
+"Transcript" = "Trascrizione";
+
+// MARK: - Training Common
+"dit" = "dit";
+"dah" = "dah";
+"Keyboard: . or F = dit, - or J = dah" = "Tastiera: . o F = dit, - o J = dah";
+"Keyboard: . or F = dit, - or J = dah, Space = next char" = "Tastiera: . o F = dit, - o J = dah, Spazio = carattere successivo";
+"Paused" = "In pausa";
+"Pause" = "Pausa";
+"Resume" = "Riprendi";
+"End Session" = "Termina sessione";
+"Correct!" = "Corretto!";
+
+// MARK: - CharacterIntroductionView
+"Character %@" = "Carattere %@";
+"Play Sound" = "Riproduci suono";
+
+// MARK: - ReceiveTrainingView
+"?" = "?";
+"Type the letter you heard" = "Scrivi la lettera che hai sentito";
+"Listen..." = "Ascolta...";
+"Starting..." = "Avvio...";
+"You pressed: %@" = "Hai premuto: %@";
+"Too slow!" = "Troppo lento!";
+
+// MARK: - SendTrainingView
+"You sent: %@" = "Hai inviato: %@";
+"Should be: %@" = "Dovrebbe essere: %@";
+
+// MARK: - EarTrainingView
+"Reproduce the pattern" = "Riproduci il pattern";
+"Expected: %@" = "Atteso: %@";
+"New patterns unlocked:" = "Nuovi pattern sbloccati:";
+
+// MARK: - VocabularyTrainingView
+"Type what you heard" = "Scrivi ciò che hai sentito";
+"Replay" = "Ripeti";
+"Set: %@" = "Set: %@";
+"You entered: %@" = "Hai inserito: %@";
+
+// MARK: - Session Complete / Results
+"Session Complete" = "Sessione completata";
+"Level Up!" = "Livello superiore!";
+"New character unlocked:" = "Nuovo carattere sbloccato:";
+"Need 90% to advance" = "Serve il 90% per avanzare";
+"Continue to Next Level" = "Continua al prossimo livello";
+"Try Again" = "Riprova";
+"Done" = "Fatto";
+"Results" = "Risultati";
+"Excellent work! ≥90% accuracy achieved." = "Ottimo lavoro! ≥90% di precisione raggiunta.";
+"Keep practicing! Need ≥90% to advance." = "Continua a praticare! Serve ≥90% per avanzare.";
+
+// MARK: - SettingsView
+"Profile" = "Profilo";
+"Audio" = "Audio";
+"Band Conditions" = "Condizioni di banda";
+"Enable Band Conditions" = "Attiva condizioni di banda";
+"Signal Fading (QSB)" = "Fading del segnale (QSB)";
+"Interference (QRM)" = "Interferenze (QRM)";
+"Playing..." = "Riproduzione...";
+"Preview Sound" = "Anteprima audio";
+"Apply Preset" = "Applica preset";
+"Good Conditions" = "Buone condizioni";
+"Contest Pileup" = "Pile-up contest";
+"Difficult" = "Difficile";
+"Notifications" = "Notifiche";
+"Notifications are disabled. Enable them in Settings." = "Le notifiche sono disattivate. Attivale nelle Impostazioni.";
+"Enable Notifications" = "Attiva notifiche";
+"Practice Reminders" = "Promemoria pratica";
+"Streak Reminders" = "Promemoria serie";
+"Preferred Time" = "Orario preferito";
+"Quiet Hours (10 PM - 8 AM)" = "Ore silenziose (22-8)";
+"Progress" = "Progressi";
+"Current Level" = "Livello attuale";
+"Overall Accuracy" = "Precisione complessiva";
+"Current Streak" = "Serie attuale";
+"Longest Streak" = "Serie più lunga";
+"Session History" = "Cronologia sessioni";
+"About" = "Informazioni";
+"Version" = "Versione";
+"Build %@" = "Build %@";
+"Unknown version" = "Versione sconosciuta";
+"What's New" = "Novità";
+"License" = "Licenza";
+"Acknowledgments" = "Ringraziamenti";
+"Privacy Policy" = "Privacy";
+"Source Code" = "Codice sorgente";
+"Support & Feedback" = "Supporto e feedback";
+"Reset All Progress" = "Reimposta progressi";
+"Reset Progress?" = "Reimpostare i progressi?";
+"This will delete all your progress and start over from Level 1. This cannot be undone." = "Questo cancellerà tutti i tuoi progressi e ricomincerà dal Livello 1. Non è possibile annullare.";
+"Cancel" = "Annulla";
+"Reset" = "Reimposta";
+
+// MARK: - SessionHistoryView
+"No Sessions Yet" = "Nessuna sessione";
+"Complete a training session to see your history here." = "Completa una sessione di allenamento per vedere la cronologia qui.";
+"Schedule Details" = "Dettagli programmazione";
+"Receive Interval" = "Intervallo ricezione";
+"Send Interval" = "Intervallo trasmissione";
+"Next Practice" = "Prossima pratica";
+"Receive: Not scheduled" = "Ricezione: Non programmata";
+"Send: Not scheduled" = "Trasmissione: Non programmata";
+"Data Maintenance" = "Manutenzione dati";
+"Delete Invalid Sessions" = "Elimina sessioni non valide";
+"Recalculate Schedule from History" = "Ricalcola programmazione dalla cronologia";
+"Cleanup Complete" = "Pulizia completata";
+"Schedule Recalculated" = "Programmazione ricalcolata";
+"Next practice dates have been recalculated from your valid session history." = "Le prossime date di pratica sono state ricalcolate dalla tua cronologia valida.";
+"OK" = "OK";
+"nil" = "nil";
+
+// MARK: - WhatsNewView
+"Koch Trainer for iOS" = "Koch Trainer per iOS";
+"Version %@" = "Versione %@";
+"View Full Changelog" = "Visualizza changelog completo";
+
+// MARK: - LicenseView
+"MIT License" = "Licenza MIT";
+
+// MARK: - AcknowledgmentsView
+"73 de Koch Trainer" = "73 de Koch Trainer";
+
+// MARK: - Enum Display Names (SessionType)
+"session.type.receive" = "Ricezione";
+"session.type.send" = "Trasmissione";
+"session.type.receiveCustom" = "Ricezione personalizzata";
+"session.type.sendCustom" = "Trasmissione personalizzata";
+"session.type.receiveVocabulary" = "Ricezione vocabolario";
+"session.type.sendVocabulary" = "Trasmissione vocabolario";
+"session.type.qso" = "QSO";
+"session.type.earTraining" = "Allenamento uditivo";
+
+// MARK: - QSO Styles
+"qso.style.firstContact" = "Primo contatto";
+"qso.style.signalReport" = "Rapporto segnale";
+"qso.style.contest" = "Contest";
+"qso.style.ragChew" = "Conversazione";
+
+// MARK: - QSO Style Descriptions
+"qso.style.firstContact.description" = "Scambio semplice: nominativi, rapporto, 73";
+"qso.style.signalReport.description" = "QSO base: nominativi, rapporto, nomi, 73";
+"qso.style.contest.description" = "Scambi rapidi: rapporto e numero seriale";
+"qso.style.ragChew.description" = "Conversazione rilassata: nomi, località, meteo";
+
+// MARK: - QSO Difficulty Levels
+"qso.difficulty.beginner" = "Principiante";
+"qso.difficulty.intermediate" = "Intermedio";
+"qso.difficulty.advanced" = "Avanzato";
+"qso.difficulty.expert" = "Esperto";
+
+// MARK: - QSO Phase User Actions
+"qso.phase.idle.action" = "Inizia chiamando CQ";
+"qso.phase.callingCQ.action" = "Invia CQ CQ CQ DE [tuo nominativo] K";
+"qso.phase.awaitingResponse.action" = "Attendi una risposta...";
+"qso.phase.receivedCall.action" = "Conferma la stazione che chiama";
+"qso.phase.sendingExchange.action" = "Invia il tuo scambio";
+"qso.phase.awaitingExchange.action" = "Attendi il loro scambio...";
+"qso.phase.exchangeReceived.action" = "Copia il loro scambio e rispondi";
+"qso.phase.signing.action" = "Invia 73 o SK per terminare";
+"qso.phase.completed.action" = "QSO completato!";
+
+// MARK: - QSO Start Modes
+"qso.startMode.callCQ" = "Chiama CQ";
+"qso.startMode.callCQ.description" = "Tu chiami CQ e attendi una risposta";
+"qso.startMode.answerCQ" = "Rispondi a CQ";
+"qso.startMode.answerCQ.description" = "Ascolta un CQ e rispondi";
+
+// MARK: - Notifications
+"notification.practiceDue.title" = "Ora di praticare";
+"notification.practiceDue.body.receive" = "La tua sessione di ricezione è pronta.";
+"notification.practiceDue.body.send" = "La tua sessione di trasmissione è pronta.";
+"notification.streakReminder.title" = "Mantieni la tua serie!";
+"notification.streakReminder.body %lld" = "Hai una serie di %lld giorni. Pratica oggi per continuare.";
+"notification.levelReview.title" = "Tempo di ripasso";
+"notification.levelReview.body %lld" = "È passata una settimana da quando hai raggiunto il livello %lld. Tempo per un ripasso!";
+"notification.welcomeBack.title" = "Ci manchi!";
+"notification.welcomeBack.body" = "Pronto a riprendere il Morse? I tuoi progressi ti aspettano.";

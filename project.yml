@@ -7,6 +7,8 @@ options:
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
   groupSortPosition: top
+  defaultConfig: Debug
+  developmentLanguage: en
 
 settings:
   base:

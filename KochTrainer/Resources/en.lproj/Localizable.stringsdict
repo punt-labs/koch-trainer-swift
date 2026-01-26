@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Day streak pluralization: "1 day streak" vs "2 day streak" (note: streak stays singular) -->
+    <key>%lld day streak</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@ streak</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld day</string>
+            <key>other</key>
+            <string>%lld day</string>
+        </dict>
+    </dict>
+
+    <!-- Days pluralization: "1 days" vs "2 days" -->
+    <key>%lld days</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld day</string>
+            <key>other</key>
+            <string>%lld days</string>
+        </dict>
+    </dict>
+
+    <!-- Sessions pluralization: "1 session" vs "5 sessions" -->
+    <key>%lld sessions</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@sessions@</string>
+        <key>sessions</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld session</string>
+            <key>other</key>
+            <string>%lld sessions</string>
+        </dict>
+    </dict>
+
+    <!-- Invalid sessions deleted: "Deleted 1 invalid session(s)." vs "Deleted 5 invalid session(s)." -->
+    <key>Deleted %lld invalid session(s).</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Deleted %#@sessions@.</string>
+        <key>sessions</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld invalid session</string>
+            <key>other</key>
+            <string>%lld invalid sessions</string>
+        </dict>
+    </dict>
+
+    <!-- Level format: "Level 1/26" -->
+    <key>Level %lld/%lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Level %1$lld/%2$lld</string>
+    </dict>
+
+    <!-- Of 26: "1 of 26" -->
+    <key>%lld of 26</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%lld of 26</string>
+    </dict>
+
+    <!-- Correct/attempts: "15/20 correct" -->
+    <key>%lld/%lld correct</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%1$lld/%2$lld correct</string>
+    </dict>
+
+    <!-- Score format: "Score: 15/20" -->
+    <key>Score: %lld/%lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Score: %1$lld/%2$lld</string>
+    </dict>
+
+    <!-- Correct format: "Correct: 15/20" -->
+    <key>Correct: %lld/%lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Correct: %1$lld/%2$lld</string>
+    </dict>
+
+    <!-- Keyed format: "Keyed: 15/20" -->
+    <key>Keyed: %lld/%lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Keyed: %1$lld/%2$lld</string>
+    </dict>
+
+    <!-- Sessions section header: "Sessions (5)" -->
+    <key>Sessions (%lld)</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>Sessions (%lld)</string>
+    </dict>
+
+    <!-- Found count: "5 found" -->
+    <key>%lld found</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%lld found</string>
+    </dict>
+</dict>
+</plist>
