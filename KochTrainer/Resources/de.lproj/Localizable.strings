@@ -30,6 +30,8 @@
 
 // MARK: - VocabularyView
 "Vocabulary" = "Vokabeln";
+"Common Words" = "Häufige Wörter";
+"Callsign Patterns" = "Rufzeichen-Muster";
 "QSO Simulation" = "QSO-Simulation";
 "Advanced" = "Fortgeschritten";
 "Start QSO Practice" = "QSO-Training starten";
@@ -69,8 +71,18 @@
 "Correct!" = "Richtig!";
 
 // MARK: - CharacterIntroductionView
+"Learn Characters" = "Zeichen lernen";
 "Character %@" = "Zeichen %@";
 "Play Sound" = "Ton abspielen";
+"Next Character" = "Nächstes Zeichen";
+"Start Receive" = "Empfang starten";
+"Start Send" = "Senden starten";
+"Start Ear" = "Gehör starten";
+
+// MARK: - Training Navigation Titles
+"Receive Training" = "Empfangstraining";
+"Send Training" = "Sendetraining";
+"Complete!" = "Fertig!";
 
 // MARK: - ReceiveTrainingView
 "?" = "?";
@@ -110,7 +122,13 @@
 // MARK: - SettingsView
 "Profile" = "Profil";
 "Audio" = "Audio";
+"Tone Frequency: %lld Hz" = "Tonfrequenz: %lld Hz";
+"Effective Speed: %lld WPM" = "Effektive Geschwindigkeit: %lld WPM";
 "Band Conditions" = "Bandbedingungen";
+"Noise Level (QRN): %lld%%" = "Rauschpegel (QRN): %lld%%";
+"Fading Depth: %lld%%" = "Schwundtiefe: %lld%%";
+"Fading Rate: %@ Hz" = "Schwundrate: %@ Hz";
+"Interference Level: %lld%%" = "Störungspegel: %lld%%";
 "Enable Band Conditions" = "Bandbedingungen aktivieren";
 "Signal Fading (QSB)" = "Signalschwund (QSB)";
 "Interference (QRM)" = "Störungen (QRM)";

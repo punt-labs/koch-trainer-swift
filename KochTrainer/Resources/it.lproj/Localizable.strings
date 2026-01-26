@@ -30,6 +30,8 @@
 
 // MARK: - VocabularyView
 "Vocabulary" = "Vocabolario";
+"Common Words" = "Parole comuni";
+"Callsign Patterns" = "Modelli di nominativo";
 "QSO Simulation" = "Simulazione QSO";
 "Advanced" = "Avanzato";
 "Start QSO Practice" = "Inizia pratica QSO";
@@ -69,8 +71,18 @@
 "Correct!" = "Corretto!";
 
 // MARK: - CharacterIntroductionView
+"Learn Characters" = "Impara i caratteri";
 "Character %@" = "Carattere %@";
 "Play Sound" = "Riproduci suono";
+"Next Character" = "Prossimo carattere";
+"Start Receive Training" = "Inizia allenamento ricezione";
+"Start Send Training" = "Inizia allenamento trasmissione";
+"Start Ear Training" = "Inizia allenamento uditivo";
+
+// MARK: - Training Navigation Titles
+"Receive Training" = "Allenamento ricezione";
+"Send Training" = "Allenamento trasmissione";
+"Complete!" = "Completato!";
 
 // MARK: - ReceiveTrainingView
 "?" = "?";
@@ -110,10 +122,16 @@
 // MARK: - SettingsView
 "Profile" = "Profilo";
 "Audio" = "Audio";
+"Tone Frequency: %lld Hz" = "Frequenza tono: %lld Hz";
+"Effective Speed: %lld WPM" = "Velocità effettiva: %lld WPM";
 "Band Conditions" = "Condizioni di banda";
 "Enable Band Conditions" = "Attiva condizioni di banda";
+"Noise Level (QRN): %lld%%" = "Livello rumore (QRN): %lld%%";
 "Signal Fading (QSB)" = "Fading del segnale (QSB)";
+"Fading Depth: %lld%%" = "Profondità fading: %lld%%";
+"Fading Rate: %@ Hz" = "Tasso fading: %@ Hz";
 "Interference (QRM)" = "Interferenze (QRM)";
+"Interference Level: %lld%%" = "Livello interferenze: %lld%%";
 "Playing..." = "Riproduzione...";
 "Preview Sound" = "Anteprima audio";
 "Apply Preset" = "Applica preset";

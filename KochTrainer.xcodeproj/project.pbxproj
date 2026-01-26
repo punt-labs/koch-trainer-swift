@@ -256,6 +256,7 @@
 		9145C1BD8515A86E59BC029C /* BandConditionsProcessorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandConditionsProcessorTests.swift; sourceTree = "<group>"; };
 		93801142040EBF4673C25DF1 /* AudioEngineFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineFactory.swift; sourceTree = "<group>"; };
 		93C2727890DE2BA482FBBBB0 /* MorseAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseAudioEngine.swift; sourceTree = "<group>"; };
+		97FBF81380E27CEACEFB61DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		996BF2A5F179BABCA29A0EC9 /* TrainingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPage.swift; sourceTree = "<group>"; };
 		9E777C9ED33AD1EB63E6D6D0 /* MorseInputPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseInputPage.swift; sourceTree = "<group>"; };
 		A0D4BA05FB5AA93D714311C5 /* KochTrainerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KochTrainerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -499,6 +500,7 @@
 				BAA5D62B8261DE21681B0FC8 /* Services */,
 				C52F8C38914F36332B79DE6E /* ViewModels */,
 				ED42486BF1C2F9F1ED999588 /* Views */,
+				97FBF81380E27CEACEFB61DA /* Info.plist */,
 			);
 			path = KochTrainer;
 			sourceTree = "<group>";
@@ -1063,8 +1065,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				INFOPLIST_FILE = KochTrainer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1167,8 +1168,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Koch Trainer";
+				INFOPLIST_FILE = KochTrainer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

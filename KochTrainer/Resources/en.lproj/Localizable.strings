@@ -36,6 +36,8 @@
 
 // MARK: - VocabularyView
 "Vocabulary" = "Vocabulary";
+"Common Words" = "Common Words";
+"Callsign Patterns" = "Callsign Patterns";
 "QSO Simulation" = "QSO Simulation";
 "Advanced" = "Advanced";
 "Start QSO Practice" = "Start QSO Practice";
@@ -90,8 +92,18 @@
 "Correct!" = "Correct!";
 
 // MARK: - CharacterIntroductionView
+"Learn Characters" = "Learn Characters";
 "Character %@" = "Character %@";
 "Play Sound" = "Play Sound";
+"Next Character" = "Next Character";
+"Start Receive" = "Start Receive";
+"Start Send" = "Start Send";
+"Start Ear" = "Start Ear";
+
+// MARK: - Training Navigation Titles
+"Receive Training" = "Receive Training";
+"Send Training" = "Send Training";
+"Complete!" = "Complete!";
 
 // MARK: - ReceiveTrainingView
 "?" = "?";

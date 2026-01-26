@@ -43,7 +43,7 @@ struct EarTrainingView: View {
             // Main content based on phase
             switch viewModel.phase {
             case .introduction:
-                CharacterIntroductionView(viewModel: viewModel, trainingType: "Ear Training")
+                CharacterIntroductionView(viewModel: viewModel, startButtonKey: "Start Ear Training")
 
             case .training:
                 EarTrainingPhaseView(viewModel: viewModel)

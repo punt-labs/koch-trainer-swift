@@ -20,7 +20,7 @@ protocol CharacterIntroducing: ObservableObject {
 struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
     @ObservedObject var viewModel: ViewModel
 
-    let trainingType: String
+    let startButtonKey: LocalizedStringKey
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -60,7 +60,7 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
                 Button {
                     viewModel.nextIntroCharacter()
                 } label: {
-                    Text(viewModel.isLastIntroCharacter ? "Start \(trainingType)" : "Next Character")
+                    Text(viewModel.isLastIntroCharacter ? startButtonKey : "Next Character")
                         .font(Typography.headline)
                 }
                 .buttonStyle(SecondaryButtonStyle())
