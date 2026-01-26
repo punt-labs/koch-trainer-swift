@@ -28,7 +28,8 @@ struct MorseQSOView: View {
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
-                    .onChange(of: hiddenInput) { newValue in
+                    .accessibilityHidden(true)
+                    .onChange(of: hiddenInput) { _, newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }
@@ -197,6 +198,8 @@ private struct MorseQSOSessionView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(viewModel.isAITextVisible ? "Hide AI text" : "Show AI text")
+                .accessibilityHint("Double tap to toggle text visibility for copy practice")
                 .accessibilityIdentifier(AccessibilityID.QSO.aiTextToggle)
             }
 
@@ -323,6 +326,7 @@ private struct MorseQSOSessionView: View {
                         .background(Theme.Colors.primary.opacity(0.8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint("Short Morse element")
                 .accessibilityIdentifier(AccessibilityID.QSO.ditButton)
 
                 Button {
@@ -335,6 +339,7 @@ private struct MorseQSOSessionView: View {
                         .background(Theme.Colors.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint("Long Morse element")
                 .accessibilityIdentifier(AccessibilityID.QSO.dahButton)
             }
             .frame(height: 100)

@@ -14,12 +14,15 @@ struct ResultsView: View {
             if didLevelUp {
                 Text("🎉")
                     .font(.system(size: 80))
+                    .accessibilityLabel("Celebration")
                 Text("Level Up!")
                     .font(Typography.largeTitle)
                     .foregroundColor(Theme.Colors.success)
+                    .accessibilityIdentifier(AccessibilityID.Results.levelUpTitle)
             } else {
                 Text("Session Complete")
                     .font(Typography.largeTitle)
+                    .accessibilityIdentifier(AccessibilityID.Results.sessionCompleteTitle)
             }
 
             Spacer()
@@ -34,15 +37,19 @@ struct ResultsView: View {
             .padding()
             .background(Theme.Colors.secondaryBackground)
             .cornerRadius(12)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.Results.statsCard)
 
             if result.accuracy >= 0.90 {
                 Text("Excellent work! ≥90% accuracy achieved.")
                     .font(Typography.body)
                     .foregroundColor(Theme.Colors.success)
+                    .accessibilityIdentifier(AccessibilityID.Results.feedbackText)
             } else {
                 Text("Keep practicing! Need ≥90% to advance.")
                     .font(Typography.body)
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier(AccessibilityID.Results.feedbackText)
             }
 
             Spacer()
@@ -51,8 +58,11 @@ struct ResultsView: View {
                 dismiss()
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(AccessibilityID.Results.doneButton)
         }
         .padding(Theme.Spacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.Results.view)
         .navigationTitle("Results")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

@@ -44,8 +44,17 @@ final class NotificationManager: ObservableObject {
 
     // MARK: Lifecycle
 
-    init(notificationCenter: NotificationCenterProtocol = UNUserNotificationCenter.current()) {
+    init(
+        notificationCenter: NotificationCenterProtocol = UNUserNotificationCenter.current(),
+        defaults: UserDefaults = .standard
+    ) {
         self.notificationCenter = notificationCenter
+        self.defaults = defaults
+
+        // Initialize with cached status to prevent view re-renders during initial async check
+        let cachedRawValue = defaults.integer(forKey: cachedStatusKey)
+        authorizationStatus = UNAuthorizationStatus(rawValue: cachedRawValue) ?? .notDetermined
+
         Task {
             await refreshAuthorizationStatus()
         }
@@ -69,9 +78,19 @@ final class NotificationManager: ObservableObject {
     }
 
     /// Refresh the current authorization status.
+    /// Only updates the published property if the status actually changed,
+    /// preventing unnecessary view re-renders that can interrupt VoiceOver.
     func refreshAuthorizationStatus() async {
         let settingsProtocol = await notificationCenter.notificationSettings()
-        authorizationStatus = settingsProtocol.authorizationStatus
+        let newStatus = settingsProtocol.authorizationStatus
+
+        // Cache for future inits to prevent re-renders
+        defaults.set(newStatus.rawValue, forKey: cachedStatusKey)
+
+        // Only publish if changed to avoid view re-renders during VoiceOver
+        if authorizationStatus != newStatus {
+            authorizationStatus = newStatus
+        }
     }
 
     /// Schedule all notifications based on current schedule and settings.
@@ -110,6 +129,8 @@ final class NotificationManager: ObservableObject {
     private static let quietHoursEnd = 8 // 8 AM
 
     private let notificationCenter: NotificationCenterProtocol
+    private let defaults: UserDefaults
+    private let cachedStatusKey = "notificationAuthorizationStatus"
 
     private func schedulePracticeReminders(
         schedule: PracticeSchedule,

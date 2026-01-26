@@ -16,26 +16,25 @@ struct CharacterGridView: View {
     var onCharacterSelected: ((Character) -> Void)?
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: Theme.Spacing.sm) {
-                ForEach(MorseCode.kochOrder, id: \.self) { character in
-                    CharacterCell(
-                        character: character,
-                        isSelected: selectedCharacters.contains(character),
-                        stat: characterStats[character],
-                        onTap: { toggleSelection(character) }
-                    )
+        // Using non-lazy Grid to prevent ScrollView layout changes from interrupting VoiceOver
+        Grid(horizontalSpacing: Theme.Spacing.sm, verticalSpacing: Theme.Spacing.sm) {
+            ForEach(MorseCode.kochOrder.chunked(into: 5), id: \.self) { row in
+                GridRow {
+                    ForEach(row, id: \.self) { character in
+                        CharacterCell(
+                            character: character,
+                            isSelected: selectedCharacters.contains(character),
+                            stat: characterStats[character],
+                            onTap: { toggleSelection(character) }
+                        )
+                    }
                 }
             }
-            .padding(Theme.Spacing.sm)
         }
+        .padding(Theme.Spacing.sm)
     }
 
     // MARK: Private
-
-    private let columns = [
-        GridItem(.adaptive(minimum: 60, maximum: 80), spacing: Theme.Spacing.sm)
-    ]
 
     private func toggleSelection(_ character: Character) {
         if selectedCharacters.contains(character) {
@@ -89,7 +88,9 @@ private struct CharacterCell: View {
             .frame(width: 60, height: 60)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint("Double tap to toggle selection for practice")
         .accessibilityIdentifier(AccessibilityID.Practice.characterCell(character))
     }
 
@@ -109,11 +110,24 @@ private struct CharacterCell: View {
         if hasPracticeData, let accuracy = stat?.combinedAccuracy {
             let percentage = Int(accuracy * 100)
             label += ", \(percentage)% proficiency"
+        } else {
+            label += ", not yet practiced"
         }
         if isSelected {
             label += ", selected"
         }
         return label
+    }
+}
+
+// MARK: - Array Extension
+
+extension Array where Element: Hashable {
+    /// Splits array into chunks of specified size
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
     }
 }
 

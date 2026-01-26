@@ -6,11 +6,11 @@ enum Theme {
         /// Primary accent color - adapts to light/dark mode
         static let primary = Color.accentColor
 
-        /// Main background - white in light mode, true black in dark mode (OLED-friendly)
-        static let background = Color("Background")
+        /// Main background - uses system grouped background for accessibility compliance
+        static let background = Color(uiColor: .systemGroupedBackground)
 
-        /// Secondary background for cards and sections
-        static let secondaryBackground = Color("SecondaryBackground")
+        /// Secondary background for cards and sections - uses system color for WCAG contrast compliance
+        static let secondaryBackground = Color(uiColor: .secondarySystemGroupedBackground)
 
         /// Success state color - adapts to light/dark mode
         static let success = Color("Success")

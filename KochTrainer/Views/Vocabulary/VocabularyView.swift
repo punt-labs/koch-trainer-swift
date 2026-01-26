@@ -20,6 +20,7 @@ struct VocabularyView: View {
                 vocabularySetRow(
                     name: "Common Words",
                     description: "CQ, DE, K, AR, SK, 73, QTH, QSL...",
+                    descriptionAccessibilityLabel: nil,
                     set: VocabularySet.commonWords,
                     receiveId: AccessibilityID.Vocab.commonWordsReceiveButton,
                     sendId: AccessibilityID.Vocab.commonWordsSendButton
@@ -28,6 +29,7 @@ struct VocabularyView: View {
                 vocabularySetRow(
                     name: "Callsign Patterns",
                     description: "W1AW, K0ABC, VE3XYZ...",
+                    descriptionAccessibilityLabel: "W 1 A W, K 0 A B C, V E 3 X Y Z, and more",
                     set: VocabularySet.callsignPatterns,
                     receiveId: AccessibilityID.Vocab.callsignReceiveButton,
                     sendId: AccessibilityID.Vocab.callsignSendButton
@@ -87,6 +89,7 @@ struct VocabularyView: View {
                 Text(settingsStore.settings.userCallsign)
                     .font(Typography.body)
                     .foregroundColor(.secondary)
+                    .accessibilityLabel(spellOut(settingsStore.settings.userCallsign))
             }
 
             HStack(spacing: Theme.Spacing.md) {
@@ -121,6 +124,7 @@ struct VocabularyView: View {
     private func vocabularySetRow(
         name: String,
         description: String,
+        descriptionAccessibilityLabel: String?,
         set: VocabularySet,
         receiveId: String,
         sendId: String
@@ -133,6 +137,7 @@ struct VocabularyView: View {
                     Text(description)
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(descriptionAccessibilityLabel ?? description)
                 }
                 Spacer()
             }
@@ -164,6 +169,11 @@ struct VocabularyView: View {
         .cornerRadius(12)
         .accessibilityElement(children: .contain)
     }
+
+    private func spellOut(_ text: String) -> String {
+        text.map { String($0) }.joined(separator: " ")
+    }
+
 }
 
 #Preview {

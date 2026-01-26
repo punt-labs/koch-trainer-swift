@@ -13,4 +13,18 @@ enum Typography {
     /// Monospaced font for Morse patterns and code
     static let morse = Font.system(.title, design: .monospaced, weight: .medium)
     static let morseLarge = Font.system(.largeTitle, design: .monospaced, weight: .bold)
+
+    // MARK: - Scalable Display Fonts
+
+    /// Large character display (scales from specified base size)
+    /// Use with @ScaledMetric for accessibility compliance
+    static func characterDisplay(size: CGFloat) -> Font {
+        .system(size: size, weight: .bold, design: .rounded)
+    }
+
+    /// Pattern display (scales from specified base size)
+    /// Use with @ScaledMetric for accessibility compliance
+    static func patternDisplay(size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
 }

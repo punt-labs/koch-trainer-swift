@@ -32,7 +32,8 @@ struct EarTrainingView: View {
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
-                    .onChange(of: hiddenInput) { newValue in
+                    .accessibilityHidden(true)
+                    .onChange(of: hiddenInput) { _, newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }
@@ -94,7 +95,7 @@ struct EarTrainingView: View {
         .onDisappear {
             viewModel.cleanup()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background, case .training = viewModel.phase {
                 viewModel.pause()
             }
@@ -117,6 +118,9 @@ struct EarTrainingView: View {
 // MARK: - EarTrainingPhaseView
 
 struct EarTrainingPhaseView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: EarTrainingViewModel
 
     var body: some View {
@@ -150,9 +154,15 @@ struct EarTrainingPhaseView: View {
 
                     // User's current pattern input
                     Text(viewModel.currentPattern.isEmpty ? " " : viewModel.currentPattern)
-                        .font(.system(size: 48, weight: .bold, design: .monospaced))
+                        .font(Typography.patternDisplay(size: patternSize))
+                        .fontWeight(.bold)
                         .foregroundColor(Theme.Colors.primary)
                         .frame(height: 60)
+                        .accessibilityLabel(
+                            viewModel.currentPattern.isEmpty
+                                ? ""
+                                : AccessibilityAnnouncer.spokenPattern(viewModel.currentPattern)
+                        )
                         .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
 
                     // Progress bar (always present, opacity controlled)
@@ -183,6 +193,7 @@ struct EarTrainingPhaseView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(!viewModel.isWaitingForInput)
+                    .accessibilityHint("Short Morse element")
                     .accessibilityIdentifier(AccessibilityID.Send.ditButton)
 
                     // Dah button
@@ -197,6 +208,7 @@ struct EarTrainingPhaseView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(!viewModel.isWaitingForInput)
+                    .accessibilityHint("Long Morse element")
                     .accessibilityIdentifier(AccessibilityID.Send.dahButton)
                 }
                 .frame(height: 120)
@@ -206,9 +218,13 @@ struct EarTrainingPhaseView: View {
                 // Score display
                 HStack {
                     Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                        .accessibilityLabel(
+                            "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                        )
                         .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                     Spacer()
                     Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                        .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                         .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
                 }
                 .font(Typography.body)
@@ -225,6 +241,11 @@ struct EarTrainingPhaseView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 48
+
 }
 
 // MARK: - EarFeedbackView
@@ -243,9 +264,15 @@ struct EarFeedbackView: View {
                     Text("Expected: \(feedback.expectedPattern)")
                         .font(Typography.body)
                         .foregroundColor(Theme.Colors.error)
+                        .accessibilityLabel(
+                            "Expected: \(AccessibilityAnnouncer.spokenPattern(feedback.expectedPattern))"
+                        )
                     Text("You sent: \(feedback.userPattern)")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "You sent: \(AccessibilityAnnouncer.spokenPattern(feedback.userPattern))"
+                        )
                 }
             }
         }
@@ -337,6 +364,10 @@ struct EarCompletedView: View {
                                         .font(.system(size: 24, design: .monospaced))
                                         .foregroundColor(.secondary)
                                 }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityLabel(
+                                    "\(String(char)) equals \(AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? ""))"
+                                )
                             }
                         }
                         .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
