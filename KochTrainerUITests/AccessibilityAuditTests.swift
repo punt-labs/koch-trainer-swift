@@ -40,7 +40,7 @@ final class AccessibilityAuditTests: XCTestCase {
 
     func testVocabViewAccessibilityAudit() throws {
         let application = try XCTUnwrap(app)
-        application.tabBars.buttons["Vocabulary"].tap()
+        application.tabBars.buttons["Vocab"].tap()
         _ = application.staticTexts["Common Words"].waitForExistence(timeout: 2)
         try application.performAccessibilityAudit()
     }
@@ -59,7 +59,7 @@ final class AccessibilityAuditTests: XCTestCase {
     func testReceiveTrainingIntroAccessibilityAudit() throws {
         let application = try XCTUnwrap(app)
         application.tabBars.buttons["Learn"].tap()
-        application.buttons["Receive, Start Training"].tap()
+        application.buttons["learn-receive-training-start-button"].tap()
         _ = application.staticTexts["Character"].waitForExistence(timeout: 3)
         try application.performAccessibilityAudit()
     }
@@ -67,7 +67,7 @@ final class AccessibilityAuditTests: XCTestCase {
     func testSendTrainingIntroAccessibilityAudit() throws {
         let application = try XCTUnwrap(app)
         application.tabBars.buttons["Learn"].tap()
-        application.buttons["Send, Start Training"].tap()
+        application.buttons["learn-send-training-start-button"].tap()
         _ = application.staticTexts["Character"].waitForExistence(timeout: 3)
         try application.performAccessibilityAudit()
     }
@@ -75,7 +75,7 @@ final class AccessibilityAuditTests: XCTestCase {
     func testEarTrainingIntroAccessibilityAudit() throws {
         let application = try XCTUnwrap(app)
         application.tabBars.buttons["Learn"].tap()
-        application.buttons["Ear Training, Start Training"].tap()
+        application.buttons["learn-ear-training-start-button"].tap()
         _ = application.staticTexts["Character"].waitForExistence(timeout: 3)
         try application.performAccessibilityAudit()
     }

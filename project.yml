@@ -1,9 +1,9 @@
 name: KochTrainer
 
 options:
-  bundleIdPrefix: com.kochtrainer
+  bundleIdPrefix: com.puntlabs
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
   groupSortPosition: top
@@ -30,7 +30,7 @@ targets:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.puntlabs.kochtrainer
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: "Koch Trainer"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -47,7 +47,7 @@ targets:
       - target: KochTrainer
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.puntlabs.kochtrainer.tests
         GENERATE_INFOPLIST_FILE: YES
 
   KochTrainerUITests:
@@ -61,7 +61,7 @@ targets:
       - target: KochTrainer
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kochtrainer.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: com.puntlabs.kochtrainer.uitests
         GENERATE_INFOPLIST_FILE: YES
 
 schemes:

@@ -29,7 +29,7 @@ struct MorseQSOView: View {
                     .opacity(0)
                     .frame(width: 0, height: 0)
                     .accessibilityHidden(true)
-                    .onChange(of: hiddenInput) { newValue in
+                    .onChange(of: hiddenInput) { _, newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }

@@ -7,212 +7,327 @@ struct SettingsView: View {
     // MARK: Internal
 
     var body: some View {
-        Form {
-            Section("Profile") {
-                TextField("Your Callsign", text: $settingsStore.settings.userCallsign)
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
+        AccessibleForm {
+            // MARK: - Profile Section
+
+            AccessibleSection("Profile") {
+                AccessibleRow(showDivider: false) {
+                    TextField("Your Callsign", text: $settings.userCallsign)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                }
             }
 
-            Section("Audio") {
-                VStack(alignment: .leading) {
-                    Text("Tone Frequency: \(Int(settingsStore.settings.toneFrequency)) Hz")
+            // MARK: - Audio Section
+
+            AccessibleSection("Audio") {
+                AccessibleRow {
+                    LabeledContent("Tone Frequency") {
+                        Text("\(Int(settings.toneFrequency)) Hz")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                AccessibleRow {
                     Slider(
-                        value: $settingsStore.settings.toneFrequency,
+                        value: $settings.toneFrequency,
                         in: 400 ... 800,
                         step: 25
-                    )
+                    ) {
+                        Text("Tone Frequency")
+                    }
+                    .accessibilityValue("\(Int(settings.toneFrequency)) Hertz")
                 }
-
-                VStack(alignment: .leading) {
-                    Text("Effective Speed: \(settingsStore.settings.effectiveSpeed) WPM")
+                AccessibleRow {
+                    LabeledContent("Effective Speed") {
+                        Text("\(settings.effectiveSpeed) WPM")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                AccessibleRow(showDivider: false) {
                     Slider(
                         value: Binding(
-                            get: { Double(settingsStore.settings.effectiveSpeed) },
-                            set: { settingsStore.settings.effectiveSpeed = Int($0) }
+                            get: { Double(settings.effectiveSpeed) },
+                            set: { settings.effectiveSpeed = Int($0) }
                         ),
                         in: 10 ... 18,
                         step: 1
-                    )
+                    ) {
+                        Text("Effective Speed")
+                    }
+                    .accessibilityValue("\(settings.effectiveSpeed) words per minute")
                 }
             }
 
-            Section("Band Conditions") {
-                Toggle("Enable Band Conditions", isOn: $settingsStore.settings.bandConditionsEnabled)
+            // MARK: - Band Conditions Section
 
-                if settingsStore.settings.bandConditionsEnabled {
-                    VStack(alignment: .leading) {
-                        Text("Noise Level (QRN): \(Int(settingsStore.settings.noiseLevel * 100))%")
-                        Slider(value: $settingsStore.settings.noiseLevel, in: 0 ... 1, step: 0.1)
-                    }
+            AccessibleSection("Band Conditions") {
+                AccessibleRow(showDivider: settings.bandConditionsEnabled) {
+                    Toggle("Enable Band Conditions", isOn: $settings.bandConditionsEnabled)
+                }
 
-                    Toggle("Signal Fading (QSB)", isOn: $settingsStore.settings.fadingEnabled)
-
-                    if settingsStore.settings.fadingEnabled {
+                if settings.bandConditionsEnabled {
+                    AccessibleRow {
                         VStack(alignment: .leading) {
-                            Text("Fading Depth: \(Int(settingsStore.settings.fadingDepth * 100))%")
-                            Slider(value: $settingsStore.settings.fadingDepth, in: 0 ... 1, step: 0.1)
-                        }
-
-                        VStack(alignment: .leading) {
-                            let rateText = String(format: "%.2f", settingsStore.settings.fadingRate)
-                            Text("Fading Rate: \(rateText) Hz")
-                            Slider(value: $settingsStore.settings.fadingRate, in: 0.02 ... 0.3, step: 0.02)
+                            Text("Noise Level (QRN): \(Int(settings.noiseLevel * 100))%")
+                            Slider(value: $settings.noiseLevel, in: 0 ... 1, step: 0.1)
                         }
                     }
 
-                    Toggle("Interference (QRM)", isOn: $settingsStore.settings.interferenceEnabled)
+                    AccessibleRow(showDivider: settings.fadingEnabled) {
+                        Toggle("Signal Fading (QSB)", isOn: $settings.fadingEnabled)
+                    }
 
-                    if settingsStore.settings.interferenceEnabled {
-                        VStack(alignment: .leading) {
-                            Text("Interference Level: \(Int(settingsStore.settings.interferenceLevel * 100))%")
-                            Slider(value: $settingsStore.settings.interferenceLevel, in: 0 ... 1, step: 0.1)
+                    if settings.fadingEnabled {
+                        AccessibleRow {
+                            VStack(alignment: .leading) {
+                                Text("Fading Depth: \(Int(settings.fadingDepth * 100))%")
+                                Slider(value: $settings.fadingDepth, in: 0 ... 1, step: 0.1)
+                            }
+                        }
+
+                        AccessibleRow {
+                            VStack(alignment: .leading) {
+                                let rateText = String(format: "%.2f", settings.fadingRate)
+                                Text("Fading Rate: \(rateText) Hz")
+                                Slider(value: $settings.fadingRate, in: 0.02 ... 0.3, step: 0.02)
+                            }
                         }
                     }
 
-                    Button(action: previewBandConditions) {
-                        HStack {
-                            Image(systemName: isPreviewingBandConditions ? "speaker.wave.2.fill" : "speaker.wave.2")
-                            Text(isPreviewingBandConditions ? "Playing..." : "Preview Sound")
+                    AccessibleRow(showDivider: settings.interferenceEnabled) {
+                        Toggle("Interference (QRM)", isOn: $settings.interferenceEnabled)
+                    }
+
+                    if settings.interferenceEnabled {
+                        AccessibleRow {
+                            VStack(alignment: .leading) {
+                                Text("Interference Level: \(Int(settings.interferenceLevel * 100))%")
+                                Slider(value: $settings.interferenceLevel, in: 0 ... 1, step: 0.1)
+                            }
                         }
                     }
-                    .disabled(isPreviewingBandConditions)
 
-                    // Presets
-                    Menu("Apply Preset") {
-                        Button("Good Conditions") {
-                            applyPreset(.goodConditions)
+                    AccessibleRow {
+                        Button(action: previewBandConditions) {
+                            HStack {
+                                Image(systemName: isPreviewingBandConditions ? "speaker.wave.2.fill" : "speaker.wave.2")
+                                Text(isPreviewingBandConditions ? "Playing..." : "Preview Sound")
+                            }
                         }
-                        Button("Contest Pileup") {
-                            applyPreset(.contestPileup)
-                        }
-                        Button("Difficult") {
-                            applyPreset(.difficult)
+                        .disabled(isPreviewingBandConditions)
+                    }
+
+                    AccessibleRow(showDivider: false) {
+                        Menu("Apply Preset") {
+                            Button("Good Conditions") {
+                                applyPreset(.goodConditions)
+                            }
+                            Button("Contest Pileup") {
+                                applyPreset(.contestPileup)
+                            }
+                            Button("Difficult") {
+                                applyPreset(.difficult)
+                            }
                         }
                     }
                 }
             }
 
-            Section("Notifications") {
+            // MARK: - Notifications Section
+
+            AccessibleSection("Notifications") {
                 if notificationManager.authorizationStatus == .notDetermined {
-                    Button("Enable Notifications") {
-                        Task {
-                            await notificationManager.requestAuthorization()
+                    AccessibleRow(showDivider: false) {
+                        Button("Enable Notifications") {
+                            Task {
+                                await notificationManager.requestAuthorization()
+                            }
                         }
                     }
                 } else if notificationManager.authorizationStatus == .denied {
-                    Text("Notifications are disabled. Enable them in Settings.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    AccessibleRow(showDivider: false) {
+                        Text("Notifications are disabled. Enable them in Settings.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 } else {
-                    Toggle(
-                        "Practice Reminders",
-                        isOn: $settingsStore.settings.notificationSettings.practiceRemindersEnabled
-                    )
-
-                    Toggle(
-                        "Streak Reminders",
-                        isOn: $settingsStore.settings.notificationSettings.streakRemindersEnabled
-                    )
-
-                    DatePicker(
-                        "Preferred Time",
-                        selection: preferredTimeBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-
-                    Toggle(
-                        "Quiet Hours (10 PM - 8 AM)",
-                        isOn: $settingsStore.settings.notificationSettings.quietHoursEnabled
-                    )
+                    AccessibleRow {
+                        Toggle(
+                            "Practice Reminders",
+                            isOn: $settings.notificationSettings.practiceRemindersEnabled
+                        )
+                    }
+                    AccessibleRow {
+                        Toggle(
+                            "Streak Reminders",
+                            isOn: $settings.notificationSettings.streakRemindersEnabled
+                        )
+                    }
+                    AccessibleRow {
+                        DatePicker(
+                            "Preferred Time",
+                            selection: preferredTimeBinding,
+                            displayedComponents: .hourAndMinute
+                        )
+                    }
+                    AccessibleRow(showDivider: false) {
+                        Toggle(
+                            "Quiet Hours (10 PM - 8 AM)",
+                            isOn: $settings.notificationSettings.quietHoursEnabled
+                        )
+                    }
                 }
             }
 
-            Section("Progress") {
-                HStack {
-                    Text("Current Level")
-                    Spacer()
-                    Text("\(progressStore.progress.currentLevel) of 26")
-                        .foregroundColor(.secondary)
-                }
+            // MARK: - Progress Section
 
-                HStack {
-                    Text("Overall Accuracy")
-                    Spacer()
-                    Text("\(progressStore.overallAccuracyPercentage)%")
-                        .foregroundColor(.secondary)
+            AccessibleSection("Progress") {
+                AccessibleRow {
+                    HStack {
+                        Text("Current Level")
+                        Spacer()
+                        Text("\(progressStore.progress.currentLevel) of 26")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                AccessibleRow {
+                    HStack {
+                        Text("Overall Accuracy")
+                        Spacer()
+                        Text("\(progressStore.overallAccuracyPercentage)%")
+                            .foregroundColor(.secondary)
+                    }
                 }
 
                 if progressStore.progress.schedule.currentStreak > 0 {
-                    HStack {
-                        Text("Current Streak")
-                        Spacer()
-                        Text("\(progressStore.progress.schedule.currentStreak) days")
-                            .foregroundColor(.secondary)
+                    AccessibleRow {
+                        HStack {
+                            Text("Current Streak")
+                            Spacer()
+                            Text("\(progressStore.progress.schedule.currentStreak) days")
+                                .foregroundColor(.secondary)
+                        }
                     }
-
-                    HStack {
-                        Text("Longest Streak")
-                        Spacer()
-                        Text("\(progressStore.progress.schedule.longestStreak) days")
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                NavigationLink(destination: SessionHistoryView()) {
-                    HStack {
-                        Text("Session History")
-                        Spacer()
-                        Text("\(progressStore.progress.sessionHistory.count) sessions")
-                            .foregroundColor(.secondary)
+                    AccessibleRow {
+                        HStack {
+                            Text("Longest Streak")
+                            Spacer()
+                            Text("\(progressStore.progress.schedule.longestStreak) days")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(AccessibilityID.Settings.sessionHistoryLink)
 
-                Button("Reset All Progress", role: .destructive) {
-                    showResetConfirmation = true
+                AccessibleRow {
+                    NavigationLink(destination: SessionHistoryView()) {
+                        HStack {
+                            Text("Session History")
+                            Spacer()
+                            Text("\(progressStore.progress.sessionHistory.count) sessions")
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier(AccessibilityID.Settings.sessionHistoryLink)
                 }
-                .accessibilityIdentifier(AccessibilityID.Settings.resetProgressButton)
+
+                AccessibleRow(showDivider: false) {
+                    Button("Reset All Progress", role: .destructive) {
+                        showResetConfirmation = true
+                    }
+                    .accessibilityIdentifier(AccessibilityID.Settings.resetProgressButton)
+                }
             }
 
-            Section("About") {
-                HStack {
-                    Text("Version")
-                    Spacer()
-                    Text(appVersion)
-                        .foregroundColor(.secondary)
-                }
+            // MARK: - About Section
 
-                NavigationLink(destination: WhatsNewView()) {
-                    Label("What's New", systemImage: "sparkles")
+            AccessibleSection("About") {
+                AccessibleRow {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text(appVersion)
+                            .foregroundColor(.secondary)
+                    }
                 }
-                .accessibilityIdentifier(AccessibilityID.Settings.whatsNewLink)
-
-                NavigationLink(destination: LicenseView()) {
-                    Label("License", systemImage: "doc.text")
+                AccessibleRow {
+                    NavigationLink(destination: WhatsNewView()) {
+                        HStack {
+                            Label("What's New", systemImage: "sparkles")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier(AccessibilityID.Settings.whatsNewLink)
                 }
-
-                NavigationLink(destination: AcknowledgmentsView()) {
-                    Label("Acknowledgments", systemImage: "heart")
+                AccessibleRow {
+                    NavigationLink(destination: LicenseView()) {
+                        HStack {
+                            Label("License", systemImage: "doc.text")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
-                .accessibilityIdentifier(AccessibilityID.Settings.acknowledgementsLink)
+                AccessibleRow {
+                    NavigationLink(destination: AcknowledgmentsView()) {
+                        HStack {
+                            Label("Acknowledgments", systemImage: "heart")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier(AccessibilityID.Settings.acknowledgementsLink)
+                }
 
                 if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/blob/main/PRIVACY.md") {
-                    Link(destination: url) {
-                        Label("Privacy Policy", systemImage: "hand.raised")
+                    AccessibleRow {
+                        Link(destination: url) {
+                            HStack {
+                                Label("Privacy Policy", systemImage: "hand.raised")
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
 
                 if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift") {
-                    Link(destination: url) {
-                        Label("Source Code", systemImage: "chevron.left.forwardslash.chevron.right")
+                    AccessibleRow {
+                        Link(destination: url) {
+                            HStack {
+                                Label("Source Code", systemImage: "chevron.left.forwardslash.chevron.right")
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
 
                 if let url = URL(string: "https://github.com/punt-labs/koch-trainer-swift/issues") {
-                    Link(destination: url) {
-                        Label("Support & Feedback", systemImage: "bubble.left.and.exclamationmark.bubble.right")
+                    AccessibleRow(showDivider: false) {
+                        Link(destination: url) {
+                            HStack {
+                                Label("Support & Feedback", systemImage: "bubble.left.and.exclamationmark.bubble.right")
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
             }
@@ -227,6 +342,14 @@ struct SettingsView: View {
         } message: {
             Text("This will delete all your progress and start over from Level 1. This cannot be undone.")
         }
+        .onAppear {
+            // Copy settings to local state to isolate from @EnvironmentObject observation
+            settings = settingsStore.settings
+        }
+        .onChange(of: settings) { _, newSettings in
+            // Sync changes back to store
+            settingsStore.settings = newSettings
+        }
     }
 
     // MARK: Private
@@ -234,6 +357,11 @@ struct SettingsView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var notificationManager: NotificationManager
+
+    /// Local copy of settings to isolate view from @EnvironmentObject observation during VoiceOver.
+    /// Changes sync back to store immediately via onChange.
+    @State private var settings = AppSettings()
+
     @State private var showResetConfirmation = false
     @State private var isPreviewingBandConditions = false
     @StateObject private var previewAudioEngineWrapper = ObservableAudioEngine()
@@ -243,14 +371,14 @@ struct SettingsView: View {
         Binding(
             get: {
                 var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-                components.hour = settingsStore.settings.notificationSettings.preferredReminderHour
-                components.minute = settingsStore.settings.notificationSettings.preferredReminderMinute
+                components.hour = settings.notificationSettings.preferredReminderHour
+                components.minute = settings.notificationSettings.preferredReminderMinute
                 return Calendar.current.date(from: components) ?? Date()
             },
             set: { newDate in
-                settingsStore.settings.notificationSettings.preferredReminderHour =
+                settings.notificationSettings.preferredReminderHour =
                     Calendar.current.component(.hour, from: newDate)
-                settingsStore.settings.notificationSettings.preferredReminderMinute =
+                settings.notificationSettings.preferredReminderMinute =
                     Calendar.current.component(.minute, from: newDate)
             }
         )
@@ -280,9 +408,9 @@ struct SettingsView: View {
 
     private func previewBandConditions() {
         isPreviewingBandConditions = true
-        previewAudioEngineWrapper.engine.setFrequency(settingsStore.settings.toneFrequency)
-        previewAudioEngineWrapper.engine.setEffectiveSpeed(settingsStore.settings.effectiveSpeed)
-        previewAudioEngineWrapper.engine.configureBandConditions(from: settingsStore.settings)
+        previewAudioEngineWrapper.engine.setFrequency(settings.toneFrequency)
+        previewAudioEngineWrapper.engine.setEffectiveSpeed(settings.effectiveSpeed)
+        previewAudioEngineWrapper.engine.configureBandConditions(from: settings)
 
         // Use continuous audio session for realistic preview
         previewAudioEngineWrapper.engine.startSession()
@@ -298,25 +426,25 @@ struct SettingsView: View {
     private func applyPreset(_ preset: BandConditionPreset) {
         switch preset {
         case .goodConditions:
-            settingsStore.settings.noiseLevel = 0.1
-            settingsStore.settings.fadingEnabled = true
-            settingsStore.settings.fadingDepth = 0.2
-            settingsStore.settings.fadingRate = 0.05
-            settingsStore.settings.interferenceEnabled = false
+            settings.noiseLevel = 0.1
+            settings.fadingEnabled = true
+            settings.fadingDepth = 0.2
+            settings.fadingRate = 0.05
+            settings.interferenceEnabled = false
         case .contestPileup:
-            settingsStore.settings.noiseLevel = 0.3
-            settingsStore.settings.fadingEnabled = true
-            settingsStore.settings.fadingDepth = 0.4
-            settingsStore.settings.fadingRate = 0.1
-            settingsStore.settings.interferenceEnabled = true
-            settingsStore.settings.interferenceLevel = 0.4
+            settings.noiseLevel = 0.3
+            settings.fadingEnabled = true
+            settings.fadingDepth = 0.4
+            settings.fadingRate = 0.1
+            settings.interferenceEnabled = true
+            settings.interferenceLevel = 0.4
         case .difficult:
-            settingsStore.settings.noiseLevel = 0.5
-            settingsStore.settings.fadingEnabled = true
-            settingsStore.settings.fadingDepth = 0.7
-            settingsStore.settings.fadingRate = 0.15
-            settingsStore.settings.interferenceEnabled = true
-            settingsStore.settings.interferenceLevel = 0.3
+            settings.noiseLevel = 0.5
+            settings.fadingEnabled = true
+            settings.fadingDepth = 0.7
+            settings.fadingRate = 0.15
+            settings.interferenceEnabled = true
+            settings.interferenceLevel = 0.3
         }
     }
 }

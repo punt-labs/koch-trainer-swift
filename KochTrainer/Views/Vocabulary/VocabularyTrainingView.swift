@@ -49,7 +49,7 @@ struct VocabularyTrainingView: View {
                         .opacity(0)
                         .frame(width: 0, height: 0)
                         .accessibilityHidden(true)
-                        .onChange(of: textInput) { newValue in
+                        .onChange(of: textInput) { _, newValue in
                             if !viewModel.currentWord.isEmpty,
                                newValue.count >= viewModel.currentWord.count {
                                 viewModel.submitAnswer(newValue)
@@ -125,7 +125,7 @@ struct VocabularyTrainingView: View {
         .onDisappear {
             viewModel.cleanup()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background, case .training = viewModel.phase {
                 viewModel.pause()
             }

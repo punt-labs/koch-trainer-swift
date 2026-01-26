@@ -124,7 +124,7 @@ struct QSOSessionView: View {
                 }
                 .padding(Theme.Spacing.md)
             }
-            .onChange(of: viewModel.transcript.count) { _ in
+            .onChange(of: viewModel.transcript.count) { _, _ in
                 if let lastMessage = viewModel.transcript.last {
                     withAnimation {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)

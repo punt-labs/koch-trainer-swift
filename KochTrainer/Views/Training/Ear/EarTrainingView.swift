@@ -33,7 +33,7 @@ struct EarTrainingView: View {
                     .opacity(0)
                     .frame(width: 0, height: 0)
                     .accessibilityHidden(true)
-                    .onChange(of: hiddenInput) { newValue in
+                    .onChange(of: hiddenInput) { _, newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }
@@ -95,7 +95,7 @@ struct EarTrainingView: View {
         .onDisappear {
             viewModel.cleanup()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background, case .training = viewModel.phase {
                 viewModel.pause()
             }
