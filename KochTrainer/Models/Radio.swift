@@ -34,6 +34,10 @@ final class Radio: @unchecked Sendable {
 
         /// Cannot stop radio that is already off
         case alreadyOff
+
+        /// Tone activation requires radio to be on (receiving or transmitting)
+        /// Z spec constraint: ¬(radioMode = off ∧ toneActive)
+        case mustBeOn
     }
 
     /// Current radio mode (thread-safe read).

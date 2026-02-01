@@ -163,4 +163,41 @@ final class ToneGeneratorTests: XCTestCase {
 
         // If we get here without crashing, test passes
     }
+
+    // MARK: - Z Spec Constraint Tests
+
+    /// Verifies Z spec constraint: ¬(radioMode = off ∧ toneActive)
+    /// Activating tone when radio is off should throw.
+    func testActivateTone_whenRadioOff_throws() {
+        let toneGenerator = ToneGenerator()
+
+        // Radio starts off by default (no session started)
+        XCTAssertEqual(toneGenerator.radioMode, .off)
+
+        // Attempting to activate tone should throw
+        XCTAssertThrowsError(try toneGenerator.activateTone(frequency: 600)) { error in
+            guard let radioError = error as? Radio.RadioError else {
+                XCTFail("Expected Radio.RadioError, got \(type(of: error))")
+                return
+            }
+            XCTAssertEqual(radioError, .mustBeOn)
+        }
+    }
+
+    /// Verifies that activating tone succeeds when radio is on (session started).
+    func testActivateTone_whenRadioOn_succeeds() throws {
+        let toneGenerator = ToneGenerator()
+
+        // Start session (puts radio in receiving mode)
+        toneGenerator.startSession()
+        XCTAssertEqual(toneGenerator.radioMode, .receiving)
+
+        // Activating tone should succeed
+        XCTAssertNoThrow(try toneGenerator.activateTone(frequency: 600))
+        XCTAssertTrue(toneGenerator.isToneActive)
+
+        // Clean up
+        toneGenerator.deactivateTone()
+        toneGenerator.endSession()
+    }
 }

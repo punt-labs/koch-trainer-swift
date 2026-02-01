@@ -141,6 +141,8 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     // MARK: - Introduction Phase
 
     func startIntroduction() {
+        audioEngine.startSession()
+
         guard !introCharacters.isEmpty else {
             startTraining()
             return

@@ -1,4 +1,5 @@
 import Foundation
+import os
 import UserNotifications
 
 // MARK: - NotificationSettingsProtocol
@@ -72,7 +73,7 @@ final class NotificationManager: ObservableObject {
             await refreshAuthorizationStatus()
             return granted
         } catch {
-            print("Notification authorization error: \(error)")
+            logger.error("Notification authorization error: \(error.localizedDescription)")
             return false
         }
     }
@@ -131,6 +132,7 @@ final class NotificationManager: ObservableObject {
     private let notificationCenter: NotificationCenterProtocol
     private let defaults: UserDefaults
     private let cachedStatusKey = "notificationAuthorizationStatus"
+    private let logger = Logger(subsystem: "com.kochtrainer", category: "NotificationManager")
 
     private func schedulePracticeReminders(
         schedule: PracticeSchedule,
