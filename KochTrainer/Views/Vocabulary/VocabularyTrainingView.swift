@@ -79,7 +79,7 @@ struct VocabularyTrainingView: View {
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isTrainingActive)
-        .focusable(!viewModel.isReceiveMode)
+        .focusable()
         .focused($isSendKeyboardFocused)
         .onKeyPress { press in
             guard !viewModel.isReceiveMode,
