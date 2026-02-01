@@ -105,7 +105,8 @@ Thumbs.db
 
 # Local TODO/planning files
 .TODO.md
-TestResults.xcresult
+*.xcresult
+CoverageDerived/
 
 # LaTeX build                                                                                                                                     
   artifacts
