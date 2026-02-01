@@ -143,8 +143,14 @@ final class ToneGenerator: @unchecked Sendable {
         isSessionActive = false
     }
 
-    /// Activate tone generation at the specified frequency (for continuous mode)
-    func activateTone(frequency: Double) {
+    /// Activate tone generation at the specified frequency (for continuous mode).
+    ///
+    /// - Throws: `Radio.RadioError.mustBeOn` if radio is off.
+    /// - Note: Z spec constraint: ¬(radioMode = off ∧ toneActive)
+    func activateTone(frequency: Double) throws {
+        guard radioMode != .off else {
+            throw Radio.RadioError.mustBeOn
+        }
         currentFrequency = frequency
         toneActiveLock.lock()
         _isToneActive = true

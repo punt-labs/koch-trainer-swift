@@ -232,11 +232,18 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
     /// Play a tone element.
     /// Uses continuous mode during active sessions (radio simulation with band conditions).
-    /// Uses discrete mode otherwise (clean audio for introduction/preview).
+    /// Uses discrete mode otherwise (clean audio for settings preview).
     private func playToneElement(duration: TimeInterval) async {
         if isSessionActive {
             // Continuous mode: toggle tone flag on running engine
-            toneGenerator.activateTone(frequency: frequency)
+            // Precondition: radio must be on (receiving or transmitting)
+            do {
+                try toneGenerator.activateTone(frequency: frequency)
+            } catch {
+                preconditionFailure(
+                    "Z spec violation: attempted to activate tone with radio off. Call startSession() before playing."
+                )
+            }
             await toneGenerator.playSilence(duration: duration)
             toneGenerator.deactivateTone()
         } else {
