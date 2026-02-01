@@ -78,7 +78,7 @@
     <key>Level %lld/%lld</key>
     <dict>
         <key>NSStringLocalizedFormatKey</key>
-        <string>Level %1$lld/%2$lld</string>
+        <string>Stufe %1$lld/%2$lld</string>
     </dict>
 
     <!-- Of 26 -->

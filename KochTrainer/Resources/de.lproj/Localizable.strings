@@ -16,7 +16,7 @@
 "Ear Training" = "Gehörtraining";
 "Start Ear Training" = "Gehörtraining starten";
 "Characters: %@" = "Zeichen: %@";
-"Receive" = "Empfangen";
+"Receive" = "Hören";
 "Start Receive Training" = "Empfangstraining starten";
 "Send" = "Senden";
 "Start Send Training" = "Sendetraining starten";
@@ -65,7 +65,7 @@
 "Keyboard: . or F = dit, - or J = dah" = "Tastatur: . oder F = dit, - oder J = dah";
 "Keyboard: . or F = dit, - or J = dah, Space = next char" = "Tastatur: . oder F = dit, - oder J = dah, Leertaste = nächstes Zeichen";
 "Paused" = "Pausiert";
-"Pause" = "Pause";
+"Pause" = "Pausieren";
 "Resume" = "Fortsetzen";
 "End Session" = "Sitzung beenden";
 "Correct!" = "Richtig!";
@@ -109,10 +109,10 @@
 
 // MARK: - Session Complete / Results
 "Session Complete" = "Sitzung abgeschlossen";
-"Level Up!" = "Level aufgestiegen!";
+"Level Up!" = "Aufgestiegen!";
 "New character unlocked:" = "Neues Zeichen freigeschaltet:";
 "Need 90% to advance" = "90% für Aufstieg benötigt";
-"Continue to Next Level" = "Zum nächsten Level";
+"Continue to Next Level" = "Zur nächsten Stufe";
 "Try Again" = "Nochmal versuchen";
 "Done" = "Fertig";
 "Results" = "Ergebnisse";
@@ -146,7 +146,7 @@
 "Preferred Time" = "Bevorzugte Zeit";
 "Quiet Hours (10 PM - 8 AM)" = "Ruhezeit (22-8 Uhr)";
 "Progress" = "Fortschritt";
-"Current Level" = "Aktuelles Level";
+"Current Level" = "Aktuelle Stufe";
 "Overall Accuracy" = "Gesamtgenauigkeit";
 "Current Streak" = "Aktuelle Serie";
 "Longest Streak" = "Längste Serie";
@@ -163,7 +163,7 @@
 "Support & Feedback" = "Support & Feedback";
 "Reset All Progress" = "Fortschritt zurücksetzen";
 "Reset Progress?" = "Fortschritt zurücksetzen?";
-"This will delete all your progress and start over from Level 1. This cannot be undone." = "Dies löscht deinen gesamten Fortschritt und startet bei Level 1 neu. Dies kann nicht rückgängig gemacht werden.";
+"This will delete all your progress and start over from Level 1. This cannot be undone." = "Dies löscht deinen gesamten Fortschritt und startet bei Stufe 1 neu. Dies kann nicht rückgängig gemacht werden.";
 "Cancel" = "Abbrechen";
 "Reset" = "Zurücksetzen";
 
@@ -189,6 +189,23 @@
 "Koch Trainer for iOS" = "Koch Trainer für iOS";
 "Version %@" = "Version %@";
 "View Full Changelog" = "Vollständigen Changelog anzeigen";
+
+// WhatsNew Feature Titles
+"Koch Method" = "Koch-Methode";
+"Vocabulary Practice" = "Vokabeltraining";
+"Streak Tracking" = "Serien-Verfolgung";
+"Proficiency Indicators" = "Kompetenzanzeigen";
+
+// WhatsNew Feature Descriptions
+"whatsnew.ear.description" = "Muster nach Länge lernen, beginnend mit den kürzesten";
+"whatsnew.receive.description" = "Morsezeichen hören und identifizieren";
+"whatsnew.send.description" = "Dit/Dah-Muster mit Tasten oder Tastatur geben";
+"whatsnew.koch.description" = "Progressives Lernen mit 26 Zeichen";
+"whatsnew.vocab.description" = "Häufige Wörter, Q-Gruppen und Abkürzungen";
+"whatsnew.qso.description" = "Realistische Amateurfunk-Gespräche üben";
+"whatsnew.band.description" = "QRN-, QSB- und QRM-Audiosimulation";
+"whatsnew.streak.description" = "Tägliche Übungsserien und Erinnerungen";
+"whatsnew.proficiency.description" = "Genauigkeitsvisualisierung pro Zeichen";
 
 // MARK: - LicenseView
 "MIT License" = "MIT-Lizenz";
@@ -248,6 +265,6 @@
 "notification.streakReminder.title" = "Deine Serie halten!";
 "notification.streakReminder.body %lld" = "Du hast eine %lld-Tage-Serie. Übe heute, um sie fortzusetzen.";
 "notification.levelReview.title" = "Zeit für Wiederholung";
-"notification.levelReview.body %lld" = "Es ist eine Woche her, seit du Level %lld erreicht hast. Zeit für eine Wiederholung!";
+"notification.levelReview.body %lld" = "Es ist eine Woche her, seit du Stufe %lld erreicht hast. Zeit für eine Wiederholung!";
 "notification.welcomeBack.title" = "Wir vermissen dich!";
 "notification.welcomeBack.body" = "Bereit, weiter Morsen zu lernen? Dein Fortschritt wartet.";

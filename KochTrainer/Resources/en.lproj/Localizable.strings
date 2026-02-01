@@ -229,6 +229,28 @@
 "Version %@" = "Version %@";
 "View Full Changelog" = "View Full Changelog";
 
+// WhatsNew Feature Titles (same as section headers where applicable)
+// "Ear Training" - already defined above
+// "Receive Training" - already defined above
+// "Send Training" - already defined above
+"Koch Method" = "Koch Method";
+"Vocabulary Practice" = "Vocabulary Practice";
+// "QSO Simulation" - already defined above
+"Band Conditions" = "Band Conditions";
+"Streak Tracking" = "Streak Tracking";
+"Proficiency Indicators" = "Proficiency Indicators";
+
+// WhatsNew Feature Descriptions
+"whatsnew.ear.description" = "Learn patterns by length, starting with shortest";
+"whatsnew.receive.description" = "Listen to Morse code and identify characters";
+"whatsnew.send.description" = "Key dit/dah patterns using paddles or keyboard";
+"whatsnew.koch.description" = "Progressive learning with 26 characters";
+"whatsnew.vocab.description" = "Common words, Q-codes, and abbreviations";
+"whatsnew.qso.description" = "Practice realistic ham radio conversations";
+"whatsnew.band.description" = "QRN, QSB, and QRM audio simulation";
+"whatsnew.streak.description" = "Daily practice streaks and reminders";
+"whatsnew.proficiency.description" = "Per-character accuracy visualization";
+
 // MARK: - LicenseView
 "MIT License" = "MIT License";
 

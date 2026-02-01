@@ -190,6 +190,23 @@
 "Version %@" = "Versione %@";
 "View Full Changelog" = "Visualizza changelog completo";
 
+// WhatsNew Feature Titles
+"Koch Method" = "Metodo Koch";
+"Vocabulary Practice" = "Pratica vocabolario";
+"Streak Tracking" = "Tracciamento serie";
+"Proficiency Indicators" = "Indicatori di competenza";
+
+// WhatsNew Feature Descriptions
+"whatsnew.ear.description" = "Impara i pattern per lunghezza, iniziando dai più corti";
+"whatsnew.receive.description" = "Ascolta il codice Morse e identifica i caratteri";
+"whatsnew.send.description" = "Manipola i pattern dit/dah usando tasto o tastiera";
+"whatsnew.koch.description" = "Apprendimento progressivo con 26 caratteri";
+"whatsnew.vocab.description" = "Parole comuni, codici Q e abbreviazioni";
+"whatsnew.qso.description" = "Pratica conversazioni radioamatoriali realistiche";
+"whatsnew.band.description" = "Simulazione audio QRN, QSB e QRM";
+"whatsnew.streak.description" = "Serie di pratica giornaliera e promemoria";
+"whatsnew.proficiency.description" = "Visualizzazione della precisione per carattere";
+
 // MARK: - LicenseView
 "MIT License" = "Licenza MIT";
 
