@@ -154,12 +154,9 @@ final class BandConditionsProcessorTests: XCTestCase {
         }
 
         // Count samples where outputs differ significantly (> 1% difference)
-        var differenceCount = 0
-        for i in 0 ..< outputs1.count {
-            if abs(outputs1[i] - outputs2[i]) > 0.01 {
-                differenceCount += 1
-            }
-        }
+        let differenceCount = (0 ..< outputs1.count)
+            .filter { abs(outputs1[$0] - outputs2[$0]) > 0.01 }
+            .count
 
         // With random fading, most samples should differ between the two runs
         // Expect at least 50% to be different

@@ -1,7 +1,6 @@
 @testable import KochTrainer
 import XCTest
 
-// swiftlint:disable type_body_length
 @MainActor
 final class EarTrainingViewModelTests: XCTestCase {
 
@@ -546,5 +545,3 @@ final class EarTrainingViewModelTests: XCTestCase {
     }
 
 }
-
-// swiftlint:enable type_body_length
