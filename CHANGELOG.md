@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Privacy manifest** (PrivacyInfo.xcprivacy): Declares UserDefaults API usage and no data collection
+- **Notification usage description**: Explains why practice reminders and streak alerts are sent
+- **Export compliance flag**: Marks app as using no non-exempt encryption
 - **Internationalization (i18n)**: Full localization infrastructure with support for 6 languages
   - English (US) - base language
   - English (UK) - spelling variants (practise vs practice)

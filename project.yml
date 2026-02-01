@@ -46,6 +46,8 @@ targets:
           - fr
           - es
           - it
+        NSUserNotificationsUsageDescription: "Koch Trainer sends practice reminders and streak alerts to help you maintain a consistent learning schedule."
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
