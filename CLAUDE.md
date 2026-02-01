@@ -196,7 +196,7 @@ protocol CharacterIntroducing: ObservableObject {
 
 ## Technical Constraints
 
-- iOS 16+, Swift 5.9+, SwiftUI
+- iOS 17+, Swift 5.9+, SwiftUI
 - Portrait only
 - No external dependencies
 - XcodeGen for project configuration
