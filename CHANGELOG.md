@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-02-01
+
 ### Added
+- **Accessibility compliance**: VoiceOver labels with spoken Morse patterns ("dit dah" instead of ".-"), accessibility hints on training buttons, Dynamic Type support with `@ScaledMetric`, hidden decorative elements, and automated `performAccessibilityAudit()` tests
 - **Privacy manifest** (PrivacyInfo.xcprivacy): Declares UserDefaults API usage and no data collection
 - **Notification usage description**: Explains why practice reminders and streak alerts are sent
 - **Export compliance flag**: Marks app as using no non-exempt encryption
@@ -20,6 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Italian (it)
 - Pluralization support via stringsdict for proper singular/plural handling
 - Locale-aware number formatting for decimal values
+
+### Fixed
+- Software keyboard no longer covers dit/dah buttons on Send Training, Ear Training, QSO, and Vocabulary screens
+
+### Changed
+- Minimum deployment target raised to iOS 17.0
+- Bundle identifier changed to com.puntlabs.kochtrainer
+
+### Technical
+- 1,041 tests (973 unit + 68 UI)
+- SwiftLint warnings reduced to 0
 
 ## [0.9.0] - 2026-01-24
 
@@ -76,12 +90,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dark Mode Support**: Full support for iOS light and dark appearance modes
 
 ### Technical
-- SwiftUI-based iOS app (iOS 16+)
+- SwiftUI-based iOS app
 - XcodeGen for project configuration
-- 519 unit tests
 - SwiftLint and SwiftFormat for code quality
 - GitHub Actions CI pipeline
 
 
+[1.0.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...v0.9.0
 [0.7.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0
