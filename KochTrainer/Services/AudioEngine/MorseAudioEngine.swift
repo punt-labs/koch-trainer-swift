@@ -241,7 +241,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
                 try toneGenerator.activateTone(frequency: frequency)
             } catch {
                 preconditionFailure(
-                    "Z spec violation: attempted to activate tone with radio off. Call startSession() before playing."
+                    "Programming error: Z spec violation: attempted to activate tone with radio off. Call startSession() before playing."
                 )
             }
             await toneGenerator.playSilence(duration: duration)
