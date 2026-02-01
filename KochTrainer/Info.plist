@@ -29,6 +29,10 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Koch Trainer sends practice reminders and streak alerts to help you maintain a consistent learning schedule.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
