@@ -108,6 +108,11 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         return false
     }
 
+    /// Dynamic timeout based on current target character's pattern length
+    var currentInputTimeout: TimeInterval {
+        TrainingTiming.timeoutForCharacter(targetCharacter)
+    }
+
     func configure(progressStore: ProgressStore, settingsStore: SettingsStore) {
         self.progressStore = progressStore
         self.settingsStore = settingsStore
@@ -353,11 +358,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var currentLevel: Int = 1
     private var lastInputTime: Date?
 
-    /// Dynamic timeout based on current target character's pattern length
-    private var currentInputTimeout: TimeInterval {
-        TrainingTiming.timeoutForCharacter(targetCharacter)
-    }
-
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {
             startTraining()
@@ -420,19 +420,26 @@ extension SendTrainingViewModel {
     }
 
     func resetInputTimer() {
+        // Start at full, animate to zero via SwiftUI animation
         inputTimeRemaining = currentInputTimeout
+
         inputTimer?.invalidate()
-        inputTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tickInput() }
+        // Single-fire timer for timeout detection only
+        inputTimer = Timer.scheduledTimer(withTimeInterval: currentInputTimeout, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.handleInputTimeout() }
+        }
+
+        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
+            inputTimeRemaining = 0
         }
     }
 
-    private func tickInput() {
-        inputTimeRemaining -= 0.05
-        if inputTimeRemaining <= 0 {
-            inputTimer?.invalidate()
-            completeCurrentInput()
-        }
+    private func handleInputTimeout() {
+        guard isWaitingForInput else { return }
+        inputTimer?.invalidate()
+        completeCurrentInput()
     }
 
     private func completeCurrentInput() {

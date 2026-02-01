@@ -434,23 +434,29 @@ extension ReceiveTrainingViewModel {
 
     func startResponseTimer() {
         isWaitingForResponse = true
+        // Start at full, animate to zero via SwiftUI animation
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
-        responseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tickResponse() }
+        // Single-fire timer for timeout detection only
+        responseTimer = Timer.scheduledTimer(withTimeInterval: responseTimeout, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.handleTimeout() }
+        }
+
+        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
+            responseTimeRemaining = 0
         }
     }
 
-    private func tickResponse() {
-        responseTimeRemaining -= 0.05
-        if responseTimeRemaining <= 0 {
-            responseTimer?.invalidate()
-            isWaitingForResponse = false
-            if let expected = currentCharacter {
-                recordResponse(expected: expected, wasCorrect: false, userPressed: nil)
-                showFeedbackAndContinue(wasCorrect: false, expected: expected, userPressed: nil)
-            }
+    private func handleTimeout() {
+        guard isWaitingForResponse else { return }
+        responseTimer?.invalidate()
+        isWaitingForResponse = false
+        if let expected = currentCharacter {
+            recordResponse(expected: expected, wasCorrect: false, userPressed: nil)
+            showFeedbackAndContinue(wasCorrect: false, expected: expected, userPressed: nil)
         }
     }
 

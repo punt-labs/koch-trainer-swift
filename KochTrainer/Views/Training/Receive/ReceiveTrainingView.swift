@@ -202,12 +202,16 @@ struct TrainingPhaseView: View {
                 .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
 
                 // Slot 3: Progress bar (always present, opacity controlled)
-                TimeoutProgressBar(progress: viewModel.responseProgress)
-                    .frame(height: 8)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                    .padding(.top, Theme.Spacing.md)
-                    .opacity(viewModel.isWaitingForResponse ? 1 : 0)
-                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
+                // Animation runs on render thread, not main thread
+                TimeoutProgressBar(
+                    progress: viewModel.responseProgress,
+                    animationDuration: viewModel.responseTimeout
+                )
+                .frame(height: 8)
+                .padding(.horizontal, Theme.Spacing.xl)
+                .padding(.top, Theme.Spacing.md)
+                .opacity(viewModel.isWaitingForResponse ? 1 : 0)
+                .accessibilityIdentifier(AccessibilityID.Training.progressBar)
             }
             .frame(height: 200)
 
@@ -423,8 +427,14 @@ struct ReceiveFeedbackMessageView: View {
 
 // MARK: - TimeoutProgressBar
 
+/// Animated progress bar that counts down from full to empty.
+/// Uses SwiftUI's declarative animation (runs on render thread) instead of timer-driven updates.
 struct TimeoutProgressBar: View {
+    /// Current progress value (0.0 to 1.0). Animate changes to this value externally.
     let progress: Double
+
+    /// Duration for the countdown animation. Set to 0 for no animation.
+    var animationDuration: TimeInterval = 0
 
     var progressColor: Color {
         if progress > 0.5 {
@@ -445,6 +455,12 @@ struct TimeoutProgressBar: View {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(progressColor)
                     .frame(width: geometry.size.width * max(0, min(1, progress)))
+                    .animation(
+                        animationDuration > 0
+                            ? .linear(duration: animationDuration)
+                            : .none,
+                        value: progress
+                    )
             }
         }
     }
