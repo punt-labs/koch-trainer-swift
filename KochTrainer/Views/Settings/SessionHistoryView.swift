@@ -78,14 +78,14 @@ struct SessionHistoryView: View {
                     HStack {
                         Text("Receive Interval")
                         Spacer()
-                        Text("\(String(format: "%.2f", schedule.receiveInterval)) days")
+                        Text("\(schedule.receiveInterval.formatted(.number.precision(.fractionLength(2)))) days")
                             .foregroundColor(.secondary)
                     }
 
                     HStack {
                         Text("Send Interval")
                         Spacer()
-                        Text("\(String(format: "%.2f", schedule.sendInterval)) days")
+                        Text("\(schedule.sendInterval.formatted(.number.precision(.fractionLength(2)))) days")
                             .foregroundColor(.secondary)
                     }
 
@@ -201,7 +201,7 @@ struct SessionHistoryView: View {
             }
 
             HStack {
-                Text("Interval: \(String(format: "%.1f", interval)) days")
+                Text("Interval: \(interval.formatted(.number.precision(.fractionLength(1)))) days")
                     .font(Typography.caption)
                     .foregroundColor(.secondary)
                 Spacer()

@@ -13,32 +13,32 @@ enum QSOStyle: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .firstContact: return "First Contact"
-        case .signalReport: return "Signal Report"
-        case .contest: return "Contest"
-        case .ragChew: return "Rag Chew"
+        case .firstContact: return String(localized: "qso.style.firstContact")
+        case .signalReport: return String(localized: "qso.style.signalReport")
+        case .contest: return String(localized: "qso.style.contest")
+        case .ragChew: return String(localized: "qso.style.ragChew")
         }
     }
 
     var description: String {
         switch self {
         case .firstContact:
-            return "Simple exchange: callsigns, signal report, 73"
+            return String(localized: "qso.style.firstContact.description")
         case .signalReport:
-            return "Basic QSO: callsigns, signal report, names, 73"
+            return String(localized: "qso.style.signalReport.description")
         case .contest:
-            return "Quick exchanges: signal report and serial number"
+            return String(localized: "qso.style.contest.description")
         case .ragChew:
-            return "Casual conversation: names, locations, weather"
+            return String(localized: "qso.style.ragChew.description")
         }
     }
 
     var difficulty: String {
         switch self {
-        case .firstContact: return "Beginner"
-        case .signalReport: return "Intermediate"
-        case .contest: return "Advanced"
-        case .ragChew: return "Expert"
+        case .firstContact: return String(localized: "qso.difficulty.beginner")
+        case .signalReport: return String(localized: "qso.difficulty.intermediate")
+        case .contest: return String(localized: "qso.difficulty.advanced")
+        case .ragChew: return String(localized: "qso.difficulty.expert")
         }
     }
 }
@@ -61,15 +61,15 @@ enum QSOPhase: String, Codable, Equatable {
 
     var userAction: String {
         switch self {
-        case .idle: return "Start by sending CQ"
-        case .callingCQ: return "Send CQ CQ CQ DE [your call] K"
-        case .awaitingResponse: return "Wait for station to call..."
-        case .receivedCall: return "Acknowledge the calling station"
-        case .sendingExchange: return "Send your exchange"
-        case .awaitingExchange: return "Wait for their exchange..."
-        case .exchangeReceived: return "Copy their exchange and respond"
-        case .signing: return "Send 73 or SK to end"
-        case .completed: return "QSO complete!"
+        case .idle: return String(localized: "qso.phase.idle.action")
+        case .callingCQ: return String(localized: "qso.phase.callingCQ.action")
+        case .awaitingResponse: return String(localized: "qso.phase.awaitingResponse.action")
+        case .receivedCall: return String(localized: "qso.phase.receivedCall.action")
+        case .sendingExchange: return String(localized: "qso.phase.sendingExchange.action")
+        case .awaitingExchange: return String(localized: "qso.phase.awaitingExchange.action")
+        case .exchangeReceived: return String(localized: "qso.phase.exchangeReceived.action")
+        case .signing: return String(localized: "qso.phase.signing.action")
+        case .completed: return String(localized: "qso.phase.completed.action")
         }
     }
 }
