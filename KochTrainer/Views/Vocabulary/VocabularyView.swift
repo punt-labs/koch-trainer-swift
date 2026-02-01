@@ -17,23 +17,22 @@ struct VocabularyView: View {
 
             // Built-in vocabulary sets
             VStack(spacing: Theme.Spacing.md) {
-                vocabularySetRow(
+                vocabularySetRow(VocabularyRowConfig(
                     name: "Common Words",
                     description: "CQ, DE, K, AR, SK, 73, QTH, QSL...",
-                    descriptionAccessibilityLabel: nil,
                     set: VocabularySet.commonWords,
                     receiveId: AccessibilityID.Vocab.commonWordsReceiveButton,
                     sendId: AccessibilityID.Vocab.commonWordsSendButton
-                )
+                ))
 
-                vocabularySetRow(
+                vocabularySetRow(VocabularyRowConfig(
                     name: "Callsign Patterns",
                     description: "W1AW, K0ABC, VE3XYZ...",
                     descriptionAccessibilityLabel: "W 1 A W, K 0 A B C, V E 3 X Y Z, and more",
                     set: VocabularySet.callsignPatterns,
                     receiveId: AccessibilityID.Vocab.callsignReceiveButton,
                     sendId: AccessibilityID.Vocab.callsignSendButton
-                )
+                ))
             }
 
             // QSO Simulation (advanced)
@@ -76,6 +75,15 @@ struct VocabularyView: View {
     }
 
     // MARK: Private
+
+    private struct VocabularyRowConfig {
+        let name: LocalizedStringKey
+        let description: String
+        var descriptionAccessibilityLabel: String?
+        let set: VocabularySet
+        let receiveId: String
+        let sendId: String
+    }
 
     @EnvironmentObject private var progressStore: ProgressStore
     @EnvironmentObject private var settingsStore: SettingsStore
@@ -121,29 +129,22 @@ struct VocabularyView: View {
         .cornerRadius(12)
     }
 
-    private func vocabularySetRow(
-        name: LocalizedStringKey,
-        description: String,
-        descriptionAccessibilityLabel: String?,
-        set: VocabularySet,
-        receiveId: String,
-        sendId: String
-    ) -> some View {
+    private func vocabularySetRow(_ config: VocabularyRowConfig) -> some View {
         VStack(spacing: Theme.Spacing.sm) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(name)
+                    Text(config.name)
                         .font(Typography.headline)
-                    Text(verbatim: description)
+                    Text(verbatim: config.description)
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel(descriptionAccessibilityLabel ?? description)
+                        .accessibilityLabel(config.descriptionAccessibilityLabel ?? config.description)
                 }
                 Spacer()
             }
 
             HStack(spacing: Theme.Spacing.md) {
-                NavigationLink(destination: VocabularyTrainingView(vocabularySet: set, sessionType: .receive)) {
+                NavigationLink(destination: VocabularyTrainingView(vocabularySet: config.set, sessionType: .receive)) {
                     HStack {
                         Image(systemName: "ear")
                         Text("Receive")
@@ -151,9 +152,9 @@ struct VocabularyView: View {
                 }
                 .buttonStyle(SecondaryButtonStyle())
                 .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(receiveId)
+                .accessibilityIdentifier(config.receiveId)
 
-                NavigationLink(destination: VocabularyTrainingView(vocabularySet: set, sessionType: .send)) {
+                NavigationLink(destination: VocabularyTrainingView(vocabularySet: config.set, sessionType: .send)) {
                     HStack {
                         Image(systemName: "hand.tap")
                         Text("Send")
@@ -161,7 +162,7 @@ struct VocabularyView: View {
                 }
                 .buttonStyle(SecondaryButtonStyle())
                 .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(sendId)
+                .accessibilityIdentifier(config.sendId)
             }
         }
         .padding(Theme.Spacing.md)

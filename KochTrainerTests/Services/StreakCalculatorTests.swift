@@ -1,6 +1,7 @@
 @testable import KochTrainer
 import XCTest
 
+// swiftlint:disable:next type_body_length
 final class StreakCalculatorTests: XCTestCase {
 
     // MARK: - First Session Tests
