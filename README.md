@@ -77,6 +77,19 @@ Practice realistic ham radio QSO exchanges by keying Morse code.
 - Smart practice scheduling based on your accuracy
 - Practice due indicators show when each skill needs attention
 
+### Language Support
+
+Fully localized in 6 languages:
+
+- English (US)
+- English (UK)
+- German (Deutsch)
+- French (Français)
+- Spanish (Español)
+- Italian (Italiano)
+
+The app automatically uses your device language. All UI text, notifications, and pluralization rules are translated.
+
 ## Why This App?
 
 The iOS App Store has several excellent Morse code apps. Here's how Koch Trainer fits in:
