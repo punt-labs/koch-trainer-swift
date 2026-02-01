@@ -152,7 +152,7 @@ This app implements Koch's method for both receiving (copying) and sending (keyi
 
 ## Requirements
 
-- iOS 16.0 or later
+- iOS 17.0 or later
 - iPhone or iPad
 
 ## Building from Source
