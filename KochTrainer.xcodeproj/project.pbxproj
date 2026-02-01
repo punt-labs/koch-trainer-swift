@@ -125,6 +125,7 @@
 		CD0CAA1E13951AA0FCE43096 /* KochTrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9E80F76DFEAE1D76AC2CD3 /* KochTrainerTests.swift */; };
 		CD78C4B876DF6324DBF213C8 /* SessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0704EA92EDE1A23D0CA675E /* SessionHistoryView.swift */; };
 		CED1F9D76F94A0B3C0CE588C /* VocabPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D48BC92CC28DBDBD6767E37 /* VocabPage.swift */; };
+		CF41AE7DECBB5FA561C6BF3B /* AccessibleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D42DB36713227E436170112 /* AccessibleForm.swift */; };
 		D1CA6B2042C6208C564A0C6D /* QSOState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E2F2CE2BA8A0424645A8DE /* QSOState.swift */; };
 		D5B67DD234228989994B3BBD /* BandConditionsProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4992367A37B216CCDDCDBC /* BandConditionsProcessor.swift */; };
 		D6ED51A820293916C2EBB9B2 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F755CF48DC3CF38BEA8528EC /* SettingsStore.swift */; };
@@ -243,6 +244,7 @@
 		7BC14AF6458B728B1D6F1580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7BFDF29DF9BF6B67A2F93594 /* WordStatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordStatTests.swift; sourceTree = "<group>"; };
 		7D3E8352ACEF05CA829D06E6 /* SendTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTrainingViewModel.swift; sourceTree = "<group>"; };
+		7D42DB36713227E436170112 /* AccessibleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibleForm.swift; sourceTree = "<group>"; };
 		7EC1AC68E549024CDF0FD258 /* Radio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Radio.swift; sourceTree = "<group>"; };
 		80D2E568FF5F2FAD1C09B897 /* RadioModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioModeTests.swift; sourceTree = "<group>"; };
 		83D11D6C4D9790BEDD6F49A2 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
@@ -552,6 +554,7 @@
 		7CD2A5207FAFC2082E5B97BC /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				7D42DB36713227E436170112 /* AccessibleForm.swift */,
 				DFBFBABD9BA016A17C22D856 /* AcknowledgmentsView.swift */,
 				2F7261D01A93BDA6B9BDA46A /* LicenseView.swift */,
 				F0704EA92EDE1A23D0CA675E /* SessionHistoryView.swift */,
@@ -852,6 +855,7 @@
 			files = (
 				B3F8C98C2B7A8FD724F1E07A /* AccessibilityAnnouncer.swift in Sources */,
 				776164BB8259871C9A5CD840 /* AccessibilityID.swift in Sources */,
+				CF41AE7DECBB5FA561C6BF3B /* AccessibleForm.swift in Sources */,
 				AEFD53BA2197ECDE605F0F60 /* AcknowledgmentsView.swift in Sources */,
 				B9E21B960E5BE46794F9C698 /* AppSettings.swift in Sources */,
 				3F34775E3AC9381208998175 /* AudioEngineFactory.swift in Sources */,
@@ -1055,7 +1059,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer.uitests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = KochTrainer;
@@ -1074,7 +1078,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1135,7 +1139,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 0.9.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -1159,7 +1163,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KochTrainer.app/KochTrainer";
@@ -1178,7 +1182,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1194,7 +1198,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer.uitests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = KochTrainer;
@@ -1211,7 +1215,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kochtrainer.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.puntlabs.kochtrainer.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KochTrainer.app/KochTrainer";
@@ -1267,7 +1271,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 0.9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
