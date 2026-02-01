@@ -10,7 +10,7 @@ DESTINATION = platform=iOS Simulator,name=$(SIM_NAME)
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
 
-.PHONY: help generate build test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
+.PHONY: help generate build test ui-test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
 help:
 	@echo "Available commands:"
@@ -20,7 +20,8 @@ help:
 	@echo "    make format      - Run SwiftFormat to auto-format code"
 	@echo "    make lint        - Run SwiftLint on source files"
 	@echo "    make build       - Build the app (runs format + lint first)"
-	@echo "    make test        - Run all tests"
+	@echo "    make test        - Run unit tests"
+	@echo "    make ui-test     - Run UI tests"
 	@echo "    make coverage    - Run tests with code coverage report"
 	@echo "    make clean       - Clean build artifacts"
 	@echo "    make run         - Build and run in simulator"
@@ -81,11 +82,21 @@ build: generate format lint ensure-sim
 		-quiet
 
 test: generate ensure-sim
-	@echo "Running tests on $(SIM_NAME)..."
+	@echo "Running unit tests on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
 		-derivedDataPath $(DERIVED_DATA) \
+		-only-testing:KochTrainerTests \
+		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
+
+ui-test: generate ensure-sim
+	@echo "Running UI tests on $(SIM_NAME)..."
+	@xcodebuild test \
+		-scheme $(SCHEME) \
+		-destination '$(DESTINATION)' \
+		-derivedDataPath $(DERIVED_DATA) \
+		-only-testing:KochTrainerUITests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
 clean:
@@ -104,11 +115,12 @@ run: build
 	xcrun simctl launch booted com.kochtrainer.app
 
 coverage: generate ensure-sim
-	@echo "Running tests with coverage on $(SIM_NAME)..."
+	@echo "Running unit tests with coverage on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination '$(DESTINATION)' \
 		-derivedDataPath $(DERIVED_DATA) \
+		-only-testing:KochTrainerTests \
 		-enableCodeCoverage YES \
 		-resultBundlePath ./build/TestResults.xcresult \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
