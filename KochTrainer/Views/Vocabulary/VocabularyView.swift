@@ -122,7 +122,7 @@ struct VocabularyView: View {
     }
 
     private func vocabularySetRow(
-        name: String,
+        name: LocalizedStringKey,
         description: String,
         descriptionAccessibilityLabel: String?,
         set: VocabularySet,
@@ -134,7 +134,7 @@ struct VocabularyView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(Typography.headline)
-                    Text(description)
+                    Text(verbatim: description)
                         .font(Typography.caption)
                         .foregroundColor(.secondary)
                         .accessibilityLabel(descriptionAccessibilityLabel ?? description)

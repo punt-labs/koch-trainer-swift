@@ -1,0 +1,23 @@
+/*
+  Localizable.strings
+  KochTrainer
+
+  English (UK) - Spelling overrides for British English
+  Only include strings that differ from US English
+*/
+
+// MARK: - Tab Bar
+// Note: "Practice" as a tab name is a noun, so it stays the same in UK English
+
+// MARK: - Notifications
+// UK English uses "practise" for the verb
+"notification.practiceDue.title" = "Time to Practise";
+"notification.practiceDue.body.receive" = "Your receive training session is ready.";
+"notification.practiceDue.body.send" = "Your send training session is ready.";
+
+// MARK: - Session History
+// UK spelling for "practise" when used as verb
+"Next practice dates have been recalculated from your valid session history." = "Next practise dates have been recalculated from your valid session history.";
+
+// Note: Most strings are identical to US English.
+// UK English locale inherits from base English and only overrides specific spellings.

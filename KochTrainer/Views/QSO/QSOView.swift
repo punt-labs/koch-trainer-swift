@@ -11,15 +11,15 @@ enum QSOStartMode: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .callCQ: return "Call CQ"
-        case .answerCQ: return "Answer CQ"
+        case .callCQ: return String(localized: "qso.startMode.callCQ")
+        case .answerCQ: return String(localized: "qso.startMode.answerCQ")
         }
     }
 
     var description: String {
         switch self {
-        case .callCQ: return "You call CQ and wait for a response"
-        case .answerCQ: return "Listen for CQ and respond to it"
+        case .callCQ: return String(localized: "qso.startMode.callCQ.description")
+        case .answerCQ: return String(localized: "qso.startMode.answerCQ.description")
         }
     }
 

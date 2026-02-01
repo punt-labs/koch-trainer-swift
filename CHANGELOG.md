@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Internationalization (i18n)**: Full localization infrastructure with support for 6 languages
+  - English (US) - base language
+  - English (UK) - spelling variants (practise vs practice)
+  - German (de)
+  - French (fr)
+  - Spanish (es)
+  - Italian (it)
+- Pluralization support via stringsdict for proper singular/plural handling
+- Locale-aware number formatting for decimal values
+
 ## [0.9.0] - 2026-01-24
 
 ### Added

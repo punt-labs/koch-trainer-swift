@@ -28,55 +28,55 @@ struct WhatsNewView: View {
                     FeatureRow(
                         icon: "ear",
                         title: "Ear Training",
-                        description: "Learn patterns by length, starting with shortest"
+                        description: "whatsnew.ear.description"
                     )
 
                     FeatureRow(
                         icon: "waveform",
                         title: "Receive Training",
-                        description: "Listen to Morse code and identify characters"
+                        description: "whatsnew.receive.description"
                     )
 
                     FeatureRow(
                         icon: "hand.tap",
                         title: "Send Training",
-                        description: "Key dit/dah patterns using paddles or keyboard"
+                        description: "whatsnew.send.description"
                     )
 
                     FeatureRow(
                         icon: "character.textbox",
                         title: "Koch Method",
-                        description: "Progressive learning with 26 characters"
+                        description: "whatsnew.koch.description"
                     )
 
                     FeatureRow(
                         icon: "text.word.spacing",
                         title: "Vocabulary Practice",
-                        description: "Common words, Q-codes, and abbreviations"
+                        description: "whatsnew.vocab.description"
                     )
 
                     FeatureRow(
                         icon: "antenna.radiowaves.left.and.right",
                         title: "QSO Simulation",
-                        description: "Practice realistic ham radio conversations"
+                        description: "whatsnew.qso.description"
                     )
 
                     FeatureRow(
                         icon: "waveform",
                         title: "Band Conditions",
-                        description: "QRN, QSB, and QRM audio simulation"
+                        description: "whatsnew.band.description"
                     )
 
                     FeatureRow(
                         icon: "flame",
                         title: "Streak Tracking",
-                        description: "Daily practice streaks and reminders"
+                        description: "whatsnew.streak.description"
                     )
 
                     FeatureRow(
                         icon: "circle.dotted",
                         title: "Proficiency Indicators",
-                        description: "Per-character accuracy visualization"
+                        description: "whatsnew.proficiency.description"
                     )
                 }
 
@@ -111,8 +111,8 @@ struct WhatsNewView: View {
 
 private struct FeatureRow: View {
     let icon: String
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Spacing.md) {

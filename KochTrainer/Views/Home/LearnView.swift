@@ -69,7 +69,7 @@ struct LearnView: View {
                         .font(Typography.headline)
                         .accessibilityLabel("Receive Training")
                     Spacer()
-                    Text("Level \(progressStore.progress.receiveLevel)/26")
+                    Text("Level \(progressStore.progress.receiveLevel)/\(26)")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
                         .accessibilityLabel(
@@ -115,7 +115,7 @@ struct LearnView: View {
                         .font(Typography.headline)
                         .accessibilityLabel("Send Training")
                     Spacer()
-                    Text("Level \(progressStore.progress.sendLevel)/26")
+                    Text("Level \(progressStore.progress.sendLevel)/\(26)")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
                         .accessibilityLabel(

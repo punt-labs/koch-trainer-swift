@@ -27,14 +27,14 @@ enum SessionType: String, Codable {
 
     var displayName: String {
         switch self {
-        case .receive: return "Receive"
-        case .send: return "Send"
-        case .receiveCustom: return "Custom Receive"
-        case .sendCustom: return "Custom Send"
-        case .receiveVocabulary: return "Vocabulary Receive"
-        case .sendVocabulary: return "Vocabulary Send"
-        case .qso: return "QSO"
-        case .earTraining: return "Ear Training"
+        case .receive: return String(localized: "session.type.receive")
+        case .send: return String(localized: "session.type.send")
+        case .receiveCustom: return String(localized: "session.type.receiveCustom")
+        case .sendCustom: return String(localized: "session.type.sendCustom")
+        case .receiveVocabulary: return String(localized: "session.type.receiveVocabulary")
+        case .sendVocabulary: return String(localized: "session.type.sendVocabulary")
+        case .qso: return String(localized: "session.type.qso")
+        case .earTraining: return String(localized: "session.type.earTraining")
         }
     }
 

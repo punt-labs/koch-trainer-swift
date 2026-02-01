@@ -28,7 +28,7 @@ struct VocabularySet: Codable, Equatable, Identifiable {
 extension VocabularySet {
     /// Common QSO words and prosigns used in amateur radio
     static let commonWords = VocabularySet(
-        name: "Common Words",
+        name: String(localized: "Common Words"),
         words: [
             "CQ", // Calling any station
             "DE", // From (this is)
@@ -76,7 +76,7 @@ extension VocabularySet {
 
     /// Sample callsign patterns for practice
     static let callsignPatterns = VocabularySet(
-        name: "Callsign Patterns",
+        name: String(localized: "Callsign Patterns"),
         words: [
             // US callsigns
             "W1AW", // ARRL headquarters
