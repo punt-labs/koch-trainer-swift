@@ -40,41 +40,24 @@ struct VocabularyTrainingView: View {
 
     var body: some View {
         ZStack {
-            // Hidden text field for keyboard capture
-            if case .training = viewModel.phase {
-                if viewModel.isReceiveMode {
-                    // Receive mode: auto-submit when input length matches expected word
-                    TextField("", text: $textInput)
-                        .focused($isKeyboardFocused)
-                        .opacity(0)
-                        .frame(width: 0, height: 0)
-                        .accessibilityHidden(true)
-                        .onChange(of: textInput) { _, newValue in
-                            if !viewModel.currentWord.isEmpty,
-                               newValue.count >= viewModel.currentWord.count {
-                                viewModel.submitAnswer(newValue)
-                                textInput = ""
-                            }
-                        }
-                        .onSubmit {
-                            viewModel.submitAnswer(textInput)
-                            textInput = ""
-                        }
-                } else {
-                    // Send mode: capture keystrokes for dit/dah
-                    TextField("", text: Binding(
-                        get: { "" },
-                        set: { newValue in
-                            if let char = newValue.last {
-                                viewModel.handleKeyPress(char)
-                            }
-                        }
-                    ))
+            // Hidden text field for keyboard capture (receive mode only — needs software keyboard)
+            if case .training = viewModel.phase, viewModel.isReceiveMode {
+                TextField("", text: $textInput)
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
                     .accessibilityHidden(true)
-                }
+                    .onChange(of: textInput) { _, newValue in
+                        if !viewModel.currentWord.isEmpty,
+                           newValue.count >= viewModel.currentWord.count {
+                            viewModel.submitAnswer(newValue)
+                            textInput = ""
+                        }
+                    }
+                    .onSubmit {
+                        viewModel.submitAnswer(textInput)
+                        textInput = ""
+                    }
             }
 
             // Main content based on phase
@@ -96,6 +79,17 @@ struct VocabularyTrainingView: View {
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isTrainingActive)
+        .focusable(!viewModel.isReceiveMode)
+        .focused($isSendKeyboardFocused)
+        .onKeyPress { press in
+            guard !viewModel.isReceiveMode,
+                  case .training = viewModel.phase,
+                  let char = press.characters.first else {
+                return .ignored
+            }
+            viewModel.handleKeyPress(char)
+            return .handled
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.view)
         .onAppear {
@@ -120,7 +114,11 @@ struct VocabularyTrainingView: View {
             } else {
                 viewModel.startSession()
             }
-            isKeyboardFocused = true
+            if viewModel.isReceiveMode {
+                isKeyboardFocused = true
+            } else {
+                isSendKeyboardFocused = true
+            }
         }
         .onDisappear {
             viewModel.cleanup()
@@ -131,7 +129,10 @@ struct VocabularyTrainingView: View {
             }
         }
         .onTapGesture {
-            isKeyboardFocused = true
+            // Re-focus keyboard for receive mode (software keyboard)
+            if viewModel.isReceiveMode {
+                isKeyboardFocused = true
+            }
         }
     }
 
@@ -144,6 +145,7 @@ struct VocabularyTrainingView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @FocusState private var isKeyboardFocused: Bool
+    @FocusState private var isSendKeyboardFocused: Bool
     @State private var textInput: String = ""
 
 }

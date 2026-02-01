@@ -26,21 +26,6 @@ struct EarTrainingView: View {
 
     var body: some View {
         ZStack {
-            // Hidden text field for keyboard capture (only active during training)
-            if case .training = viewModel.phase {
-                TextField("", text: $hiddenInput)
-                    .focused($isKeyboardFocused)
-                    .opacity(0)
-                    .frame(width: 0, height: 0)
-                    .accessibilityHidden(true)
-                    .onChange(of: hiddenInput) { _, newValue in
-                        if let lastChar = newValue.last {
-                            viewModel.handleKeyPress(lastChar)
-                        }
-                        hiddenInput = ""
-                    }
-            }
-
             // Main content based on phase
             switch viewModel.phase {
             case .introduction:
@@ -48,12 +33,6 @@ struct EarTrainingView: View {
 
             case .training:
                 EarTrainingPhaseView(viewModel: viewModel)
-                    .onAppear {
-                        isKeyboardFocused = true
-                    }
-                    .onTapGesture {
-                        isKeyboardFocused = true
-                    }
 
             case .paused:
                 EarPausedView(viewModel: viewModel)
@@ -66,6 +45,16 @@ struct EarTrainingView: View {
                     dismiss: dismiss
                 )
             }
+        }
+        .focusable()
+        .focused($isKeyboardFocused)
+        .onKeyPress { press in
+            guard case .training = viewModel.phase,
+                  let char = press.characters.first else {
+                return .ignored
+            }
+            viewModel.handleKeyPress(char)
+            return .handled
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -91,6 +80,7 @@ struct EarTrainingView: View {
             } else {
                 viewModel.startSession()
             }
+            isKeyboardFocused = true
         }
         .onDisappear {
             viewModel.cleanup()
@@ -111,7 +101,6 @@ struct EarTrainingView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @FocusState private var isKeyboardFocused: Bool
-    @State private var hiddenInput: String = ""
 
 }
 

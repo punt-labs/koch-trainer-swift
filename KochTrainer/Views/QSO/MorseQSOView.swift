@@ -22,21 +22,6 @@ struct MorseQSOView: View {
 
     var body: some View {
         ZStack {
-            // Hidden text field for keyboard capture (only during user turn)
-            if viewModel.turnState == .userKeying {
-                TextField("", text: $hiddenInput)
-                    .focused($isKeyboardFocused)
-                    .opacity(0)
-                    .frame(width: 0, height: 0)
-                    .accessibilityHidden(true)
-                    .onChange(of: hiddenInput) { _, newValue in
-                        if let lastChar = newValue.last {
-                            viewModel.handleKeyPress(lastChar)
-                        }
-                        hiddenInput = ""
-                    }
-            }
-
             // Main content
             if viewModel.isCompleted {
                 MorseQSOCompletedView(result: viewModel.getResult()) {
@@ -44,10 +29,17 @@ struct MorseQSOView: View {
                 }
             } else {
                 MorseQSOSessionView(viewModel: viewModel)
-                    .onTapGesture {
-                        isKeyboardFocused = true
-                    }
             }
+        }
+        .focusable()
+        .focused($isKeyboardFocused)
+        .onKeyPress { press in
+            guard viewModel.turnState == .userKeying,
+                  let char = press.characters.first else {
+                return .ignored
+            }
+            viewModel.handleKeyPress(char)
+            return .handled
         }
         .navigationTitle("\(viewModel.style.displayName) QSO")
         .navigationBarTitleDisplayMode(.inline)
@@ -79,7 +71,6 @@ struct MorseQSOView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isKeyboardFocused: Bool
-    @State private var hiddenInput: String = ""
 
 }
 
