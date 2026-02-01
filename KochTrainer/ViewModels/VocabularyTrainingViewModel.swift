@@ -346,22 +346,28 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     private func resetInputTimer() {
+        // Start at full, animate to zero via SwiftUI animation
         inputTimeRemaining = inputTimeout
 
         inputTimer?.invalidate()
-        inputTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+        // Single-fire timer for timeout detection only
+        inputTimer = Timer.scheduledTimer(withTimeInterval: inputTimeout, repeats: false) { [weak self] _ in
             Task { @MainActor in
-                self?.tickInput()
+                self?.handleInputTimeout()
             }
+        }
+
+        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            inputTimeRemaining = 0
         }
     }
 
-    private func tickInput() {
-        inputTimeRemaining -= 0.05
-        if inputTimeRemaining <= 0 {
-            inputTimer?.invalidate()
-            advanceToNextCharacter()
-        }
+    private func handleInputTimeout() {
+        guard isWaitingForResponse else { return }
+        inputTimer?.invalidate()
+        advanceToNextCharacter()
     }
 }
 
@@ -402,22 +408,28 @@ extension VocabularyTrainingViewModel {
 
     func startResponseTimer() {
         isWaitingForResponse = true
+        // Start at full, animate to zero via SwiftUI animation
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
-        responseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tickResponse() }
+        // Single-fire timer for timeout detection only
+        responseTimer = Timer.scheduledTimer(withTimeInterval: responseTimeout, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.handleResponseTimeout() }
+        }
+
+        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            responseTimeRemaining = 0
         }
     }
 
-    private func tickResponse() {
-        responseTimeRemaining -= 0.05
-        if responseTimeRemaining <= 0 {
-            responseTimer?.invalidate()
-            isWaitingForResponse = false
-            recordResponse(expected: currentWord, wasCorrect: false, userAnswer: "")
-            showFeedbackAndContinue(wasCorrect: false, expected: currentWord, userAnswer: "(timeout)")
-        }
+    private func handleResponseTimeout() {
+        guard isWaitingForResponse else { return }
+        responseTimer?.invalidate()
+        isWaitingForResponse = false
+        recordResponse(expected: currentWord, wasCorrect: false, userAnswer: "")
+        showFeedbackAndContinue(wasCorrect: false, expected: currentWord, userAnswer: "(timeout)")
     }
 
     func recordResponse(expected: String, wasCorrect: Bool, userAnswer: String) {

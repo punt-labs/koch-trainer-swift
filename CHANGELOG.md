@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Input lag during training**: Timer-driven countdown animation was updating 20×/second on main thread, competing with user input. Now uses SwiftUI's declarative animation (runs on render thread) with single-fire timeout timer.
+
 ## [1.0.0] - 2026-02-01
 
 ### Added
