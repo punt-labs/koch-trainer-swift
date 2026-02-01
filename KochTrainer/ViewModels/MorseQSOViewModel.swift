@@ -38,7 +38,7 @@ final class MorseQSOViewModel: ObservableObject {
     @Published private(set) var aiMessage: String = ""
     @Published private(set) var revealedText: String = ""
     @Published private(set) var isPlayingAudio: Bool = false
-    @Published var isAITextVisible: Bool = true
+    @Published var isAITextVisible: Bool = false
 
     // User turn state
     @Published private(set) var currentScript: String = ""

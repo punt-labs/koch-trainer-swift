@@ -129,7 +129,7 @@ struct VocabularyTrainingView: View {
             }
         }
         .onTapGesture {
-            // Re-focus keyboard for receive mode (software keyboard)
+            // Refocus keyboard for receive mode (software keyboard)
             if viewModel.isReceiveMode {
                 isKeyboardFocused = true
             }
