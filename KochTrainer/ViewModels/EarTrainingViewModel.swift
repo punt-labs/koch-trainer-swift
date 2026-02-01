@@ -130,6 +130,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     func startIntroduction() {
+        audioEngine.startSession()
+
         guard !introCharacters.isEmpty else {
             startTraining()
             return

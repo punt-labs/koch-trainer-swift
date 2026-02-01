@@ -118,6 +118,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         // Clear any existing paused session since we're starting fresh
         progressStore?.clearPausedSession(for: sessionType)
 
+        audioEngine.startSession()
         sessionStartTime = Date()
         isPlaying = true
         phase = .training
