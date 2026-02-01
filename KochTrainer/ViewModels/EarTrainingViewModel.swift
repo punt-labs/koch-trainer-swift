@@ -393,7 +393,7 @@ extension EarTrainingViewModel {
 
         // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             inputTimeRemaining = 0
         }
     }
