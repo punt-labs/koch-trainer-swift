@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-02-01
+
 ### Fixed
 - Band conditions (noise, fading, interference) now play continuously throughout training sessions instead of resetting between characters
 
