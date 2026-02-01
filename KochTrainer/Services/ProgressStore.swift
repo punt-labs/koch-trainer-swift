@@ -227,7 +227,7 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
                 pausedSendSession = session
             }
         } catch {
-            print("Failed to encode paused session: \(error)")
+            logger.error("Failed to encode paused session: \(error.localizedDescription)")
         }
     }
 
@@ -334,7 +334,7 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         do {
             return try JSONDecoder().decode(PausedSession.self, from: data)
         } catch {
-            print("Failed to decode paused session: \(error)")
+            logger.error("Failed to decode paused session: \(error.localizedDescription)")
             return nil
         }
     }

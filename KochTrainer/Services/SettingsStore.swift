@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Manages persistence of application settings to UserDefaults.
 @MainActor
@@ -24,6 +25,7 @@ final class SettingsStore: ObservableObject {
 
     private let key = "appSettings"
     private let defaults: UserDefaults
+    private let logger = Logger(subsystem: "com.kochtrainer", category: "SettingsStore")
 
     private func load() -> AppSettings {
         guard let data = defaults.data(forKey: key) else {
@@ -32,7 +34,7 @@ final class SettingsStore: ObservableObject {
         do {
             return try JSONDecoder().decode(AppSettings.self, from: data)
         } catch {
-            print("Failed to decode settings: \(error)")
+            logger.error("Failed to decode settings: \(error.localizedDescription)")
             return AppSettings()
         }
     }
@@ -42,7 +44,7 @@ final class SettingsStore: ObservableObject {
             let data = try JSONEncoder().encode(settings)
             defaults.set(data, forKey: key)
         } catch {
-            print("Failed to encode settings: \(error)")
+            logger.error("Failed to encode settings: \(error.localizedDescription)")
         }
     }
 }

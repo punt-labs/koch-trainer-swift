@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Band conditions (noise, fading, interference) now play continuously throughout training sessions instead of resetting between characters
+
+### Changed
+- Replaced inconsistent `print()` statements with `os.Logger` for consistent logging behavior
+
 ## [1.0.0] - 2026-02-01
 
 ### Added
