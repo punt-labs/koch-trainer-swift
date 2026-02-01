@@ -14,10 +14,10 @@ struct KochTrainerApp: App {
                 .task {
                     await notificationManager.refreshAuthorizationStatus()
                 }
-                .onChange(of: progressStore.progress.schedule) { newSchedule in
+                .onChange(of: progressStore.progress.schedule) { _, newSchedule in
                     rescheduleNotifications(schedule: newSchedule)
                 }
-                .onChange(of: settingsStore.settings.notificationSettings) { _ in
+                .onChange(of: settingsStore.settings.notificationSettings) { _, _ in
                     rescheduleNotifications(schedule: progressStore.progress.schedule)
                 }
         }

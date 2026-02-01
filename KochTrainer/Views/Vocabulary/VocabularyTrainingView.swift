@@ -1,5 +1,12 @@
 import SwiftUI
 
+// MARK: - Accessibility Helper
+
+/// Spells out a word character by character for VoiceOver (e.g., "W1AW" → "W 1 A W")
+private func spellOutWord(_ word: String) -> String {
+    word.map { String($0) }.joined(separator: " ")
+}
+
 // MARK: - VocabularyTrainingView
 
 struct VocabularyTrainingView: View {
@@ -41,7 +48,8 @@ struct VocabularyTrainingView: View {
                         .focused($isKeyboardFocused)
                         .opacity(0)
                         .frame(width: 0, height: 0)
-                        .onChange(of: textInput) { newValue in
+                        .accessibilityHidden(true)
+                        .onChange(of: textInput) { _, newValue in
                             if !viewModel.currentWord.isEmpty,
                                newValue.count >= viewModel.currentWord.count {
                                 viewModel.submitAnswer(newValue)
@@ -65,6 +73,7 @@ struct VocabularyTrainingView: View {
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
                 }
             }
 
@@ -116,7 +125,7 @@ struct VocabularyTrainingView: View {
         .onDisappear {
             viewModel.cleanup()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background, case .training = viewModel.phase {
                 viewModel.pause()
             }
@@ -142,6 +151,9 @@ struct VocabularyTrainingView: View {
 // MARK: - ReceiveVocabTrainingPhaseView
 
 private struct ReceiveVocabTrainingPhaseView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: VocabularyTrainingViewModel
     @Binding var textInput: String
 
@@ -162,7 +174,7 @@ private struct ReceiveVocabTrainingPhaseView: View {
                 } else if viewModel.isWaitingForResponse {
                     VStack(spacing: Theme.Spacing.md) {
                         Text("?")
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: questionMarkSize))
                             .foregroundColor(Theme.Colors.primary)
 
                         Text("Type what you heard")
@@ -172,7 +184,7 @@ private struct ReceiveVocabTrainingPhaseView: View {
                         // Show current input
                         if !textInput.isEmpty {
                             Text(textInput.uppercased())
-                                .font(.system(size: 36, weight: .medium, design: .monospaced))
+                                .font(Typography.patternDisplay(size: inputSize))
                                 .foregroundColor(.secondary)
                                 .accessibilityIdentifier(AccessibilityID.VocabTraining.userInputDisplay)
                         }
@@ -218,9 +230,13 @@ private struct ReceiveVocabTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                    .accessibilityLabel(
+                        "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                    )
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)
@@ -236,11 +252,20 @@ private struct ReceiveVocabTrainingPhaseView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.receivePhaseView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var questionMarkSize: CGFloat = 80
+    @ScaledMetric(relativeTo: .title) private var inputSize: CGFloat = 36
+
 }
 
 // MARK: - SendVocabTrainingPhaseView
 
 private struct SendVocabTrainingPhaseView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: VocabularyTrainingViewModel
 
     var body: some View {
@@ -260,8 +285,9 @@ private struct SendVocabTrainingPhaseView: View {
                 } else {
                     // Target word to send
                     Text(viewModel.currentWord)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(Typography.characterDisplay(size: wordSize))
                         .foregroundColor(Theme.Colors.primary)
+                        .accessibilityLabel(spellOutWord(viewModel.currentWord))
                         .accessibilityIdentifier(AccessibilityID.VocabTraining.targetWord)
 
                     // Current progress through the word
@@ -271,7 +297,7 @@ private struct SendVocabTrainingPhaseView: View {
                         Text(viewModel.currentPattern.isEmpty ? "_" : viewModel.currentPattern)
                             .foregroundColor(.secondary)
                     }
-                    .font(.system(size: 24, weight: .medium, design: .monospaced))
+                    .font(Typography.patternDisplay(size: patternSize))
                     .frame(height: 32)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.patternProgress)
                 }
@@ -305,6 +331,7 @@ private struct SendVocabTrainingPhaseView: View {
                         .background(Theme.Colors.primary.opacity(0.8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint("Short Morse element")
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.ditButton)
 
                 Button {
@@ -317,6 +344,7 @@ private struct SendVocabTrainingPhaseView: View {
                         .background(Theme.Colors.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint("Long Morse element")
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.dahButton)
             }
             .frame(height: 120)
@@ -326,9 +354,13 @@ private struct SendVocabTrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                    .accessibilityLabel(
+                        "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                    )
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.scoreText)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.accuracyText)
             }
             .font(Typography.body)
@@ -344,6 +376,12 @@ private struct SendVocabTrainingPhaseView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.sendPhaseView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var wordSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 24
+
 }
 
 // MARK: - VocabPausedView
@@ -446,13 +484,17 @@ private struct VocabCompletedView: View {
 // MARK: - VocabFeedbackView
 
 private struct VocabFeedbackView: View {
+
+    // MARK: Internal
+
     let feedback: VocabularyTrainingViewModel.Feedback
 
     var body: some View {
         VStack(spacing: Theme.Spacing.md) {
             Text(feedback.expectedWord)
-                .font(.system(size: 48, weight: .bold, design: .rounded))
+                .font(Typography.characterDisplay(size: wordSize))
                 .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
+                .accessibilityLabel(spellOutWord(feedback.expectedWord))
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackWord)
 
             if feedback.wasCorrect {
@@ -466,6 +508,7 @@ private struct VocabFeedbackView: View {
                         Text("You entered: \(feedback.userAnswer)")
                             .font(Typography.body)
                             .foregroundColor(Theme.Colors.error)
+                            .accessibilityLabel("You entered: \(spellOutWord(feedback.userAnswer))")
                     } else {
                         Text("Too slow!")
                             .font(Typography.headline)
@@ -478,6 +521,11 @@ private struct VocabFeedbackView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var wordSize: CGFloat = 48
+
 }
 
 #Preview {

@@ -41,7 +41,8 @@ struct ReceiveTrainingView: View {
                     .focused($isKeyboardFocused)
                     .opacity(0)
                     .frame(width: 0, height: 0)
-                    .onChange(of: hiddenInput) { newValue in
+                    .accessibilityHidden(true)
+                    .onChange(of: hiddenInput) { _, newValue in
                         if let lastChar = newValue.last {
                             viewModel.handleKeyPress(lastChar)
                         }
@@ -117,7 +118,7 @@ struct ReceiveTrainingView: View {
         .onDisappear {
             viewModel.cleanup()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background, case .training = viewModel.phase {
                 viewModel.pause()
             }
@@ -140,6 +141,9 @@ struct ReceiveTrainingView: View {
 // MARK: - TrainingPhaseView
 
 struct TrainingPhaseView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: ReceiveTrainingViewModel
 
     var body: some View {
@@ -158,11 +162,11 @@ struct TrainingPhaseView: View {
                 Group {
                     if let feedback = viewModel.lastFeedback {
                         Text(String(feedback.expectedCharacter))
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: characterSize))
                             .foregroundColor(feedback.wasCorrect ? Theme.Colors.success : Theme.Colors.error)
                     } else if viewModel.isWaitingForResponse {
                         Text("?")
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: characterSize))
                             .foregroundColor(Theme.Colors.primary)
                     } else if viewModel.currentCharacter != nil {
                         Image(systemName: "speaker.wave.2.fill")
@@ -170,7 +174,7 @@ struct TrainingPhaseView: View {
                             .foregroundColor(Theme.Colors.primary)
                     } else {
                         Text(" ")
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: characterSize))
                     }
                 }
                 .frame(height: 100)
@@ -212,9 +216,13 @@ struct TrainingPhaseView: View {
             // Score display
             HStack {
                 Text("Correct: \(viewModel.counter.correct)/\(viewModel.counter.attempts)")
+                    .accessibilityLabel(
+                        "\(viewModel.counter.correct) correct out of \(viewModel.counter.attempts) attempts"
+                    )
                     .accessibilityIdentifier(AccessibilityID.Training.scoreDisplay)
                 Spacer()
                 Text("Accuracy: \(viewModel.accuracyPercentage)%")
+                    .accessibilityLabel("\(viewModel.accuracyPercentage) percent accuracy")
                     .accessibilityIdentifier(AccessibilityID.Training.accuracyDisplay)
             }
             .font(Typography.body)
@@ -230,6 +238,11 @@ struct TrainingPhaseView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.trainingView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 80
+
 }
 
 // MARK: - PausedView
@@ -279,6 +292,9 @@ struct PausedView: View {
 // MARK: - CompletedView
 
 struct CompletedView: View {
+
+    // MARK: Internal
+
     @ObservedObject var viewModel: ReceiveTrainingViewModel
 
     let didAdvance: Bool
@@ -303,13 +319,16 @@ struct CompletedView: View {
                             .foregroundColor(.secondary)
 
                         Text(String(char))
-                            .font(.system(size: 80, weight: .bold, design: .rounded))
+                            .font(Typography.characterDisplay(size: newCharacterSize))
                             .foregroundColor(Theme.Colors.primary)
                             .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
 
                         Text(MorseCode.pattern(for: char) ?? "")
                             .font(.system(size: 24, weight: .medium, design: .monospaced))
                             .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? "")
+                            )
                     }
                 }
             } else {
@@ -368,6 +387,11 @@ struct CompletedView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
+
+    // MARK: Private
+
+    @ScaledMetric(relativeTo: .largeTitle) private var newCharacterSize: CGFloat = 80
+
 }
 
 // MARK: - ReceiveFeedbackMessageView

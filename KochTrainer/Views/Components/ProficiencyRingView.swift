@@ -23,6 +23,7 @@ struct ProficiencyRing: View {
                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
             )
             .rotationEffect(.degrees(-90))
+            .accessibilityHidden(true) // Decorative; proficiency announced via parent label
     }
 
     // MARK: Private
