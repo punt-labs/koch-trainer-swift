@@ -208,9 +208,13 @@ private struct ReceiveVocabTrainingPhaseView: View {
                 }
 
                 if viewModel.isWaitingForResponse {
-                    TimeoutProgressBar(progress: viewModel.responseProgress)
-                        .frame(height: 8)
-                        .padding(.horizontal, Theme.Spacing.xl)
+                    // Animation runs on render thread, not main thread
+                    TimeoutProgressBar(
+                        progress: viewModel.responseProgress,
+                        animationDuration: viewModel.responseTimeout
+                    )
+                    .frame(height: 8)
+                    .padding(.horizontal, Theme.Spacing.xl)
                 }
             }
             .frame(height: 250)
@@ -305,10 +309,14 @@ private struct SendVocabTrainingPhaseView: View {
                 }
 
                 // Input timeout progress bar
-                if viewModel.inputTimeRemaining > 0 {
-                    TimeoutProgressBar(progress: viewModel.inputProgress)
-                        .frame(height: 8)
-                        .padding(.horizontal, Theme.Spacing.xl)
+                // Animation runs on render thread, not main thread
+                if viewModel.isWaitingForResponse {
+                    TimeoutProgressBar(
+                        progress: viewModel.inputProgress,
+                        animationDuration: viewModel.inputTimeout
+                    )
+                    .frame(height: 8)
+                    .padding(.horizontal, Theme.Spacing.xl)
                 }
             }
             .frame(height: 200)

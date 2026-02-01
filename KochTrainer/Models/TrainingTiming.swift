@@ -19,6 +19,10 @@ enum TrainingTiming {
     /// Delay between groups in receive training (0.5s)
     static let interGroupDelay: UInt64 = 500_000_000
 
+    /// Delay before triggering progress bar animation (10ms).
+    /// Allows SwiftUI to observe the initial value before animating to zero.
+    static let animationStartDelay: UInt64 = 10_000_000
+
     // MARK: - Response Timeouts (seconds)
 
     /// Timeout for single keystroke input (Receive training: user types one letter)
