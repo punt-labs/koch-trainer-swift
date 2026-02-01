@@ -436,7 +436,7 @@ extension ReceiveTrainingViewModel {
 
     func startResponseTimer() {
         isWaitingForResponse = true
-        // Start at full, animate to zero via SwiftUI animation
+        // Start at full (no animation for initial set)
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
@@ -445,10 +445,12 @@ extension ReceiveTrainingViewModel {
             Task { @MainActor in self?.handleTimeout() }
         }
 
-        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        // Animate countdown from full to zero
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
-            responseTimeRemaining = 0
+            withAnimation(.linear(duration: responseTimeout)) {
+                responseTimeRemaining = 0
+            }
         }
     }
 
