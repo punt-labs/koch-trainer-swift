@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Countdown timer animation**: Timer started at 20% and behaved erratically due to both 0→100% and 100%→0% transitions being animated. Now uses explicit `withAnimation()` only for the countdown, ensuring the timer starts at 100% and smoothly decreases to 0%.
+
 ## [1.0.1] - 2026-02-01
 
 ### Fixed

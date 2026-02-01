@@ -422,7 +422,7 @@ extension SendTrainingViewModel {
     }
 
     func resetInputTimer() {
-        // Start at full, animate to zero via SwiftUI animation
+        // Start at full (no animation for initial set)
         inputTimeRemaining = currentInputTimeout
 
         inputTimer?.invalidate()
@@ -431,10 +431,13 @@ extension SendTrainingViewModel {
             Task { @MainActor in self?.handleInputTimeout() }
         }
 
-        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        // Animate countdown from full to zero
+        let duration = currentInputTimeout
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
-            inputTimeRemaining = 0
+            withAnimation(.linear(duration: duration)) {
+                inputTimeRemaining = 0
+            }
         }
     }
 

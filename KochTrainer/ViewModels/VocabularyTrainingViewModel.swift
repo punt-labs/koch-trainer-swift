@@ -347,7 +347,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     private func resetInputTimer() {
-        // Start at full, animate to zero via SwiftUI animation
+        // Start at full (no animation for initial set)
         inputTimeRemaining = inputTimeout
 
         inputTimer?.invalidate()
@@ -358,10 +358,12 @@ final class VocabularyTrainingViewModel: ObservableObject {
             }
         }
 
-        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        // Animate countdown from full to zero
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
-            inputTimeRemaining = 0
+            withAnimation(.linear(duration: inputTimeout)) {
+                inputTimeRemaining = 0
+            }
         }
     }
 
@@ -409,7 +411,7 @@ extension VocabularyTrainingViewModel {
 
     func startResponseTimer() {
         isWaitingForResponse = true
-        // Start at full, animate to zero via SwiftUI animation
+        // Start at full (no animation for initial set)
         responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
@@ -418,10 +420,12 @@ extension VocabularyTrainingViewModel {
             Task { @MainActor in self?.handleResponseTimeout() }
         }
 
-        // Trigger animation by setting to zero after a brief delay to let SwiftUI see the initial value
+        // Animate countdown from full to zero
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
-            responseTimeRemaining = 0
+            withAnimation(.linear(duration: responseTimeout)) {
+                responseTimeRemaining = 0
+            }
         }
     }
 

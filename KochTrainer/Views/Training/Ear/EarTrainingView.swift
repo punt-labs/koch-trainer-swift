@@ -155,15 +155,12 @@ struct EarTrainingPhaseView: View {
                         .accessibilityIdentifier(AccessibilityID.Send.patternDisplay)
 
                     // Progress bar (always present, opacity controlled)
-                    // Animation runs on render thread, not main thread
-                    TimeoutProgressBar(
-                        progress: viewModel.inputProgress,
-                        animationDuration: viewModel.currentInputTimeout
-                    )
-                    .frame(height: 8)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                    .opacity(viewModel.isWaitingForInput ? 1 : 0)
-                    .accessibilityIdentifier(AccessibilityID.Training.progressBar)
+                    // Animation controlled by ViewModel via withAnimation()
+                    TimeoutProgressBar(progress: viewModel.inputProgress)
+                        .frame(height: 8)
+                        .padding(.horizontal, Theme.Spacing.xl)
+                        .opacity(viewModel.isWaitingForInput ? 1 : 0)
+                        .accessibilityIdentifier(AccessibilityID.Training.progressBar)
                 }
                 .frame(height: 200)
 
