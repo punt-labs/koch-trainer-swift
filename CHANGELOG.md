@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Progress bar overshoot**: Animation state from previous character bled into next character's countdown, causing progress bar to display >100%. Now explicitly cancels any in-progress animation before starting new countdown.
+
 ## [1.0.1] - 2026-02-01
 
 ### Fixed
