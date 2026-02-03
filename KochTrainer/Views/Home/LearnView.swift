@@ -5,158 +5,156 @@ struct LearnView: View {
     // MARK: Internal
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            Text("Koch Trainer")
-                .font(Typography.largeTitle)
-                .accessibilityIdentifier(AccessibilityID.Learn.title)
+        ScrollView {
+            VStack(spacing: Theme.Spacing.lg) {
+                Text("Koch Trainer")
+                    .font(Typography.largeTitle)
+                    .accessibilityIdentifier(AccessibilityID.Learn.title)
 
-            // Streak card (only shown if streak > 0)
-            if schedule.currentStreak > 0 {
-                streakCard
-            }
-
-            Spacer()
-
-            // Receive training section
-            VStack(spacing: Theme.Spacing.sm) {
-                HStack {
-                    Text("Receive")
-                        .font(Typography.headline)
-                        .accessibilityLabel("Receive Training")
-                    Spacer()
-                    Text("Level \(progressStore.progress.receiveLevel)/\(26)")
-                        .font(Typography.body)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Receive level \(progressStore.progress.receiveLevel) of 26"
-                        )
-                        .accessibilityIdentifier(AccessibilityID.Learn.receiveLevel)
+                // Streak card (only shown if streak > 0)
+                if schedule.currentStreak > 0 {
+                    streakCard
                 }
 
-                NavigationLink(destination: ReceiveTrainingView()) {
+                // Receive training section
+                VStack(spacing: Theme.Spacing.sm) {
                     HStack {
-                        Image(systemName: "waveform")
-                        Text("Start Receive Training")
+                        Text("Receive")
+                            .font(Typography.headline)
+                            .accessibilityLabel("Receive Training")
+                        Spacer()
+                        Text("Level \(progressStore.progress.receiveLevel)/\(26)")
+                            .font(Typography.body)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Receive level \(progressStore.progress.receiveLevel) of 26"
+                            )
+                            .accessibilityIdentifier(AccessibilityID.Learn.receiveLevel)
+                    }
+
+                    NavigationLink(destination: ReceiveTrainingView()) {
+                        HStack {
+                            Image(systemName: "waveform")
+                            Text("Start Receive Training")
+                        }
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier(AccessibilityID.Learn.receiveTrainingButton)
+
+                    HStack {
+                        let receiveChars = progressStore.progress.unlockedCharacters(for: .receive)
+                        Text("Characters: \(receiveChars.map { String($0) }.joined())")
+                            .font(Typography.caption)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Unlocked characters: \(receiveChars.map { String($0) }.joined(separator: ", "))"
+                            )
+
+                        Spacer()
+
+                        practiceDueIndicator(for: .receive)
                     }
                 }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(AccessibilityID.Learn.receiveTrainingButton)
+                .padding(Theme.Spacing.md)
+                .background(Theme.Colors.secondaryBackground)
+                .cornerRadius(12)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier(AccessibilityID.Learn.receiveSection)
 
-                HStack {
-                    let receiveChars = progressStore.progress.unlockedCharacters(for: .receive)
-                    Text("Characters: \(receiveChars.map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Unlocked characters: \(receiveChars.map { String($0) }.joined(separator: ", "))"
-                        )
-
-                    Spacer()
-
-                    practiceDueIndicator(for: .receive)
-                }
-            }
-            .padding(Theme.Spacing.md)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(12)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier(AccessibilityID.Learn.receiveSection)
-
-            // Send training section
-            VStack(spacing: Theme.Spacing.sm) {
-                HStack {
-                    Text("Send")
-                        .font(Typography.headline)
-                        .accessibilityLabel("Send Training")
-                    Spacer()
-                    Text("Level \(progressStore.progress.sendLevel)/\(26)")
-                        .font(Typography.body)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Send level \(progressStore.progress.sendLevel) of 26"
-                        )
-                        .accessibilityIdentifier(AccessibilityID.Learn.sendLevel)
-                }
-
-                NavigationLink(destination: SendTrainingView()) {
+                // Send training section
+                VStack(spacing: Theme.Spacing.sm) {
                     HStack {
-                        Image(systemName: "hand.tap")
-                        Text("Start Send Training")
+                        Text("Send")
+                            .font(Typography.headline)
+                            .accessibilityLabel("Send Training")
+                        Spacer()
+                        Text("Level \(progressStore.progress.sendLevel)/\(26)")
+                            .font(Typography.body)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Send level \(progressStore.progress.sendLevel) of 26"
+                            )
+                            .accessibilityIdentifier(AccessibilityID.Learn.sendLevel)
+                    }
+
+                    NavigationLink(destination: SendTrainingView()) {
+                        HStack {
+                            Image(systemName: "hand.tap")
+                            Text("Start Send Training")
+                        }
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier(AccessibilityID.Learn.sendTrainingButton)
+
+                    HStack {
+                        let sendChars = progressStore.progress.unlockedCharacters(for: .send)
+                        Text("Characters: \(sendChars.map { String($0) }.joined())")
+                            .font(Typography.caption)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Unlocked characters: \(sendChars.map { String($0) }.joined(separator: ", "))"
+                            )
+
+                        Spacer()
+
+                        practiceDueIndicator(for: .send)
                     }
                 }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(AccessibilityID.Learn.sendTrainingButton)
+                .padding(Theme.Spacing.md)
+                .background(Theme.Colors.secondaryBackground)
+                .cornerRadius(12)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier(AccessibilityID.Learn.sendSection)
 
-                HStack {
-                    let sendChars = progressStore.progress.unlockedCharacters(for: .send)
-                    Text("Characters: \(sendChars.map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Unlocked characters: \(sendChars.map { String($0) }.joined(separator: ", "))"
-                        )
-
-                    Spacer()
-
-                    practiceDueIndicator(for: .send)
-                }
-            }
-            .padding(Theme.Spacing.md)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(12)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier(AccessibilityID.Learn.sendSection)
-
-            // Ear training section (supplementary activity for dit/dah recognition)
-            VStack(spacing: Theme.Spacing.sm) {
-                HStack {
-                    Text("Ear Training")
-                        .font(Typography.headline)
-                    Spacer()
-                    Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
-                        .font(Typography.body)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Ear training level \(progressStore.progress.earTrainingLevel) of \(MorseCode.maxEarTrainingLevel)"
-                        )
-                        .accessibilityIdentifier(AccessibilityID.Learn.earTrainingLevel)
-                }
-
-                NavigationLink(destination: EarTrainingView()) {
+                // Ear training section (supplementary activity for dit/dah recognition)
+                VStack(spacing: Theme.Spacing.sm) {
                     HStack {
-                        Image(systemName: "ear")
-                        Text("Start Ear Training")
+                        Text("Ear Training")
+                            .font(Typography.headline)
+                        Spacer()
+                        Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
+                            .font(Typography.body)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Ear training level \(progressStore.progress.earTrainingLevel) of \(MorseCode.maxEarTrainingLevel)"
+                            )
+                            .accessibilityIdentifier(AccessibilityID.Learn.earTrainingLevel)
+                    }
+
+                    NavigationLink(destination: EarTrainingView()) {
+                        HStack {
+                            Image(systemName: "ear")
+                            Text("Start Ear Training")
+                        }
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
+
+                    HStack {
+                        let chars = MorseCode.charactersByPatternLength(
+                            upToLevel: progressStore.progress.earTrainingLevel
+                        )
+                        Text("Characters: \(chars.map { String($0) }.joined())")
+                            .font(Typography.caption)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel(
+                                "Learning patterns for: \(chars.map { String($0) }.joined(separator: ", "))"
+                            )
+
+                        Spacer()
                     }
                 }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
-
-                HStack {
-                    let chars = MorseCode.charactersByPatternLength(
-                        upToLevel: progressStore.progress.earTrainingLevel
-                    )
-                    Text("Characters: \(chars.map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Learning patterns for: \(chars.map { String($0) }.joined(separator: ", "))"
-                        )
-
-                    Spacer()
-                }
+                .padding(Theme.Spacing.md)
+                .background(Theme.Colors.secondaryBackground)
+                .cornerRadius(12)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier(AccessibilityID.Learn.earTrainingSection)
             }
-            .padding(Theme.Spacing.md)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(12)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier(AccessibilityID.Learn.earTrainingSection)
-
-            Spacer()
+            .padding(Theme.Spacing.lg)
         }
-        .padding(Theme.Spacing.lg)
         .navigationTitle("Learn")
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityElement(children: .contain)
