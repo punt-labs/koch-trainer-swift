@@ -209,7 +209,9 @@ private struct ReceiveVocabTrainingPhaseView: View {
 
                 if viewModel.isWaitingForResponse {
                     // Animation controlled by ViewModel via withAnimation()
+                    // .id() forces view recreation when timer resets, destroying in-flight animation
                     TimeoutProgressBar(progress: viewModel.responseProgress)
+                        .id(viewModel.timerCycleId)
                         .frame(height: 8)
                         .padding(.horizontal, Theme.Spacing.xl)
                 }
@@ -307,8 +309,10 @@ private struct SendVocabTrainingPhaseView: View {
 
                 // Input timeout progress bar
                 // Animation controlled by ViewModel via withAnimation()
+                // .id() forces view recreation when timer resets, destroying in-flight animation
                 if viewModel.isWaitingForResponse {
                     TimeoutProgressBar(progress: viewModel.inputProgress)
+                        .id(viewModel.timerCycleId)
                         .frame(height: 8)
                         .padding(.horizontal, Theme.Spacing.xl)
                 }

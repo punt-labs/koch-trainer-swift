@@ -168,10 +168,13 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
     // MARK: - Response Timer Tests
 
     func testStartResponseTimerSetsWaiting() {
+        let initialCycleId = viewModel.timerCycleId
         viewModel.startResponseTimer()
 
         XCTAssertTrue(viewModel.isWaitingForResponse)
-        XCTAssertEqual(viewModel.responseTimeRemaining, viewModel.responseTimeout)
+        XCTAssertEqual(viewModel.timerCycleId, initialCycleId + 1)
+        // responseTimeRemaining animation starts asynchronously via Task
+        // so we don't assert on its value here
     }
 
     // MARK: - Session Timer Tests

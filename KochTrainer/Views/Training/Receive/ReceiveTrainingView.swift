@@ -203,7 +203,9 @@ struct TrainingPhaseView: View {
 
                 // Slot 3: Progress bar (always present, opacity controlled)
                 // Animation controlled by ViewModel via withAnimation()
+                // .id() forces view recreation when timer resets, destroying in-flight animation
                 TimeoutProgressBar(progress: viewModel.responseProgress)
+                    .id(viewModel.timerCycleId)
                     .frame(height: 8)
                     .padding(.horizontal, Theme.Spacing.xl)
                     .padding(.top, Theme.Spacing.md)

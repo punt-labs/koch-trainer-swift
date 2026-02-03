@@ -339,10 +339,19 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
     func testResponseProgress() {
         viewModel.startSession()
-        viewModel.startResponseTimer()
 
-        // Initial progress should be close to 1.0
-        XCTAssertGreaterThan(viewModel.responseProgress, 0.9)
+        // Test computed property directly (like ReceiveTrainingViewModelTests)
+        // responseProgress = responseTimeRemaining / responseTimeout
+        let timeout = viewModel.responseTimeout
+
+        viewModel.responseTimeRemaining = timeout
+        XCTAssertEqual(viewModel.responseProgress, 1.0, accuracy: 0.001)
+
+        viewModel.responseTimeRemaining = timeout / 2
+        XCTAssertEqual(viewModel.responseProgress, 0.5, accuracy: 0.001)
+
+        viewModel.responseTimeRemaining = 0
+        XCTAssertEqual(viewModel.responseProgress, 0, accuracy: 0.001)
     }
 
     // MARK: - Send Mode Tests
