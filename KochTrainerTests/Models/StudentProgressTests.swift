@@ -578,14 +578,15 @@ final class CharacterStatTests: XCTestCase {
         XCTAssertEqual(stat.sendAccuracy, 0.6, accuracy: 0.001)
     }
 
-    func testCombinedAccuracy() {
+    func testKochAccuracy() {
         let stat = CharacterStat(
             receiveAttempts: 10, receiveCorrect: 9,
-            sendAttempts: 10, sendCorrect: 7
+            sendAttempts: 10, sendCorrect: 7,
+            earTrainingAttempts: 5, earTrainingCorrect: 5
         )
 
-        // (9 + 7) / (10 + 10) = 16/20 = 0.8
-        XCTAssertEqual(stat.combinedAccuracy, 0.8, accuracy: 0.001)
+        // Koch accuracy excludes ear training: (9 + 7) / (10 + 10) = 16/20 = 0.8
+        XCTAssertEqual(stat.kochAccuracy, 0.8, accuracy: 0.001)
     }
 
     func testAccuracyForSessionType() {

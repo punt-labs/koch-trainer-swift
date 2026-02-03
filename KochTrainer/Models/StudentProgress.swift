@@ -242,9 +242,13 @@ struct CharacterStat: Codable, Equatable {
         return Double(earTrainingCorrect) / Double(earTrainingAttempts)
     }
 
-    var combinedAccuracy: Double {
-        guard totalAttempts > 0 else { return 0 }
-        return Double(totalCorrect) / Double(totalAttempts)
+    /// Koch method accuracy (receive + send only, excludes ear training)
+    /// Used for proficiency indicators on the Practice screen.
+    var kochAccuracy: Double {
+        let kochAttempts = receiveAttempts + sendAttempts
+        let kochCorrect = receiveCorrect + sendCorrect
+        guard kochAttempts > 0 else { return 0 }
+        return Double(kochCorrect) / Double(kochAttempts)
     }
 
     /// Get accuracy for a specific session type

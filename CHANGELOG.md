@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Proficiency rings**: Ear training stats incorrectly contributed to character proficiency display. Proficiency now reflects only receive + send (Koch method skills), not ear training.
+
+### Changed
+- **Learn screen**: Moved Ear Training below Receive and Send to reflect its role as a supplementary activity for dit/dah recognition, not a primary learning activity.
+
 ## [1.0.1] - 2026-02-01
 
 ### Fixed

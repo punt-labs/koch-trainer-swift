@@ -132,18 +132,23 @@ Consecutive calendar days with at least one completed session:
 
 ### Character Statistics
 
-Per-character accuracy tracked across all session types:
+Per-character accuracy tracked separately by training direction:
 
 ```swift
 struct CharacterStat: Codable {
+    var receiveAttempts: Int
     var receiveCorrect: Int
-    var receiveTotal: Int
+    var sendAttempts: Int
     var sendCorrect: Int
-    var sendTotal: Int
+    var earTrainingAttempts: Int
+    var earTrainingCorrect: Int
 
-    var combinedAccuracy: Double  // Used for proficiency indicators
+    var kochAccuracy: Double  // Receive + send only, used for proficiency indicators
 }
 ```
+
+Note: Ear training stats are tracked separately and do not contribute to proficiency indicators,
+as ear training focuses on dit/dah pattern recognition rather than character identification.
 
 ### Audio Engine
 
