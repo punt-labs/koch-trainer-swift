@@ -49,6 +49,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var responseTimeRemaining: TimeInterval = 0
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForResponse: Bool = false
+    @Published var timerCycleId: Int = 0
 
     // MARK: - Configuration
 
@@ -435,14 +436,11 @@ extension ReceiveTrainingViewModel {
     }
 
     func startResponseTimer() {
-        isWaitingForResponse = true
+        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
+        timerCycleId += 1
 
-        // Cancel any in-progress animation and reset to full
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            responseTimeRemaining = responseTimeout
-        }
+        isWaitingForResponse = true
+        responseTimeRemaining = responseTimeout
 
         responseTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -450,9 +448,9 @@ extension ReceiveTrainingViewModel {
             Task { @MainActor in self?.handleTimeout() }
         }
 
-        // Animate countdown from full to zero
+        // Yield to event loop so SwiftUI creates new view seeing responseTimeRemaining = full
+        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             withAnimation(.linear(duration: responseTimeout)) {
                 responseTimeRemaining = 0
             }

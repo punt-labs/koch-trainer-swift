@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Proficiency rings**: Ear training stats incorrectly contributed to character proficiency display. Proficiency now reflects only receive + send (Koch method skills), not ear training.
 - **`make run`**: Fixed incorrect bundle ID (`com.kochtrainer.app` → `com.puntlabs.kochtrainer`) and added explicit simulator UDID targeting to avoid ambiguity with multiple booted simulators.
+- **Progress bar overflow (>100%)**: When answering correctly mid-countdown, in-flight render-thread animation interfered with new timer value. Now uses `.id()` modifier to destroy old view (and its animation) before creating fresh view for new countdown.
 
 ### Changed
 - **Learn screen**: Moved Ear Training below Receive and Send to reflect its role as a supplementary activity for dit/dah recognition, not a primary learning activity.

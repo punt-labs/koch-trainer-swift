@@ -45,6 +45,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForInput: Bool = true
     @Published var inputTimeRemaining: TimeInterval = 0
+    @Published var timerCycleId: Int = 0
 
     let proficiencyThreshold: Double = 0.90
 
@@ -422,12 +423,10 @@ extension SendTrainingViewModel {
     }
 
     func resetInputTimer() {
-        // Cancel any in-progress animation and reset to full
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            inputTimeRemaining = currentInputTimeout
-        }
+        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
+        timerCycleId += 1
+
+        inputTimeRemaining = currentInputTimeout
 
         inputTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -435,10 +434,10 @@ extension SendTrainingViewModel {
             Task { @MainActor in self?.handleInputTimeout() }
         }
 
-        // Animate countdown from full to zero
+        // Yield to event loop so SwiftUI creates new view seeing inputTimeRemaining = full
+        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
         let duration = currentInputTimeout
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             withAnimation(.linear(duration: duration)) {
                 inputTimeRemaining = 0
             }
