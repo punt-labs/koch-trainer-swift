@@ -7,26 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- **Proficiency rings**: Ear training stats incorrectly contributed to character proficiency display. Proficiency now reflects only receive + send (Koch method skills), not ear training.
-- **`make run`**: Fixed incorrect bundle ID (`com.kochtrainer.app` → `com.puntlabs.kochtrainer`) and added explicit simulator UDID targeting to avoid ambiguity with multiple booted simulators.
-- **Small screen scrolling**: Learn, Practice, Vocabulary, and Results screens now scroll on smaller devices like iPhone 13 mini where content may exceed screen height.
-- **Progress bar overflow (>100%)**: When answering correctly mid-countdown, in-flight render-thread animation interfered with new timer value. Now uses `.id()` modifier to destroy old view (and its animation) before creating fresh view for new countdown.
-- **No audio after pause/resume**: Audio session was not properly ended on pause, causing `startSession()` on resume to no-op. Now calls `endSession()` in pause and `startSession()` in resume per Z spec.
-
-### Changed
-- **Learn screen**: Moved Ear Training below Receive and Send to reflect its role as a supplementary activity for dit/dah recognition, not a primary learning activity.
-
-## [1.0.1] - 2026-02-01
+## [1.0.1] - 2026-02-03
 
 ### Fixed
 - Band conditions (noise, fading, interference) now play continuously throughout training sessions instead of resetting between characters
 - **Input lag during training**: Timer-driven countdown animation was updating 20×/second on main thread, competing with user input. Now uses SwiftUI's declarative animation (runs on render thread) with single-fire timeout timer.
 - **Countdown timer animation**: Timer started at 20% and behaved erratically due to both 0→100% and 100%→0% transitions being animated. Now uses explicit `withAnimation()` only for the countdown, ensuring the timer starts at 100% and smoothly decreases to 0%.
-- **Progress bar overshoot**: Animation state from previous character bled into next character's countdown, causing progress bar to display >100%. Now explicitly cancels any in-progress animation before starting new countdown.
+- **Progress bar overflow (>100%)**: Animation from previous character bled into next countdown. Now uses `.id()` modifier to destroy old view (and its animation) before creating fresh view for each new countdown.
+- **No audio after pause/resume**: Audio session was not properly ended on pause, causing `startSession()` on resume to no-op. Now calls `endSession()` in pause and `startSession()` in resume per Z spec.
+- **Proficiency rings**: Ear training stats incorrectly contributed to character proficiency display. Proficiency now reflects only receive + send (Koch method skills), not ear training.
+- **`make run`**: Fixed incorrect bundle ID (`com.kochtrainer.app` → `com.puntlabs.kochtrainer`) and added explicit simulator UDID targeting to avoid ambiguity with multiple booted simulators.
+- **Small screen scrolling**: Learn, Practice, Vocabulary, and Results screens now scroll on smaller devices like iPhone 13 mini where content may exceed screen height.
 
 ### Changed
 - Replaced inconsistent `print()` statements with `os.Logger` for consistent logging behavior
+- **Learn screen**: Moved Ear Training below Receive and Send to reflect its role as a supplementary activity for dit/dah recognition, not a primary learning activity.
 
 ## [1.0.0] - 2026-02-01
 
@@ -117,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI pipeline
 
 
+[1.0.1]: https://github.com/punt-labs/koch-trainer-swift/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...v0.9.0
 [0.7.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0
