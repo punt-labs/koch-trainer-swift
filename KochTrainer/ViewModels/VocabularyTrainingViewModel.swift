@@ -347,8 +347,12 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     private func resetInputTimer() {
-        // Start at full (no animation for initial set)
-        inputTimeRemaining = inputTimeout
+        // Cancel any in-progress animation and reset to full
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            inputTimeRemaining = inputTimeout
+        }
 
         inputTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -411,8 +415,13 @@ extension VocabularyTrainingViewModel {
 
     func startResponseTimer() {
         isWaitingForResponse = true
-        // Start at full (no animation for initial set)
-        responseTimeRemaining = responseTimeout
+
+        // Cancel any in-progress animation and reset to full
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            responseTimeRemaining = responseTimeout
+        }
 
         responseTimer?.invalidate()
         // Single-fire timer for timeout detection only

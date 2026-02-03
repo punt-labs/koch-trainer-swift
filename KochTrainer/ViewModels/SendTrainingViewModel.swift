@@ -422,8 +422,12 @@ extension SendTrainingViewModel {
     }
 
     func resetInputTimer() {
-        // Start at full (no animation for initial set)
-        inputTimeRemaining = currentInputTimeout
+        // Cancel any in-progress animation and reset to full
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            inputTimeRemaining = currentInputTimeout
+        }
 
         inputTimer?.invalidate()
         // Single-fire timer for timeout detection only
