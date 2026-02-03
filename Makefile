@@ -106,13 +106,14 @@ clean:
 	@echo "Clean complete."
 
 run: build
-	@echo "Launching simulator $(SIM_NAME)..."
-	xcrun simctl boot "$(SIM_NAME)" 2>/dev/null || true
-	open -a Simulator
-	@echo "Installing app..."
-	xcrun simctl install booted $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app
-	@echo "Launching app..."
-	xcrun simctl launch booted com.kochtrainer.app
+	@SIM_UDID=$$(xcrun simctl list devices | grep "$(SIM_NAME)" | head -1 | sed 's/.*(\([A-F0-9-]*\)).*/\1/'); \
+	echo "Launching simulator $(SIM_NAME) ($$SIM_UDID)..."; \
+	xcrun simctl boot "$$SIM_UDID" 2>/dev/null || true; \
+	open -a Simulator; \
+	echo "Installing app..."; \
+	xcrun simctl install "$$SIM_UDID" $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app; \
+	echo "Launching app..."; \
+	xcrun simctl launch "$$SIM_UDID" com.puntlabs.kochtrainer
 
 coverage: generate ensure-sim
 	@echo "Running unit tests with coverage on $(SIM_NAME)..."
