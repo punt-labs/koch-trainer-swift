@@ -7,15 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- **Progress bar overshoot**: Animation state from previous character bled into next character's countdown, causing progress bar to display >100%. Now explicitly cancels any in-progress animation before starting new countdown.
-
 ## [1.0.1] - 2026-02-01
 
 ### Fixed
 - Band conditions (noise, fading, interference) now play continuously throughout training sessions instead of resetting between characters
 - **Input lag during training**: Timer-driven countdown animation was updating 20×/second on main thread, competing with user input. Now uses SwiftUI's declarative animation (runs on render thread) with single-fire timeout timer.
 - **Countdown timer animation**: Timer started at 20% and behaved erratically due to both 0→100% and 100%→0% transitions being animated. Now uses explicit `withAnimation()` only for the countdown, ensuring the timer starts at 100% and smoothly decreases to 0%.
+- **Progress bar overshoot**: Animation state from previous character bled into next character's countdown, causing progress bar to display >100%. Now explicitly cancels any in-progress animation before starting new countdown.
 
 ### Changed
 - Replaced inconsistent `print()` statements with `os.Logger` for consistent logging behavior
