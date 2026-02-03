@@ -17,51 +17,6 @@ struct LearnView: View {
 
             Spacer()
 
-            // Ear training section
-            VStack(spacing: Theme.Spacing.sm) {
-                HStack {
-                    Text("Ear Training")
-                        .font(Typography.headline)
-                    Spacer()
-                    Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
-                        .font(Typography.body)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Ear training level \(progressStore.progress.earTrainingLevel) of \(MorseCode.maxEarTrainingLevel)"
-                        )
-                        .accessibilityIdentifier(AccessibilityID.Learn.earTrainingLevel)
-                }
-
-                NavigationLink(destination: EarTrainingView()) {
-                    HStack {
-                        Image(systemName: "ear")
-                        Text("Start Ear Training")
-                    }
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
-
-                HStack {
-                    let chars = MorseCode.charactersByPatternLength(
-                        upToLevel: progressStore.progress.earTrainingLevel
-                    )
-                    Text("Characters: \(chars.map { String($0) }.joined())")
-                        .font(Typography.caption)
-                        .foregroundColor(.secondary)
-                        .accessibilityLabel(
-                            "Learning patterns for: \(chars.map { String($0) }.joined(separator: ", "))"
-                        )
-
-                    Spacer()
-                }
-            }
-            .padding(Theme.Spacing.md)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(12)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier(AccessibilityID.Learn.earTrainingSection)
-
             // Receive training section
             VStack(spacing: Theme.Spacing.sm) {
                 HStack {
@@ -153,6 +108,51 @@ struct LearnView: View {
             .cornerRadius(12)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.Learn.sendSection)
+
+            // Ear training section (supplementary activity for dit/dah recognition)
+            VStack(spacing: Theme.Spacing.sm) {
+                HStack {
+                    Text("Ear Training")
+                        .font(Typography.headline)
+                    Spacer()
+                    Text("Level \(progressStore.progress.earTrainingLevel)/\(MorseCode.maxEarTrainingLevel)")
+                        .font(Typography.body)
+                        .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Ear training level \(progressStore.progress.earTrainingLevel) of \(MorseCode.maxEarTrainingLevel)"
+                        )
+                        .accessibilityIdentifier(AccessibilityID.Learn.earTrainingLevel)
+                }
+
+                NavigationLink(destination: EarTrainingView()) {
+                    HStack {
+                        Image(systemName: "ear")
+                        Text("Start Ear Training")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier(AccessibilityID.Learn.earTrainingButton)
+
+                HStack {
+                    let chars = MorseCode.charactersByPatternLength(
+                        upToLevel: progressStore.progress.earTrainingLevel
+                    )
+                    Text("Characters: \(chars.map { String($0) }.joined())")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                        .accessibilityLabel(
+                            "Learning patterns for: \(chars.map { String($0) }.joined(separator: ", "))"
+                        )
+
+                    Spacer()
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Colors.secondaryBackground)
+            .cornerRadius(12)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.Learn.earTrainingSection)
 
             Spacer()
         }

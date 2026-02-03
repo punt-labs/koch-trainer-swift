@@ -77,9 +77,10 @@ private struct CharacterCell: View {
                 }
 
                 // Progress ring overlays the edge (inset by half line width so outer edge aligns)
-                if hasPracticeData {
+                // Uses Koch accuracy (receive + send only, excludes ear training)
+                if hasKochPracticeData {
                     ProficiencyRing(
-                        proficiency: stat?.combinedAccuracy ?? 0,
+                        proficiency: stat?.kochAccuracy ?? 0,
                         lineWidth: 4
                     )
                     .padding(2)
@@ -100,14 +101,15 @@ private struct CharacterCell: View {
         MorseCode.pattern(for: character) ?? ""
     }
 
-    private var hasPracticeData: Bool {
+    /// Whether the character has Koch method practice data (receive or send, not ear training)
+    private var hasKochPracticeData: Bool {
         guard let stat else { return false }
-        return stat.totalAttempts > 0
+        return (stat.receiveAttempts + stat.sendAttempts) > 0
     }
 
     private var accessibilityLabel: String {
         var label = "\(character)"
-        if hasPracticeData, let accuracy = stat?.combinedAccuracy {
+        if hasKochPracticeData, let accuracy = stat?.kochAccuracy {
             let percentage = Int(accuracy * 100)
             label += ", \(percentage)% proficiency"
         } else {
