@@ -187,7 +187,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         responseTimer?.invalidate()
         audioEngine.stop()
-        try? audioEngine.stopRadio()
+        audioEngine.endSession()
         isWaitingForResponse = false
         announcer.announcePaused()
 
@@ -261,8 +261,8 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .training
         isPlaying = true
         announcer.announceResumed()
-        try? audioEngine.stopRadio()
-        try? audioEngine.startReceiving()
+        // Restart audio session (endSession() was called in pause())
+        audioEngine.startSession()
         startSessionTimer()
         playNextGroup()
     }
