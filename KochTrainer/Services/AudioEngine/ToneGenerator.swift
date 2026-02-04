@@ -164,6 +164,30 @@ final class ToneGenerator: @unchecked Sendable {
         toneActiveLock.unlock()
     }
 
+    /// Play a tone element with serialized access (for continuous mode).
+    /// Queues on a serial queue to prevent concurrent activate/deactivate races.
+    func playToneElementSerialized(frequency: Double, duration: TimeInterval) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            continuousToneQueue.async { [weak self] in
+                guard let self else {
+                    continuation.resume()
+                    return
+                }
+
+                do {
+                    try activateTone(frequency: frequency)
+                } catch {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                Thread.sleep(forTimeInterval: duration)
+                deactivateTone()
+                continuation.resume()
+            }
+        }
+    }
+
     // MARK: Private
 
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
@@ -174,8 +198,11 @@ final class ToneGenerator: @unchecked Sendable {
     private let stateLock = NSLock()
     private var _isPlaying = false
 
-    // Serial queue to ensure tones play sequentially
+    // Serial queue to ensure discrete tones play sequentially
     private let audioQueue = DispatchQueue(label: "com.kochtrainer.audioQueue")
+
+    // Serial queue to ensure continuous mode tone elements play sequentially
+    private let continuousToneQueue = DispatchQueue(label: "com.kochtrainer.continuousToneQueue")
 
     // Continuous session state
     private var isSessionActive = false

@@ -9,7 +9,8 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     override func setUp() async throws {
         mockAudioEngine = MockAudioEngine()
-        viewModel = SendTrainingViewModel(audioEngine: mockAudioEngine)
+        mockClock = MockClock()
+        viewModel = SendTrainingViewModel(audioEngine: mockAudioEngine, clock: mockClock)
         progressStore = ProgressStore()
         settingsStore = SettingsStore()
         viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
@@ -134,10 +135,10 @@ final class SendTrainingViewModelTests: XCTestCase {
             viewModel.nextIntroCharacter()
         }
 
-        // Simulate some input
-        viewModel.inputDit()
-        viewModel.inputDah()
-        viewModel.inputDit()
+        // Simulate some input using keyer
+        pressDit()
+        pressDah()
+        pressDit()
 
         // Wait for input timeout to register the attempt
         try? await Task.sleep(nanoseconds: 2_500_000_000)
@@ -174,21 +175,28 @@ final class SendTrainingViewModelTests: XCTestCase {
             viewModel.nextIntroCharacter()
         }
 
-        // Test '.' key
+        // Test '.' key - press starts element
         viewModel.handleKeyPress(".")
+        viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, ".")
 
-        // Reset for next test
-        viewModel.pause()
-        viewModel.resume()
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.ditDuration ?? 0)
+        viewModel.handleKeyRelease(".")
 
         // Test 'f' key
         viewModel.handleKeyPress("f")
-        XCTAssertEqual(viewModel.currentPattern, ".")
-
-        // Test 'F' key (uppercase)
-        viewModel.handleKeyPress("F")
+        viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, "..")
+
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.ditDuration ?? 0)
+        viewModel.handleKeyRelease("f")
+
+        // Test 'F' key (uppercase) - verifies case-insensitive handling
+        viewModel.handleKeyPress("F")
+        viewModel.keyer?.processTick(at: mockClock.now())
+        XCTAssertEqual(viewModel.currentPattern, "...")
     }
 
     func testKeyPressHandlesDahKeys() async {
@@ -199,19 +207,26 @@ final class SendTrainingViewModelTests: XCTestCase {
 
         // Test '-' key
         viewModel.handleKeyPress("-")
+        viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, "-")
 
-        // Reset for next test
-        viewModel.pause()
-        viewModel.resume()
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.dahDuration ?? 0)
+        viewModel.handleKeyRelease("-")
 
         // Test 'j' key
         viewModel.handleKeyPress("j")
-        XCTAssertEqual(viewModel.currentPattern, "-")
-
-        // Test 'J' key (uppercase)
-        viewModel.handleKeyPress("J")
+        viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, "--")
+
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.dahDuration ?? 0)
+        viewModel.handleKeyRelease("j")
+
+        // Test 'J' key (uppercase) - verifies case-insensitive handling
+        viewModel.handleKeyPress("J")
+        viewModel.keyer?.processTick(at: mockClock.now())
+        XCTAssertEqual(viewModel.currentPattern, "---")
     }
 
     func testInputIgnoredWhenNotPlaying() async {
@@ -223,8 +238,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         viewModel.pause()
 
         // Input should be ignored when paused
-        viewModel.inputDit()
-        viewModel.inputDah()
+        viewModel.updatePaddle(dit: true, dah: false)
+        viewModel.updatePaddle(dit: false, dah: true)
 
         XCTAssertEqual(viewModel.currentPattern, "")
     }
@@ -289,10 +304,10 @@ final class SendTrainingViewModelTests: XCTestCase {
             viewModel.nextIntroCharacter()
         }
 
-        // Simulate some input and wait for it to register
-        viewModel.inputDah()
-        viewModel.inputDit()
-        viewModel.inputDah()
+        // Simulate some input using keyer
+        pressDah()
+        pressDit()
+        pressDah()
 
         // Wait for input timeout
         try? await Task.sleep(nanoseconds: 2_500_000_000)
@@ -469,16 +484,16 @@ final class SendTrainingViewModelTests: XCTestCase {
             viewModel.nextIntroCharacter()
         }
 
-        viewModel.inputDit()
+        pressDit()
         XCTAssertEqual(viewModel.currentPattern, ".")
 
-        viewModel.inputDah()
+        pressDah()
         XCTAssertEqual(viewModel.currentPattern, ".-")
 
-        viewModel.inputDit()
+        pressDit()
         XCTAssertEqual(viewModel.currentPattern, ".-.")
 
-        viewModel.inputDah()
+        pressDah()
         XCTAssertEqual(viewModel.currentPattern, ".-.-")
     }
 
@@ -489,8 +504,8 @@ final class SendTrainingViewModelTests: XCTestCase {
         }
 
         // Build a pattern
-        viewModel.inputDit()
-        viewModel.inputDah()
+        pressDit()
+        pressDah()
         XCTAssertEqual(viewModel.currentPattern, ".-")
 
         // Manually call showNextCharacter
@@ -700,10 +715,49 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: Private
 
-    private var viewModel = SendTrainingViewModel(audioEngine: MockAudioEngine())
-    private var mockAudioEngine = MockAudioEngine()
-    private var progressStore = ProgressStore()
-    private var settingsStore = SettingsStore()
+    // swiftlint:disable implicitly_unwrapped_optional
+    private var viewModel: SendTrainingViewModel!
+    private var mockAudioEngine: MockAudioEngine!
+    private var mockClock: MockClock!
+    private var progressStore: ProgressStore!
+    private var settingsStore: SettingsStore!
+
+    // swiftlint:enable implicitly_unwrapped_optional
+
+    // MARK: - Test Helpers
+
+    /// Input a complete dit element with proper timing.
+    private func pressDit() {
+        pressElement(dit: true, dah: false, duration: viewModel.keyer?.configuration.ditDuration ?? 0)
+    }
+
+    /// Input a complete dah element with proper timing.
+    private func pressDah() {
+        pressElement(dit: false, dah: true, duration: viewModel.keyer?.configuration.dahDuration ?? 0)
+    }
+
+    private func pressElement(dit: Bool, dah: Bool, duration: TimeInterval) {
+        guard let keyer = viewModel.keyer else { return }
+        viewModel.updatePaddle(dit: dit, dah: dah)
+        keyer.processTick(at: mockClock.now())
+        mockClock.advance(by: duration + 0.001)
+        keyer.processTick(at: mockClock.now())
+        // Release paddle BEFORE gap completes to prevent continuous element generation
+        viewModel.updatePaddle(dit: false, dah: false)
+        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
+        keyer.processTick(at: mockClock.now())
+        viewModel.currentPattern = keyer.currentPattern
+    }
+
+    /// Advance time to complete current keyer element and gap.
+    private func completeKeyerElement(duration: TimeInterval) {
+        guard let keyer = viewModel.keyer else { return }
+        mockClock.advance(by: duration + 0.001)
+        keyer.processTick(at: mockClock.now())
+        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
+        keyer.processTick(at: mockClock.now())
+        viewModel.currentPattern = keyer.currentPattern
+    }
 
 }
 

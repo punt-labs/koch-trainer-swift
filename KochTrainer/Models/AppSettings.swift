@@ -27,7 +27,10 @@ struct AppSettings: Codable, Equatable {
         fadingDepth: Double = 0.5,
         fadingRate: Double = 0.1,
         interferenceEnabled: Bool = false,
-        interferenceLevel: Double = 0.2
+        interferenceLevel: Double = 0.2,
+        keyerWPM: Int = 13,
+        keyerFrequency: Double = 700,
+        keyerHapticEnabled: Bool = true
     ) {
         _toneFrequency = max(400, min(800, toneFrequency))
         _effectiveSpeed = max(10, min(18, effectiveSpeed))
@@ -41,6 +44,9 @@ struct AppSettings: Codable, Equatable {
         _fadingRate = max(0.01, min(0.5, fadingRate))
         self.interferenceEnabled = interferenceEnabled
         _interferenceLevel = max(0, min(1, interferenceLevel))
+        _keyerWPM = max(5, min(40, keyerWPM))
+        _keyerFrequency = max(400, min(1000, keyerFrequency))
+        self.keyerHapticEnabled = keyerHapticEnabled
     }
 
     // MARK: Internal
@@ -61,6 +67,9 @@ struct AppSettings: Codable, Equatable {
 
     /// Whether interference from other stations is enabled (QRM)
     var interferenceEnabled: Bool
+
+    /// Whether haptic feedback is enabled for the keyer
+    var keyerHapticEnabled: Bool
 
     /// Tone frequency in Hz (400-800)
     var toneFrequency: Double {
@@ -104,6 +113,20 @@ struct AppSettings: Codable, Equatable {
         set { _interferenceLevel = max(0, min(1, newValue)) }
     }
 
+    // MARK: - Keyer Settings
+
+    /// Keyer speed in words per minute (5-40)
+    var keyerWPM: Int {
+        get { _keyerWPM }
+        set { _keyerWPM = max(5, min(40, newValue)) }
+    }
+
+    /// Keyer sidetone frequency in Hz (400-1000)
+    var keyerFrequency: Double {
+        get { _keyerFrequency }
+        set { _keyerFrequency = max(400, min(1000, newValue)) }
+    }
+
     // MARK: Private
 
     private var _toneFrequency: Double
@@ -113,6 +136,8 @@ struct AppSettings: Codable, Equatable {
     private var _fadingDepth: Double
     private var _fadingRate: Double
     private var _interferenceLevel: Double
+    private var _keyerWPM: Int
+    private var _keyerFrequency: Double
 
 }
 
@@ -132,6 +157,9 @@ extension AppSettings {
         case fadingRate
         case interferenceEnabled
         case interferenceLevel
+        case keyerWPM
+        case keyerFrequency
+        case keyerHapticEnabled
     }
 
     init(from decoder: Decoder) throws {
@@ -171,6 +199,15 @@ extension AppSettings {
 
         let interference = try container.decodeIfPresent(Double.self, forKey: .interferenceLevel) ?? 0.2
         _interferenceLevel = max(0, min(1, interference))
+
+        // Keyer settings migration
+        let keyerWpm = try container.decodeIfPresent(Int.self, forKey: .keyerWPM) ?? 13
+        _keyerWPM = max(5, min(40, keyerWpm))
+
+        let keyerFreq = try container.decodeIfPresent(Double.self, forKey: .keyerFrequency) ?? 700
+        _keyerFrequency = max(400, min(1000, keyerFreq))
+
+        keyerHapticEnabled = try container.decodeIfPresent(Bool.self, forKey: .keyerHapticEnabled) ?? true
     }
 
     func encode(to encoder: Encoder) throws {
@@ -187,5 +224,8 @@ extension AppSettings {
         try container.encode(_fadingRate, forKey: .fadingRate)
         try container.encode(interferenceEnabled, forKey: .interferenceEnabled)
         try container.encode(_interferenceLevel, forKey: .interferenceLevel)
+        try container.encode(_keyerWPM, forKey: .keyerWPM)
+        try container.encode(_keyerFrequency, forKey: .keyerFrequency)
+        try container.encode(keyerHapticEnabled, forKey: .keyerHapticEnabled)
     }
 }

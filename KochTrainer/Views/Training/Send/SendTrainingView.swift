@@ -57,12 +57,20 @@ struct SendTrainingView: View {
         }
         .focusable()
         .focused($isKeyboardFocused)
-        .onKeyPress { press in
+        .onKeyPress(phases: .down) { press in
             guard case .training = viewModel.phase,
                   let char = press.characters.first else {
                 return .ignored
             }
             viewModel.handleKeyPress(char)
+            return .handled
+        }
+        .onKeyPress(phases: .up) { press in
+            guard case .training = viewModel.phase,
+                  let char = press.characters.first else {
+                return .ignored
+            }
+            viewModel.handleKeyRelease(char)
             return .handled
         }
         .navigationTitle(navigationTitle)
@@ -198,39 +206,17 @@ struct SendTrainingPhaseView: View {
                     .foregroundColor(.secondary)
                     .accessibilityIdentifier(AccessibilityID.Send.keyboardHint)
 
-                // Paddle area
-                HStack(spacing: 2) {
-                    // Dit button
-                    Button {
-                        viewModel.inputDit()
-                    } label: {
-                        Text("dit")
-                            .font(.system(size: 24, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Theme.Colors.primary.opacity(0.8))
+                // Iambic paddle area
+                DualPaddleView(
+                    onDitChange: { pressed in
+                        viewModel.updatePaddle(dit: pressed, dah: dahPressed)
+                        ditPressed = pressed
+                    },
+                    onDahChange: { pressed in
+                        viewModel.updatePaddle(dit: ditPressed, dah: pressed)
+                        dahPressed = pressed
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Short Morse element")
-                    .accessibilityIdentifier(AccessibilityID.Send.ditButton)
-
-                    // Dah button
-                    Button {
-                        viewModel.inputDah()
-                    } label: {
-                        Text("dah")
-                            .font(.system(size: 24, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Theme.Colors.primary)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Long Morse element")
-                    .accessibilityIdentifier(AccessibilityID.Send.dahButton)
-                }
-                .frame(height: 120)
-                .cornerRadius(12)
-                .clipped()
+                )
 
                 // Score display
                 HStack {
@@ -263,6 +249,10 @@ struct SendTrainingPhaseView: View {
 
     @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 100
     @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 36
+
+    /// Track paddle state for proper coordination between dit and dah paddles.
+    @State private var ditPressed = false
+    @State private var dahPressed = false
 
 }
 

@@ -82,6 +82,19 @@ final class SilentAudioEngine: AudioEngineProtocol {
         try radioState.stopRadio()
     }
 
+    // MARK: - Tone Control API
+
+    func activateTone(frequency: Double) throws {
+        guard radioState.mode != .off else {
+            throw Radio.RadioError.mustBeOn
+        }
+        // Silent - no-op
+    }
+
+    func deactivateTone() {
+        // Silent - no-op
+    }
+
     // MARK: Private
 
     // MARK: - Radio State (shared helper)
