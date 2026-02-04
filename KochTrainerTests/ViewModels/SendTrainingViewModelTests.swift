@@ -188,6 +188,15 @@ final class SendTrainingViewModelTests: XCTestCase {
         viewModel.handleKeyPress("f")
         viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, "..")
+
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.ditDuration ?? 0)
+        viewModel.handleKeyRelease("f")
+
+        // Test 'F' key (uppercase) - verifies case-insensitive handling
+        viewModel.handleKeyPress("F")
+        viewModel.keyer?.processTick(at: mockClock.now())
+        XCTAssertEqual(viewModel.currentPattern, "...")
     }
 
     func testKeyPressHandlesDahKeys() async {
@@ -209,6 +218,15 @@ final class SendTrainingViewModelTests: XCTestCase {
         viewModel.handleKeyPress("j")
         viewModel.keyer?.processTick(at: mockClock.now())
         XCTAssertEqual(viewModel.currentPattern, "--")
+
+        // Complete element and release
+        completeKeyerElement(duration: viewModel.keyer?.configuration.dahDuration ?? 0)
+        viewModel.handleKeyRelease("j")
+
+        // Test 'J' key (uppercase) - verifies case-insensitive handling
+        viewModel.handleKeyPress("J")
+        viewModel.keyer?.processTick(at: mockClock.now())
+        XCTAssertEqual(viewModel.currentPattern, "---")
     }
 
     func testInputIgnoredWhenNotPlaying() async {

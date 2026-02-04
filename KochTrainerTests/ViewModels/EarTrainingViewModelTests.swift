@@ -546,12 +546,16 @@ final class EarTrainingViewModelTests: XCTestCase {
         // If we get here, the flag wasn't set - test will fail with assertion
     }
 
-    /// Press a key and advance keyer timing to complete the element
+    /// Press a key and advance keyer timing to complete the element.
+    /// Note: handleKeyPress receives the original key (including uppercase),
+    /// so this DOES test case-insensitive handling. The lowercasing below
+    /// is only to determine the correct duration for timing advancement.
     private func pressKey(_ key: Character) {
         guard let keyer = viewModel.keyer else { return }
-        viewModel.handleKeyPress(key)
+        viewModel.handleKeyPress(key) // Original key passed - tests case handling in ViewModel
         keyer.processTick(at: mockClock.now())
 
+        // Lowercase only for duration calculation, not for testing
         let keyLower = key.lowercased()
         let duration = (keyLower == "." || keyLower == "f")
             ? keyer.configuration.ditDuration
