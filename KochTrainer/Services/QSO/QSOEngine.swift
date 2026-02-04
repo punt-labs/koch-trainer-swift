@@ -137,9 +137,10 @@ final class QSOEngine: ObservableObject {
         state.addMessage(from: sender, text: text)
     }
 
-    /// Stop any ongoing audio playback
+    /// Signal that audio playback should stop.
+    /// Note: Actual audio stopping is handled by the audio engine's radioMode state.
+    /// This method clears the UI state flag so views know playback has ended.
     func stopAudio() {
-        // Audio stopping is handled by endSession() or stopRadio()
         isPlayingAudio = false
     }
 
