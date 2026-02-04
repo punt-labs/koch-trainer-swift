@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Dropped audio on rapid input**: In Send Training, rapidly tapping dit-dit or dah-dah could drop the second tone due to concurrent activate/deactivate race conditions. Tone element playback is now serialized via a dedicated dispatch queue.
+
 ## [1.0.1] - 2026-02-03
 
 ### Fixed
