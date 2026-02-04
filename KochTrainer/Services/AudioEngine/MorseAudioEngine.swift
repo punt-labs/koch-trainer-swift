@@ -43,6 +43,15 @@ protocol AudioEngineProtocol {
     /// Stop the radio (transition to off).
     /// - Throws: `Radio.RadioError.alreadyOff` if radio is already off.
     func stopRadio() throws
+
+    // MARK: - Tone Control API (for IambicKeyer)
+
+    /// Activate continuous tone at specified frequency.
+    /// - Throws: `Radio.RadioError.mustBeOn` if radio is off.
+    func activateTone(frequency: Double) throws
+
+    /// Deactivate continuous tone.
+    func deactivateTone()
 }
 
 // MARK: - MorseAudioEngine
@@ -212,6 +221,18 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// Stop the radio.
     func stopRadio() throws {
         try toneGenerator.radio.stop()
+    }
+
+    // MARK: - Tone Control API
+
+    /// Activate continuous tone at specified frequency.
+    func activateTone(frequency: Double) throws {
+        try toneGenerator.activateTone(frequency: frequency)
+    }
+
+    /// Deactivate continuous tone.
+    func deactivateTone() {
+        toneGenerator.deactivateTone()
     }
 
     // MARK: Private

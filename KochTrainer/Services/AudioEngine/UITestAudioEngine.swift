@@ -88,6 +88,19 @@ final class UITestAudioEngine: AudioEngineProtocol, ObservableObject {
         storedRadioMode = .off
     }
 
+    // MARK: - Tone Control API
+
+    func activateTone(frequency: Double) throws {
+        guard storedRadioMode != .off else {
+            throw Radio.RadioError.mustBeOn
+        }
+        // Silent - no-op
+    }
+
+    func deactivateTone() {
+        // Silent - no-op
+    }
+
     // MARK: Private
 
     private var storedRadioMode: RadioMode = .off

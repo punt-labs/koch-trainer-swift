@@ -16,12 +16,14 @@ final class VocabularyTrainingViewModel: ObservableObject {
         vocabularySet: VocabularySet,
         sessionType: SessionType,
         audioEngine: AudioEngineProtocol? = nil,
-        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()
+        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer(),
+        clock: KeyerClock = RealClock()
     ) {
         self.vocabularySet = vocabularySet
         self.sessionType = sessionType
         self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
+        self.clock = clock
     }
 
     // MARK: Internal
@@ -70,6 +72,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
     /// Input timeout for send mode (time to complete keying)
     let inputTimeout: TimeInterval = 2.0
 
+    /// Keyer for morse input timing. Internal for test access.
+    var keyer: IambicKeyer?
+
     /// Response timeout scales with word length
     var responseTimeout: TimeInterval {
         // Base 3 seconds + 1 second per character
@@ -111,6 +116,11 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
         // Merge existing word stats
         wordStats = progressStore.progress.wordStats
+
+        // Setup keyer for send mode
+        if !isReceiveMode {
+            setupKeyer(from: settingsStore.settings)
+        }
     }
 
     // MARK: - Session Control
@@ -123,6 +133,10 @@ final class VocabularyTrainingViewModel: ObservableObject {
         sessionStartTime = Date()
         isPlaying = true
         phase = .training
+        // Start keyer for send mode
+        if !isReceiveMode {
+            keyer?.start()
+        }
         showNextWord()
     }
 
@@ -132,6 +146,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         phase = .paused
         responseTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForResponse = false
@@ -150,6 +165,11 @@ final class VocabularyTrainingViewModel: ObservableObject {
         announcer.announceResumed()
         try? audioEngine.stopRadio()
         try? audioEngine.startReceiving()
+        // Re-setup and start keyer for send mode
+        if !isReceiveMode, let settings = settingsStore?.settings {
+            setupKeyer(from: settings)
+            keyer?.start()
+        }
         showNextWord()
     }
 
@@ -195,6 +215,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         isPlaying = false
         responseTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         isWaitingForResponse = false
 
@@ -226,6 +247,8 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
+        keyer?.stop()
+        keyer = nil
         audioEngine.endSession()
     }
 
@@ -263,27 +286,33 @@ final class VocabularyTrainingViewModel: ObservableObject {
         let keyLower = Character(key.lowercased())
 
         if keyLower == "." || keyLower == "f" {
-            inputDit()
+            queueElement(.dit)
         } else if keyLower == "-" || keyLower == "j" {
-            inputDah()
+            queueElement(.dah)
         } else if keyLower == " " {
             // Space advances to next character in word
             advanceToNextCharacter()
         }
     }
 
-    func inputDit() {
+    /// Queue a discrete element for playback with proper timing.
+    func queueElement(_ element: MorseElement) {
         guard isPlaying, isWaitingForResponse else { return }
-        currentPattern += "."
-        playDit()
+        keyer?.queueElement(element)
+        // Sync pattern from keyer for UI feedback
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
         resetInputTimer()
     }
 
-    func inputDah() {
+    /// Update paddle state for continuous iambic keying.
+    func updatePaddle(dit: Bool, dah: Bool) {
         guard isPlaying, isWaitingForResponse else { return }
-        currentPattern += "-"
-        playDah()
-        resetInputTimer()
+        keyer?.updatePaddle(PaddleInput(ditPressed: dit, dahPressed: dah))
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
     }
 
     // MARK: Private
@@ -292,7 +321,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     private let audioEngine: AudioEngineProtocol
     private let announcer: AccessibilityAnnouncer
+    private let clock: KeyerClock
     private let decoder = MorseDecoder()
+    private let hapticManager = HapticManager()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
 
@@ -304,18 +335,44 @@ final class VocabularyTrainingViewModel: ObservableObject {
     private var recentWords: [String] = []
     private var currentCharIndex: Int = 0
 
-    private func playDit() {
-        Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDit()
-        }
+    private func setupKeyer(from settings: AppSettings) {
+        let config = KeyerConfiguration(
+            wpm: settings.keyerWPM,
+            frequency: settings.keyerFrequency,
+            hapticEnabled: settings.keyerHapticEnabled
+        )
+
+        keyer = IambicKeyer(
+            configuration: config,
+            clock: clock,
+            onToneStart: { [weak self] frequency in
+                guard let self else { return }
+                do {
+                    try audioEngine.activateTone(frequency: frequency)
+                } catch {
+                    // Radio not in transmit mode, ignore
+                }
+            },
+            onToneStop: { [weak self] in
+                self?.audioEngine.deactivateTone()
+            },
+            onPatternComplete: { [weak self] pattern in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.handleKeyerPatternComplete(pattern)
+                }
+            },
+            onHaptic: { [weak self] element in
+                self?.hapticManager.playHaptic(for: element)
+            }
+        )
     }
 
-    private func playDah() {
-        Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            await engine.playDah()
-        }
+    private func handleKeyerPatternComplete(_ pattern: String) {
+        guard isWaitingForResponse else { return }
+        currentPattern = pattern
+        // In vocabulary send mode, pattern complete advances to next character
+        advanceToNextCharacter()
     }
 
     private func advanceToNextCharacter() {

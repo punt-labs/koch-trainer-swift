@@ -11,9 +11,14 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
+    init(
+        audioEngine: AudioEngineProtocol? = nil,
+        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer(),
+        clock: KeyerClock = RealClock()
+    ) {
         self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
+        self.clock = clock
     }
 
     // MARK: Internal
@@ -63,6 +68,9 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Fixed minimum attempts for proficiency check
     let minimumAttemptsForProficiency: Int = 20
+
+    /// Keyer for morse input timing. Internal for test access.
+    var keyer: IambicKeyer?
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -130,6 +138,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.configureBandConditions(from: settingsStore.settings)
 
         introCharacters = MorseCode.charactersByPatternLength(upToLevel: currentLevel)
+        setupKeyer(from: settingsStore.settings)
     }
 
     // MARK: - Session Lifecycle
@@ -176,6 +185,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForInput = false
@@ -196,6 +206,11 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         announcer.announceResumed()
         try? audioEngine.stopRadio()
         try? audioEngine.startReceiving()
+        // Re-setup and start keyer
+        if let settings = settingsStore?.settings {
+            setupKeyer(from: settings)
+        }
+        keyer?.start()
         startSessionTimer()
         playNextCharacter()
     }
@@ -204,6 +219,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         isWaitingForInput = false
 
@@ -249,6 +265,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
+        keyer?.stop()
+        keyer = nil
         audioEngine.endSession()
     }
 
@@ -261,22 +279,29 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // . or f = dit, - or j = dah
         if keyLower == "." || keyLower == "f" {
-            inputDit()
+            queueElement(.dit)
         } else if keyLower == "-" || keyLower == "j" {
-            inputDah()
+            queueElement(.dah)
         }
     }
 
-    func inputDit() {
+    /// Queue a discrete element for playback with proper timing.
+    func queueElement(_ element: MorseElement) {
         guard isPlaying, isWaitingForInput else { return }
-        currentPattern += "."
-        playDit()
+        keyer?.queueElement(element)
+        // Sync pattern from keyer for UI feedback
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
     }
 
-    func inputDah() {
+    /// Update paddle state for continuous iambic keying.
+    func updatePaddle(dit: Bool, dah: Bool) {
         guard isPlaying, isWaitingForInput else { return }
-        currentPattern += "-"
-        playDah()
+        keyer?.updatePaddle(PaddleInput(ditPressed: dit, dahPressed: dah))
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
     }
 
     // MARK: - Paused Session Management
@@ -317,6 +342,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     private let audioEngine: AudioEngineProtocol
     private let announcer: AccessibilityAnnouncer
+    private let clock: KeyerClock
+    private let hapticManager = HapticManager()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?
@@ -343,6 +370,7 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionStartTime = Date()
         isPlaying = true
         startSessionTimer()
+        keyer?.start()
         playNextCharacter()
     }
 
@@ -353,16 +381,43 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         endSession()
     }
 
-    private func playDit() {
-        Task {
-            await audioEngine.playDit()
-        }
+    private func setupKeyer(from settings: AppSettings) {
+        let config = KeyerConfiguration(
+            wpm: settings.keyerWPM,
+            frequency: settings.keyerFrequency,
+            hapticEnabled: settings.keyerHapticEnabled
+        )
+
+        keyer = IambicKeyer(
+            configuration: config,
+            clock: clock,
+            onToneStart: { [weak self] frequency in
+                guard let self else { return }
+                do {
+                    try audioEngine.activateTone(frequency: frequency)
+                } catch {
+                    // Radio not in transmit mode, ignore
+                }
+            },
+            onToneStop: { [weak self] in
+                self?.audioEngine.deactivateTone()
+            },
+            onPatternComplete: { [weak self] pattern in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.handleKeyerPatternComplete(pattern)
+                }
+            },
+            onHaptic: { [weak self] element in
+                self?.hapticManager.playHaptic(for: element)
+            }
+        )
     }
 
-    private func playDah() {
-        Task {
-            await audioEngine.playDah()
-        }
+    private func handleKeyerPatternComplete(_ pattern: String) {
+        guard isWaitingForInput else { return }
+        currentPattern = pattern
+        completeCurrentInput()
     }
 }
 

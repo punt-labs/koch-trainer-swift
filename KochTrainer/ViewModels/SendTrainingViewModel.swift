@@ -10,9 +10,14 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: Lifecycle
 
-    init(audioEngine: AudioEngineProtocol? = nil, announcer: AccessibilityAnnouncer = AccessibilityAnnouncer()) {
+    init(
+        audioEngine: AudioEngineProtocol? = nil,
+        announcer: AccessibilityAnnouncer = AccessibilityAnnouncer(),
+        clock: KeyerClock = RealClock()
+    ) {
         self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
         self.announcer = announcer
+        self.clock = clock
     }
 
     // MARK: Internal
@@ -51,6 +56,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Custom characters for practice mode (nil = use level-based characters)
     private(set) var customCharacters: [Character]?
+
+    /// Keyer for morse input timing. Internal for test access.
+    var keyer: IambicKeyer?
 
     /// Minimum attempts scales with character count (5 per character, floor of 15)
     var minimumAttemptsForProficiency: Int {
@@ -123,6 +131,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         audioEngine.configureBandConditions(from: settingsStore.settings)
 
         introCharacters = MorseCode.characters(forLevel: currentLevel)
+        setupKeyer(from: settingsStore.settings)
     }
 
     /// Configure for custom practice with specific characters (no level advancement)
@@ -137,6 +146,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
         // For custom practice, use the selected characters as intro
         introCharacters = customCharacters
+        setupKeyer(from: settingsStore.settings)
     }
 
     // MARK: - Introduction Phase
@@ -183,6 +193,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForInput = false
@@ -262,6 +273,12 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         try? audioEngine.stopRadio()
         try? audioEngine.startReceiving()
         startSessionTimer()
+
+        // Re-setup and start keyer (keyer was stopped on pause)
+        if let settings = settingsStore?.settings {
+            setupKeyer(from: settings)
+        }
+        keyer?.start()
         showNextCharacter()
     }
 
@@ -269,6 +286,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
+        keyer?.stop()
         audioEngine.stop()
         isWaitingForInput = false
 
@@ -316,42 +334,62 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer = nil
         inputTimer?.invalidate()
         inputTimer = nil
+        keyer?.stop()
+        keyer = nil
         audioEngine.endSession()
     }
 
-    // MARK: - Input Handling
-
     func handleKeyPress(_ key: Character) {
-        guard isWaitingForInput else { return }
+        guard isPlaying, isWaitingForInput else { return }
 
         let keyLower = Character(key.lowercased())
 
-        // . or f = dit, - or j = dah
+        // Queue discrete elements for keyboard input (allows typing ahead)
         if keyLower == "." || keyLower == "f" {
-            inputDit()
+            queueElement(.dit)
         } else if keyLower == "-" || keyLower == "j" {
-            inputDah()
+            queueElement(.dah)
         }
     }
 
-    func inputDit() {
-        guard isPlaying, isWaitingForInput else { return }
-        currentPattern += "."
-        lastInputTime = Date()
-        playDit()
+    func handleKeyRelease(_: Character) {
+        // Keyboard uses queued elements, not continuous paddle state
     }
 
-    func inputDah() {
+    /// Queue a discrete element for playback with proper timing.
+    func queueElement(_ element: MorseElement) {
         guard isPlaying, isWaitingForInput else { return }
-        currentPattern += "-"
         lastInputTime = Date()
-        playDah()
+        keyer?.queueElement(element)
+        // Sync pattern from keyer for UI feedback
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
+    }
+
+    /// Update paddle state. This is the ONLY input path.
+    /// All timing controlled by keyer.
+    func updatePaddle(dit: Bool, dah: Bool) {
+        guard isPlaying, isWaitingForInput else { return }
+        lastInputTime = Date()
+        keyer?.updatePaddle(PaddleInput(ditPressed: dit, dahPressed: dah))
+        // Sync pattern from keyer for immediate UI feedback
+        if let keyerPattern = keyer?.currentPattern {
+            currentPattern = keyerPattern
+        }
     }
 
     // MARK: Private
 
+    // MARK: - Input Handling
+
+    /// Track keyboard paddle state for key-up detection.
+    private var keyboardDitPressed = false
+    private var keyboardDahPressed = false
+
     private let audioEngine: AudioEngineProtocol
     private let announcer: AccessibilityAnnouncer
+    private let clock: KeyerClock
     private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
@@ -360,6 +398,7 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     private var sessionStartTime: Date?
     private var currentLevel: Int = 1
     private var lastInputTime: Date?
+    private let hapticManager = HapticManager()
 
     private func showIntroCharacter(at index: Int) {
         guard index < introCharacters.count else {
@@ -382,7 +421,47 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionStartTime = Date()
         isPlaying = true
         startSessionTimer()
+        keyer?.start()
         showNextCharacter()
+    }
+
+    private func setupKeyer(from settings: AppSettings) {
+        let config = KeyerConfiguration(
+            wpm: settings.keyerWPM,
+            frequency: settings.keyerFrequency,
+            hapticEnabled: settings.keyerHapticEnabled
+        )
+
+        keyer = IambicKeyer(
+            configuration: config,
+            clock: clock,
+            onToneStart: { [weak self] frequency in
+                guard let self else { return }
+                do {
+                    try audioEngine.activateTone(frequency: frequency)
+                } catch {
+                    // Radio not in transmit mode, ignore
+                }
+            },
+            onToneStop: { [weak self] in
+                self?.audioEngine.deactivateTone()
+            },
+            onPatternComplete: { [weak self] pattern in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.handleKeyerPatternComplete(pattern)
+                }
+            },
+            onHaptic: { [weak self] element in
+                self?.hapticManager.playHaptic(for: element)
+            }
+        )
+    }
+
+    private func handleKeyerPatternComplete(_ pattern: String) {
+        guard isWaitingForInput else { return }
+        currentPattern = pattern
+        completeCurrentInput()
     }
 
     private func checkForProficiency() {
@@ -390,18 +469,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard accuracy >= proficiencyThreshold else { return }
 
         endSession()
-    }
-
-    private func playDit() {
-        Task {
-            await audioEngine.playDit()
-        }
-    }
-
-    private func playDah() {
-        Task {
-            await audioEngine.playDah()
-        }
     }
 }
 
