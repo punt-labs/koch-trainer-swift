@@ -92,11 +92,12 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playDit()
     }
 
-    func testPlayDitWhenStopped() async {
+    func testPlayDitWhenSessionEndedIsNoOp() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        engine.startSession()
+        engine.endSession()
 
-        // Should return immediately when stopped
+        // Should return immediately when session ended (radioMode = off)
         await engine.playDit()
     }
 
@@ -108,10 +109,12 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playDah()
     }
 
-    func testPlayDahWhenStopped() async {
+    func testPlayDahWhenSessionEndedIsNoOp() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        engine.startSession()
+        engine.endSession()
 
+        // Should return immediately when session ended
         await engine.playDah()
     }
 
@@ -136,10 +139,12 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playCharacter("@")
     }
 
-    func testPlayCharacterWhenStopped() async {
+    func testPlayCharacterWhenSessionEndedIsNoOp() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        engine.startSession()
+        engine.endSession()
 
+        // Should return immediately when session ended
         await engine.playCharacter("K")
     }
 
@@ -169,10 +174,12 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playGroup("cq")
     }
 
-    func testPlayGroupWhenStopped() async {
+    func testPlayGroupWhenSessionEndedIsNoOp() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        engine.startSession()
+        engine.endSession()
 
+        // Should return immediately when session ended
         await engine.playGroup("CQ")
     }
 
@@ -209,52 +216,48 @@ final class MorseAudioEngineTests: XCTestCase {
         await engine.playGroup("AB", onCharacterPlayed: nil)
     }
 
-    // MARK: - stop Tests
+    // MARK: - Session Control Tests
 
-    func testStop() async {
+    func testEndSessionStopsPlayback() async {
         let engine = MorseAudioEngine()
+        engine.startSession()
 
-        engine.stop()
+        engine.endSession()
 
-        // Subsequent plays should return immediately
+        // Subsequent plays should return immediately when session ended
         await engine.playDit()
     }
 
-    func testStopDuringPlayback() async {
+    func testEndSessionDuringPlayback() async {
         let engine = MorseAudioEngine()
+        engine.startSession()
 
         // Start a long playback
         Task {
             await engine.playGroup("ABCDEFGHIJ")
         }
 
-        // Stop immediately
+        // End session immediately
         try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
-        engine.stop()
+        engine.endSession()
     }
 
-    // MARK: - reset Tests
-
-    func testReset() async {
+    func testRestartSessionAfterEnd() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        engine.startSession()
+        engine.endSession()
 
-        engine.reset()
+        engine.startSession()
 
-        // Should be able to play again
+        // Should be able to play again after restarting session
         await engine.playDit()
     }
 
-    func testResetAfterStop() async {
+    func testPlayAllowedWithoutSessionForSettingsPreview() async {
         let engine = MorseAudioEngine()
-        engine.stop()
+        // Do NOT start a session - this simulates settings preview mode
 
-        // Verify stopped
-        await engine.playDit() // Should return immediately
-
-        engine.reset()
-
-        // Now should play
+        // Should be able to play even without session (discrete mode)
         await engine.playDit()
     }
 

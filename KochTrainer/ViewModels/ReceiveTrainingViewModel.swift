@@ -159,9 +159,7 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            await audioEngine.playCharacter(char)
         }
     }
 
@@ -186,7 +184,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         phase = .paused
         sessionTimer?.invalidate()
         responseTimer?.invalidate()
-        audioEngine.stop()
         audioEngine.endSession()
         isWaitingForResponse = false
         announcer.announcePaused()
@@ -271,7 +268,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
         isPlaying = false
         sessionTimer?.invalidate()
         responseTimer?.invalidate()
-        audioEngine.stop()
         isWaitingForResponse = false
 
         // Clear any paused session since we're ending
@@ -428,9 +424,7 @@ extension ReceiveTrainingViewModel {
         lastFeedback = nil
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playCharacter(char)
+            await audioEngine.playCharacter(char)
             if isPlaying { startResponseTimer() }
         }
     }
@@ -492,7 +486,7 @@ extension ReceiveTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playCharacter(expected) }
+                if isPlaying { await audioEngine.playCharacter(expected) }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

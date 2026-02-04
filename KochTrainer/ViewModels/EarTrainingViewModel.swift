@@ -163,7 +163,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            audioEngine.reset()
             await audioEngine.playCharacter(char)
         }
     }
@@ -186,7 +185,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForInput = false
         announcer.announcePaused()
@@ -220,7 +218,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         isWaitingForInput = false
 
         progressStore?.clearPausedSession(for: .earTraining)
@@ -547,7 +544,6 @@ extension EarTrainingViewModel {
         // Play the character audio
         Task {
             guard let char = targetCharacter else { return }
-            audioEngine.reset()
             await audioEngine.playCharacter(char)
 
             // After audio finishes, start accepting input and start timer

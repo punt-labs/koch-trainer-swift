@@ -37,14 +37,6 @@ final class UITestAudioEngine: AudioEngineProtocol, ObservableObject {
         // Silent - no-op
     }
 
-    func stop() {
-        // Silent - no-op
-    }
-
-    func reset() {
-        // Silent - no-op
-    }
-
     func setFrequency(_ frequency: Double) {
         // Silent - no-op
     }

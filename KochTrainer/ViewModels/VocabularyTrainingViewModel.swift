@@ -147,7 +147,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForResponse = false
         announcer.announcePaused()
@@ -216,7 +215,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
         responseTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         isWaitingForResponse = false
 
         // Clear any paused session since we're ending
@@ -272,9 +270,7 @@ final class VocabularyTrainingViewModel: ObservableObject {
         guard isReceiveMode, !currentWord.isEmpty else { return }
 
         Task {
-            guard let engine = audioEngine as? MorseAudioEngine else { return }
-            engine.reset()
-            await engine.playGroup(currentWord)
+            await audioEngine.playGroup(currentWord)
         }
     }
 
@@ -458,9 +454,7 @@ extension VocabularyTrainingViewModel {
 
         if isReceiveMode {
             Task {
-                guard let engine = audioEngine as? MorseAudioEngine else { return }
-                engine.reset()
-                await engine.playGroup(currentWord)
+                await audioEngine.playGroup(currentWord)
                 if isPlaying { startResponseTimer() }
             }
         } else {
@@ -527,7 +521,7 @@ extension VocabularyTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playGroup(expected) }
+                if isPlaying { await audioEngine.playGroup(expected) }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

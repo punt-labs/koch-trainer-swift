@@ -11,7 +11,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
 
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
-    var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
@@ -33,10 +32,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
         }
     }
 
-    func stop() {
-        stopCalled = true
-    }
-
     func setFrequency(_ frequency: Double) {
         frequencySet = frequency
     }
@@ -46,12 +41,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
     }
 
     func configureBandConditions(from settings: AppSettings) {}
-
-    func reset() {
-        playCharacterCalls = []
-        playGroupCalls = []
-        stopCalled = false
-    }
 
     func playDit() async {}
 
@@ -163,7 +152,6 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     func testResumeFromPaused() {
         viewModel.startSession()
         viewModel.pause()
-        mockAudioEngine.stopCalled = false
 
         viewModel.resume()
 

@@ -139,7 +139,7 @@ final class QSOEngine: ObservableObject {
 
     /// Stop any ongoing audio playback
     func stopAudio() {
-        audioEngine.stop()
+        // Audio stopping is handled by endSession() or stopRadio()
         isPlayingAudio = false
     }
 
@@ -206,10 +206,7 @@ final class QSOEngine: ObservableObject {
         isPlayingAudio = true
         defer { isPlayingAudio = false }
 
-        if let engine = audioEngine as? MorseAudioEngine {
-            engine.reset()
-            await engine.playGroup(message)
-        }
+        await audioEngine.playGroup(message)
     }
 
 }
