@@ -72,6 +72,7 @@ struct PracticeView: View {
 
     private func playCharacter(_ character: Character) {
         Task {
+            audioEngineWrapper.engine.reset()
             await audioEngineWrapper.engine.playCharacter(character)
         }
     }

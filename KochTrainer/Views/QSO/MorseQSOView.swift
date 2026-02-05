@@ -308,7 +308,7 @@ private struct MorseQSOSessionView: View {
             // Paddle buttons
             HStack(spacing: 2) {
                 Button {
-                    viewModel.queueElement(.dit)
+                    viewModel.inputDit()
                 } label: {
                     Text("dit")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -321,7 +321,7 @@ private struct MorseQSOSessionView: View {
                 .accessibilityIdentifier(AccessibilityID.QSO.ditButton)
 
                 Button {
-                    viewModel.queueElement(.dah)
+                    viewModel.inputDah()
                 } label: {
                     Text("dah")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))

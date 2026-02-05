@@ -58,8 +58,6 @@ struct SettingsView: View {
                 }
             }
 
-            KeyerSettingsSection(settings: $settings)
-
             // MARK: - Band Conditions Section
 
             AccessibleSection("Band Conditions") {
@@ -449,57 +447,6 @@ struct SettingsView: View {
             settings.interferenceLevel = 0.3
         }
     }
-}
-
-// MARK: - KeyerSettingsSection
-
-struct KeyerSettingsSection: View {
-
-    @Binding var settings: AppSettings
-
-    var body: some View {
-        AccessibleSection("Keyer (Send Training)") {
-            AccessibleRow {
-                LabeledContent("Keyer Speed") {
-                    Text("\(settings.keyerWPM) WPM")
-                        .foregroundColor(.secondary)
-                }
-            }
-            AccessibleRow {
-                Slider(
-                    value: Binding(
-                        get: { Double(settings.keyerWPM) },
-                        set: { settings.keyerWPM = Int($0) }
-                    ),
-                    in: 5 ... 40,
-                    step: 1
-                ) {
-                    Text("Keyer Speed")
-                }
-                .accessibilityValue("\(settings.keyerWPM) words per minute")
-            }
-            AccessibleRow {
-                LabeledContent("Sidetone Frequency") {
-                    Text("\(Int(settings.keyerFrequency)) Hz")
-                        .foregroundColor(.secondary)
-                }
-            }
-            AccessibleRow {
-                Slider(
-                    value: $settings.keyerFrequency,
-                    in: 400 ... 1000,
-                    step: 25
-                ) {
-                    Text("Sidetone Frequency")
-                }
-                .accessibilityValue("\(Int(settings.keyerFrequency)) Hertz")
-            }
-            AccessibleRow(showDivider: false) {
-                Toggle("Haptic Feedback", isOn: $settings.keyerHapticEnabled)
-            }
-        }
-    }
-
 }
 
 // MARK: - BandConditionPreset

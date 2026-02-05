@@ -9,8 +9,7 @@ final class EarTrainingViewModelTests: XCTestCase {
     override func setUp() async throws {
         testDefaults.removePersistentDomain(forName: "TestEarTrainingVM")
         mockAudioEngine = MockAudioEngine()
-        mockClock = MockClock()
-        viewModel = EarTrainingViewModel(audioEngine: mockAudioEngine, clock: mockClock)
+        viewModel = EarTrainingViewModel(audioEngine: mockAudioEngine)
         progressStore = ProgressStore(defaults: testDefaults)
         settingsStore = SettingsStore(defaults: testDefaults)
         viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
@@ -208,13 +207,13 @@ final class EarTrainingViewModelTests: XCTestCase {
         // Wait for async playNextCharacter Task to complete and set isWaitingForInput
         await waitForWaitingForInput()
 
-        pressKey(".")
+        viewModel.handleKeyPress(".")
         XCTAssertEqual(viewModel.currentPattern, ".")
 
-        pressKey("f")
+        viewModel.handleKeyPress("f")
         XCTAssertEqual(viewModel.currentPattern, "..")
 
-        pressKey("F")
+        viewModel.handleKeyPress("F")
         XCTAssertEqual(viewModel.currentPattern, "...")
     }
 
@@ -227,13 +226,13 @@ final class EarTrainingViewModelTests: XCTestCase {
         // Wait for async playNextCharacter Task to complete and set isWaitingForInput
         await waitForWaitingForInput()
 
-        pressKey("-")
+        viewModel.handleKeyPress("-")
         XCTAssertEqual(viewModel.currentPattern, "-")
 
-        pressKey("j")
+        viewModel.handleKeyPress("j")
         XCTAssertEqual(viewModel.currentPattern, "--")
 
-        pressKey("J")
+        viewModel.handleKeyPress("J")
         XCTAssertEqual(viewModel.currentPattern, "---")
     }
 
@@ -246,8 +245,8 @@ final class EarTrainingViewModelTests: XCTestCase {
         // Before waiting for input (audio still playing)
         XCTAssertFalse(viewModel.isWaitingForInput)
 
-        viewModel.queueElement(.dit)
-        viewModel.queueElement(.dah)
+        viewModel.inputDit()
+        viewModel.inputDah()
 
         XCTAssertEqual(viewModel.currentPattern, "")
     }
@@ -260,8 +259,8 @@ final class EarTrainingViewModelTests: XCTestCase {
 
         viewModel.pause()
 
-        viewModel.queueElement(.dit)
-        viewModel.queueElement(.dah)
+        viewModel.inputDit()
+        viewModel.inputDah()
 
         XCTAssertEqual(viewModel.currentPattern, "")
     }
@@ -524,9 +523,8 @@ final class EarTrainingViewModelTests: XCTestCase {
 
     // MARK: Private
 
-    private var viewModel = EarTrainingViewModel(audioEngine: MockAudioEngine(), clock: MockClock())
+    private var viewModel = EarTrainingViewModel(audioEngine: MockAudioEngine())
     private var mockAudioEngine = MockAudioEngine()
-    private var mockClock = MockClock()
     private var progressStore = ProgressStore()
     private var settingsStore = SettingsStore()
     private var testDefaults = UserDefaults(suiteName: "TestEarTrainingVM") ?? .standard
@@ -544,27 +542,6 @@ final class EarTrainingViewModelTests: XCTestCase {
             try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
         }
         // If we get here, the flag wasn't set - test will fail with assertion
-    }
-
-    /// Press a key and advance keyer timing to complete the element.
-    /// Note: handleKeyPress receives the original key (including uppercase),
-    /// so this DOES test case-insensitive handling. The lowercasing below
-    /// is only to determine the correct duration for timing advancement.
-    private func pressKey(_ key: Character) {
-        guard let keyer = viewModel.keyer else { return }
-        viewModel.handleKeyPress(key) // Original key passed - tests case handling in ViewModel
-        keyer.processTick(at: mockClock.now())
-
-        // Lowercase only for duration calculation, not for testing
-        let keyLower = key.lowercased()
-        let duration = (keyLower == "." || keyLower == "f")
-            ? keyer.configuration.ditDuration
-            : keyer.configuration.dahDuration
-
-        mockClock.advance(by: duration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
     }
 
 }

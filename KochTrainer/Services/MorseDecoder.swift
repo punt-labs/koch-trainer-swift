@@ -2,23 +2,14 @@ import Foundation
 
 // MARK: - MorseElement
 
-/// Morse code element type (dit or dah).
-/// Used by both MorseDecoder and IambicKeyer.
-enum MorseElement: Equatable, Sendable {
+/// Input element for Morse decoding.
+enum MorseElement {
     case dit
     case dah
 
     // MARK: Internal
 
     var symbol: String {
-        switch self {
-        case .dit: return "."
-        case .dah: return "-"
-        }
-    }
-
-    /// Pattern character representation (alias for symbol).
-    var patternCharacter: Character {
         switch self {
         case .dit: return "."
         case .dah: return "-"

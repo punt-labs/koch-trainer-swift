@@ -200,39 +200,4 @@ final class ToneGeneratorTests: XCTestCase {
         toneGenerator.deactivateTone()
         toneGenerator.endSession()
     }
-
-    // MARK: - Serialized Playback Tests (Continuous Mode Race Fix)
-
-    /// Verifies that rapid tone elements in continuous mode are all processed sequentially.
-    /// This tests the fix for dropped audio when user taps dit-dit rapidly.
-    func testRapidToneElementsInContinuousMode_areAllProcessedSequentially() async throws {
-        let toneGenerator = ToneGenerator()
-        toneGenerator.startSession()
-        defer { toneGenerator.endSession() }
-
-        let ditDuration: TimeInterval = 0.06
-        let toneCount = 3
-        let startTime = Date()
-
-        // Simulate rapid button taps by spawning concurrent tasks
-        await withTaskGroup(of: Void.self) { group in
-            for _ in 0 ..< toneCount {
-                group.addTask {
-                    try? await toneGenerator.playToneElementSerialized(
-                        frequency: 600,
-                        duration: ditDuration
-                    )
-                }
-            }
-        }
-
-        let elapsed = Date().timeIntervalSince(startTime)
-        // Should take at least (toneCount * ditDuration) since serialized
-        let minimumExpected = Double(toneCount) * ditDuration * 0.9
-        XCTAssertGreaterThan(
-            elapsed,
-            minimumExpected,
-            "Tones should play sequentially, not concurrently"
-        )
-    }
 }

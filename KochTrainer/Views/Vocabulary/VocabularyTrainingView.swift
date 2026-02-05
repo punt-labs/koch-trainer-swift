@@ -330,7 +330,7 @@ private struct SendVocabTrainingPhaseView: View {
             // Paddle area
             HStack(spacing: 2) {
                 Button {
-                    viewModel.queueElement(.dit)
+                    viewModel.inputDit()
                 } label: {
                     Text("dit")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -343,7 +343,7 @@ private struct SendVocabTrainingPhaseView: View {
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.ditButton)
 
                 Button {
-                    viewModel.queueElement(.dah)
+                    viewModel.inputDah()
                 } label: {
                     Text("dah")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))

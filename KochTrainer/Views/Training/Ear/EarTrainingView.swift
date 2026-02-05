@@ -175,7 +175,7 @@ struct EarTrainingPhaseView: View {
                 HStack(spacing: 2) {
                     // Dit button
                     Button {
-                        viewModel.queueElement(.dit)
+                        viewModel.inputDit()
                     } label: {
                         Text("dit")
                             .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -190,7 +190,7 @@ struct EarTrainingPhaseView: View {
 
                     // Dah button
                     Button {
-                        viewModel.queueElement(.dah)
+                        viewModel.inputDah()
                     } label: {
                         Text("dah")
                             .font(.system(size: 24, weight: .semibold, design: .rounded))

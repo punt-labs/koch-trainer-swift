@@ -11,6 +11,7 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
 
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
+    var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
@@ -32,6 +33,10 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
         }
     }
 
+    func stop() {
+        stopCalled = true
+    }
+
     func setFrequency(_ frequency: Double) {
         frequencySet = frequency
     }
@@ -41,6 +46,12 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
     }
 
     func configureBandConditions(from settings: AppSettings) {}
+
+    func reset() {
+        playCharacterCalls = []
+        playGroupCalls = []
+        stopCalled = false
+    }
 
     func playDit() async {}
 
@@ -55,14 +66,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
     func startReceiving() throws { try radioState.startReceiving() }
     func startTransmitting() throws { try radioState.startTransmitting() }
     func stopRadio() throws { try radioState.stopRadio() }
-
-    func activateTone(frequency: Double) throws {
-        guard radioState.mode != .off else {
-            throw Radio.RadioError.mustBeOn
-        }
-    }
-
-    func deactivateTone() {}
 
     // MARK: Private
 
@@ -149,25 +152,15 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.phase, .completed)
     }
 
-    func testResumeFromPaused() async {
+    func testResumeFromPaused() {
         viewModel.startSession()
         viewModel.pause()
-        let callsBeforeResume = mockAudioEngine.playGroupCalls.count
+        mockAudioEngine.stopCalled = false
 
         viewModel.resume()
 
         XCTAssertTrue(viewModel.isPlaying)
         XCTAssertEqual(viewModel.phase, .training)
-
-        // Wait for async audio playback to be triggered
-        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
-
-        // Verify audio plays after resume (showNextWord triggers playGroup in receive mode)
-        XCTAssertGreaterThan(
-            mockAudioEngine.playGroupCalls.count,
-            callsBeforeResume,
-            "Audio should play after resuming from pause"
-        )
     }
 
     func testResumeNotPausedIsNoOp() {
@@ -375,22 +368,32 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         sendVM.cleanup()
     }
 
-    func testQueueDitInSendMode() {
-        let sendVM = makeSendViewModel()
+    func testInputDitInSendMode() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
-        pressDit(viewModel: sendVM)
+        sendVM.inputDit()
 
         XCTAssertEqual(sendVM.currentPattern, ".")
 
         sendVM.cleanup()
     }
 
-    func testQueueDahInSendMode() {
-        let sendVM = makeSendViewModel()
+    func testInputDahInSendMode() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
-        pressDah(viewModel: sendVM)
+        sendVM.inputDah()
 
         XCTAssertEqual(sendVM.currentPattern, "-")
 
@@ -398,13 +401,18 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     }
 
     func testInputPatternBuildUp() {
-        let sendVM = makeSendViewModel()
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
-        pressDah(viewModel: sendVM)
-        pressDit(viewModel: sendVM)
-        pressDah(viewModel: sendVM)
-        pressDit(viewModel: sendVM)
+        sendVM.inputDah()
+        sendVM.inputDit()
+        sendVM.inputDah()
+        sendVM.inputDit()
 
         XCTAssertEqual(sendVM.currentPattern, "-.-.")
 
@@ -412,46 +420,61 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
     }
 
     func testHandleKeyPressDit() {
-        let sendVM = makeSendViewModel()
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
-        pressKey(".", viewModel: sendVM)
+        sendVM.handleKeyPress(".")
         XCTAssertEqual(sendVM.currentPattern, ".")
 
-        pressKey("f", viewModel: sendVM)
+        sendVM.handleKeyPress("f")
         XCTAssertEqual(sendVM.currentPattern, "..")
 
-        pressKey("F", viewModel: sendVM)
+        sendVM.handleKeyPress("F")
         XCTAssertEqual(sendVM.currentPattern, "...")
 
         sendVM.cleanup()
     }
 
     func testHandleKeyPressDah() {
-        let sendVM = makeSendViewModel()
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
-        pressKey("-", viewModel: sendVM)
+        sendVM.handleKeyPress("-")
         XCTAssertEqual(sendVM.currentPattern, "-")
 
-        pressKey("j", viewModel: sendVM)
+        sendVM.handleKeyPress("j")
         XCTAssertEqual(sendVM.currentPattern, "--")
 
-        pressKey("J", viewModel: sendVM)
+        sendVM.handleKeyPress("J")
         XCTAssertEqual(sendVM.currentPattern, "---")
 
         sendVM.cleanup()
     }
 
     func testHandleKeyPressSpaceAdvancesToNextCharacter() {
-        let sendVM = makeSendViewModel()
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
         // Input pattern for 'C' (-.-.)
-        pressKey("-", viewModel: sendVM)
-        pressKey(".", viewModel: sendVM)
-        pressKey("-", viewModel: sendVM)
-        pressKey(".", viewModel: sendVM)
+        sendVM.handleKeyPress("-")
+        sendVM.handleKeyPress(".")
+        sendVM.handleKeyPress("-")
+        sendVM.handleKeyPress(".")
         XCTAssertEqual(sendVM.currentPattern, "-.-.")
 
         // Space should decode the pattern and add to userInput
@@ -521,25 +544,51 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         sendVM.cleanup()
     }
 
-    func testQueueElementNotAllowedWhenNotPlaying() {
-        let sendVM = makeSendViewModel()
+    func testInputDitNotAllowedWhenNotPlaying() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         // Don't start session
 
-        sendVM.queueElement(.dit)
+        sendVM.inputDit()
 
         XCTAssertEqual(sendVM.currentPattern, "")
 
         sendVM.cleanup()
     }
 
-    func testQueueElementNotAllowedWhenNotWaitingForResponse() {
-        let sendVM = makeSendViewModel()
+    func testInputDahNotAllowedWhenNotPlaying() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
+        // Don't start session
+
+        sendVM.inputDah()
+
+        XCTAssertEqual(sendVM.currentPattern, "")
+
+        sendVM.cleanup()
+    }
+
+    func testInputDitNotAllowedWhenNotWaitingForResponse() {
+        let sendVM = VocabularyTrainingViewModel(
+            vocabularySet: testSet,
+            sessionType: .send,
+            audioEngine: mockAudioEngine
+        )
+        sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
         sendVM.startSession()
 
         // Pause to clear isWaitingForResponse
         sendVM.pause()
 
-        sendVM.queueElement(.dit)
+        sendVM.inputDit()
 
         XCTAssertEqual(sendVM.currentPattern, "")
 
@@ -734,61 +783,9 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         audioEngine: VocabularyMockAudioEngine()
     )
     private var mockAudioEngine = VocabularyMockAudioEngine()
-    private var mockClock = MockClock()
     private var progressStore = ProgressStore()
     private var settingsStore = SettingsStore()
     private var testDefaults = UserDefaults(suiteName: "TestVocabVM") ?? .standard
-
-    /// Helper to create a send mode view model with proper keyer timing support
-    private func makeSendViewModel() -> VocabularyTrainingViewModel {
-        let vm = VocabularyTrainingViewModel(
-            vocabularySet: testSet,
-            sessionType: .send,
-            audioEngine: mockAudioEngine,
-            clock: mockClock
-        )
-        vm.configure(progressStore: progressStore, settingsStore: settingsStore)
-        return vm
-    }
-
-    /// Queue a dit element and advance time to complete it
-    private func pressDit(viewModel vm: VocabularyTrainingViewModel) {
-        guard let keyer = vm.keyer else { return }
-        vm.queueElement(.dit)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.ditDuration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
-    }
-
-    /// Queue a dah element and advance time to complete it
-    private func pressDah(viewModel vm: VocabularyTrainingViewModel) {
-        guard let keyer = vm.keyer else { return }
-        vm.queueElement(.dah)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.dahDuration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
-    }
-
-    /// Press a key via handleKeyPress and advance keyer timing
-    private func pressKey(_ key: Character, viewModel vm: VocabularyTrainingViewModel) {
-        guard let keyer = vm.keyer else { return }
-        vm.handleKeyPress(key)
-        keyer.processTick(at: mockClock.now())
-
-        let keyLower = String(key).lowercased()
-        let duration = (keyLower == "." || keyLower == "f")
-            ? keyer.configuration.ditDuration
-            : keyer.configuration.dahDuration
-
-        mockClock.advance(by: duration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
-    }
 
 }
 

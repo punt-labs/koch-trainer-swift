@@ -10,18 +10,11 @@ final class MorseQSOViewModel: ObservableObject {
 
     // MARK: Lifecycle
 
-    init(
-        style: QSOStyle,
-        callsign: String,
-        aiStarts: Bool = true,
-        audioEngine: AudioEngineProtocol? = nil,
-        clock: KeyerClock = RealClock()
-    ) {
+    init(style: QSOStyle, callsign: String, aiStarts: Bool = true, audioEngine: AudioEngineProtocol? = nil) {
         self.style = style
         myCallsign = callsign
         self.aiStarts = aiStarts
         self.audioEngine = audioEngine ?? AudioEngineFactory.makeEngine()
-        self.clock = clock
         engine = QSOEngine(style: style, myCallsign: callsign, audioEngine: self.audioEngine)
     }
 
@@ -70,9 +63,6 @@ final class MorseQSOViewModel: ObservableObject {
     // MARK: - Configuration
 
     let inputTimeout: TimeInterval = 2.0
-
-    /// Keyer for morse input timing. Internal for test access.
-    var keyer: IambicKeyer?
 
     var phase: QSOPhase {
         engine.state.phase
@@ -151,7 +141,6 @@ final class MorseQSOViewModel: ObservableObject {
             effectiveSpeed: settingsStore.settings.effectiveSpeed,
             settings: settingsStore.settings
         )
-        setupKeyer(from: settingsStore.settings)
     }
 
     /// Save session result to progress history.
@@ -197,7 +186,6 @@ final class MorseQSOViewModel: ObservableObject {
         isSessionActive = false
         turnState = .completed
         inputTimer?.invalidate()
-        keyer?.stop()
         audioEngine.endSession()
         saveSession()
     }
@@ -205,8 +193,6 @@ final class MorseQSOViewModel: ObservableObject {
     func cleanup() {
         inputTimer?.invalidate()
         inputTimer = nil
-        keyer?.stop()
-        keyer = nil
         audioEngine.endSession()
     }
 
@@ -217,28 +203,31 @@ final class MorseQSOViewModel: ObservableObject {
 
         let keyLower = Character(key.lowercased())
         if keyLower == "." || keyLower == "f" {
-            queueElement(.dit)
+            inputDit()
         } else if keyLower == "-" || keyLower == "j" {
-            queueElement(.dah)
+            inputDah()
         }
     }
 
-    func handleKeyRelease(_: Character) {
-        // Keyboard uses queued elements, not continuous paddle state
+    func inputDit() {
+        guard turnState == .userKeying else { return }
+        currentPattern += "."
+
+        // Switch to transmit mode for sidetone
+        try? audioEngine.stopRadio()
+        try? audioEngine.startTransmitting()
+        playDit()
+        resetInputTimer()
     }
 
-    /// Update paddle state for continuous iambic keying (touch paddles).
-    func updatePaddle(dit: Bool, dah: Bool) {
+    func inputDah() {
         guard turnState == .userKeying else { return }
-        keyer?.updatePaddle(PaddleInput(ditPressed: dit, dahPressed: dah))
-        syncPatternFromKeyer()
-    }
+        currentPattern += "-"
 
-    /// Queue a discrete element for playback with proper timing.
-    func queueElement(_ element: MorseElement) {
-        guard turnState == .userKeying else { return }
-        keyer?.queueElement(element)
-        syncPatternFromKeyer()
+        // Switch to transmit mode for sidetone
+        try? audioEngine.stopRadio()
+        try? audioEngine.startTransmitting()
+        playDah()
         resetInputTimer()
     }
 
@@ -263,64 +252,11 @@ final class MorseQSOViewModel: ObservableObject {
 
     private let engine: QSOEngine
     private let audioEngine: AudioEngineProtocol
-    private let clock: KeyerClock
     private var settingsStore: SettingsStore?
     private var progressStore: ProgressStore?
     private var sessionStartTime: Date?
     private var currentBlockStartTime: Date?
     private var inputTimer: Timer?
-    private let hapticManager = HapticManager()
-
-    private func syncPatternFromKeyer() {
-        if let pattern = keyer?.currentPattern {
-            currentPattern = pattern
-        }
-    }
-
-    private func setupKeyer(from settings: AppSettings) {
-        let config = KeyerConfiguration(
-            wpm: settings.keyerWPM,
-            frequency: settings.keyerFrequency,
-            hapticEnabled: settings.keyerHapticEnabled
-        )
-
-        keyer = IambicKeyer(
-            configuration: config,
-            clock: clock,
-            onToneStart: { [weak self] frequency in
-                guard let self else { return }
-                do {
-                    try audioEngine.activateTone(frequency: frequency)
-                } catch {
-                    // Radio not in transmit mode, ignore
-                }
-            },
-            onToneStop: { [weak self] in
-                self?.audioEngine.deactivateTone()
-            },
-            onPatternComplete: { [weak self] pattern in
-                guard let self else { return }
-                Task { @MainActor in
-                    self.handleKeyerPatternComplete(pattern)
-                }
-            },
-            onPatternUpdated: { [weak self] pattern in
-                guard let self else { return }
-                Task { @MainActor in
-                    self.currentPattern = pattern
-                }
-            },
-            onHaptic: { [weak self] element in
-                self?.hapticManager.playHaptic(for: element)
-            }
-        )
-    }
-
-    private func handleKeyerPatternComplete(_ pattern: String) {
-        guard turnState == .userKeying else { return }
-        currentPattern = pattern
-        completeCurrentCharacter()
-    }
 
     // MARK: - User Turn
 
@@ -334,8 +270,6 @@ final class MorseQSOViewModel: ObservableObject {
         // Reset block speed tracking
         currentBlockStartTime = nil
         currentBlockCharactersKeyed = 0
-        // Start keyer for user input
-        keyer?.start()
     }
 
     private func generateUserScript() -> String {
@@ -390,7 +324,6 @@ final class MorseQSOViewModel: ObservableObject {
 
     private func completeUserTurn() {
         inputTimer?.invalidate()
-        keyer?.stop()
 
         Task {
             // Submit the script to QSO engine (advances state machine)
@@ -484,4 +417,23 @@ final class MorseQSOViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Audio
+
+    private func playDit() {
+        Task {
+            await audioEngine.playDit()
+            // Return to receiving mode after sidetone
+            try? audioEngine.stopRadio()
+            try? audioEngine.startReceiving()
+        }
+    }
+
+    private func playDah() {
+        Task {
+            await audioEngine.playDah()
+            // Return to receiving mode after sidetone
+            try? audioEngine.stopRadio()
+            try? audioEngine.startReceiving()
+        }
+    }
 }

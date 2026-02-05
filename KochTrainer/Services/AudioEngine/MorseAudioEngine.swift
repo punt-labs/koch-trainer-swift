@@ -12,6 +12,8 @@ protocol AudioEngineProtocol {
     func playGroup(_ group: String, onCharacterPlayed: ((Character, Int) -> Void)?) async
     func playDit() async
     func playDah() async
+    func stop()
+    func reset()
     func setFrequency(_ frequency: Double)
     func setEffectiveSpeed(_ wpm: Int)
     func configureBandConditions(from settings: AppSettings)
@@ -41,15 +43,6 @@ protocol AudioEngineProtocol {
     /// Stop the radio (transition to off).
     /// - Throws: `Radio.RadioError.alreadyOff` if radio is already off.
     func stopRadio() throws
-
-    // MARK: - Tone Control API (for IambicKeyer)
-
-    /// Activate continuous tone at specified frequency.
-    /// - Throws: `Radio.RadioError.mustBeOn` if radio is off.
-    func activateTone(frequency: Double) throws
-
-    /// Deactivate continuous tone.
-    func deactivateTone()
 }
 
 // MARK: - MorseAudioEngine
@@ -109,9 +102,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
     /// Play a single character in Morse code.
     func playCharacter(_ char: Character) async {
-        // In continuous session mode, respect radio state (off = paused)
-        // In discrete mode (settings preview), always allow playback
-        guard !isSessionActive || radioMode != .off else { return }
+        guard !isStopped else { return }
 
         guard let pattern = MorseCode.pattern(for: char) else {
             logger.warning("Unknown character: \(String(char))")
@@ -119,7 +110,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         }
 
         for (index, element) in pattern.enumerated() {
-            guard !isSessionActive || radioMode != .off else { return }
+            guard !isStopped else { return }
 
             switch element {
             case ".":
@@ -139,13 +130,13 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
 
     /// Play a single dit (short tone).
     func playDit() async {
-        guard !isSessionActive || radioMode != .off else { return }
+        guard !isStopped else { return }
         await playToneElement(duration: timing.ditDuration)
     }
 
     /// Play a single dah (long tone).
     func playDah() async {
-        guard !isSessionActive || radioMode != .off else { return }
+        guard !isStopped else { return }
         await playToneElement(duration: timing.dahDuration)
     }
 
@@ -160,7 +151,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         let characters = Array(group.uppercased())
 
         for (index, char) in characters.enumerated() {
-            guard !isSessionActive || radioMode != .off else { return }
+            guard !isStopped else { return }
 
             if char == " " {
                 // Word gap (minus character gap already waited)
@@ -178,17 +169,30 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         }
     }
 
+    /// Stop all audio playback.
+    func stop() {
+        isStopped = true
+        toneGenerator.stopTone()
+    }
+
+    /// Reset stopped state to allow playback again.
+    func reset() {
+        isStopped = false
+    }
+
     // MARK: - Continuous Session API
 
     /// Start a continuous audio session.
     /// The audio engine runs continuously with radio mode control.
     func startSession() {
+        isStopped = false
         isSessionActive = true
         toneGenerator.startSession()
     }
 
     /// End the continuous audio session.
     func endSession() {
+        isStopped = true
         isSessionActive = false
         toneGenerator.endSession()
     }
@@ -210,18 +214,6 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
         try toneGenerator.radio.stop()
     }
 
-    // MARK: - Tone Control API
-
-    /// Activate continuous tone at specified frequency.
-    func activateTone(frequency: Double) throws {
-        try toneGenerator.activateTone(frequency: frequency)
-    }
-
-    /// Deactivate continuous tone.
-    func deactivateTone() {
-        toneGenerator.deactivateTone()
-    }
-
     // MARK: Private
 
     private let logger = Logger(subsystem: "com.kochtrainer", category: "MorseAudioEngine")
@@ -230,6 +222,7 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     private var frequency: Double = 600
     private var effectiveSpeed: Int = 12
 
+    private var isStopped = false
     private var isSessionActive = false
 
     /// Timing configuration based on current effective speed
@@ -242,17 +235,17 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// Uses discrete mode otherwise (clean audio for settings preview).
     private func playToneElement(duration: TimeInterval) async {
         if isSessionActive {
-            // Continuous mode: use serialized playback to prevent race conditions
+            // Continuous mode: toggle tone flag on running engine
+            // Precondition: radio must be on (receiving or transmitting)
             do {
-                try await toneGenerator.playToneElementSerialized(
-                    frequency: frequency,
-                    duration: duration
-                )
+                try toneGenerator.activateTone(frequency: frequency)
             } catch {
                 preconditionFailure(
-                    "Programming error: Z spec violation: attempted to play tone with radio off."
+                    "Programming error: Z spec violation: attempted to activate tone with radio off. Call startSession() before playing."
                 )
             }
+            await toneGenerator.playSilence(duration: duration)
+            toneGenerator.deactivateTone()
         } else {
             // Discrete mode: start/stop engine per tone (no band conditions)
             await toneGenerator.playTone(frequency: frequency, duration: duration)

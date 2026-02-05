@@ -11,6 +11,7 @@ final class MockAudioEngine: AudioEngineProtocol {
 
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
+    var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
@@ -32,6 +33,10 @@ final class MockAudioEngine: AudioEngineProtocol {
         }
     }
 
+    func stop() {
+        stopCalled = true
+    }
+
     func setFrequency(_ frequency: Double) {
         frequencySet = frequency
     }
@@ -42,6 +47,12 @@ final class MockAudioEngine: AudioEngineProtocol {
 
     func configureBandConditions(from settings: AppSettings) {
         // No-op for testing
+    }
+
+    func reset() {
+        playCharacterCalls = []
+        playGroupCalls = []
+        stopCalled = false
     }
 
     func playDit() async {
@@ -61,14 +72,6 @@ final class MockAudioEngine: AudioEngineProtocol {
     func startReceiving() throws { try radioState.startReceiving() }
     func startTransmitting() throws { try radioState.startTransmitting() }
     func stopRadio() throws { try radioState.stopRadio() }
-
-    func activateTone(frequency: Double) throws {
-        guard radioState.mode != .off else {
-            throw Radio.RadioError.mustBeOn
-        }
-    }
-
-    func deactivateTone() {}
 
     // MARK: Private
 
@@ -482,7 +485,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     func testCleanupStopsAudio() {
         viewModel.startSession()
-        mockAudioEngine.endSessionCalled = false
+        mockAudioEngine.stopCalled = false
 
         viewModel.cleanup()
 

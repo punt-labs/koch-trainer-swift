@@ -39,6 +39,15 @@ final class SilentAudioEngine: AudioEngineProtocol {
         // Silent - no-op
     }
 
+    func stop() {
+        // Silent - no-op
+    }
+
+    func reset() {
+        playedCharacters.removeAll()
+        playedGroups.removeAll()
+    }
+
     func setFrequency(_ frequency: Double) {
         // Silent - no-op
     }
@@ -71,19 +80,6 @@ final class SilentAudioEngine: AudioEngineProtocol {
 
     func stopRadio() throws {
         try radioState.stopRadio()
-    }
-
-    // MARK: - Tone Control API
-
-    func activateTone(frequency: Double) throws {
-        guard radioState.mode != .off else {
-            throw Radio.RadioError.mustBeOn
-        }
-        // Silent - no-op
-    }
-
-    func deactivateTone() {
-        // Silent - no-op
     }
 
     // MARK: Private

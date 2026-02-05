@@ -52,14 +52,6 @@ final class QSOEnginePhaseTests: XCTestCase {
         func startTransmitting() throws { try radioState.startTransmitting() }
         func stopRadio() throws { try radioState.stopRadio() }
 
-        func activateTone(frequency: Double) throws {
-            guard radioState.mode != .off else {
-                throw Radio.RadioError.mustBeOn
-            }
-        }
-
-        func deactivateTone() {}
-
         // MARK: Private
 
         private let radioState = MockRadioState()

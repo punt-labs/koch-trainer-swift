@@ -137,10 +137,9 @@ final class QSOEngine: ObservableObject {
         state.addMessage(from: sender, text: text)
     }
 
-    /// Signal that audio playback should stop.
-    /// Note: Actual audio stopping is handled by the audio engine's radioMode state.
-    /// This method clears the UI state flag so views know playback has ended.
+    /// Stop any ongoing audio playback
     func stopAudio() {
+        audioEngine.stop()
         isPlayingAudio = false
     }
 
@@ -207,7 +206,10 @@ final class QSOEngine: ObservableObject {
         isPlayingAudio = true
         defer { isPlayingAudio = false }
 
-        await audioEngine.playGroup(message)
+        if let engine = audioEngine as? MorseAudioEngine {
+            engine.reset()
+            await engine.playGroup(message)
+        }
     }
 
 }

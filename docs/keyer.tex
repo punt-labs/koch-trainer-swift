@@ -1,0 +1,1042 @@
+%
+% iambic_keyer.tex
+%
+% Z Specification for Iambic Paddle Keyer
+% Formal model of automatic Morse code element generation
+%
+% This specification integrates with koch_trainer.tex and models the
+% electronic keyer that handles dit/dah timing automatically.
+%
+
+\documentclass[a4paper,10pt,fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amssymb}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{fuzz}
+\usepackage{zed-maths}
+\usepackage{zed-proof}
+
+\begin{document}
+
+\title{Iambic Keyer: A Z Specification}
+\author{Formal Model of Automatic Morse Code Element Generation}
+\date{February 2026}
+\hypersetup{
+  pdftitle={Iambic Keyer: A Z Specification},
+  pdfauthor={Formal Model of Automatic Morse Code Element Generation},
+  pdfsubject={Z Specification for Morse Code Keying},
+  pdfcreator={fuzz/probcli}
+}
+\maketitle
+
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+This specification models an \emph{iambic keyer}---an electronic device that
+generates properly-timed Morse code elements from paddle inputs. Unlike a
+straight key where the operator manually times each dit and dah by holding
+down the key for the correct duration, an iambic keyer handles all timing
+automatically. The operator simply touches the dit paddle to produce dits
+or the dah paddle to produce dahs; the keyer ensures correct element duration
+and inter-element spacing.
+
+\subsection{Integration with Koch Trainer}
+
+This specification extends the Koch Trainer system (koch\_trainer.tex) by
+modeling the keyer subsystem used during \emph{send} training. The keyer:
+
+\begin{itemize}
+\item Operates only when \emph{radioMode = transmitting} (half-duplex constraint)
+\item Generates audio via the existing \emph{toneActive} mechanism
+\item Receives paddle inputs from touch zones or keyboard (F/J keys in simulator)
+\item Outputs properly-timed Morse elements for character recognition
+\end{itemize}
+
+The keyer is the bridge between raw user input (paddle touches) and the
+discrete character attempts recorded by $RecordSendAttempt$.
+
+\subsection{Keyer Variants}
+
+Amateur radio operators use several keyer modes. This specification models
+\emph{Iambic Mode B}, the most common choice:
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\hline
+Mode & Behavior \\
+\hline
+Iambic A & Element stops immediately when both paddles released \\
+Iambic B & Current element completes before stopping \\
+Ultimatic & Alternation favors most recently pressed paddle \\
+\hline
+\end{tabular}
+\end{center}
+
+Mode B is preferred by most operators because it produces cleaner code---the
+current element always completes, avoiding truncated elements that sound wrong.
+
+\subsection{Scope}
+
+This specification models:
+
+\begin{itemize}
+\item Paddle input state (dit/dah held)
+\item Keyer state machine (idle, playing element, inter-element gap)
+\item Element timing derived from words-per-minute setting
+\item Iambic squeeze behavior (alternating dit-dah when both paddles held)
+\item Haptic feedback triggers
+\end{itemize}
+
+We do not model audio waveform generation, envelope shaping, or UI layout---only
+the state machine that determines when tones start and stop.
+
+%==============================================================================
+\section{Basic Types}
+%==============================================================================
+
+Time is measured in milliseconds for element timing precision.
+
+\begin{zed}
+Time == \nat
+\end{zed}
+
+We reuse the boolean type from koch\_trainer.tex:
+
+\begin{zed}
+ZBOOL ::= ztrue | zfalse
+\end{zed}
+
+%==============================================================================
+\section{Free Types}
+%==============================================================================
+
+\subsection{Paddle}
+
+The two physical paddle inputs:
+
+\begin{zed}
+Paddle ::= dit | dah
+\end{zed}
+
+In the physical device, dit is conventionally on the left (thumb) and dah on
+the right (index finger) for right-handed operators. The iPhone implementation
+uses the bottom-left quadrant for dit and bottom-right for dah.
+
+\subsection{Element}
+
+The Morse code elements that the keyer generates:
+
+\begin{zed}
+Element ::= ditElement | dahElement
+\end{zed}
+
+A dit has duration $T$ (one time unit). A dah has duration $3T$. The inter-element
+gap within a character is $T$. These ratios are fixed by international convention.
+
+\subsection{Keyer Phase}
+
+The keyer cycles through three phases:
+
+\begin{zed}
+KeyerPhase ::= keyerIdle | playing | gap
+\end{zed}
+
+\begin{itemize}
+\item \emph{keyerIdle}: No element active, waiting for paddle input
+\item \emph{playing}: Tone active, generating a dit or dah
+\item \emph{gap}: Tone silent, inter-element spacing before next element
+\end{itemize}
+
+\subsection{Iambic Mode}
+
+\begin{zed}
+IambicMode ::= modeA | modeB
+\end{zed}
+
+Mode A truncates elements on paddle release; Mode B completes them. We default
+to Mode B but model both for completeness.
+
+%==============================================================================
+\section{Global Constants}
+%==============================================================================
+
+\subsection{Timing Constants}
+
+Element timing derives from the standard PARIS calibration: the word ``PARIS''
+contains exactly 50 time units, so at $W$ words per minute, each time unit
+is $\frac{1200}{W}$ milliseconds.
+
+\begin{axdef}
+defaultWpm : \nat \\
+minWpm : \nat \\
+maxWpm : \nat \\
+defaultToneHz : \nat \\
+minToneHz : \nat \\
+maxToneHz : \nat
+\where
+defaultWpm = 13 \\
+minWpm = 5 \\
+maxWpm = 40 \\
+defaultToneHz = 700 \\
+minToneHz = 400 \\
+maxToneHz = 1000
+\end{axdef}
+
+The default speed of 13 WPM is a good starting point for beginners. The tone
+frequency of 700 Hz is comfortable for extended listening; operators typically
+choose frequencies between 400--1000 Hz based on personal preference and
+ambient noise conditions.
+
+\subsection{Timing Functions}
+
+We define timing as axiomatic functions rather than computed values, since
+Z does not have division. The implementation computes these as:
+
+\[
+ditMs = \frac{1200}{wpm}, \quad
+dahMs = 3 \times ditMs, \quad
+gapMs = ditMs
+\]
+
+\begin{axdef}
+ditDuration : \nat \pfun Time \\
+dahDuration : \nat \pfun Time \\
+gapDuration : \nat \pfun Time
+\where
+\dom ditDuration = minWpm \upto maxWpm \\
+\dom dahDuration = minWpm \upto maxWpm \\
+\dom gapDuration = minWpm \upto maxWpm \\
+\forall w : minWpm \upto maxWpm @ \\
+\t1 dahDuration(w) = 3 * ditDuration(w) \land \\
+\t1 gapDuration(w) = ditDuration(w)
+\end{axdef}
+
+For reference, at common speeds:
+
+\begin{center}
+\begin{tabular}{rrrr}
+\hline
+WPM & Dit (ms) & Dah (ms) & Gap (ms) \\
+\hline
+5 & 240 & 720 & 240 \\
+13 & 92 & 277 & 92 \\
+20 & 60 & 180 & 60 \\
+25 & 48 & 144 & 48 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Model Bounds}
+
+As with koch\_trainer.tex, we define bounds for finite model checking:
+
+\begin{axdef}
+KEYER\_MODEL\_BOUND : \nat
+\where
+KEYER\_MODEL\_BOUND = 10
+\end{axdef}
+
+This bounds the time values to enable ProB animation.
+
+%==============================================================================
+\section{Keyer Configuration}
+%==============================================================================
+
+User-configurable keyer settings that remain constant during element generation:
+
+\begin{schema}{KeyerConfig}
+wpm : \nat \\
+toneHz : \nat \\
+iambicMode : IambicMode \\
+hapticEnabled : ZBOOL
+\where
+wpm \geq minWpm \\
+wpm \leq maxWpm \\
+toneHz \geq minToneHz \\
+toneHz \leq maxToneHz
+\end{schema}
+
+The \emph{wpm} setting controls element timing. The \emph{toneHz} setting
+controls audio frequency (passed to the audio engine, not modeled here).
+The \emph{iambicMode} selects Mode A or B behavior. The \emph{hapticEnabled}
+flag controls whether haptic feedback fires on element start.
+
+%==============================================================================
+\section{Paddle Input State}
+%==============================================================================
+
+Tracks which paddles are currently held down:
+
+\begin{schema}{PaddleState}
+ditHeld : ZBOOL \\
+dahHeld : ZBOOL
+\end{schema}
+
+Both paddles can be held simultaneously---this is the ``squeeze'' that produces
+alternating dit-dah sequences in iambic mode.
+
+%==============================================================================
+\section{Keyer State}
+%==============================================================================
+
+The core keyer state machine:
+
+\begin{schema}{KeyerState}
+keyerPhase : KeyerPhase \\
+currentElement : Element \\
+elementStartTime : Time \\
+gapStartTime : Time \\
+pendingOpposite : ZBOOL \\
+lastPlayedElement : Element
+\where
+% Phase determines which timing field is relevant
+keyerPhase = keyerIdle \implies elementStartTime = 0 \land gapStartTime = 0 \\
+keyerPhase = playing \implies gapStartTime = 0 \\
+keyerPhase = gap \implies elementStartTime = 0 \\
+% Model bounds for animation
+elementStartTime \leq KEYER\_MODEL\_BOUND \\
+gapStartTime \leq KEYER\_MODEL\_BOUND
+\end{schema}
+
+The \emph{currentElement} field indicates which element is playing (only
+meaningful when $keyerPhase = playing$). The \emph{elementStartTime} records
+when the current element began, enabling duration checking. The
+\emph{pendingOpposite} flag is set when the opposite paddle is pressed
+during an element, ensuring it plays next (iambic squeeze behavior).
+The \emph{lastPlayedElement} remembers what just finished for alternation.
+
+%==============================================================================
+\section{Output State}
+%==============================================================================
+
+Observable outputs---tone generation and haptic feedback:
+
+\begin{schema}{KeyerOutput}
+toneActive : ZBOOL \\
+hapticPending : ZBOOL \\
+hapticPaddle : Paddle
+\end{schema}
+
+The \emph{toneActive} field connects directly to the $toneActive$ field in
+$TrainingSession$ from koch\_trainer.tex. When $toneActive = ztrue$, the
+audio engine generates a tone at the configured frequency.
+
+The \emph{hapticPending} flag indicates a haptic event should fire. The
+\emph{hapticPaddle} indicates which paddle triggered it (dit and dah have
+subtly different haptic patterns for tactile differentiation).
+
+%==============================================================================
+\section{Complete Keyer System}
+%==============================================================================
+
+\begin{schema}{Keyer}
+KeyerConfig \\
+PaddleState \\
+KeyerState \\
+KeyerOutput \\
+now : Time
+\where
+% Fundamental invariant: tone matches phase
+toneActive = ztrue \iff keyerPhase = playing \\
+% Haptic only fires at element start, never in idle
+keyerPhase = keyerIdle \implies hapticPending = zfalse \\
+% Time bound for model checking
+now \leq KEYER\_MODEL\_BOUND
+\end{schema}
+
+The invariant $toneActive = ztrue \iff keyerPhase = playing$ ensures the
+audio output correctly reflects the keyer state. This is the key property
+that the implementation must maintain.
+
+%==============================================================================
+\section{Initialization}
+%==============================================================================
+
+\begin{schema}{KeyerInit}
+Keyer'
+\where
+% Configuration defaults
+wpm' = defaultWpm \\
+toneHz' = defaultToneHz \\
+iambicMode' = modeB \\
+hapticEnabled' = ztrue \\
+% Input state: nothing held
+ditHeld' = zfalse \\
+dahHeld' = zfalse \\
+% Keyer state: idle
+keyerPhase' = keyerIdle \\
+currentElement' = ditElement \\
+elementStartTime' = 0 \\
+gapStartTime' = 0 \\
+pendingOpposite' = zfalse \\
+lastPlayedElement' = ditElement \\
+% Output state: silent
+toneActive' = zfalse \\
+hapticPending' = zfalse \\
+hapticPaddle' = dit \\
+% Time
+now' = 0
+\end{schema}
+
+The keyer initializes to an idle state with default configuration. The
+\emph{currentElement} and \emph{lastPlayedElement} default values are
+arbitrary since they're only meaningful in non-idle states.
+
+%==============================================================================
+\section{Input Operations}
+%==============================================================================
+
+\subsection{Paddle Down}
+
+User presses a paddle (touch begins or key pressed):
+
+\begin{schema}{PaddleDown}
+\Delta Keyer \\
+p? : Paddle
+\where
+% Update held state for the pressed paddle
+(p? = dit \land ditHeld' = ztrue \land dahHeld' = dahHeld) \lor
+(p? = dah \land dahHeld' = ztrue \land ditHeld' = ditHeld) \\
+% If playing opposite element, set pending flag
+(keyerPhase = playing \land \\
+\t1 ((p? = dit \land currentElement = dahElement) \lor \\
+\t1 ~(p? = dah \land currentElement = ditElement))) \\
+\t1 \implies pendingOpposite' = ztrue \\
+\lnot (keyerPhase = playing \land \\
+\t1 ((p? = dit \land currentElement = dahElement) \lor \\
+\t1 ~(p? = dah \land currentElement = ditElement))) \\
+\t1 \implies pendingOpposite' = pendingOpposite \\
+% All other state unchanged
+keyerPhase' = keyerPhase \\
+currentElement' = currentElement \\
+elementStartTime' = elementStartTime \\
+gapStartTime' = gapStartTime \\
+lastPlayedElement' = lastPlayedElement \\
+toneActive' = toneActive \\
+hapticPending' = hapticPending \\
+hapticPaddle' = hapticPaddle \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+The key behavior here is setting \emph{pendingOpposite} when the opposite
+paddle is pressed during an element. This ensures the squeeze behavior
+works correctly---pressing dah while a dit is playing queues the dah for
+immediate playback after the current element completes.
+
+\subsection{Paddle Up}
+
+User releases a paddle (touch ends or key released):
+
+\begin{schema}{PaddleUp}
+\Delta Keyer \\
+p? : Paddle
+\where
+% Update held state for the released paddle
+(p? = dit \land ditHeld' = zfalse \land dahHeld' = dahHeld) \lor
+(p? = dah \land dahHeld' = zfalse \land ditHeld' = ditHeld) \\
+% All other state unchanged
+keyerPhase' = keyerPhase \\
+currentElement' = currentElement \\
+elementStartTime' = elementStartTime \\
+gapStartTime' = gapStartTime \\
+pendingOpposite' = pendingOpposite \\
+lastPlayedElement' = lastPlayedElement \\
+toneActive' = toneActive \\
+hapticPending' = hapticPending \\
+hapticPaddle' = hapticPaddle \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+Note that releasing a paddle does not immediately stop the element in Mode B.
+The element completes its full duration. Mode A would add a truncation check
+here (modeled separately in Section~\ref{sec:modea}).
+
+%==============================================================================
+\section{Internal State Transitions}
+%==============================================================================
+
+\subsection{Start Element from Idle}
+
+When the keyer is idle and a paddle is held, start the corresponding element:
+
+\begin{schema}{StartFromIdle}
+\Delta Keyer
+\where
+% Precondition: idle with at least one paddle held
+keyerPhase = keyerIdle \\
+ditHeld = ztrue \lor dahHeld = ztrue \\
+% Determine which element to start (dit takes priority)
+(ditHeld = ztrue \implies \\
+\t1 currentElement' = ditElement \land hapticPaddle' = dit) \\
+(ditHeld = zfalse \land dahHeld = ztrue \implies \\
+\t1 currentElement' = dahElement \land hapticPaddle' = dah) \\
+% Transition to playing
+keyerPhase' = playing \\
+elementStartTime' = now \\
+gapStartTime' = 0 \\
+pendingOpposite' = zfalse \\
+lastPlayedElement' = lastPlayedElement \\
+% Outputs
+toneActive' = ztrue \\
+(hapticEnabled = ztrue \implies hapticPending' = ztrue) \\
+(hapticEnabled = zfalse \implies hapticPending' = zfalse) \\
+% Unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+When both paddles are held simultaneously, dit takes priority for the first
+element. This is a common convention; the subsequent alternation will then
+produce dah-dit-dah-dit\ldots
+
+\subsection{Element Duration Elapsed}
+
+When an element has played for its full duration, transition to gap phase:
+
+\begin{schema}{EndElement}
+\Delta Keyer
+\where
+keyerPhase = playing \\
+% Check duration based on element type
+(currentElement = ditElement \land \\
+\t1 now \geq elementStartTime + ditDuration(wpm)) \lor
+(currentElement = dahElement \land \\
+\t1 now \geq elementStartTime + dahDuration(wpm)) \\
+% Transition to gap
+keyerPhase' = gap \\
+gapStartTime' = now \\
+elementStartTime' = 0 \\
+lastPlayedElement' = currentElement \\
+currentElement' = currentElement \\
+pendingOpposite' = pendingOpposite \\
+% Turn off tone
+toneActive' = zfalse \\
+hapticPending' = zfalse \\
+% Unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+hapticPaddle' = hapticPaddle \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+The element completes and the keyer enters a silent gap before potentially
+starting the next element.
+
+\subsection{Gap Elapsed with Next Element}
+
+When the inter-element gap completes and there's a next element to play:
+
+\begin{schema}{EndGapWithNext}
+\Delta Keyer \\
+nextElement : Element
+\where
+keyerPhase = gap \\
+now \geq gapStartTime + gapDuration(wpm) \\
+% Determine next element (see decision logic below)
+% Priority 1: pending opposite
+(pendingOpposite = ztrue \land \\
+\t1 lastPlayedElement = ditElement \land nextElement = dahElement) \lor
+(pendingOpposite = ztrue \land \\
+\t1 lastPlayedElement = dahElement \land nextElement = ditElement) \lor
+% Priority 2: both held - alternate
+(pendingOpposite = zfalse \land ditHeld = ztrue \land dahHeld = ztrue \land \\
+\t1 lastPlayedElement = ditElement \land nextElement = dahElement) \lor
+(pendingOpposite = zfalse \land ditHeld = ztrue \land dahHeld = ztrue \land \\
+\t1 lastPlayedElement = dahElement \land nextElement = ditElement) \lor
+% Priority 3: dit held only
+(pendingOpposite = zfalse \land ditHeld = ztrue \land dahHeld = zfalse \land \\
+\t1 nextElement = ditElement) \lor
+% Priority 4: dah held only
+(pendingOpposite = zfalse \land ditHeld = zfalse \land dahHeld = ztrue \land \\
+\t1 nextElement = dahElement) \\
+% Start next element
+keyerPhase' = playing \\
+currentElement' = nextElement \\
+elementStartTime' = now \\
+gapStartTime' = 0 \\
+pendingOpposite' = zfalse \\
+lastPlayedElement' = lastPlayedElement \\
+% Outputs
+toneActive' = ztrue \\
+(hapticEnabled = ztrue \implies hapticPending' = ztrue) \\
+(hapticEnabled = zfalse \implies hapticPending' = zfalse) \\
+(nextElement = ditElement \implies hapticPaddle' = dit) \\
+(nextElement = dahElement \implies hapticPaddle' = dah) \\
+% Unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+The next element decision follows this priority:
+
+\begin{enumerate}
+\item If \emph{pendingOpposite} is set, play the opposite of what just finished
+\item If both paddles held (squeeze), alternate from what just finished
+\item If only dit held, play dit
+\item If only dah held, play dah
+\item If nothing held, return to idle (see next schema)
+\end{enumerate}
+
+\subsection{Gap Elapsed to Idle}
+
+When the gap completes but no paddle is held:
+
+\begin{schema}{EndGapToIdle}
+\Delta Keyer
+\where
+keyerPhase = gap \\
+now \geq gapStartTime + gapDuration(wpm) \\
+pendingOpposite = zfalse \\
+ditHeld = zfalse \\
+dahHeld = zfalse \\
+% Return to idle
+keyerPhase' = keyerIdle \\
+elementStartTime' = 0 \\
+gapStartTime' = 0 \\
+pendingOpposite' = zfalse \\
+% Preserve last played for reference
+lastPlayedElement' = lastPlayedElement \\
+currentElement' = currentElement \\
+% Silent
+toneActive' = zfalse \\
+hapticPending' = zfalse \\
+% Unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+hapticPaddle' = hapticPaddle \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+The keyer returns to idle, ready for the next paddle touch.
+
+%==============================================================================
+\section{Timer Operations}
+%==============================================================================
+
+\subsection{Advance Time}
+
+The timer tick advances the clock:
+
+\begin{schema}{AdvanceTime}
+\Delta Keyer \\
+delta? : Time
+\where
+delta? \geq 1 \\
+now' = now + delta? \\
+now + delta? \leq KEYER\_MODEL\_BOUND \\
+% All else unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+keyerPhase' = keyerPhase \\
+currentElement' = currentElement \\
+elementStartTime' = elementStartTime \\
+gapStartTime' = gapStartTime \\
+pendingOpposite' = pendingOpposite \\
+lastPlayedElement' = lastPlayedElement \\
+toneActive' = toneActive \\
+hapticPending' = hapticPending \\
+hapticPaddle' = hapticPaddle \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+The implementation calls this at 1ms intervals using CADisplayLink for
+smooth, jitter-free timing.
+
+\subsection{Tick}
+
+The complete timer callback checks for state transitions after advancing time.
+This is a promoted operation combining time advance with transition checks:
+
+\begin{zed}
+Tick \defs AdvanceTime \semi TickTransitions
+\end{zed}
+
+Where $TickTransitions$ is defined as:
+
+\begin{schema}{TickTransitions}
+\Delta Keyer
+\where
+% Case 1: Idle with paddle held
+(keyerPhase = keyerIdle \land (ditHeld = ztrue \lor dahHeld = ztrue) \\
+\t1 \land \Xi KeyerConfig \land \exists \Delta Keyer @ StartFromIdle) \lor
+% Case 2: Playing with duration elapsed
+(keyerPhase = playing \land \\
+\t1 ((currentElement = ditElement \land \\
+\t2 ~now \geq elementStartTime + ditDuration(wpm)) \lor \\
+\t1 ~(currentElement = dahElement \land \\
+\t2 ~now \geq elementStartTime + dahDuration(wpm))) \\
+\t1 \land \Xi KeyerConfig \land \exists \Delta Keyer @ EndElement) \lor
+% Case 3: Gap elapsed
+(keyerPhase = gap \land now \geq gapStartTime + gapDuration(wpm) \land \\
+\t1 \Xi KeyerConfig \land \\
+\t1 ((\exists \Delta Keyer; nextElement : Element @ EndGapWithNext) \lor \\
+\t1 ~(\exists \Delta Keyer @ EndGapToIdle))) \lor
+% Case 4: No transition
+(\Xi Keyer)
+\end{schema}
+
+%==============================================================================
+\section{Configuration Operations}
+%==============================================================================
+
+\begin{schema}{SetWpm}
+\Delta Keyer \\
+newWpm? : \nat
+\where
+newWpm? \geq minWpm \\
+newWpm? \leq maxWpm \\
+wpm' = newWpm? \\
+% All else unchanged
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled \\
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+keyerPhase' = keyerPhase \\
+currentElement' = currentElement \\
+elementStartTime' = elementStartTime \\
+gapStartTime' = gapStartTime \\
+pendingOpposite' = pendingOpposite \\
+lastPlayedElement' = lastPlayedElement \\
+toneActive' = toneActive \\
+hapticPending' = hapticPending \\
+hapticPaddle' = hapticPaddle \\
+now' = now
+\end{schema}
+
+WPM changes take effect immediately for the next element. An element currently
+playing completes at its original timing.
+
+\begin{schema}{SetToneHz}
+\Delta Keyer \\
+newToneHz? : \nat
+\where
+newToneHz? \geq minToneHz \\
+newToneHz? \leq maxToneHz \\
+toneHz' = newToneHz? \\
+wpm' = wpm \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled \\
+\Xi PaddleState \\
+\Xi KeyerState \\
+\Xi KeyerOutput \\
+now' = now
+\end{schema}
+
+\begin{schema}{SetIambicMode}
+\Delta Keyer \\
+newMode? : IambicMode
+\where
+iambicMode' = newMode? \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+hapticEnabled' = hapticEnabled \\
+\Xi PaddleState \\
+\Xi KeyerState \\
+\Xi KeyerOutput \\
+now' = now
+\end{schema}
+
+\begin{schema}{ToggleHaptic}
+\Delta Keyer
+\where
+(hapticEnabled = ztrue \land hapticEnabled' = zfalse) \lor
+(hapticEnabled = zfalse \land hapticEnabled' = ztrue) \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+\Xi PaddleState \\
+\Xi KeyerState \\
+\Xi KeyerOutput \\
+now' = now
+\end{schema}
+
+%==============================================================================
+\section{Query Operations}
+%==============================================================================
+
+\begin{schema}{GetTimings}
+\Xi Keyer \\
+ditMs! : Time \\
+dahMs! : Time \\
+gapMs! : Time
+\where
+ditMs! = ditDuration(wpm) \\
+dahMs! = dahDuration(wpm) \\
+gapMs! = gapDuration(wpm)
+\end{schema}
+
+\begin{schema}{IsPlaying}
+\Xi Keyer \\
+playing! : ZBOOL
+\where
+(keyerPhase = playing \land playing! = ztrue) \lor
+(keyerPhase \neq playing \land playing! = zfalse)
+\end{schema}
+
+%==============================================================================
+\section{Iambic Mode A Variant}
+\label{sec:modea}
+%==============================================================================
+
+Mode A differs from Mode B in one key respect: when both paddles are released
+during an element, the element is truncated immediately rather than completing.
+
+\begin{schema}{TruncateElement}
+\Delta Keyer
+\where
+keyerPhase = playing \\
+iambicMode = modeA \\
+ditHeld = zfalse \\
+dahHeld = zfalse \\
+% Immediate return to idle
+keyerPhase' = keyerIdle \\
+elementStartTime' = 0 \\
+gapStartTime' = 0 \\
+pendingOpposite' = zfalse \\
+currentElement' = currentElement \\
+lastPlayedElement' = currentElement \\
+% Stop tone immediately
+toneActive' = zfalse \\
+hapticPending' = zfalse \\
+% Unchanged
+ditHeld' = ditHeld \\
+dahHeld' = dahHeld \\
+hapticPaddle' = hapticPaddle \\
+now' = now \\
+wpm' = wpm \\
+toneHz' = toneHz \\
+iambicMode' = iambicMode \\
+hapticEnabled' = hapticEnabled
+\end{schema}
+
+For Mode A, the tick transitions would include this additional case. Most
+operators find Mode A produces choppier-sounding code and prefer Mode B.
+
+%==============================================================================
+\section{Error Schemas}
+%==============================================================================
+
+For totalized operations:
+
+\begin{schema}{PaddleAlreadyHeld}
+\Xi Keyer \\
+p? : Paddle
+\where
+(p? = dit \land ditHeld = ztrue) \lor
+(p? = dah \land dahHeld = ztrue)
+\end{schema}
+
+\begin{schema}{PaddleNotHeld}
+\Xi Keyer \\
+p? : Paddle
+\where
+(p? = dit \land ditHeld = zfalse) \lor
+(p? = dah \land dahHeld = zfalse)
+\end{schema}
+
+\begin{schema}{InvalidWpm}
+\Xi Keyer \\
+newWpm? : \nat
+\where
+newWpm? < minWpm \lor newWpm? > maxWpm
+\end{schema}
+
+\begin{schema}{InvalidToneHz}
+\Xi Keyer \\
+newToneHz? : \nat
+\where
+newToneHz? < minToneHz \lor newToneHz? > maxToneHz
+\end{schema}
+
+%==============================================================================
+\section{Total Operations}
+%==============================================================================
+
+\begin{zed}
+PaddleDownTotal \defs PaddleDown \lor PaddleAlreadyHeld
+\end{zed}
+
+\begin{zed}
+PaddleUpTotal \defs PaddleUp \lor PaddleNotHeld
+\end{zed}
+
+\begin{zed}
+SetWpmTotal \defs SetWpm \lor InvalidWpm
+\end{zed}
+
+\begin{zed}
+SetToneHzTotal \defs SetToneHz \lor InvalidToneHz
+\end{zed}
+
+%==============================================================================
+\section{Integration with Training Session}
+%==============================================================================
+
+The keyer integrates with the Koch Trainer's $TrainingSession$ through
+these connections:
+
+\subsection{Radio Mode Constraint}
+
+The keyer may only generate tones when the radio is in transmit mode. This
+models the half-duplex constraint from koch\_trainer.tex:
+
+\begin{schema}{KeyerRadioConstraint}
+Keyer \\
+radioMode : RadioMode
+\where
+toneActive = ztrue \implies radioMode = transmitting \\
+radioMode = off \implies keyerPhase = keyerIdle
+\end{schema}
+
+When the radio is off or receiving, the keyer must be idle.
+
+\subsection{Tone Synchronization}
+
+The keyer's $toneActive$ output drives the $TrainingSession$ $toneActive$ field.
+The operation sequences are:
+
+\begin{enumerate}
+\item User begins touch $\rightarrow$ $PaddleDown$ $\rightarrow$ $StartFromIdle$
+      $\rightarrow$ $toneActive := ztrue$ $\rightarrow$ $ActivateTone$ (in TrainingSession)
+\item Element completes $\rightarrow$ $EndElement$ $\rightarrow$ $toneActive := zfalse$
+      $\rightarrow$ $DeactivateTone$ (in TrainingSession)
+\end{enumerate}
+
+\subsection{Session Flow}
+
+During send training:
+
+\begin{enumerate}
+\item $InitSession$ sets $direction := send$
+\item $CompleteIntroduction$ sets $radioMode := receiving$
+\item User presses paddle $\rightarrow$ $EnterTransmitMode$ sets $radioMode := transmitting$
+\item Keyer generates elements via $StartFromIdle$, $EndElement$, $EndGapWithNext$
+\item User finishes character $\rightarrow$ timeout $\rightarrow$ $ExitTransmitMode$
+      sets $radioMode := receiving$
+\item System compares keyed pattern to expected $\rightarrow$ $RecordCorrectResponse$
+      or $RecordIncorrectResponse$
+\item Repeat until proficiency met
+\end{enumerate}
+
+%==============================================================================
+\section{System Invariants}
+%==============================================================================
+
+The following properties hold for any reachable keyer state:
+
+\begin{enumerate}
+\item \textbf{Tone-phase consistency}:
+      $toneActive = ztrue \iff keyerPhase = playing$
+
+\item \textbf{Timing validity}: When $keyerPhase = playing$,
+      $elementStartTime \leq now$
+
+\item \textbf{Gap validity}: When $keyerPhase = gap$,
+      $gapStartTime \leq now$
+
+\item \textbf{Idle silence}: When $keyerPhase = keyerIdle$,
+      $toneActive = zfalse$
+
+\item \textbf{Duration bounds}: For any $w \in minWpm \upto maxWpm$,
+      $ditDuration(w) \geq 30 \land ditDuration(w) \leq 240$
+\end{enumerate}
+
+%==============================================================================
+\section{Precondition Summary}
+%==============================================================================
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\hline
+Operation & Precondition \\
+\hline
+$PaddleDown$ & $p? = dit \implies ditHeld = zfalse$; $p? = dah \implies dahHeld = zfalse$ \\
+$PaddleUp$ & $p? = dit \implies ditHeld = ztrue$; $p? = dah \implies dahHeld = ztrue$ \\
+$StartFromIdle$ & $keyerPhase = keyerIdle \land (ditHeld = ztrue \lor dahHeld = ztrue)$ \\
+$EndElement$ & $keyerPhase = playing \land now \geq elementStartTime + duration$ \\
+$EndGapWithNext$ & $keyerPhase = gap \land now \geq gapStartTime + gapDuration(wpm) \land
+                   (pendingOpposite = ztrue \lor ditHeld = ztrue \lor dahHeld = ztrue)$ \\
+$EndGapToIdle$ & $keyerPhase = gap \land now \geq gapStartTime + gapDuration(wpm) \land
+                 pendingOpposite = zfalse \land ditHeld = zfalse \land dahHeld = zfalse$ \\
+$SetWpm$ & $minWpm \leq newWpm? \leq maxWpm$ \\
+$SetToneHz$ & $minToneHz \leq newToneHz? \leq maxToneHz$ \\
+$TruncateElement$ & $keyerPhase = playing \land iambicMode = modeA \land
+                    ditHeld = zfalse \land dahHeld = zfalse$ \\
+\hline
+\end{tabular}
+\end{center}
+
+%==============================================================================
+\section{Validation}
+%==============================================================================
+
+This specification can be validated with:
+
+\begin{itemize}
+\item \textbf{fuzz}: Type-checking the combined specification
+\item \textbf{probcli -init}: Verifying initialization succeeds
+\item \textbf{probcli -cbc\_deadlock}: Checking no deadlock states exist
+\item \textbf{probcli -cbc\_assertions}: Verifying invariants hold
+\end{itemize}
+
+The $KEYER\_MODEL\_BOUND$ constant enables finite model checking. For combined
+validation with koch\_trainer.tex, ensure both specifications use compatible
+bounds and the shared types ($ZBOOL$, $RadioMode$) are defined consistently.
+
+%==============================================================================
+\section{Implementation Notes}
+%==============================================================================
+
+\subsection{Timer Resolution}
+
+The implementation should use CADisplayLink (iOS) or equivalent high-resolution
+timer with 1ms or better resolution. At 25 WPM, a dit is only 48ms---timing
+jitter above 5ms becomes audible.
+
+\subsection{Haptic Latency}
+
+iOS Core Haptics has approximately 10-15ms latency. Pre-warm the haptic engine
+on view appearance to avoid additional latency on first touch.
+
+\subsection{Audio Latency}
+
+AVAudioEngine with a 5ms buffer provides acceptable latency for keying practice.
+Total touch-to-audio latency should be under 50ms for comfortable operation up
+to 20 WPM.
+
+\end{document}
+

@@ -4,22 +4,10 @@ import XCTest
 @MainActor
 final class MorseQSOViewModelTests: XCTestCase {
 
-    // MARK: Internal
-
-    var mockAudioEngine = MockAudioEngine()
-    var mockClock = MockClock()
-    var settingsStore = SettingsStore()
-
-    override func setUp() async throws {
-        mockAudioEngine = MockAudioEngine()
-        mockClock = MockClock()
-        settingsStore = SettingsStore()
-    }
-
     // MARK: - Initialization Tests
 
     func testInitialState() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertEqual(viewModel.style, .contest)
         XCTAssertEqual(viewModel.myCallsign, "W5ABC")
@@ -31,7 +19,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testCallsignPassedToEngine() {
-        let viewModel = makeViewModel(style: .ragChew, callsign: "K0ABC")
+        let viewModel = MorseQSOViewModel(style: .ragChew, callsign: "K0ABC")
 
         XCTAssertEqual(viewModel.myCallsign, "K0ABC")
         XCTAssertEqual(viewModel.style, .ragChew)
@@ -40,7 +28,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Session Control Tests
 
     func testStartSessionUserInitiated() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         viewModel.startSession()
 
@@ -50,7 +38,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testStartSessionAIInitiated() {
-        let viewModel = makeViewModel(aiStarts: true)
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: true)
 
         viewModel.startSession()
 
@@ -59,7 +47,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testEndSession() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.endSession()
@@ -72,14 +60,14 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Accuracy Calculation Tests
 
     func testKeyingAccuracyInitiallyZero() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertEqual(viewModel.keyingAccuracy, 0.0)
         XCTAssertEqual(viewModel.accuracyPercentage, 0)
     }
 
     func testAccuracyPercentageCalculation() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         // Simulate accuracy tracking (normally done internally)
         // We'll test the result getter instead
@@ -93,7 +81,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Input Progress Tests
 
     func testInputProgressInitiallyZero() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertEqual(viewModel.inputProgress, 0.0)
         XCTAssertEqual(viewModel.inputTimeRemaining, 0.0)
@@ -102,7 +90,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Phase Tests
 
     func testPhaseDescription() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         XCTAssertEqual(viewModel.phase, .idle)
         XCTAssertEqual(viewModel.phaseDescription, "Start by sending CQ")
@@ -114,7 +102,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Turn State Tests
 
     func testTurnStateTransitions() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         XCTAssertEqual(viewModel.turnState, .idle)
 
@@ -128,7 +116,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Script Generation Tests
 
     func testCurrentScriptPopulatedOnUserTurn() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         viewModel.startSession()
 
@@ -140,101 +128,101 @@ final class MorseQSOViewModelTests: XCTestCase {
 
     // MARK: - Input Handling Tests
 
-    func testQueueDitAppendsToPattern() {
-        let viewModel = makeViewModel()
+    func testInputDitAppendsToPattern() {
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         XCTAssertTrue(viewModel.currentPattern.isEmpty)
 
-        pressDit(viewModel: viewModel)
+        viewModel.inputDit()
 
         XCTAssertEqual(viewModel.currentPattern, ".")
     }
 
-    func testQueueDahAppendsToPattern() {
-        let viewModel = makeViewModel()
+    func testInputDahAppendsToPattern() {
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressDah(viewModel: viewModel)
+        viewModel.inputDah()
 
         XCTAssertEqual(viewModel.currentPattern, "-")
     }
 
-    func testQueueDitDahSequence() {
-        let viewModel = makeViewModel()
+    func testInputDitDahSequence() {
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressDit(viewModel: viewModel)
-        pressDah(viewModel: viewModel)
+        viewModel.inputDit()
+        viewModel.inputDah()
 
         XCTAssertEqual(viewModel.currentPattern, ".-")
     }
 
     func testInputIgnoredWhenNotUserTurn() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
 
         // Not started, so not user turn
-        viewModel.queueElement(.dit)
+        viewModel.inputDit()
 
         XCTAssertTrue(viewModel.currentPattern.isEmpty)
     }
 
     func testHandleKeyPressDit() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: ".")
+        viewModel.handleKeyPress(".")
 
         XCTAssertEqual(viewModel.currentPattern, ".")
     }
 
     func testHandleKeyPressFForDit() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: "f")
+        viewModel.handleKeyPress("f")
 
         XCTAssertEqual(viewModel.currentPattern, ".")
     }
 
     func testHandleKeyPressDash() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: "-")
+        viewModel.handleKeyPress("-")
 
         XCTAssertEqual(viewModel.currentPattern, "-")
     }
 
     func testHandleKeyPressJForDah() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: "j")
+        viewModel.handleKeyPress("j")
 
         XCTAssertEqual(viewModel.currentPattern, "-")
     }
 
     func testHandleKeyPressUppercaseF() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: "F")
+        viewModel.handleKeyPress("F")
 
         XCTAssertEqual(viewModel.currentPattern, ".")
     }
 
     func testHandleKeyPressUppercaseJ() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
-        pressKeyWithTiming(viewModel: viewModel, key: "J")
+        viewModel.handleKeyPress("J")
 
         XCTAssertEqual(viewModel.currentPattern, "-")
     }
 
     func testHandleKeyPressIgnoresOtherKeys() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         viewModel.handleKeyPress("a")
@@ -247,7 +235,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Result Generation Tests
 
     func testGetResultContainsSessionInfo() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         let result = viewModel.getResult()
@@ -260,7 +248,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     }
 
     func testGetResultRagChewStyle() {
-        let viewModel = makeViewModel(style: .ragChew, callsign: "K0XYZ")
+        let viewModel = MorseQSOViewModel(style: .ragChew, callsign: "K0XYZ", aiStarts: false)
         viewModel.startSession()
 
         let result = viewModel.getResult()
@@ -272,7 +260,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Expected Character Tests
 
     func testCurrentExpectedCharacterFromScript() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC", aiStarts: false)
         viewModel.startSession()
 
         // Script starts with "CQ", so first expected should be 'C'
@@ -285,7 +273,11 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Configuration Tests
 
     func testConfigureWithSettingsStore() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
+        let settingsStore = SettingsStore()
+
+        // Should not crash and should configure audio engine
+        viewModel.configure(settingsStore: settingsStore)
 
         // Configuration was applied (no crash means success)
         XCTAssertNotNil(viewModel)
@@ -294,7 +286,7 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Transcript Tests
 
     func testTranscriptInitiallyEmpty() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertTrue(viewModel.transcript.isEmpty)
     }
@@ -302,74 +294,21 @@ final class MorseQSOViewModelTests: XCTestCase {
     // MARK: - Station Info Tests
 
     func testTheirCallsignAccessible() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         // Virtual station is generated on init
         XCTAssertFalse(viewModel.theirCallsign.isEmpty)
     }
 
     func testTheirNameAccessible() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertFalse(viewModel.theirName.isEmpty)
     }
 
     func testTheirQTHAccessible() {
-        let viewModel = makeViewModel()
+        let viewModel = MorseQSOViewModel(style: .contest, callsign: "W5ABC")
 
         XCTAssertFalse(viewModel.theirQTH.isEmpty)
-    }
-
-    // MARK: Private
-
-    // MARK: - Private Helpers
-
-    private func makeViewModel(
-        style: QSOStyle = .contest,
-        callsign: String = "W5ABC",
-        aiStarts: Bool = false
-    ) -> MorseQSOViewModel {
-        let viewModel = MorseQSOViewModel(
-            style: style,
-            callsign: callsign,
-            aiStarts: aiStarts,
-            audioEngine: mockAudioEngine,
-            clock: mockClock
-        )
-        viewModel.configure(settingsStore: settingsStore)
-        return viewModel
-    }
-
-    private func pressDit(viewModel: MorseQSOViewModel) {
-        guard let keyer = viewModel.keyer else { return }
-        viewModel.queueElement(.dit)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.ditDuration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
-    }
-
-    private func pressDah(viewModel: MorseQSOViewModel) {
-        guard let keyer = viewModel.keyer else { return }
-        viewModel.queueElement(.dah)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.dahDuration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
-    }
-
-    private func pressKeyWithTiming(viewModel: MorseQSOViewModel, key: Character) {
-        guard let keyer = viewModel.keyer else { return }
-        viewModel.handleKeyPress(key)
-        keyer.processTick(at: mockClock.now())
-        let duration = (key == "." || key.lowercased() == "f")
-            ? keyer.configuration.ditDuration
-            : keyer.configuration.dahDuration
-        mockClock.advance(by: duration + 0.001)
-        keyer.processTick(at: mockClock.now())
-        mockClock.advance(by: keyer.configuration.elementGap + 0.001)
-        keyer.processTick(at: mockClock.now())
     }
 }
