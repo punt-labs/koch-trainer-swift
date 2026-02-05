@@ -304,12 +304,6 @@ final class MorseQSOViewModel: ObservableObject {
                     self.handleKeyerPatternComplete(pattern)
                 }
             },
-            onPatternUpdated: { [weak self] pattern in
-                guard let self else { return }
-                Task { @MainActor in
-                    self.currentPattern = pattern
-                }
-            },
             onHaptic: { [weak self] element in
                 self?.hapticManager.playHaptic(for: element)
             }

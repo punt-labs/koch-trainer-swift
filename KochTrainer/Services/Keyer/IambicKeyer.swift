@@ -65,7 +65,6 @@ final class IambicKeyer {
     ///   - onToneStart: Called when tone should start (with frequency).
     ///   - onToneStop: Called when tone should stop.
     ///   - onPatternComplete: Called when character pattern is complete.
-    ///   - onPatternUpdated: Called when pattern changes (for real-time UI sync).
     ///   - onHaptic: Called for haptic feedback (dit or dah).
     init(
         configuration: KeyerConfiguration = KeyerConfiguration(),
@@ -73,7 +72,6 @@ final class IambicKeyer {
         onToneStart: @escaping (Double) -> Void = { _ in },
         onToneStop: @escaping () -> Void = {},
         onPatternComplete: @escaping (String) -> Void = { _ in },
-        onPatternUpdated: @escaping (String) -> Void = { _ in },
         onHaptic: @escaping (MorseElement) -> Void = { _ in }
     ) {
         self.configuration = configuration
@@ -81,7 +79,6 @@ final class IambicKeyer {
         self.onToneStart = onToneStart
         self.onToneStop = onToneStop
         self.onPatternComplete = onPatternComplete
-        self.onPatternUpdated = onPatternUpdated
         self.onHaptic = onHaptic
     }
 
@@ -128,6 +125,15 @@ final class IambicKeyer {
         currentPattern = ""
         lastElement = nil
         pendingElements.removeAll()
+    }
+
+    /// Clear pending input without stopping the keyer.
+    /// Call this when starting a new character to prevent queued elements
+    /// from carrying over.
+    func clearPendingInput() {
+        pendingElements.removeAll()
+        currentPattern = ""
+        lastElement = nil
     }
 
     /// Update paddle input state.
@@ -177,7 +183,6 @@ final class IambicKeyer {
     private let onToneStart: (Double) -> Void
     private let onToneStop: () -> Void
     private let onPatternComplete: (String) -> Void
-    private let onPatternUpdated: (String) -> Void
     private let onHaptic: (MorseElement) -> Void
 
     private var displayLink: CADisplayLink?
@@ -196,16 +201,19 @@ final class IambicKeyer {
 
     private func processIdlePhase(at now: TimeInterval) {
         // Check for pattern timeout if we have accumulated pattern
-        if !currentPattern.isEmpty {
+        // Only emit if no queued elements waiting (user may still be typing)
+        if !currentPattern.isEmpty, pendingElements.isEmpty {
             let idleElapsed = now - idleStartTime
             if idleElapsed >= configuration.idleTimeout {
                 emitPattern()
             }
         }
 
-        // Start element if paddle pressed
+        // Start element if paddle pressed or queued
         if paddle.isPressed {
             startElement()
+        } else if !pendingElements.isEmpty {
+            startNextQueuedElement()
         }
     }
 
@@ -257,9 +265,6 @@ final class IambicKeyer {
 
         // Append to pattern
         currentPattern.append(elementToPlay.patternCharacter)
-
-        // Notify pattern changed for real-time UI sync
-        onPatternUpdated(currentPattern)
 
         // Start tone
         onToneStart(configuration.frequency)

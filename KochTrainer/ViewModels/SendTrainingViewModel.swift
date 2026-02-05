@@ -364,12 +364,26 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         }
     }
 
-    /// Update paddle state. This is the ONLY input path.
-    /// All timing controlled by keyer.
+    /// Update paddle state for continuous iambic keying.
+    /// Also queues discrete elements on press to ensure quick taps aren't missed.
     func updatePaddle(dit: Bool, dah: Bool) {
         guard isPlaying, isWaitingForInput else { return }
         lastInputTime = Date()
+
+        // Queue element on press to ensure quick taps aren't missed
+        // (the continuous paddle state might change before the display link sees it)
+        if dit, !lastDitPressed {
+            keyer?.queueElement(.dit)
+        }
+        if dah, !lastDahPressed {
+            keyer?.queueElement(.dah)
+        }
+        lastDitPressed = dit
+        lastDahPressed = dah
+
+        // Also update continuous paddle state for hold-and-repeat behavior
         keyer?.updatePaddle(PaddleInput(ditPressed: dit, dahPressed: dah))
+
         // Sync pattern from keyer for immediate UI feedback
         if let keyerPattern = keyer?.currentPattern {
             currentPattern = keyerPattern
@@ -377,6 +391,10 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     // MARK: Private
+
+    /// Track previous paddle state to detect press transitions.
+    private var lastDitPressed = false
+    private var lastDahPressed = false
 
     // MARK: - Input Handling
 
@@ -447,12 +465,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
                 guard let self else { return }
                 Task { @MainActor in
                     self.handleKeyerPatternComplete(pattern)
-                }
-            },
-            onPatternUpdated: { [weak self] pattern in
-                guard let self else { return }
-                Task { @MainActor in
-                    self.currentPattern = pattern
                 }
             },
             onHaptic: { [weak self] element in
