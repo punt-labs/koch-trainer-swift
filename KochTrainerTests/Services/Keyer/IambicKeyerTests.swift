@@ -12,6 +12,7 @@ final class IambicKeyerTests: XCTestCase {
         toneStopCount = 0
         lastFrequency = nil
         completedPatterns = []
+        updatedPatterns = []
         hapticElements = []
     }
 
@@ -338,7 +339,6 @@ final class IambicKeyerTests: XCTestCase {
 
     func testStop_cleansUpState() {
         let keyer = makeKeyer()
-        let config = keyer.configuration
 
         // Start playing
         keyer.updatePaddle(PaddleInput(ditPressed: true, dahPressed: false))
@@ -353,6 +353,32 @@ final class IambicKeyerTests: XCTestCase {
         XCTAssertEqual(toneStopCount, 1) // Tone stopped on stop()
     }
 
+    // MARK: - Pattern Updated Callback Tests
+
+    func testPatternUpdated_calledOnEachElement() {
+        let keyer = makeKeyer()
+        let config = keyer.configuration
+
+        XCTAssertTrue(updatedPatterns.isEmpty)
+
+        // Press dit
+        keyer.updatePaddle(PaddleInput(ditPressed: true, dahPressed: false))
+        keyer.processTick(at: clock.now())
+        XCTAssertEqual(updatedPatterns, ["."])
+
+        // Complete dit and gap, release paddle, then press dah
+        clock.advance(by: config.ditDuration + 0.001)
+        keyer.processTick(at: clock.now())
+        keyer.updatePaddle(PaddleInput(ditPressed: false, dahPressed: false))
+        clock.advance(by: config.elementGap + 0.001)
+        keyer.processTick(at: clock.now())
+
+        // Now press dah (new element in same pattern before idle timeout)
+        keyer.updatePaddle(PaddleInput(ditPressed: false, dahPressed: true))
+        keyer.processTick(at: clock.now())
+        XCTAssertEqual(updatedPatterns, [".", ".-"])
+    }
+
     // MARK: Private
 
     // MARK: - Test Fixtures
@@ -362,6 +388,7 @@ final class IambicKeyerTests: XCTestCase {
     private var toneStopCount: Int = 0
     private var lastFrequency: Double?
     private var completedPatterns: [String] = []
+    private var updatedPatterns: [String] = []
     private var hapticElements: [MorseElement] = []
 
     /// Unwrapped clock for convenient test access. Precondition: setUp() called.
@@ -386,6 +413,9 @@ final class IambicKeyerTests: XCTestCase {
             },
             onPatternComplete: { [weak self] pattern in
                 self?.completedPatterns.append(pattern)
+            },
+            onPatternUpdated: { [weak self] pattern in
+                self?.updatedPatterns.append(pattern)
             },
             onHaptic: { [weak self] element in
                 self?.hapticElements.append(element)
