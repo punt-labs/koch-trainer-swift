@@ -11,7 +11,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
 
     var playCharacterCalls: [Character] = []
     var playGroupCalls: [String] = []
-    var stopCalled = false
     var endSessionCalled = false
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
@@ -33,10 +32,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
         }
     }
 
-    func stop() {
-        stopCalled = true
-    }
-
     func setFrequency(_ frequency: Double) {
         frequencySet = frequency
     }
@@ -46,12 +41,6 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
     }
 
     func configureBandConditions(from settings: AppSettings) {}
-
-    func reset() {
-        playCharacterCalls = []
-        playGroupCalls = []
-        stopCalled = false
-    }
 
     func playDit() async {}
 
@@ -160,15 +149,25 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.phase, .completed)
     }
 
-    func testResumeFromPaused() {
+    func testResumeFromPaused() async {
         viewModel.startSession()
         viewModel.pause()
-        mockAudioEngine.stopCalled = false
+        let callsBeforeResume = mockAudioEngine.playGroupCalls.count
 
         viewModel.resume()
 
         XCTAssertTrue(viewModel.isPlaying)
         XCTAssertEqual(viewModel.phase, .training)
+
+        // Wait for async audio playback to be triggered
+        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+
+        // Verify audio plays after resume (showNextWord triggers playGroup in receive mode)
+        XCTAssertGreaterThan(
+            mockAudioEngine.playGroupCalls.count,
+            callsBeforeResume,
+            "Audio should play after resuming from pause"
+        )
     }
 
     func testResumeNotPausedIsNoOp() {

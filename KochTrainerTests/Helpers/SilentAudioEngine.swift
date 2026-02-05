@@ -39,15 +39,6 @@ final class SilentAudioEngine: AudioEngineProtocol {
         // Silent - no-op
     }
 
-    func stop() {
-        // Silent - no-op
-    }
-
-    func reset() {
-        playedCharacters.removeAll()
-        playedGroups.removeAll()
-    }
-
     func setFrequency(_ frequency: Double) {
         // Silent - no-op
     }

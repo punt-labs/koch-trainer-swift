@@ -65,6 +65,7 @@ final class IambicKeyer {
     ///   - onToneStart: Called when tone should start (with frequency).
     ///   - onToneStop: Called when tone should stop.
     ///   - onPatternComplete: Called when character pattern is complete.
+    ///   - onPatternUpdated: Called when pattern changes (for real-time UI sync).
     ///   - onHaptic: Called for haptic feedback (dit or dah).
     init(
         configuration: KeyerConfiguration = KeyerConfiguration(),
@@ -72,6 +73,7 @@ final class IambicKeyer {
         onToneStart: @escaping (Double) -> Void = { _ in },
         onToneStop: @escaping () -> Void = {},
         onPatternComplete: @escaping (String) -> Void = { _ in },
+        onPatternUpdated: @escaping (String) -> Void = { _ in },
         onHaptic: @escaping (MorseElement) -> Void = { _ in }
     ) {
         self.configuration = configuration
@@ -79,6 +81,7 @@ final class IambicKeyer {
         self.onToneStart = onToneStart
         self.onToneStop = onToneStop
         self.onPatternComplete = onPatternComplete
+        self.onPatternUpdated = onPatternUpdated
         self.onHaptic = onHaptic
     }
 
@@ -174,6 +177,7 @@ final class IambicKeyer {
     private let onToneStart: (Double) -> Void
     private let onToneStop: () -> Void
     private let onPatternComplete: (String) -> Void
+    private let onPatternUpdated: (String) -> Void
     private let onHaptic: (MorseElement) -> Void
 
     private var displayLink: CADisplayLink?
@@ -253,6 +257,9 @@ final class IambicKeyer {
 
         // Append to pattern
         currentPattern.append(elementToPlay.patternCharacter)
+
+        // Notify pattern changed for real-time UI sync
+        onPatternUpdated(currentPattern)
 
         // Start tone
         onToneStart(configuration.frequency)

@@ -167,7 +167,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         guard let char = currentIntroCharacter else { return }
 
         Task {
-            audioEngine.reset()
             await audioEngine.playCharacter(char)
         }
     }
@@ -194,7 +193,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         try? audioEngine.stopRadio()
         isWaitingForInput = false
         announcer.announcePaused()
@@ -287,7 +285,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         sessionTimer?.invalidate()
         inputTimer?.invalidate()
         keyer?.stop()
-        audioEngine.stop()
         isWaitingForInput = false
 
         // Clear any paused session since we're ending
@@ -450,6 +447,12 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
                 guard let self else { return }
                 Task { @MainActor in
                     self.handleKeyerPatternComplete(pattern)
+                }
+            },
+            onPatternUpdated: { [weak self] pattern in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.currentPattern = pattern
                 }
             },
             onHaptic: { [weak self] element in
