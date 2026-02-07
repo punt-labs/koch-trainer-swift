@@ -1020,23 +1020,313 @@ bounds and the shared types ($ZBOOL$, $RadioMode$) are defined consistently.
 %==============================================================================
 \section{Implementation Notes}
 %==============================================================================
+\section{Process and Threading Design}
+\label{sec:threading}
+%==============================================================================
+
+The Z specification models state transitions but does not address \emph{when}
+or \emph{where} these transitions execute. This section defines the process
+architecture required for correct implementation.
+
+\textbf{Key principle:} Z models \emph{what} state changes occur. This section
+models \emph{how} those changes are triggered and synchronized across threads.
+
+\subsection{Thread Model}
+
+The implementation involves four distinct execution contexts:
+
+\begin{center}
+\begin{tabular}{llp{6cm}}
+\hline
+Context & Timing & Responsibility \\
+\hline
+UIKit Events & Event-driven (~instant) & Touch began/ended delivery \\
+Main Thread & 60-120 FPS (8-16ms) & ViewModel state, SwiftUI rendering \\
+Display Link & 60-120 FPS (8-16ms) & Keyer tick loop, element timing \\
+Audio RT & ~44.1kHz (23$\mu$s/sample) & Tone generation, waveform output \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Component Responsibilities}
+
+\subsubsection{PaddleInputManager (Main Thread)}
+
+Receives touch events from UIKit and manages paddle memory:
+
+\begin{itemize}
+\item \textbf{Input:} \texttt{touchesBegan}, \texttt{touchesEnded} from UIKit
+\item \textbf{State:} \texttt{ditHeld}, \texttt{dahHeld}, \texttt{ditMemory}, \texttt{dahMemory}
+\item \textbf{Output:} Callback to keyer engine
+\end{itemize}
+
+Paddle memory latches press events to survive timing gaps between touch delivery
+and keyer tick:
+
+\begin{verbatim}
+func handleTouchBegan(paddle: Paddle) {
+    if paddle == .dit {
+        ditHeld = true
+        ditMemory = true   // Latch until serviced
+    }
+    // ... similar for dah
+    onPaddleChanged(PaddleState(...))
+}
+\end{verbatim}
+
+\subsubsection{IambicKeyerEngine (Main Thread via CADisplayLink)}
+
+Implements the Z state machine with precise timing:
+
+\begin{itemize}
+\item \textbf{Timing source:} CADisplayLink at 120 FPS preferred
+\item \textbf{Input:} \texttt{PaddleState} from input manager
+\item \textbf{State:} Implements \texttt{KeyerState} schema
+\item \textbf{Output:} Callbacks for element start/end, pattern completion
+\end{itemize}
+
+The keyer reads paddle memory and clears it when serviced:
+
+\begin{verbatim}
+private func selectNextElement() -> Element {
+    if ditMemory {
+        ditMemory = false  // Clear after servicing
+        return .dit
+    }
+    if dahMemory {
+        dahMemory = false
+        return .dah
+    }
+    // Fall back to held state
+    if paddle.ditHeld { return .dit }
+    if paddle.dahHeld { return .dah }
+}
+\end{verbatim}
+
+\subsubsection{PatternTracker (Main Thread)}
+
+Single owner of character boundary detection:
+
+\begin{itemize}
+\item \textbf{Input:} Element completed callbacks from keyer
+\item \textbf{State:} Current pattern string, idle timer
+\item \textbf{Output:} Pattern completion callback to ViewModel
+\end{itemize}
+
+\textbf{Critical:} Only one component owns character timeout. The failed
+implementation had competing timeouts in both keyer and ViewModel.
+
+\subsubsection{AudioController (Main $\rightarrow$ Audio RT)}
+
+Bridges main thread commands to real-time audio:
+
+\begin{itemize}
+\item \textbf{Input:} \texttt{toneActive} changes from keyer
+\item \textbf{State:} Lock-protected flags readable by audio callback
+\item \textbf{Output:} Waveform samples to AVAudioEngine
+\end{itemize}
+
+\subsection{Timing Diagram}
+
+Successful element playback sequence:
+
+\begin{verbatim}
+TIME    CONTEXT         EVENT                       STATE
+----------------------------------------------------------------------
+T+0ms   UIKit           touchesBegan                ditHeld=true
+T+0ms   Main            onPaddleChanged callback    ditMemory=true
+T+0ms   Main            keyer checks (if idle)      phase=playing
+T+0ms   Main            onToneStart callback        -
+T+0ms   Main->Audio     activateTone()              isToneActive=true
+T+1ms   Audio RT        next buffer renders tone    speaker output
+
+T+8ms   DisplayLink     tick: elapsed=8ms < 92ms    (no change)
+T+16ms  DisplayLink     tick: elapsed=16ms < 92ms   (no change)
+...
+T+92ms  DisplayLink     tick: elapsed >= 92ms       phase=gap
+T+92ms  Main            onToneStop callback         -
+T+92ms  Main->Audio     deactivateTone()            isToneActive=false
+\end{verbatim}
+
+\subsection{Thread Safety Patterns}
+
+\subsubsection{Main Thread (@MainActor)}
+
+All ViewModel state must be accessed on the main thread:
+
+\begin{verbatim}
+@MainActor
+final class SendTrainingViewModel: ObservableObject {
+    @Published var currentPattern: String = ""
+
+    // Callbacks from keyer run on main thread
+    func handlePatternComplete(_ pattern: String) {
+        currentPattern = pattern  // Safe: @MainActor
+    }
+}
+\end{verbatim}
+
+\subsubsection{Audio Thread (NSLock)}
+
+Audio callbacks cannot use Swift actors. Use explicit locking:
+
+\begin{verbatim}
+final class ToneGenerator: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _isToneActive = false
+
+    var isToneActive: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return _isToneActive
+    }
+}
+\end{verbatim}
+
+\subsubsection{Callback Threading}
+
+All keyer callbacks should be explicitly \texttt{@MainActor}:
+
+\begin{verbatim}
+init(
+    onToneStart: @escaping @MainActor (Double) -> Void,
+    onToneStop: @escaping @MainActor () -> Void,
+    onPatternComplete: @escaping @MainActor (String) -> Void
+)
+\end{verbatim}
+
+\subsection{Event-Driven vs Polling}
+
+\textbf{Anti-pattern (from failed implementation):}
+
+\begin{verbatim}
+// WRONG: Polling reads stale state
+func updatePaddle(...) {
+    keyer.queueElement(.dit)
+    currentPattern = keyer.currentPattern  // Stale!
+}
+\end{verbatim}
+
+\textbf{Correct pattern:}
+
+\begin{verbatim}
+// RIGHT: Event-driven updates
+keyer.onPatternUpdated = { pattern in
+    Task { @MainActor in
+        self.currentPattern = pattern
+    }
+}
+\end{verbatim}
+
+\subsection{Single Timeout Owner}
+
+The failed implementation had two competing timeout mechanisms:
+
+\begin{enumerate}
+\item Keyer's idle timeout (415ms at 13 WPM)
+\item ViewModel's input timer (variable duration)
+\end{enumerate}
+
+\textbf{Solution:} Choose one owner. Two valid designs:
+
+\textbf{Option A: Keyer owns character boundaries}
+\begin{itemize}
+\item Keyer detects idle timeout, emits \texttt{onPatternComplete}
+\item ViewModel receives completed patterns, no timer needed
+\item Keyer controls all timing
+\end{itemize}
+
+\textbf{Option B: ViewModel owns character boundaries}
+\begin{itemize}
+\item Keyer emits \texttt{onElementCompleted} for each element
+\item ViewModel accumulates pattern, manages single timeout
+\item ViewModel decides when pattern is complete
+\end{itemize}
+
+\subsection{Latency Budget}
+
+End-to-end latency requirements:
+
+\begin{center}
+\begin{tabular}{lr}
+\hline
+Segment & Budget \\
+\hline
+Touch to keyer state change & $<$ 1ms \\
+Keyer to audio flag change & $<$ 1ms \\
+Audio flag to speaker output & $<$ 3ms (next buffer) \\
+\hline
+\textbf{Total touch-to-audio} & $<$ \textbf{5ms} \\
+\hline
+\end{tabular}
+\end{center}
+
+At 25 WPM, a dit is 48ms. Latency under 10\% of element duration (5ms) is
+imperceptible. Latency above 20ms becomes noticeable as sluggishness.
+
+%==============================================================================
+\section{Implementation Notes}
+%==============================================================================
 
 \subsection{Timer Resolution}
 
-The implementation should use CADisplayLink (iOS) or equivalent high-resolution
-timer with 1ms or better resolution. At 25 WPM, a dit is only 48ms---timing
-jitter above 5ms becomes audible.
+Use CADisplayLink (iOS) at maximum frame rate (120 FPS on ProMotion devices).
+This provides 8ms resolution, sufficient for 13 WPM (92ms dit). For higher
+speeds (25+ WPM), consider a dedicated \texttt{DispatchSourceTimer} at 1ms
+intervals.
+
+At 25 WPM, a dit is only 48ms---timing jitter above 5ms becomes audible.
+
+\subsection{Paddle Memory}
+
+Implement dit/dah memory per the Curtis 8044 patent. When the opposite paddle
+is pressed during an element, latch that press until the keyer services it.
+This prevents lost input when paddle is released before the next tick.
+
+\begin{verbatim}
+// Set memory on press (edge-triggered)
+if input.ditPressed && !previousInput.ditPressed {
+    ditMemory = true
+}
+// Clear memory when element starts
+private func startElement(_ element: Element) {
+    if element == .dit { ditMemory = false }
+    if element == .dah { dahMemory = false }
+    // ...
+}
+\end{verbatim}
 
 \subsection{Haptic Latency}
 
 iOS Core Haptics has approximately 10-15ms latency. Pre-warm the haptic engine
 on view appearance to avoid additional latency on first touch.
 
-\subsection{Audio Latency}
+\subsection{Audio Engine Configuration}
 
-AVAudioEngine with a 5ms buffer provides acceptable latency for keying practice.
-Total touch-to-audio latency should be under 50ms for comfortable operation up
-to 20 WPM.
+Use continuous audio session mode:
+
+\begin{itemize}
+\item Start \texttt{AVAudioEngine} at session begin, run until session end
+\item Control tone via \texttt{isToneActive} flag, not engine start/stop
+\item Engine start/stop adds 50-100ms latency; flag toggle is sample-accurate
+\end{itemize}
+
+Total touch-to-audio latency should be under 5ms for comfortable operation up
+to 25 WPM.
+
+\subsection{Lessons from Failed Implementation}
+
+The first implementation (PR \#68) failed due to:
+
+\begin{enumerate}
+\item \textbf{Missing paddle memory:} Quick taps lost between ticks
+\item \textbf{Competing timeouts:} Keyer and ViewModel both had timers
+\item \textbf{Polling state sync:} ViewModel read stale keyer state
+\item \textbf{idleStartTime bug:} Not reset on re-entry to playing phase
+\end{enumerate}
+
+See \texttt{docs/keyer-post-mortem.md} for detailed analysis.
+
+See \texttt{docs/threading.md} for comprehensive Swift concurrency patterns.
 
 \end{document}
-
