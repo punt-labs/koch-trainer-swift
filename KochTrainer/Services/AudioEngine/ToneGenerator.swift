@@ -174,7 +174,7 @@ final class ToneGenerator: @unchecked Sendable {
     private let stateLock = NSLock()
     private var _isPlaying = false
 
-    // Serial queue to ensure tones play sequentially
+    /// Serial queue to ensure tones play sequentially
     private let audioQueue = DispatchQueue(label: "com.kochtrainer.audioQueue")
 
     // Continuous session state

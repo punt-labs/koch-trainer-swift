@@ -45,7 +45,7 @@ final class BackupManagerTests: XCTestCase {
 
     // MARK: - createBackup Tests
 
-    func testCreateBackupStoresDataAtIndex0() throws {
+    func testCreateBackupStoresDataAtIndex0() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -60,7 +60,7 @@ final class BackupManagerTests: XCTestCase {
         XCTAssertEqual(backups[0], data)
     }
 
-    func testCreateBackupRotatesExistingBackups() throws {
+    func testCreateBackupRotatesExistingBackups() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -81,7 +81,7 @@ final class BackupManagerTests: XCTestCase {
         XCTAssertEqual(backups[2], data1) // Oldest at index 2
     }
 
-    func testCreateBackupDropsOldestWhenAtMax() throws {
+    func testCreateBackupDropsOldestWhenAtMax() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -119,7 +119,7 @@ final class BackupManagerTests: XCTestCase {
         XCTAssertTrue(backups.isEmpty)
     }
 
-    func testGetBackupsReturnsBackupsInOrder() throws {
+    func testGetBackupsReturnsBackupsInOrder() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -169,7 +169,7 @@ final class BackupManagerTests: XCTestCase {
 
     // MARK: - Custom maxBackups Tests
 
-    func testCustomMaxBackupsLimitsStorage() throws {
+    func testCustomMaxBackupsLimitsStorage() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -191,7 +191,7 @@ final class BackupManagerTests: XCTestCase {
 
     // MARK: - Persistence Tests
 
-    func testBackupsPersistAcrossInstances() throws {
+    func testBackupsPersistAcrossInstances() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -211,7 +211,7 @@ final class BackupManagerTests: XCTestCase {
 
     // MARK: - Edge Cases
 
-    func testEmptyDataBackup() throws {
+    func testEmptyDataBackup() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -227,7 +227,7 @@ final class BackupManagerTests: XCTestCase {
         XCTAssertEqual(backups[0], emptyData)
     }
 
-    func testLargeDataBackup() throws {
+    func testLargeDataBackup() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return

@@ -113,14 +113,16 @@ final class NotificationManager: ObservableObject {
 
     // MARK: Private
 
-    // Notification identifiers
+    /// Notification identifiers
     private enum NotificationID {
         static let practiceReceive = "practice.receive"
         static let practiceSend = "practice.send"
         static let streakReminder = "streak.reminder"
         static let welcomeBack = "welcome.back"
 
-        static func levelReview(_ level: Int) -> String { "level.review.\(level)" }
+        static func levelReview(_ level: Int) -> String {
+            "level.review.\(level)"
+        }
     }
 
     // Anti-nag constants

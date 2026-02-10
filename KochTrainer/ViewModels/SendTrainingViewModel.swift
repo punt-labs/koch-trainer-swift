@@ -58,7 +58,9 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
     }
 
     /// Whether this is a custom practice session (no level advancement)
-    var isCustomSession: Bool { customCharacters != nil }
+    var isCustomSession: Bool {
+        customCharacters != nil
+    }
 
     var formattedTime: String {
         let minutes = Int(timeRemaining) / 60

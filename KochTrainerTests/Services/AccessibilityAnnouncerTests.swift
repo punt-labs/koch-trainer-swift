@@ -73,9 +73,9 @@ final class AccessibilityAnnouncerTests: XCTestCase {
 
     // MARK: - Announcement Method Tests (No Crash)
 
-    /// Verify announcement methods don't crash when VoiceOver is off.
-    /// These tests ensure the API is callable; actual VoiceOver behavior
-    /// requires manual testing on device.
+    // Verify announcement methods don't crash when VoiceOver is off.
+    // These tests ensure the API is callable; actual VoiceOver behavior
+    // requires manual testing on device.
 
     func testAnnounceCorrectDoesNotCrash() {
         let announcer = AccessibilityAnnouncer()

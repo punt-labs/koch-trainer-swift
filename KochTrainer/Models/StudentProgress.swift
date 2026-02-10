@@ -69,9 +69,14 @@ struct StudentProgress: Codable, Equatable {
     /// User-created vocabulary sets
     var customVocabularySets: [VocabularySet]
 
-    // Legacy computed properties for backward compatibility
-    var currentLevel: Int { max(receiveLevel, sendLevel) }
-    var unlockedCharacters: [Character] { MorseCode.characters(forLevel: currentLevel) }
+    /// Legacy computed properties for backward compatibility
+    var currentLevel: Int {
+        max(receiveLevel, sendLevel)
+    }
+
+    var unlockedCharacters: [Character] {
+        MorseCode.characters(forLevel: currentLevel)
+    }
 
     /// Overall accuracy across all attempts (both directions combined)
     var overallAccuracy: Double {
@@ -224,8 +229,13 @@ struct CharacterStat: Codable, Equatable {
 
     var lastPracticed: Date
 
-    var totalAttempts: Int { receiveAttempts + sendAttempts + earTrainingAttempts }
-    var totalCorrect: Int { receiveCorrect + sendCorrect + earTrainingCorrect }
+    var totalAttempts: Int {
+        receiveAttempts + sendAttempts + earTrainingAttempts
+    }
+
+    var totalCorrect: Int {
+        receiveCorrect + sendCorrect + earTrainingCorrect
+    }
 
     var receiveAccuracy: Double {
         guard receiveAttempts > 0 else { return 0 }

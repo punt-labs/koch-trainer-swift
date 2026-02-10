@@ -20,7 +20,7 @@ final class ProgressStoreScheduleTests: XCTestCase {
 
     // MARK: - Recalculate Schedule Tests
 
-    func testRecalculateScheduleFromHistoryWithReceiveSession() throws {
+    func testRecalculateScheduleFromHistoryWithReceiveSession() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -48,7 +48,7 @@ final class ProgressStoreScheduleTests: XCTestCase {
         XCTAssertNotNil(store.progress.schedule.receiveNextDate)
     }
 
-    func testRecalculateScheduleFromHistoryWithSendSession() throws {
+    func testRecalculateScheduleFromHistoryWithSendSession() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -164,7 +164,7 @@ final class ProgressStoreScheduleTests: XCTestCase {
         XCTAssertNil(store.progress.schedule.receiveNextDate)
     }
 
-    func testRecalculateScheduleFromHistoryUsesMostRecentSession() throws {
+    func testRecalculateScheduleFromHistoryUsesMostRecentSession() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return

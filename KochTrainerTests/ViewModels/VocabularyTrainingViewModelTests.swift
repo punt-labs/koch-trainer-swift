@@ -16,7 +16,9 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
 
-    var radioMode: RadioMode { radioState.mode }
+    var radioMode: RadioMode {
+        radioState.mode
+    }
 
     func playCharacter(_ char: Character) async {
         playCharacterCalls.append(char)
@@ -57,15 +59,26 @@ final class VocabularyMockAudioEngine: AudioEngineProtocol {
 
     func playDah() async {}
 
-    func startSession() { radioState.startSession() }
+    func startSession() {
+        radioState.startSession()
+    }
+
     func endSession() {
         radioState.endSession()
         endSessionCalled = true
     }
 
-    func startReceiving() throws { try radioState.startReceiving() }
-    func startTransmitting() throws { try radioState.startTransmitting() }
-    func stopRadio() throws { try radioState.stopRadio() }
+    func startReceiving() throws {
+        try radioState.startReceiving()
+    }
+
+    func startTransmitting() throws {
+        try radioState.startTransmitting()
+    }
+
+    func stopRadio() throws {
+        try radioState.stopRadio()
+    }
 
     // MARK: Private
 

@@ -236,7 +236,7 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
 
     // MARK: - End Session Tests
 
-    func testEndSessionRecordsResult() async {
+    func testEndSessionRecordsResult() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -257,7 +257,7 @@ final class ReceiveTrainingViewModelInputTests: XCTestCase {
         XCTAssertFalse(didAdvance)
     }
 
-    func testEndSessionWithCustomSessionDoesNotAdvance() async {
+    func testEndSessionWithCustomSessionDoesNotAdvance() {
         let customChars: [Character] = ["K", "M"]
         let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
         vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)

@@ -5,32 +5,6 @@ import Foundation
 /// Summary of a completed Morse QSO training session.
 struct MorseQSOResult {
 
-    // MARK: Lifecycle
-
-    init(
-        style: QSOStyle,
-        myCallsign: String,
-        theirCallsign: String,
-        theirName: String,
-        theirQTH: String,
-        duration: TimeInterval,
-        totalCharactersKeyed: Int,
-        correctCharactersKeyed: Int,
-        exchangesCompleted: Int
-    ) {
-        self.style = style
-        self.myCallsign = myCallsign
-        self.theirCallsign = theirCallsign
-        self.theirName = theirName
-        self.theirQTH = theirQTH
-        self.duration = duration
-        self.totalCharactersKeyed = totalCharactersKeyed
-        self.correctCharactersKeyed = correctCharactersKeyed
-        self.exchangesCompleted = exchangesCompleted
-    }
-
-    // MARK: Internal
-
     /// QSO style (contest or rag chew)
     let style: QSOStyle
 

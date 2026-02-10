@@ -110,7 +110,7 @@ final class EarTrainingViewModelTests: XCTestCase {
 
     // MARK: - Pause Tests
 
-    func testPauseDuringTrainingTransitionsToPaused() async {
+    func testPauseDuringTrainingTransitionsToPaused() {
         viewModel.startSession()
 
         while case .introduction = viewModel.phase {
@@ -148,7 +148,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         }
     }
 
-    func testPauseDuringPausedIsNoOp() async {
+    func testPauseDuringPausedIsNoOp() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -163,7 +163,7 @@ final class EarTrainingViewModelTests: XCTestCase {
 
     // MARK: - Resume Tests
 
-    func testResumeFromPausedTransitionsToTraining() async {
+    func testResumeFromPausedTransitionsToTraining() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -236,7 +236,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentPattern, "---")
     }
 
-    func testInputIgnoredWhenNotWaitingForInput() async {
+    func testInputIgnoredWhenNotWaitingForInput() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -251,7 +251,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentPattern, "")
     }
 
-    func testInputIgnoredWhenPaused() async {
+    func testInputIgnoredWhenPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -267,7 +267,7 @@ final class EarTrainingViewModelTests: XCTestCase {
 
     // MARK: - End Session Tests
 
-    func testEndSessionFromTraining() async {
+    func testEndSessionFromTraining() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -284,7 +284,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPlaying)
     }
 
-    func testEndSessionFromPaused() async {
+    func testEndSessionFromPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -300,7 +300,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         }
     }
 
-    func testEndSessionWithNoAttemptsDoesNotAdvance() async {
+    func testEndSessionWithNoAttemptsDoesNotAdvance() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -346,7 +346,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertNil(snapshot)
     }
 
-    func testCreatePausedSessionSnapshotCapturesState() async {
+    func testCreatePausedSessionSnapshotCapturesState() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -360,7 +360,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertNil(snapshot?.customCharacters)
     }
 
-    func testRestoreFromPausedSessionRestoresState() async {
+    func testRestoreFromPausedSessionRestoresState() {
         let session = PausedSession(
             sessionType: .earTraining,
             startTime: Date().addingTimeInterval(-120),
@@ -458,7 +458,7 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isIntroCompleted)
     }
 
-    func testIsIntroCompletedTrueInPaused() async {
+    func testIsIntroCompletedTrueInPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()

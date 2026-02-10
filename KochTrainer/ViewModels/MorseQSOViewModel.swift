@@ -52,7 +52,7 @@ final class MorseQSOViewModel: ObservableObject {
     @Published private(set) var lastKeyedCharacter: Character?
     @Published private(set) var lastKeyedWasCorrect: Bool = false
 
-    // Speed tracking for current user turn
+    /// Speed tracking for current user turn
     @Published private(set) var currentBlockCharactersKeyed: Int = 0
 
     // Session info

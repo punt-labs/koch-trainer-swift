@@ -21,7 +21,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - Pause Tests
 
-    func testPauseDuringTrainingTransitionsToPaused() async {
+    func testPauseDuringTrainingTransitionsToPaused() {
         // Start session and skip intro to get to training
         viewModel.startSession()
 
@@ -68,7 +68,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         }
     }
 
-    func testPauseDuringPausedIsNoOp() async {
+    func testPauseDuringPausedIsNoOp() {
         // Get to training
         viewModel.startSession()
         while case .introduction = viewModel.phase {
@@ -86,7 +86,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - Resume Tests
 
-    func testResumeFromPausedTransitionsToTraining() async {
+    func testResumeFromPausedTransitionsToTraining() {
         // Get to training and pause
         viewModel.startSession()
         while case .introduction = viewModel.phase {
@@ -168,7 +168,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - Input Tests
 
-    func testKeyPressHandlesDitKeys() async {
+    func testKeyPressHandlesDitKeys() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -191,7 +191,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentPattern, "..")
     }
 
-    func testKeyPressHandlesDahKeys() async {
+    func testKeyPressHandlesDahKeys() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -214,7 +214,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentPattern, "--")
     }
 
-    func testInputIgnoredWhenNotPlaying() async {
+    func testInputIgnoredWhenNotPlaying() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -231,7 +231,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - End Session Tests
 
-    func testEndSessionFromTraining() async {
+    func testEndSessionFromTraining() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -248,7 +248,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPlaying)
     }
 
-    func testEndSessionFromPaused() async {
+    func testEndSessionFromPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -305,7 +305,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertNil(snapshot?.customCharacters)
     }
 
-    func testCreatePausedSessionSnapshotForCustomSession() async {
+    func testCreatePausedSessionSnapshotForCustomSession() {
         let customChars: [Character] = ["A", "B", "C"]
         let vm = SendTrainingViewModel(audioEngine: MockAudioEngine())
         vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
@@ -322,7 +322,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(snapshot?.isCustomSession ?? false)
     }
 
-    func testRestoreFromPausedSessionRestoresState() async {
+    func testRestoreFromPausedSessionRestoresState() {
         // Create a paused session
         let session = PausedSession(
             sessionType: .send,
@@ -450,7 +450,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isIntroCompleted)
     }
 
-    func testIsIntroCompletedTrueInPaused() async {
+    func testIsIntroCompletedTrueInPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -463,7 +463,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - Pattern Building Tests
 
-    func testPatternBuildsCorrectly() async {
+    func testPatternBuildsCorrectly() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -482,7 +482,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentPattern, ".-.-")
     }
 
-    func testPatternClearsAfterShowNextCharacter() async {
+    func testPatternClearsAfterShowNextCharacter() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -507,7 +507,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.accuracyPercentage, 0)
     }
 
-    func testAccuracyCalculation() async {
+    func testAccuracyCalculation() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -551,7 +551,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.formattedTime, "5:00")
     }
 
-    func testProficiencyProgressShowsAttempts() async {
+    func testProficiencyProgressShowsAttempts() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -572,7 +572,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(progress.contains("of"))
     }
 
-    func testIntroProgressEmptyOutsideIntroduction() async {
+    func testIntroProgressEmptyOutsideIntroduction() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -592,7 +592,7 @@ final class SendTrainingViewModelTests: XCTestCase {
 
     // MARK: - Record Response Tests
 
-    func testRecordResponseUpdatesStats() async {
+    func testRecordResponseUpdatesStats() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -606,7 +606,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 1)
     }
 
-    func testRecordResponseIncorrectDoesNotIncrementCorrect() async {
+    func testRecordResponseIncorrectDoesNotIncrementCorrect() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -620,7 +620,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.characterStats["K"]?.sendCorrect, 0)
     }
 
-    func testRecordResponseMergesCharacterStats() async {
+    func testRecordResponseMergesCharacterStats() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -683,7 +683,7 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.lastFeedback)
     }
 
-    func testShowFeedbackAndContinueSetsLastFeedback() async {
+    func testShowFeedbackAndContinueSetsLastFeedback() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()

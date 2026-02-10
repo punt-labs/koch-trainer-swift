@@ -16,7 +16,9 @@ final class MockAudioEngine: AudioEngineProtocol {
     var frequencySet: Double?
     var effectiveSpeedSet: Int?
 
-    var radioMode: RadioMode { radioState.mode }
+    var radioMode: RadioMode {
+        radioState.mode
+    }
 
     func playCharacter(_ char: Character) async {
         playCharacterCalls.append(char)
@@ -63,15 +65,26 @@ final class MockAudioEngine: AudioEngineProtocol {
         // No-op for testing
     }
 
-    func startSession() { radioState.startSession() }
+    func startSession() {
+        radioState.startSession()
+    }
+
     func endSession() {
         radioState.endSession()
         endSessionCalled = true
     }
 
-    func startReceiving() throws { try radioState.startReceiving() }
-    func startTransmitting() throws { try radioState.startTransmitting() }
-    func stopRadio() throws { try radioState.stopRadio() }
+    func startReceiving() throws {
+        try radioState.startReceiving()
+    }
+
+    func startTransmitting() throws {
+        try radioState.startTransmitting()
+    }
+
+    func stopRadio() throws {
+        try radioState.stopRadio()
+    }
 
     // MARK: Private
 
@@ -308,7 +321,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     // MARK: - Pause Tests
 
-    func testPauseDuringTrainingTransitionsToPaused() async {
+    func testPauseDuringTrainingTransitionsToPaused() {
         // Start session and skip intro to get to training
         viewModel.startSession()
 
@@ -355,7 +368,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         }
     }
 
-    func testPauseDuringPausedIsNoOp() async {
+    func testPauseDuringPausedIsNoOp() {
         // Get to training
         viewModel.startSession()
         while case .introduction = viewModel.phase {
@@ -373,7 +386,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     // MARK: - Resume Tests
 
-    func testResumeFromPausedTransitionsToTraining() async {
+    func testResumeFromPausedTransitionsToTraining() {
         // Get to training and pause
         viewModel.startSession()
         while case .introduction = viewModel.phase {
@@ -448,7 +461,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
 
     // MARK: - End Session Tests
 
-    func testEndSessionFromTraining() async {
+    func testEndSessionFromTraining() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -465,7 +478,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPlaying)
     }
 
-    func testEndSessionFromPaused() async {
+    func testEndSessionFromPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -513,7 +526,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertNil(snapshot)
     }
 
-    func testCreatePausedSessionSnapshotCapturesState() async {
+    func testCreatePausedSessionSnapshotCapturesState() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()
@@ -533,7 +546,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertNil(snapshot?.customCharacters)
     }
 
-    func testCreatePausedSessionSnapshotForCustomSession() async {
+    func testCreatePausedSessionSnapshotForCustomSession() {
         let customChars: [Character] = ["A", "B", "C"]
         let vm = ReceiveTrainingViewModel(audioEngine: MockAudioEngine())
         vm.configure(progressStore: progressStore, settingsStore: settingsStore, customCharacters: customChars)
@@ -550,7 +563,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(snapshot?.isCustomSession ?? false)
     }
 
-    func testRestoreFromPausedSessionRestoresState() async {
+    func testRestoreFromPausedSessionRestoresState() {
         // Create a paused session
         let session = PausedSession(
             sessionType: .receive,
@@ -678,7 +691,7 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isIntroCompleted)
     }
 
-    func testIsIntroCompletedTrueInPaused() async {
+    func testIsIntroCompletedTrueInPaused() {
         viewModel.startSession()
         while case .introduction = viewModel.phase {
             viewModel.nextIntroCharacter()

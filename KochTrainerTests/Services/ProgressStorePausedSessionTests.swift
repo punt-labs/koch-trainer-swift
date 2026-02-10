@@ -102,7 +102,7 @@ final class ProgressStorePausedSessionTests: XCTestCase {
         XCTAssertEqual(retrieved?.currentLevel, 3)
     }
 
-    func testPausedEarTrainingSessionPersistsAcrossInstances() throws {
+    func testPausedEarTrainingSessionPersistsAcrossInstances() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return

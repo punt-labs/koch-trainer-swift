@@ -16,7 +16,9 @@ final class QSOEnginePhaseTests: XCTestCase {
         var stopCalled = false
         var bandConditionsConfigured = false
 
-        var radioMode: RadioMode { radioState.mode }
+        var radioMode: RadioMode {
+            radioState.mode
+        }
 
         func playCharacter(_: Character) async {}
         func playGroup(_ group: String) async {
@@ -32,7 +34,10 @@ final class QSOEnginePhaseTests: XCTestCase {
 
         func playDit() async {}
         func playDah() async {}
-        func stop() { stopCalled = true }
+        func stop() {
+            stopCalled = true
+        }
+
         func reset() {}
         func setFrequency(_ frequency: Double) {
             self.frequency = frequency
@@ -46,11 +51,25 @@ final class QSOEnginePhaseTests: XCTestCase {
             bandConditionsConfigured = true
         }
 
-        func startSession() { radioState.startSession() }
-        func endSession() { radioState.endSession() }
-        func startReceiving() throws { try radioState.startReceiving() }
-        func startTransmitting() throws { try radioState.startTransmitting() }
-        func stopRadio() throws { try radioState.stopRadio() }
+        func startSession() {
+            radioState.startSession()
+        }
+
+        func endSession() {
+            radioState.endSession()
+        }
+
+        func startReceiving() throws {
+            try radioState.startReceiving()
+        }
+
+        func startTransmitting() throws {
+            try radioState.startTransmitting()
+        }
+
+        func stopRadio() throws {
+            try radioState.stopRadio()
+        }
 
         // MARK: Private
 

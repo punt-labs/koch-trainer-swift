@@ -356,7 +356,7 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertNil(store.pausedSession(for: .receive))
     }
 
-    func testPausedSessionPersistsAcrossInstances() throws {
+    func testPausedSessionPersistsAcrossInstances() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -513,7 +513,7 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertEqual(backupProgress.sendLevel, 2)
     }
 
-    func testResetClearsBackups() throws {
+    func testResetClearsBackups() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return
@@ -534,7 +534,7 @@ final class ProgressStoreTests: XCTestCase {
         XCTAssertFalse(backupManager.hasBackups)
     }
 
-    func testLoadRecoverFromBackupOnCorruptPrimary() throws {
+    func testLoadRecoverFromBackupOnCorruptPrimary() {
         guard let defaults = testDefaults else {
             XCTFail("Test defaults not initialized")
             return

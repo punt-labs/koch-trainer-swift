@@ -16,7 +16,9 @@ final class QSOEngineTests: XCTestCase {
         var frequency: Double = 600
         var effectiveSpeed: Int = 12
 
-        var radioMode: RadioMode { radioState.mode }
+        var radioMode: RadioMode {
+            radioState.mode
+        }
 
         func playCharacter(_ char: Character) async {}
         func playGroup(_ group: String) async {
@@ -44,11 +46,25 @@ final class QSOEngineTests: XCTestCase {
 
         func configureBandConditions(from settings: AppSettings) {}
 
-        func startSession() { radioState.startSession() }
-        func endSession() { radioState.endSession() }
-        func startReceiving() throws { try radioState.startReceiving() }
-        func startTransmitting() throws { try radioState.startTransmitting() }
-        func stopRadio() throws { try radioState.stopRadio() }
+        func startSession() {
+            radioState.startSession()
+        }
+
+        func endSession() {
+            radioState.endSession()
+        }
+
+        func startReceiving() throws {
+            try radioState.startReceiving()
+        }
+
+        func startTransmitting() throws {
+            try radioState.startTransmitting()
+        }
+
+        func stopRadio() throws {
+            try radioState.stopRadio()
+        }
 
         // MARK: Private
 

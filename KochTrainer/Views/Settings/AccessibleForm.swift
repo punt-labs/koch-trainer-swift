@@ -7,15 +7,7 @@ import SwiftUI
 /// immediately, allowing VoiceOver to navigate smoothly.
 struct AccessibleForm<Content: View>: View {
 
-    // MARK: Lifecycle
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    // MARK: Internal
-
-    let content: Content
+    @ViewBuilder let content: Content
 
     var body: some View {
         ScrollView {

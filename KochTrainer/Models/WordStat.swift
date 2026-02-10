@@ -31,8 +31,13 @@ struct WordStat: Codable, Equatable {
 
     var lastPracticed: Date
 
-    var totalAttempts: Int { receiveAttempts + sendAttempts }
-    var totalCorrect: Int { receiveCorrect + sendCorrect }
+    var totalAttempts: Int {
+        receiveAttempts + sendAttempts
+    }
+
+    var totalCorrect: Int {
+        receiveCorrect + sendCorrect
+    }
 
     var receiveAccuracy: Double {
         guard receiveAttempts > 0 else { return 0 }
