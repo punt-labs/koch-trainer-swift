@@ -388,7 +388,12 @@ extension EarTrainingViewModel {
         // Increment cycle ID first - causes view recreation (destroys in-flight animation)
         timerCycleId += 1
 
-        inputTimeRemaining = currentInputTimeout
+        // Cancel any in-flight animation and snap to full value immediately
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            inputTimeRemaining = currentInputTimeout
+        }
 
         inputTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -396,10 +401,10 @@ extension EarTrainingViewModel {
             Task { @MainActor in self?.handleInputTimeout() }
         }
 
-        // Yield to event loop so SwiftUI creates new view seeing inputTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
+        // Wait for SwiftUI to render the full progress bar, then animate to zero
         let duration = currentInputTimeout
         Task { @MainActor in
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             withAnimation(.linear(duration: duration)) {
                 inputTimeRemaining = 0
             }

@@ -351,7 +351,12 @@ final class VocabularyTrainingViewModel: ObservableObject {
         // Increment cycle ID first - causes view recreation (destroys in-flight animation)
         timerCycleId += 1
 
-        inputTimeRemaining = inputTimeout
+        // Cancel any in-flight animation and snap to full value immediately
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            inputTimeRemaining = inputTimeout
+        }
 
         inputTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -361,9 +366,9 @@ final class VocabularyTrainingViewModel: ObservableObject {
             }
         }
 
-        // Yield to event loop so SwiftUI creates new view seeing inputTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
+        // Wait for SwiftUI to render the full progress bar, then animate to zero
         Task { @MainActor in
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             withAnimation(.linear(duration: inputTimeout)) {
                 inputTimeRemaining = 0
             }
@@ -417,7 +422,13 @@ extension VocabularyTrainingViewModel {
         timerCycleId += 1
 
         isWaitingForResponse = true
-        responseTimeRemaining = responseTimeout
+
+        // Cancel any in-flight animation and snap to full value immediately
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            responseTimeRemaining = responseTimeout
+        }
 
         responseTimer?.invalidate()
         // Single-fire timer for timeout detection only
@@ -425,9 +436,9 @@ extension VocabularyTrainingViewModel {
             Task { @MainActor in self?.handleResponseTimeout() }
         }
 
-        // Yield to event loop so SwiftUI creates new view seeing responseTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
+        // Wait for SwiftUI to render the full progress bar, then animate to zero
         Task { @MainActor in
+            try? await Task.sleep(nanoseconds: TrainingTiming.animationStartDelay)
             withAnimation(.linear(duration: responseTimeout)) {
                 responseTimeRemaining = 0
             }
