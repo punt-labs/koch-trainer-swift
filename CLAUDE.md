@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 iOS app implementing the Koch method for learning Morse code. Single-user, supports 26 letters (Koch order: K M R S U A P T L O W I N J E F Y V G Q Z H B C D X) plus digits 0-9 for callsigns and RST reports.
 
+## GitHub Operations
+
+Use the GitHub MCP tools (`mcp__plugin_github_github__*`) for all GitHub operations: creating PRs, merging PRs, reading issues, searching, requesting reviews, etc. Do **not** use the `gh` CLI. MCP tools give structured output, avoid shell parsing, and work reliably across worktrees.
+
 ## Build & Run
 
 Uses XcodeGen for project configuration. The `project.yml` file defines the project structure.
@@ -470,24 +474,21 @@ git push -u origin feature/<short-description>
 ```
 
 **6. Create Pull Request:**
-```bash
-gh pr create --title "feat: description" --body "## Summary\n..."
-```
+Use `mcp__plugin_github_github__create_pull_request` with owner, repo, title, head branch, and base branch.
 
 **7. After PR merged:**
 ```bash
 # 1. Remove worktree FIRST (before deleting branch)
 cd ~/Coding/koch-trainer-swift
 make worktree-remove BRANCH=feature/<short-description>
-
-# 2. Merge PR (now safe to delete branch)
-gh pr merge <number> --squash --delete-branch
-
-# 3. Update local main
+```
+Then merge via `mcp__plugin_github_github__merge_pull_request` (squash, delete branch).
+```bash
+# 2. Update local main
 git fetch --prune
 git pull origin main
 
-# 4. Sync beads (requires --no-verify for main commits)
+# 3. Sync beads (requires --no-verify for main commits)
 bd close <id>
 git add .beads/issues.jsonl
 git commit --no-verify -m "chore(beads): sync after merge"
