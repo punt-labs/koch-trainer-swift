@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-02-11
+
+### Fixed
+- Rapid dit/dah taps no longer overlap—tones are serialized with proper inter-element gaps
+- "We Miss You!" notification replaced with neutral "Practice Reminder" copy across all languages
+- Streak reminder threshold raised from 3 to 7 days—only nudges users with a meaningful streak at risk
+- Welcome-back notification suppressed when a practice-due reminder is already scheduled
+
 ## [1.0.1] - 2026-02-03
 
 ### Fixed
