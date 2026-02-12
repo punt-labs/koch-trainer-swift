@@ -655,6 +655,22 @@ This project uses formal Z specifications (`docs/koch_trainer.tex`) to model sta
 |------|------|--------|
 | `receiveInterval: \nat` | `Double` | Acceptable—could use millis in future |
 
+## Session Tracking with Entire CLI
+
+This project uses [Entire CLI](https://github.com/entireio/cli) to capture AI agent sessions as checkpoints. Session data lives on the `entire/checkpoints/v1` branch, separate from code.
+
+**Strategy:** `manual-commit` — no automatic commits on working branches. Checkpoints are created when you commit and pushed when you push.
+
+**No workflow changes needed.** The existing git hooks (`pre-push`, `post-commit`, `commit-msg`, `prepare-commit-msg`) and Claude Code hooks (`SessionStart`, `SessionEnd`, `UserPromptSubmit`, `Stop`, `PreToolUse(Task)`, `PostToolUse(Task, TodoWrite)`) fire automatically.
+
+| Command | When to use |
+|---------|-------------|
+| `entire status` | Check active sessions |
+| `entire resume <branch>` | Restore session metadata when returning to an in-progress branch |
+| `entire doctor` | Fix stuck sessions or hook issues |
+
+**Configuration:** `.entire/settings.json` (committed) holds project-wide settings. `.entire/settings.local.json` (gitignored) holds personal overrides.
+
 ## Standards
 
 - Do not suggest skipping tests, lowering coverage targets, or ignoring failures.
