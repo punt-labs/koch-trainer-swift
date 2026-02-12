@@ -282,4 +282,86 @@ final class MorseAudioEngineTests: XCTestCase {
 
         XCTAssertGreaterThan(timing.wordGap, timing.characterGap)
     }
+
+    // MARK: - Tone Serialization Tests
+
+    func testRapidDahsAreSerializedWithGap() async {
+        let engine = MorseAudioEngine()
+        let timing = MorseAudioEngine.Timing(effectiveWPM: 12)
+
+        // Two dahs played back-to-back should take at least:
+        // dahDuration + elementGap + dahDuration
+        let expectedMinimum = timing.dahDuration * 2 + timing.elementGap
+        let start = Date()
+
+        // Fire both concurrently (simulates rapid button taps)
+        async let first: Void = engine.playDah()
+        async let second: Void = engine.playDah()
+        _ = await (first, second)
+
+        let elapsed = Date().timeIntervalSince(start)
+        XCTAssertGreaterThanOrEqual(
+            elapsed,
+            expectedMinimum * 0.9, // 10% tolerance for scheduling jitter
+            "Two rapid dahs should be serialized: expected ≥\(expectedMinimum)s, got \(elapsed)s"
+        )
+    }
+
+    func testRapidDitDahSerializedWithGap() async {
+        let engine = MorseAudioEngine()
+        let timing = MorseAudioEngine.Timing(effectiveWPM: 12)
+
+        let expectedMinimum = timing.ditDuration + timing.elementGap + timing.dahDuration
+        let start = Date()
+
+        async let first: Void = engine.playDit()
+        async let second: Void = engine.playDah()
+        _ = await (first, second)
+
+        let elapsed = Date().timeIntervalSince(start)
+        XCTAssertGreaterThanOrEqual(
+            elapsed,
+            expectedMinimum * 0.9,
+            "Dit then dah should be serialized: expected ≥\(expectedMinimum)s, got \(elapsed)s"
+        )
+    }
+
+    func testSingleDahHasNoExtraGap() async {
+        let engine = MorseAudioEngine()
+        let timing = MorseAudioEngine.Timing(effectiveWPM: 12)
+
+        let start = Date()
+        await engine.playDah()
+        let elapsed = Date().timeIntervalSince(start)
+
+        // Should take approximately dahDuration, not dahDuration + elementGap
+        let maxExpected = timing.dahDuration + timing.elementGap
+        XCTAssertLessThan(
+            elapsed,
+            maxExpected,
+            "Single dah should not include an element gap"
+        )
+    }
+
+    func testResetClearsSerializationChain() async {
+        let engine = MorseAudioEngine()
+        let timing = MorseAudioEngine.Timing(effectiveWPM: 12)
+
+        // Play a dah, then reset (simulates new character)
+        await engine.playDah()
+        engine.stop()
+        engine.reset()
+
+        // Next dah should NOT wait for or add a gap from the previous
+        let start = Date()
+        await engine.playDah()
+        let elapsed = Date().timeIntervalSince(start)
+
+        let maxExpected = timing.dahDuration + timing.elementGap
+        XCTAssertLessThan(
+            elapsed,
+            maxExpected,
+            "After reset, first dah should not include a stale element gap"
+        )
+    }
 }

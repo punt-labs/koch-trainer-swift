@@ -129,15 +129,17 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     }
 
     /// Play a single dit (short tone).
+    /// Serialized: rapid calls queue with inter-element gaps.
     func playDit() async {
         guard !isStopped else { return }
-        await playToneElement(duration: timing.ditDuration)
+        await enqueueUserTone(duration: timing.ditDuration)
     }
 
     /// Play a single dah (long tone).
+    /// Serialized: rapid calls queue with inter-element gaps.
     func playDah() async {
         guard !isStopped else { return }
-        await playToneElement(duration: timing.dahDuration)
+        await enqueueUserTone(duration: timing.dahDuration)
     }
 
     /// Play a group of characters (word or character group).
@@ -172,12 +174,14 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     /// Stop all audio playback.
     func stop() {
         isStopped = true
+        userToneTask = nil
         toneGenerator.stopTone()
     }
 
     /// Reset stopped state to allow playback again.
     func reset() {
         isStopped = false
+        userToneTask = nil
     }
 
     // MARK: - Continuous Session API
@@ -225,9 +229,31 @@ final class MorseAudioEngine: AudioEngineProtocol, ObservableObject {
     private var isStopped = false
     private var isSessionActive = false
 
+    /// Serializes user-triggered dit/dah tones so rapid taps don't overlap.
+    /// Each tone waits for the previous to finish, then inserts an inter-element gap.
+    /// Cleared on stop()/reset() so new character attempts start without a stale gap.
+    private var userToneTask: Task<Void, Never>?
+
     /// Timing configuration based on current effective speed
     private var timing: Timing {
         Timing(effectiveWPM: effectiveSpeed)
+    }
+
+    /// Enqueue a user-triggered tone, serializing against any in-flight tone.
+    /// Inserts an inter-element gap between consecutive tones.
+    private func enqueueUserTone(duration: TimeInterval) async {
+        let previous = userToneTask
+        let task = Task { @MainActor [self] in
+            if previous != nil {
+                await previous?.value
+                guard !isStopped else { return }
+                await toneGenerator.playSilence(duration: timing.elementGap)
+            }
+            guard !isStopped else { return }
+            await playToneElement(duration: duration)
+        }
+        userToneTask = task
+        await task.value
     }
 
     /// Play a tone element.
