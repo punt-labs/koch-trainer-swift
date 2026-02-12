@@ -324,97 +324,91 @@ struct EarCompletedView: View {
     let dismiss: DismissAction
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.xl) {
-            Spacer()
+        ScrollView {
+            VStack(spacing: Theme.Spacing.xl) {
+                if didAdvance {
+                    // Level up celebration
+                    VStack(spacing: Theme.Spacing.md) {
+                        Text("Level Up!")
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.Colors.success)
+                            .accessibilityIdentifier(AccessibilityID.Training.levelUpTitle)
 
-            if didAdvance {
-                // Level up celebration
-                VStack(spacing: Theme.Spacing.md) {
-                    Text("Level Up!")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(Theme.Colors.success)
-                        .accessibilityIdentifier(AccessibilityID.Training.levelUpTitle)
+                        if let chars = newCharacters, !chars.isEmpty {
+                            Text("New patterns unlocked:")
+                                .font(Typography.body)
+                                .foregroundColor(.secondary)
 
-                    if let chars = newCharacters, !chars.isEmpty {
-                        Text("New patterns unlocked:")
+                            // Show new characters with their patterns
+                            VStack(spacing: Theme.Spacing.sm) {
+                                ForEach(chars, id: \.self) { char in
+                                    HStack {
+                                        Text(String(char))
+                                            .font(.system(size: 32, weight: .bold))
+                                            .foregroundColor(Theme.Colors.primary)
+                                        Text("=")
+                                            .foregroundColor(.secondary)
+                                        Text(MorseCode.pattern(for: char) ?? "")
+                                            .font(.system(size: 24, design: .monospaced))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel(
+                                        "\(String(char)) equals \(AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? ""))"
+                                    )
+                                }
+                            }
+                            .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
+                        }
+                    }
+                } else {
+                    // Session complete without advancement
+                    Text("Session Complete")
+                        .font(Typography.largeTitle)
+                        .accessibilityIdentifier(AccessibilityID.Training.sessionCompleteTitle)
+                }
+
+                // Stats
+                VStack(spacing: Theme.Spacing.sm) {
+                    Text("\(viewModel.counter.correct)/\(viewModel.counter.attempts) correct")
+                        .font(Typography.headline)
+                        .accessibilityIdentifier(AccessibilityID.Training.finalScore)
+
+                    Text("\(viewModel.accuracyPercentage)% accuracy")
+                        .font(Typography.body)
+                        .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
+                        .accessibilityIdentifier(AccessibilityID.Training.finalAccuracy)
+
+                    if !didAdvance, viewModel.accuracyPercentage < 90 {
+                        Text("Need 90% to advance")
                             .font(Typography.body)
                             .foregroundColor(.secondary)
-
-                        // Show new characters with their patterns
-                        VStack(spacing: Theme.Spacing.sm) {
-                            ForEach(chars, id: \.self) { char in
-                                HStack {
-                                    Text(String(char))
-                                        .font(.system(size: 32, weight: .bold))
-                                        .foregroundColor(Theme.Colors.primary)
-                                    Text("=")
-                                        .foregroundColor(.secondary)
-                                    Text(MorseCode.pattern(for: char) ?? "")
-                                        .font(.system(size: 24, design: .monospaced))
-                                        .foregroundColor(.secondary)
-                                }
-                                .accessibilityElement(children: .combine)
-                                .accessibilityLabel(
-                                    "\(String(char)) equals \(AccessibilityAnnouncer.spokenPattern(MorseCode.pattern(for: char) ?? ""))"
-                                )
-                            }
-                        }
-                        .accessibilityIdentifier(AccessibilityID.Training.newCharacterDisplay)
+                            .padding(.top, Theme.Spacing.sm)
                     }
                 }
-            } else {
-                // Session complete without advancement
-                Text("Session Complete")
-                    .font(Typography.largeTitle)
-                    .accessibilityIdentifier(AccessibilityID.Training.sessionCompleteTitle)
-            }
 
-            Spacer()
+                if didAdvance {
+                    Button("Continue to Next Level") {
+                        dismiss()
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier(AccessibilityID.Training.continueButton)
+                } else {
+                    Button("Try Again") {
+                        dismiss()
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier(AccessibilityID.Training.tryAgainButton)
 
-            // Stats
-            VStack(spacing: Theme.Spacing.sm) {
-                Text("\(viewModel.counter.correct)/\(viewModel.counter.attempts) correct")
-                    .font(Typography.headline)
-                    .accessibilityIdentifier(AccessibilityID.Training.finalScore)
-
-                Text("\(viewModel.accuracyPercentage)% accuracy")
-                    .font(Typography.body)
-                    .foregroundColor(viewModel.accuracyPercentage >= 90 ? Theme.Colors.success : .secondary)
-                    .accessibilityIdentifier(AccessibilityID.Training.finalAccuracy)
-
-                if !didAdvance, viewModel.accuracyPercentage < 90 {
-                    Text("Need 90% to advance")
-                        .font(Typography.body)
-                        .foregroundColor(.secondary)
-                        .padding(.top, Theme.Spacing.sm)
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .buttonStyle(SecondaryButtonStyle())
+                    .accessibilityIdentifier(AccessibilityID.Training.doneButton)
                 }
             }
-
-            Spacer()
-
-            if didAdvance {
-                Button("Continue to Next Level") {
-                    dismiss()
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityIdentifier(AccessibilityID.Training.continueButton)
-            } else {
-                Button("Try Again") {
-                    dismiss()
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .accessibilityIdentifier(AccessibilityID.Training.tryAgainButton)
-
-                Button("Done") {
-                    dismiss()
-                }
-                .buttonStyle(SecondaryButtonStyle())
-                .accessibilityIdentifier(AccessibilityID.Training.doneButton)
-            }
-
-            Spacer()
+            .padding(Theme.Spacing.lg)
         }
-        .padding(Theme.Spacing.lg)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Training.completedView)
     }
