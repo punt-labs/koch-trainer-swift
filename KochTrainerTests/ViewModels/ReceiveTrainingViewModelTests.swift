@@ -183,15 +183,9 @@ final class ReceiveTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.accuracy, 0.5, accuracy: 0.001)
     }
 
-    func testResponseProgress() {
-        viewModel.responseTimeRemaining = 1.5 // Half of 3.0 timeout
-        XCTAssertEqual(viewModel.responseProgress, 0.5, accuracy: 0.001)
-
-        viewModel.responseTimeRemaining = 3.0
-        XCTAssertEqual(viewModel.responseProgress, 1.0, accuracy: 0.001)
-
-        viewModel.responseTimeRemaining = 0
-        XCTAssertEqual(viewModel.responseProgress, 0, accuracy: 0.001)
+    func testTimerDeadlineInitiallyDistantPast() {
+        XCTAssertEqual(viewModel.timerDeadline, .distantPast)
+        XCTAssertEqual(viewModel.timerDuration, 0)
     }
 
     func testIntroProgressString() {

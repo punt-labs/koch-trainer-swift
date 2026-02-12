@@ -202,10 +202,7 @@ struct TrainingPhaseView: View {
                 .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
 
                 // Slot 3: Progress bar (always present, opacity controlled)
-                // Animation controlled by ViewModel via withAnimation()
-                // .id() forces view recreation when timer resets, destroying in-flight animation
-                TimeoutProgressBar(progress: viewModel.responseProgress)
-                    .id(viewModel.timerCycleId)
+                TimeoutProgressBar(deadline: viewModel.timerDeadline, duration: viewModel.timerDuration)
                     .frame(height: 8)
                     .padding(.horizontal, Theme.Spacing.xl)
                     .padding(.top, Theme.Spacing.md)
@@ -426,13 +423,36 @@ struct ReceiveFeedbackMessageView: View {
 
 // MARK: - TimeoutProgressBar
 
-/// Animated progress bar that counts down from full to empty.
-/// Animation is controlled by the caller using withAnimation() when changing the progress value.
+/// Countdown progress bar driven by wall clock time.
+/// Uses TimelineView(.animation) to compute progress each frame — no withAnimation coordination needed.
 struct TimeoutProgressBar: View {
-    /// Current progress value (0.0 to 1.0). Use withAnimation() when changing this value.
-    let progress: Double
 
-    var progressColor: Color {
+    // MARK: Internal
+
+    let deadline: Date
+    let duration: TimeInterval
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let remaining = max(0, deadline.timeIntervalSince(timeline.date))
+            let progress = duration > 0 ? remaining / duration : 0
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Theme.Colors.secondaryBackground)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(progressColor(for: progress))
+                        .frame(width: geometry.size.width * max(0, min(1, progress)))
+                }
+            }
+        }
+    }
+
+    // MARK: Private
+
+    private func progressColor(for progress: Double) -> Color {
         if progress > 0.5 {
             return Theme.Colors.success
         } else if progress > 0.25 {
@@ -441,20 +461,6 @@ struct TimeoutProgressBar: View {
             return Theme.Colors.error
         }
     }
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Theme.Colors.secondaryBackground)
-
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(progressColor)
-                    .frame(width: geometry.size.width * max(0, min(1, progress)))
-            }
-        }
-    }
-
 }
 
 #Preview {

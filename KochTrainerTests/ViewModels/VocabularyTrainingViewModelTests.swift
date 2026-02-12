@@ -350,21 +350,9 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.responseTimeout, expectedTimeout)
     }
 
-    func testResponseProgress() {
-        viewModel.startSession()
-
-        // Test computed property directly (like ReceiveTrainingViewModelTests)
-        // responseProgress = responseTimeRemaining / responseTimeout
-        let timeout = viewModel.responseTimeout
-
-        viewModel.responseTimeRemaining = timeout
-        XCTAssertEqual(viewModel.responseProgress, 1.0, accuracy: 0.001)
-
-        viewModel.responseTimeRemaining = timeout / 2
-        XCTAssertEqual(viewModel.responseProgress, 0.5, accuracy: 0.001)
-
-        viewModel.responseTimeRemaining = 0
-        XCTAssertEqual(viewModel.responseProgress, 0, accuracy: 0.001)
+    func testResponseDeadlineInitiallyDistantPast() {
+        XCTAssertEqual(viewModel.responseDeadline, .distantPast)
+        XCTAssertEqual(viewModel.responseDuration, 0)
     }
 
     // MARK: - Send Mode Tests
@@ -532,7 +520,7 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
 
     // MARK: - Send Mode Input Progress Tests
 
-    func testInputProgressInitiallyZero() {
+    func testInputDeadlineInitiallyDistantPast() {
         let sendVM = VocabularyTrainingViewModel(
             vocabularySet: testSet,
             sessionType: .send,
@@ -540,7 +528,8 @@ final class VocabularyTrainingViewModelTests: XCTestCase {
         )
         sendVM.configure(progressStore: progressStore, settingsStore: settingsStore)
 
-        XCTAssertEqual(sendVM.inputProgress, 0)
+        XCTAssertEqual(sendVM.inputDeadline, .distantPast)
+        XCTAssertEqual(sendVM.inputDuration, 0)
 
         sendVM.cleanup()
     }

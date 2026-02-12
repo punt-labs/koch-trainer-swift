@@ -1,5 +1,5 @@
+import Combine
 import Foundation
-import SwiftUI
 
 // MARK: - ReceiveTrainingViewModel
 
@@ -46,10 +46,10 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // Training state
     @Published var currentCharacter: Character?
-    @Published var responseTimeRemaining: TimeInterval = 0
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForResponse: Bool = false
-    @Published var timerCycleId: Int = 0
+    @Published var timerDeadline: Date = .distantPast
+    @Published var timerDuration: TimeInterval = 0
 
     // MARK: - Configuration
 
@@ -81,11 +81,6 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     var accuracy: Double {
         counter.accuracy
-    }
-
-    var responseProgress: Double {
-        guard responseTimeout > 0 else { return 0 }
-        return responseTimeRemaining / responseTimeout
     }
 
     var introProgress: String {
@@ -438,24 +433,13 @@ extension ReceiveTrainingViewModel {
     }
 
     func startResponseTimer() {
-        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
-        timerCycleId += 1
-
         isWaitingForResponse = true
-        responseTimeRemaining = responseTimeout
+        timerDuration = responseTimeout
+        timerDeadline = Date().addingTimeInterval(responseTimeout)
 
         responseTimer?.invalidate()
-        // Single-fire timer for timeout detection only
         responseTimer = Timer.scheduledTimer(withTimeInterval: responseTimeout, repeats: false) { [weak self] _ in
             Task { @MainActor in self?.handleTimeout() }
-        }
-
-        // Yield to event loop so SwiftUI creates new view seeing responseTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
-        Task { @MainActor in
-            withAnimation(.linear(duration: responseTimeout)) {
-                responseTimeRemaining = 0
-            }
         }
     }
 

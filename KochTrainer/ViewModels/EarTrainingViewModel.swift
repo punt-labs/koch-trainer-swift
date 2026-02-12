@@ -1,5 +1,5 @@
+import Combine
 import Foundation
-import SwiftUI
 
 // MARK: - EarTrainingViewModel
 
@@ -51,8 +51,8 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
     @Published var currentPattern: String = ""
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForInput: Bool = false
-    @Published var inputTimeRemaining: TimeInterval = 0
-    @Published var timerCycleId: Int = 0
+    @Published var timerDeadline: Date = .distantPast
+    @Published var timerDuration: TimeInterval = 0
 
     // MARK: - Configuration
 
@@ -76,11 +76,6 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     var accuracy: Double {
         counter.accuracy
-    }
-
-    var inputProgress: Double {
-        guard currentInputTimeout > 0 else { return 0 }
-        return inputTimeRemaining / currentInputTimeout
     }
 
     var introProgress: String {
@@ -385,24 +380,12 @@ extension EarTrainingViewModel {
     }
 
     func resetInputTimer() {
-        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
-        timerCycleId += 1
-
-        inputTimeRemaining = currentInputTimeout
+        timerDuration = currentInputTimeout
+        timerDeadline = Date().addingTimeInterval(currentInputTimeout)
 
         inputTimer?.invalidate()
-        // Single-fire timer for timeout detection only
         inputTimer = Timer.scheduledTimer(withTimeInterval: currentInputTimeout, repeats: false) { [weak self] _ in
             Task { @MainActor in self?.handleInputTimeout() }
-        }
-
-        // Yield to event loop so SwiftUI creates new view seeing inputTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
-        let duration = currentInputTimeout
-        Task { @MainActor in
-            withAnimation(.linear(duration: duration)) {
-                inputTimeRemaining = 0
-            }
         }
     }
 
@@ -487,7 +470,7 @@ extension EarTrainingViewModel {
         currentPattern = ""
         lastFeedback = nil
         isWaitingForInput = false
-        inputTimeRemaining = 0
+        timerDeadline = .distantPast
 
         // Play the character audio
         Task {
