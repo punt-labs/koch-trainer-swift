@@ -477,8 +477,9 @@ final class EarTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.accuracy, 0)
     }
 
-    func testInputProgressWithNoTimeout() {
-        XCTAssertEqual(viewModel.inputProgress, 0)
+    func testTimerDeadlineInitiallyDistantPast() {
+        XCTAssertEqual(viewModel.timerDeadline, .distantPast)
+        XCTAssertEqual(viewModel.timerDuration, 0)
     }
 
     func testProficiencyProgressShowsAttempts() {

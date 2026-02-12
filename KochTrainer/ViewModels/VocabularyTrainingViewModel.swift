@@ -1,5 +1,5 @@
+import Combine
 import Foundation
-import SwiftUI
 
 // MARK: - VocabularyTrainingViewModel
 
@@ -54,12 +54,13 @@ final class VocabularyTrainingViewModel: ObservableObject {
     @Published var userInput: String = ""
     @Published var lastFeedback: Feedback?
     @Published var isWaitingForResponse: Bool = false
-    @Published var responseTimeRemaining: TimeInterval = 0
+    @Published var responseDeadline: Date = .distantPast
+    @Published var responseDuration: TimeInterval = 0
 
     // Send mode state
     @Published var currentPattern: String = ""
-    @Published var inputTimeRemaining: TimeInterval = 0
-    @Published var timerCycleId: Int = 0
+    @Published var inputDeadline: Date = .distantPast
+    @Published var inputDuration: TimeInterval = 0
 
     // MARK: - Configuration
 
@@ -82,16 +83,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     var accuracy: Double {
         counter.accuracy
-    }
-
-    var responseProgress: Double {
-        guard responseTimeout > 0 else { return 0 }
-        return responseTimeRemaining / responseTimeout
-    }
-
-    var inputProgress: Double {
-        guard inputTimeout > 0 else { return 0 }
-        return inputTimeRemaining / inputTimeout
     }
 
     var isReceiveMode: Bool {
@@ -348,24 +339,13 @@ final class VocabularyTrainingViewModel: ObservableObject {
     }
 
     private func resetInputTimer() {
-        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
-        timerCycleId += 1
-
-        inputTimeRemaining = inputTimeout
+        inputDuration = inputTimeout
+        inputDeadline = Date().addingTimeInterval(inputTimeout)
 
         inputTimer?.invalidate()
-        // Single-fire timer for timeout detection only
         inputTimer = Timer.scheduledTimer(withTimeInterval: inputTimeout, repeats: false) { [weak self] _ in
             Task { @MainActor in
                 self?.handleInputTimeout()
-            }
-        }
-
-        // Yield to event loop so SwiftUI creates new view seeing inputTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
-        Task { @MainActor in
-            withAnimation(.linear(duration: inputTimeout)) {
-                inputTimeRemaining = 0
             }
         }
     }
@@ -408,29 +388,18 @@ extension VocabularyTrainingViewModel {
             }
         } else {
             isWaitingForResponse = true
-            inputTimeRemaining = 0
+            inputDeadline = .distantPast
         }
     }
 
     func startResponseTimer() {
-        // Increment cycle ID first - causes view recreation (destroys in-flight animation)
-        timerCycleId += 1
-
         isWaitingForResponse = true
-        responseTimeRemaining = responseTimeout
+        responseDuration = responseTimeout
+        responseDeadline = Date().addingTimeInterval(responseTimeout)
 
         responseTimer?.invalidate()
-        // Single-fire timer for timeout detection only
         responseTimer = Timer.scheduledTimer(withTimeInterval: responseTimeout, repeats: false) { [weak self] _ in
             Task { @MainActor in self?.handleResponseTimeout() }
-        }
-
-        // Yield to event loop so SwiftUI creates new view seeing responseTimeRemaining = full
-        // Then animate countdown from full to zero on the NEW view (no in-flight animation)
-        Task { @MainActor in
-            withAnimation(.linear(duration: responseTimeout)) {
-                responseTimeRemaining = 0
-            }
         }
     }
 

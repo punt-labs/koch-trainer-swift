@@ -181,10 +181,7 @@ struct SendTrainingPhaseView: View {
                     .accessibilityIdentifier(AccessibilityID.Training.feedbackMessage)
 
                     // Slot 3: Progress bar (always present, opacity controlled)
-                    // Animation controlled by ViewModel via withAnimation()
-                    // .id() forces view recreation when timer resets, destroying in-flight animation
-                    TimeoutProgressBar(progress: viewModel.inputProgress)
-                        .id(viewModel.timerCycleId)
+                    TimeoutProgressBar(deadline: viewModel.timerDeadline, duration: viewModel.timerDuration)
                         .frame(height: 8)
                         .padding(.horizontal, Theme.Spacing.xl)
                         .opacity(viewModel.isWaitingForInput ? 1 : 0)

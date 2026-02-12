@@ -522,8 +522,9 @@ final class SendTrainingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.accuracyPercentage, 67)
     }
 
-    func testInputProgressInitiallyZero() {
-        XCTAssertEqual(viewModel.inputProgress, 0)
+    func testTimerDeadlineInitiallyDistantPast() {
+        XCTAssertEqual(viewModel.timerDeadline, .distantPast)
+        XCTAssertEqual(viewModel.timerDuration, 0)
     }
 
     func testMinimumAttemptsForProficiency() {
