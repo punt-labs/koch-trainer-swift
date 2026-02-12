@@ -589,8 +589,6 @@ make worktree-list
 
 ### Removing a Worktree
 
-**Do not remove a worktree during an active Claude Code session that started in it.** Entire CLI records the worktree path at session start and cannot update it. Removing the worktree orphans the session's checkpoint tracking. Either end the Claude Code session first, or start a new session in the replacement worktree.
-
 ```bash
 make worktree-remove BRANCH=feature/foo
 
@@ -657,24 +655,6 @@ This project uses formal Z specifications (`docs/koch_trainer.tex`) to model sta
 | Spec | Code | Status |
 |------|------|--------|
 | `receiveInterval: \nat` | `Double` | Acceptable—could use millis in future |
-
-## Session Tracking with Entire CLI
-
-This project uses [Entire CLI](https://github.com/entireio/cli) to capture AI agent sessions as checkpoints. Session data lives on the `entire/checkpoints/v1` branch, separate from code.
-
-**Strategy:** `auto-commit` — checkpoints are created by Claude Code hooks (on prompt submit, task completion, etc.) and stored on a shadow branch. Works with the worktree + squash-merge workflow.
-
-| Command | When to use |
-|---------|-------------|
-| `entire status` | Check active sessions |
-| `entire resume <branch>` | Restore session metadata when returning to an in-progress branch |
-| `entire doctor` | Fix stuck sessions or hook issues |
-| `entire clean` | Remove orphaned shadow branches (dry run; add `--force` to delete) |
-| `entire reset --session <id>` | Clear a specific session's state (e.g., after worktree removal) |
-
-**Constraint:** Entire anchors each session to the worktree path where `session-start` fires. Do not remove a worktree mid-session — see [Removing a Worktree](#removing-a-worktree).
-
-**Configuration:** `.entire/settings.json` (committed) holds project-wide settings. `.entire/settings.local.json` (gitignored) holds personal overrides.
 
 ## Standards
 
