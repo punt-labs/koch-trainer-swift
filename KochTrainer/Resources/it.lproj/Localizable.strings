@@ -266,5 +266,5 @@
 "notification.streakReminder.body %lld" = "Hai una serie di %lld giorni. Pratica oggi per continuare.";
 "notification.levelReview.title" = "Tempo di ripasso";
 "notification.levelReview.body %lld" = "È passata una settimana da quando hai raggiunto il livello %lld. Tempo per un ripasso!";
-"notification.welcomeBack.title" = "Ci manchi!";
-"notification.welcomeBack.body" = "Pronto a riprendere il Morse? I tuoi progressi ti aspettano.";
+"notification.welcomeBack.title" = "Promemoria pratica";
+"notification.welcomeBack.body" = "Il tuo allenamento Morse è pronto quando vuoi.";

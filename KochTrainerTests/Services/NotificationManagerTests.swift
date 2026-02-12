@@ -127,7 +127,7 @@ final class NotificationManagerTests: XCTestCase {
         mockCenter.reset()
 
         var schedule = PracticeSchedule()
-        schedule.currentStreak = 5
+        schedule.currentStreak = 10
         // Last streak date was yesterday (hasn't practiced today)
         schedule.lastStreakDate = Calendar.current.date(byAdding: .day, value: -1, to: Date())
 
@@ -148,7 +148,7 @@ final class NotificationManagerTests: XCTestCase {
         mockCenter.reset()
 
         var schedule = PracticeSchedule()
-        schedule.currentStreak = 2 // Below threshold of 3
+        schedule.currentStreak = 5 // Below threshold of 7
         schedule.lastStreakDate = Calendar.current.date(byAdding: .day, value: -1, to: Date())
 
         var settings = NotificationSettings()
@@ -214,6 +214,31 @@ final class NotificationManagerTests: XCTestCase {
 
         let welcomeRequests = mockCenter.addedRequests.filter { $0.identifier == "welcome.back" }
         XCTAssertEqual(welcomeRequests.count, 1)
+    }
+
+    func testWelcomeBackSuppressedWhenPracticeReminderScheduled() async throws {
+        _ = await manager.requestAuthorization()
+        await manager.refreshAuthorizationStatus()
+        mockCenter.reset()
+
+        var schedule = PracticeSchedule()
+        // 8 days inactive (would normally trigger welcome back)
+        schedule.lastStreakDate = Calendar.current.date(byAdding: .day, value: -8, to: Date())
+        // But practice reminder is also due
+        let tomorrow = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 1, to: Date()))
+        schedule.receiveNextDate = tomorrow
+
+        var settings = NotificationSettings()
+        settings.practiceRemindersEnabled = true
+        settings.quietHoursEnabled = false
+
+        manager.scheduleNotifications(for: schedule, settings: settings)
+
+        // Practice reminder should be scheduled, but welcome back should be suppressed
+        let practiceRequests = mockCenter.addedRequests.filter { $0.identifier == "practice.receive" }
+        let welcomeRequests = mockCenter.addedRequests.filter { $0.identifier == "welcome.back" }
+        XCTAssertEqual(practiceRequests.count, 1)
+        XCTAssertTrue(welcomeRequests.isEmpty)
     }
 
     func testWelcomeBackNotScheduledWithin7Days() async {
