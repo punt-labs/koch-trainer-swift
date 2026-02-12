@@ -661,9 +661,7 @@ This project uses formal Z specifications (`docs/koch_trainer.tex`) to model sta
 
 This project uses [Entire CLI](https://github.com/entireio/cli) to capture AI agent sessions as checkpoints. Session data lives on the `entire/checkpoints/v1` branch, separate from code.
 
-**Strategy:** `manual-commit` — no automatic commits on working branches. Checkpoints are created when you commit and pushed when you push.
-
-**No workflow changes needed.** The existing git hooks (`pre-push`, `post-commit`, `commit-msg`, `prepare-commit-msg`) and Claude Code hooks (`SessionStart`, `SessionEnd`, `UserPromptSubmit`, `Stop`, `PreToolUse(Task)`, `PostToolUse(Task, TodoWrite)`) fire automatically.
+**Strategy:** `auto-commit` — checkpoints are created by Claude Code hooks (on prompt submit, task completion, etc.) and stored on a shadow branch. Works with the worktree + squash-merge workflow.
 
 | Command | When to use |
 |---------|-------------|
