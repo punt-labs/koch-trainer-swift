@@ -20,10 +20,11 @@ An iOS app for learning Morse code using the Koch method—the scientifically-pr
 
 Progressive character training following the Koch order (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X).
 
-- **Receive Training** — Listen to Morse code, type what you hear
-- **Send Training** — See a character, tap dit/dah to send it
-- **Adaptive Difficulty** — Advance to the next character when you hit 90% accuracy
-- **Separate Progression** — Track receive and send skills independently
+- **Receive Training** — Listen to Morse code, type what you hear. 3-second timeout with visual countdown.
+- **Send Training** — See a character, tap dit/dah buttons or use keyboard shortcuts (`.`/`F` = dit, `-`/`J` = dah) to send it.
+- **Ear Training** — Hear a Morse pattern and reproduce it with dit/dah taps. Progresses by pattern length (1-5 elements), building the ear-to-hand reflex essential for sending.
+- **Adaptive Difficulty** — Advance to the next character when you hit 90% accuracy over 20+ attempts
+- **Separate Progression** — Track receive and send skills independently with per-character proficiency rings
 
 ### Practice (Custom Characters)
 
@@ -64,18 +65,23 @@ Practice realistic ham radio QSO exchanges by keying Morse code.
 
 ### Settings
 
-- **Your Callsign** — For personalized vocabulary practice
+- **Your Callsign** — For personalized vocabulary and QSO practice
 - **Tone Frequency** — Adjustable 400-800 Hz
 - **Effective Speed** — Farnsworth spacing 10-18 WPM (character speed fixed at 20 WPM)
-- **Band Conditions** — Simulate QRN (noise), QSB (fading), and QRM (interference)
-- **Notifications** — Practice reminders with streak protection
-- **Session History** — Review past practice sessions and statistics
+- **Band Conditions** — Simulate realistic HF conditions: QRN (atmospheric noise), QSB (signal fading), QRM (interference). Presets for good conditions, contest pileup, and difficult bands.
+- **Notifications** — Practice-due and streak reminders. Anti-nag policy: max 2 per day, 4-hour minimum gap, quiet hours 10 PM–8 AM.
+- **Session History** — Review past practice sessions and accuracy statistics
 
 ### Streaks & Spaced Repetition
 
 - Daily streak tracking with personal best indicator
-- Smart practice scheduling based on your accuracy
-- Practice due indicators show when each skill needs attention
+- Spaced repetition scheduling: accuracy ≥90% doubles your interval (up to 30 days), <70% resets to daily
+- Practice due indicators on the home screen show when each skill needs attention
+- First 14 days capped at 2-day intervals to build the practice habit
+
+### Accessibility
+
+Full VoiceOver support: spoken Morse patterns ("dit dah" instead of ".-"), training feedback announcements, Dynamic Type support, and accessibility hints on all interactive elements.
 
 ### Language Support
 
@@ -153,7 +159,7 @@ This app implements Koch's method for both receiving (copying) and sending (keyi
 ## Requirements
 
 - iOS 17.0 or later
-- iPhone or iPad
+- iPhone
 
 ## Building from Source
 
