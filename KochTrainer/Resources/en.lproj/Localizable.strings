@@ -312,5 +312,5 @@
 "notification.levelReview.title" = "Review Time";
 // %lld for Int interpolation
 "notification.levelReview.body %lld" = "It's been a week since you reached level %lld. Time for a quick review!";
-"notification.welcomeBack.title" = "We Miss You!";
-"notification.welcomeBack.body" = "Ready to get back to learning Morse code? Your progress is waiting.";
+"notification.welcomeBack.title" = "Practice Reminder";
+"notification.welcomeBack.body" = "Your Morse code practice is ready when you are.";

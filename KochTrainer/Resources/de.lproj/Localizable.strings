@@ -266,5 +266,5 @@
 "notification.streakReminder.body %lld" = "Du hast eine %lld-Tage-Serie. Übe heute, um sie fortzusetzen.";
 "notification.levelReview.title" = "Zeit für Wiederholung";
 "notification.levelReview.body %lld" = "Es ist eine Woche her, seit du Stufe %lld erreicht hast. Zeit für eine Wiederholung!";
-"notification.welcomeBack.title" = "Wir vermissen dich!";
-"notification.welcomeBack.body" = "Bereit, weiter Morsen zu lernen? Dein Fortschritt wartet.";
+"notification.welcomeBack.title" = "Übungserinnerung";
+"notification.welcomeBack.body" = "Dein Morse-Training steht bereit, wann immer du möchtest.";

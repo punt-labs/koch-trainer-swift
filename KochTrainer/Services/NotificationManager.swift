@@ -100,10 +100,14 @@ final class NotificationManager: ObservableObject {
         guard authorizationStatus == .authorized else { return }
 
         var scheduledTimes: [Date] = []
+        let practiceCount = scheduledTimes.count
         schedulePracticeReminders(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        let hasPracticeReminder = scheduledTimes.count > practiceCount
         scheduleStreakReminderIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
         scheduleLevelReviews(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
-        scheduleWelcomeBackIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        if !hasPracticeReminder {
+            scheduleWelcomeBackIfNeeded(schedule: schedule, settings: settings, scheduledTimes: &scheduledTimes)
+        }
     }
 
     /// Cancel all scheduled notifications.
@@ -175,7 +179,7 @@ final class NotificationManager: ObservableObject {
         settings: NotificationSettings,
         scheduledTimes: inout [Date]
     ) {
-        guard settings.streakRemindersEnabled, schedule.currentStreak >= 3,
+        guard settings.streakRemindersEnabled, schedule.currentStreak >= 7,
               !StreakCalculator.hasPracticedToday(lastStreakDate: schedule.lastStreakDate) else { return }
 
         // Try today at 8 PM, fall back to tomorrow if today's time has passed
