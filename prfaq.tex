@@ -1,0 +1,380 @@
+\documentclass[11pt,letterpaper]{article}
+
+% ── Geometry ──────────────────────────────────────────────────────────────────
+\usepackage[margin=1in]{geometry}
+
+% ── Pagination ────────────────────────────────────────────────────────────────
+\widowpenalty=10000          % No widow lines (last line alone at page top)
+\clubpenalty=10000           % No orphan lines (first line alone at page bottom)
+\brokenpenalty=10000         % No hyphenated words across page breaks
+\raggedbottom                % Allow uneven page bottoms rather than stretching
+
+% ── Fonts ─────────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage{newpxtext}     % Palatino-based serif (TeX Gyre Pagella)
+\usepackage{newpxmath}     % Matching math font
+
+% ── Colors ────────────────────────────────────────────────────────────────────
+\usepackage[dvipsnames]{xcolor}
+\definecolor{SectionBlue}{HTML}{1B3A5C}
+\definecolor{AccentGray}{HTML}{4A4A4A}
+\definecolor{QuoteBorder}{HTML}{8B9DAF}
+\definecolor{RiskRed}{HTML}{C0392B}
+\definecolor{RiskAmber}{HTML}{E67E22}
+\definecolor{RiskGreen}{HTML}{27AE60}
+\definecolor{BoxBg}{HTML}{F7F8FA}
+
+% ── Tables ────────────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+% ── Boxes ─────────────────────────────────────────────────────────────────────
+\usepackage[framemethod=tikz]{mdframed}
+
+% ── Lists ─────────────────────────────────────────────────────────────────────
+\usepackage{enumitem}
+
+% ── Hyperlinks ────────────────────────────────────────────────────────────────
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=SectionBlue,
+  urlcolor=SectionBlue,
+  pdfauthor={J Freeman},
+  pdftitle={Koch Trainer PR/FAQ},
+  pdfsubject={Working Backwards — Product Discovery},
+}
+
+% ── Section styling ───────────────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\section}
+  {\Large\bfseries\color{SectionBlue}}
+  {}
+  {0pt}
+  {}
+  [\vspace{-0.5em}\textcolor{QuoteBorder}{\rule{\textwidth}{0.4pt}}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{AccentGray}}
+  {}
+  {0pt}
+  {}
+
+% ══════════════════════════════════════════════════════════════════════════════
+% Custom environments
+% ══════════════════════════════════════════════════════════════════════════════
+
+% ── \prsection{title} — styled press release section header ──────────────────
+\newcommand{\prsection}[1]{%
+  \vspace{1em}%
+  {\large\bfseries\color{SectionBlue}#1}%
+  \vspace{0.3em}\par%
+}
+
+% ── customerquote — indented, italic customer quote ──────────────────────────
+\newmdenv[
+  topline=false,
+  bottomline=false,
+  rightline=false,
+  linewidth=3pt,
+  linecolor=QuoteBorder,
+  backgroundcolor=BoxBg,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=8pt,
+  innerbottommargin=8pt,
+  skipabove=\baselineskip,
+  skipbelow=\baselineskip,
+]{customerquote}
+
+% ── spokespersonquote — indented spokesperson quote ──────────────────────────
+\newmdenv[
+  topline=false,
+  bottomline=false,
+  rightline=false,
+  linewidth=3pt,
+  linecolor=SectionBlue,
+  backgroundcolor=BoxBg,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=8pt,
+  innerbottommargin=8pt,
+  skipabove=\baselineskip,
+  skipbelow=\baselineskip,
+]{spokespersonquote}
+
+% ── faqpair — Q&A pair with bold question ────────────────────────────────────
+\newenvironment{faqpair}[1]{%
+  \vspace{0.5em}%
+  \noindent\textbf{\color{SectionBlue}Q: #1}\par%
+  \vspace{0.2em}%
+  \begin{adjustwidth}{1em}{0pt}%
+  \setlength{\parindent}{0pt}%
+}{%
+  \end{adjustwidth}%
+  \vspace{0.5em}%
+}
+
+% ── riskitem — single risk assessment entry ───────────────────────────────────
+\newcommand{\riskitem}[2]{%
+  \vspace{0.6em}%
+  \noindent\textbf{\color{SectionBlue}#1}\par
+  \vspace{0.2em}%
+  \noindent #2\par
+}
+
+% ── adjustwidth (for faqpair indentation) ────────────────────────────────────
+\usepackage{changepage}
+
+% ══════════════════════════════════════════════════════════════════════════════
+% Document
+% ══════════════════════════════════════════════════════════════════════════════
+
+\begin{document}
+
+% ── Title block ───────────────────────────────────────────────────────────────
+\begin{center}
+  {\LARGE\bfseries\color{SectionBlue} Koch Trainer} \\[0.5em]
+  {\large\color{AccentGray} A free iOS app that teaches new ham radio operators Morse code at full speed from day one} \\[1.5em]
+  {\small\color{AccentGray} February 2026 \quad|\quad J Freeman \quad|\quad Punt Labs}
+\end{center}
+
+\vspace{1em}
+\textcolor{QuoteBorder}{\rule{\textwidth}{0.8pt}}
+\vspace{1em}
+
+% ══════════════════════════════════════════════════════════════════════════════
+% PRESS RELEASE
+% ══════════════════════════════════════════════════════════════════════════════
+
+\section*{Press Release}
+
+\prsection{Summary}
+
+Today, Punt Labs announced Koch Trainer, a free iOS app that teaches newly licensed ham radio operators to copy and send Morse code using the Koch method---a well-established approach that teaches characters at full speed from the start. Unlike existing Morse apps that overwhelm beginners with advanced features or hide core functionality behind paywalls, Koch Trainer focuses exclusively on the first 26 characters, guiding operators from zero CW ability to on-air readiness with structured daily practice and spaced repetition.
+
+\prsection{Problem}
+
+Every year, thousands of amateur radio operators earn their license and discover that CW---Morse code communication---opens up a world of long-distance contacts, contest operation, and a tradition stretching back over a century. But learning CW after passing a multiple-choice exam is a solitary, frustrating experience. The traditional approach of starting slow and gradually increasing speed teaches operators to consciously count dots and dashes, creating a ``speed wall'' around 10 WPM that many never break through.
+
+The iOS App Store offers capable Morse apps, but they present a paradox for beginners: the best tools are designed for operators who already know CW. Web platforms like Morse Trainer Pro integrate with hardware keyers and simulate contest pileups. Native iOS apps like Ham Morse stream news feeds for copying practice. These are powerful---and irrelevant---when you cannot yet distinguish K from M. Gamified alternatives like Morse Mania make learning feel approachable, but their progression systems prioritize engagement over the Koch method's proven pedagogy. A new General-class licensee searching for ``learn Morse code'' finds either too much app or the wrong method.
+
+\prsection{Solution}
+
+Koch Trainer implements Ludwig Koch's method exactly as designed: start with two characters at full 20 WPM speed, practice until 90\% accuracy, then add one more. The app tracks receive (listening) and send (keying) skills independently, so operators build both abilities in parallel without one holding back the other.
+
+Three training modes address the distinct skills CW requires. Receive training plays a character and waits for the operator to type it, with a 3-second countdown that mirrors on-air pressure. Send training shows a character and the operator keys it with dit/dah taps. Ear training---inspired by language-learning apps---plays a pattern and asks the operator to reproduce it, building the ear-to-hand reflex essential for sending. Once the 26 letters are learned, vocabulary drills and simulated QSO exchanges prepare operators for their first real contact.
+
+Spaced repetition scheduling adapts to each operator's pace: strong sessions extend the interval between practices (up to 30 days), while weak sessions reset to daily review. A streak tracker and gentle reminders help establish the daily habit that makes CW stick.
+
+\prsection{Customer Quote}
+
+\begin{customerquote}
+\textit{``I got my General license last spring and immediately wanted to get on 40 meters with CW. I had no idea where to start---everything I found online assumed I already knew the basics. Koch Trainer just put K and M in my ears at real speed and said `go.' It felt impossibly fast for about three days, and then something clicked. Six weeks later I worked my first CW contact on 7.030. I still practice every morning on the train.''}
+
+\raggedleft --- \textbf{Maria Reyes, KD9LWX}, General-class licensee, Milwaukee WI
+\end{customerquote}
+
+\prsection{Getting Started}
+
+Getting started takes under a minute. Download Koch Trainer from the App Store, open the app, and tap ``Receive Training'' to hear your first two characters. There is no account to create, no settings to configure, and no purchase to unlock. Within five minutes, you will have completed your first 20-attempt training session and seen your accuracy score. The app works entirely offline---on a commute, at a park bench, or in a shack with no internet.
+
+\prsection{Spokesperson Quote}
+
+\begin{spokespersonquote}
+``We built Koch Trainer because we watched new hams get excited about CW and then give up within a month. The problem was never motivation---it was tooling. The apps that teach CW well are designed for people who already know CW. We wanted to build the app you use \emph{before} those apps, the one that gets you from zero to 26 characters and then gets out of the way. It is free, it is open source, and if you outgrow it, we consider that a success.''
+
+\raggedleft --- \textbf{J Freeman}, Punt Labs
+\end{spokespersonquote}
+
+\prsection{Call to Action}
+
+Koch Trainer is available now on the iOS App Store. It is free with no ads, no in-app purchases, and no tracking. The source code is available under the MIT license at \url{https://github.com/punt-labs/koch-trainer-swift}.
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+% FREQUENTLY ASKED QUESTIONS
+% ══════════════════════════════════════════════════════════════════════════════
+
+\section*{Frequently Asked Questions}
+
+% ── External FAQs (Customer-facing) ──────────────────────────────────────────
+
+\subsection*{External FAQs}
+
+\begin{faqpair}{What is Koch Trainer and who is it for?}
+  Koch Trainer is a free iOS app for learning Morse code using the Koch method. It is designed for newly licensed amateur radio operators who want to learn CW for the first time. If you have your Technician or General license and want to make CW contacts on HF, this app takes you from zero knowledge to all 26 letters with structured daily practice.
+\end{faqpair}
+
+\begin{faqpair}{How is Koch Trainer different from Morse Trainer Pro or Ham Morse?}
+  Morse Trainer Pro is a web-based platform with hardware keyer integration and contest simulation. Ham Morse is a native iOS app with comprehensive drills and news-feed copying practice. Both are excellent tools for operators who already know CW and want to improve. Koch Trainer does none of that. It focuses exclusively on the first stage: teaching you to recognize and send 26 characters at full speed using the Koch method. Once you can copy at 15+ WPM, you have likely outgrown Koch Trainer---and that is the goal. Think of it as the on-ramp, not the highway.
+\end{faqpair}
+
+\begin{faqpair}{How is Koch Trainer different from Morse Mania?}
+  Morse Mania uses a gamified 270-level progression system that makes Morse code learning feel like a mobile game. Koch Trainer uses the Koch method specifically: full-speed characters from day one, strict 90\% accuracy gating, and spaced repetition scheduling. If you want the game experience, Morse Mania is great. If you want the Koch method implemented faithfully for serious CW learning, that is what Koch Trainer does.
+\end{faqpair}
+
+\begin{faqpair}{How do I get started?}
+  Download the app from the App Store, open it, and tap Receive Training. You will hear your first character (K) at 20 WPM and type what you heard. No account, no configuration. You will complete your first training session in about five minutes.
+\end{faqpair}
+
+\begin{faqpair}{How much does it cost?}
+  Nothing. Koch Trainer is completely free---no ads, no in-app purchases, no subscriptions. It is open source under the MIT license.
+\end{faqpair}
+
+\begin{faqpair}{What happens to my data?}
+  All data stays on your device. Koch Trainer has no accounts, no cloud sync, no analytics, and no tracking SDKs. Notifications are local (not push). The app includes a privacy manifest declaring UserDefaults as its only data API and zero data collection.
+\end{faqpair}
+
+\begin{faqpair}{Does it work offline?}
+  Yes, completely. Koch Trainer generates all audio locally and stores all progress on-device. It works without any network connection.
+\end{faqpair}
+
+\begin{faqpair}{I already know some Morse code. Can I skip ahead?}
+  Koch Trainer starts everyone at level 1 (characters K and M). The Koch method's effectiveness depends on learning characters at full speed in a specific order. Skipping ahead would undermine the method. However, if you already know some characters, you will advance through early levels quickly since you only need 90\% accuracy over 20 attempts to progress.
+\end{faqpair}
+
+\begin{faqpair}{What about numbers and punctuation?}
+  Koch Trainer teaches the 26 letters of the alphabet plus digits 0--9 for callsigns and signal reports. Punctuation is not included---by the time you need prosigns and punctuation, you are ready for a more advanced tool.
+\end{faqpair}
+
+% ── Internal FAQs (Business-facing) ──────────────────────────────────────────
+
+\subsection*{Internal FAQs}
+
+\subsubsection*{Value \& Market}
+
+\begin{faqpair}{What is the total addressable market?}
+  The FCC has historically issued approximately 30,000--33,000 new amateur radio licenses per year in the US. Reliable international data is scarce---the commonly cited figure of 3 million worldwide amateurs originates from an IARU count circa 2000 and is likely overstated (a 2021 estimate suggests approximately 1.75 million). We focus on the US bottoms-up estimate: if 10\% of new US licensees attempt CW learning, that yields roughly 3,000 potential users per year. At 30\%, that is 9,000. The app also serves the long tail of licensed operators who tried to learn CW years ago and gave up---a population that is difficult to size but regularly surfaces in ham radio forums.
+\end{faqpair}
+
+\begin{faqpair}{What evidence do we have that customers want this?}
+  Three signals: (1) Morse Mania has thousands of App Store reviews with a high rating (4.8 stars on Google Play, where review counts are public at 32,000+), demonstrating that a meaningful number of mobile users seek Morse code learning apps. (2) The CWops CW Academy offers structured mentoring in small groups (5 or fewer students per adviser) only three semesters per year, indicating that structured CW mentoring is available but not continuously accessible year-round. (3) Reddit communities (r/amateurradio, r/morse) regularly feature posts from new licensees asking ``what app should I use to learn CW?'' with no consensus answer for Koch-method-specific training on iOS. We do not yet have direct user feedback or retention data, as the app launched in February 2026.
+\end{faqpair}
+
+\begin{faqpair}{Who are the competitors and why will we win?}
+  The competitive landscape is documented in the README. Key competitors: Morse Trainer Pro (web platform, freemium, hardware integration), Ham Morse (\$4.99, native iOS, comprehensive drills), Morse-It (\$0.99 + IAP, customization), and Morse Mania (freemium, gamified). Our structural advantage is focus: we serve a narrow segment (true beginners using Koch method) that competitors serve incidentally. We do not need to ``win'' against these apps---we need to be the obvious first app a new ham downloads, after which they graduate to Morse Trainer Pro or Ham Morse. Competitors are unlikely to narrow their scope to match us because their business models require breadth to justify pricing.
+\end{faqpair}
+
+\begin{faqpair}{What is the customer acquisition strategy?}
+  Word of mouth within the ham radio community. Specific channels: (1) GitHub visibility---open source attracts developer-hams who share with their clubs. (2) Reddit and QRZ.com forum posts by users. (3) Elmer recommendations---experienced operators recommending the app to new licensees they mentor. (4) App Store search for ``morse code'' and ``koch method.'' We have no paid acquisition budget and do not plan one. The ham community is small enough that a genuinely useful free tool can spread organically through club meetings, field days, and online forums.
+\end{faqpair}
+
+\subsubsection*{Technical}
+
+\begin{faqpair}{What are the major technical risks?}
+  Low. The app is already built and shipping (v1.0.2). Core technology is straightforward: AVFoundation audio synthesis, SwiftUI interface, UserDefaults persistence. No server dependencies, no ML models, no third-party SDKs. The primary ongoing risk is Apple platform changes requiring adaptation (e.g., audio API deprecation), which is mitigated by using only public, stable APIs.
+\end{faqpair}
+
+\begin{faqpair}{What is the estimated development timeline?}
+  The product is shipped. V1.0.0 launched February 1, 2026. The current version is 1.0.2. The codebase is approximately 14,000 lines of production Swift with 1,041 tests at 89\% adjusted coverage. Future development focuses on refinement (QSO training improvements, additional languages) rather than new core functionality.
+\end{faqpair}
+
+\begin{faqpair}{What dependencies exist on other teams or systems?}
+  None. The app has zero external dependencies---no CocoaPods, no SPM packages, no backend services. Build tooling uses XcodeGen (open source), SwiftLint, and SwiftFormat. The only external dependency is the Apple App Store for distribution.
+\end{faqpair}
+
+\begin{faqpair}{What is the scaling story?}
+  Koch Trainer runs entirely on-device with no server component. Scaling to tens of thousands of users requires no infrastructure changes. The primary scaling concern is support volume: bug reports, localization requests, and feature requests from a growing user base. These are managed through GitHub Issues and are bounded by the app's deliberately narrow scope---there are relatively few things that can break and relatively few features to request.
+\end{faqpair}
+
+\subsubsection*{Business}
+
+\begin{faqpair}{What is the revenue model?}
+  There is no revenue model. Koch Trainer is free, open source, and has no monetization. The strategic value is twofold: (1) community goodwill---contributing a genuinely useful tool to the amateur radio community builds reputation and relationships for Punt Labs; (2) portfolio demonstration---the app showcases engineering quality (SwiftUI, formal Z specifications, 89\% test coverage, CI/CD, localization in 6 languages) in a way that a private repository cannot.
+\end{faqpair}
+
+\begin{faqpair}{What does the P\&L look like?}
+  Costs: Apple Developer Program (\$99/year) and developer time. At steady state, maintenance requires approximately 2--4 hours per month for iOS compatibility updates, bug fixes, and minor improvements. There is no revenue. The total annual cost is \$99 plus opportunity cost of developer hours. This is sustainable indefinitely as a portfolio and community project, but should be evaluated annually against the strategic value it delivers (community goodwill, portfolio credibility, engineering practice).
+\end{faqpair}
+
+\begin{faqpair}{What are the key metrics for success?}
+  Two primary metrics: (1) \textbf{App Store downloads}---target 1,000 installs in the first year, 5,000 within three years. This is modest relative to Morse Mania's installed base but significant for a niche, unmarketed, free app. (2) \textbf{Community recognition}---the app is recommended by name in ham radio forums (Reddit, QRZ, eHam), club newsletters, or CW mentoring programs within 12 months of launch. A secondary metric is GitHub engagement (stars, forks, issues filed by external contributors).
+\end{faqpair}
+
+\begin{faqpair}{Why now?}
+  Three factors: (1) The FCC eliminated the Morse code requirement for US amateur licenses in 2007, which paradoxically increased casual interest in CW as a skill rather than a barrier. A generation of hams who never \emph{had} to learn CW now \emph{want} to, and they reach for their phones first. (2) SwiftUI maturity (iOS 17+) reduced the cost of building a polished, accessible, localized app to a level sustainable for a solo developer---making a free, niche product viable where it previously was not. (3) The Koch method is well-established in pedagogy but poorly represented in mobile apps---most implementations are web-based (lcwo.net) or desktop (Koch Trainer for Windows). A native iOS implementation of the Koch method is overdue.
+\end{faqpair}
+
+\begin{faqpair}{What are we not building?}
+  Koch Trainer will not add: hardware keyer integration (Morserino, WinKeyer), contest simulation with realistic pileups, CW Rooms or real-time multi-operator practice, news feed or RSS copying practice, Android or web versions, or social features (leaderboards, sharing). These are the domain of apps like Morse Trainer Pro and Ham Morse, and building them would dilute focus without serving our core user.
+\end{faqpair}
+
+\begin{faqpair}{What does failure look like?}
+  Failure is fewer than 200 installs in the first year, indicating the app is either not discoverable or not solving a real problem. At that threshold, we would evaluate whether the issue is discoverability (addressable with community outreach, App Store keyword optimization, and forum posts) or product-market fit (not addressable without fundamental changes to scope or method). Because the app is free and already built, the ongoing cost of maintaining it is low enough that ``leave it published and stop active investment'' is a viable and rational outcome. The decision threshold for continued active development is 500+ installs and at least one unsolicited community recommendation within 12 months.
+\end{faqpair}
+
+% ══════════════════════════════════════════════════════════════════════════════
+% FEATURE APPENDIX
+% ══════════════════════════════════════════════════════════════════════════════
+
+\section*{Feature Appendix}
+
+\subsection*{Must Do (V1 --- shipped)}
+
+\begin{itemize}[nosep]
+  \item Koch method receive training (26 letters at 20 WPM character speed)
+  \item Koch method send training (dit/dah keying with pattern matching)
+  \item Ear training (pattern reproduction for ear-to-hand reflex)
+  \item Independent receive/send level progression with 90\% accuracy gating
+  \item Spaced repetition scheduling with adaptive intervals
+  \item Streak tracking with daily practice indicators
+  \item Local notifications (practice due, streak reminder, level review, welcome back)
+  \item Vocabulary training (QSO words, callsigns)
+  \item QSO simulation (contest and rag chew modes)
+  \item Band conditions simulation (QRN, QSB, QRM)
+  \item Configurable audio (tone frequency, Farnsworth spacing)
+  \item VoiceOver accessibility and Dynamic Type
+  \item Localization (6 languages)
+  \item Privacy manifest and zero data collection
+\end{itemize}
+
+\subsection*{Should Do (post-V1 roadmap)}
+
+\begin{itemize}[nosep]
+  \item QSO training refinements (more templates, smoother state machine)
+  \item Additional localization languages based on user requests
+  \item App Store keyword optimization for discoverability
+  \item Character-level proficiency export or summary for Elmers
+\end{itemize}
+
+\subsection*{Won't Do (with rationale)}
+
+\begin{itemize}[nosep]
+  \item \textbf{Hardware keyer integration} (Morserino, WinKeyer) --- requires Bluetooth/USB HID support and serves advanced operators, not beginners
+  \item \textbf{Contest simulation with pileups} --- meaningful only after mastering all characters; Morse Trainer Pro does this well
+  \item \textbf{Real-time multi-operator practice} (CW Rooms) --- requires server infrastructure and shifts the app from self-paced learning to social coordination
+  \item \textbf{News feed / RSS copying practice} --- serves operators maintaining proficiency, not beginners building it
+  \item \textbf{Android or web versions} --- would split maintenance effort without clear demand signal; revisit if iOS version succeeds
+  \item \textbf{Social features} (leaderboards, sharing) --- adds complexity and data collection that conflicts with the privacy stance
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════════
+% FOUR RISKS ASSESSMENT
+% ══════════════════════════════════════════════════════════════════════════════
+
+\clearpage
+\section*{Risk Assessment}
+
+\begin{mdframed}[
+  linewidth=0.5pt,
+  linecolor=QuoteBorder,
+  backgroundcolor=BoxBg,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=10pt,
+  innerbottommargin=10pt,
+]
+{\bfseries\color{SectionBlue}Four Risks Assessment}
+
+\riskitem{Value --- \textcolor{RiskAmber}{Medium}}{Demand for CW learning tools is evidenced by Morse Mania's success and active CW Academy enrollment, but Koch Trainer's specific niche (Koch-method-only, beginner-only) is unvalidated. The app is free, which eliminates price as a barrier, but discoverability in a crowded App Store without paid acquisition is uncertain. Key risk: new hams may not search specifically for ``Koch method'' and instead download the first result (Morse Mania).}
+
+\riskitem{Usability --- \textcolor{RiskGreen}{Low}}{The app requires no account, no configuration, and delivers value within five minutes. The Koch method's structure (two characters, then three, then four) provides natural scaffolding. VoiceOver support and Dynamic Type ensure accessibility. The primary usability concern is that the Koch method itself demands patience---operators must accept practicing only 2--3 characters for days before progressing---which may feel slow compared to gamified alternatives.}
+
+\riskitem{Feasibility --- \textcolor{RiskGreen}{Low}}{The product is already built and shipping (v1.0.2, 14,000 lines, 1,041 tests). No unproven technology, no server dependencies, no third-party SDKs. Ongoing maintenance is limited to iOS compatibility updates and incremental improvements.}
+
+\riskitem{Viability --- \textcolor{RiskGreen}{Low}}{The app has no revenue target to miss. Costs are minimal: Apple Developer Program (\$99/year) and developer time. The strategic goals (community goodwill, portfolio quality) are achieved by the app existing and being good, not by reaching specific financial metrics. The primary viability risk is opportunity cost---time spent on Koch Trainer is time not spent on revenue-generating work.}
+\end{mdframed}
+
+\end{document}
