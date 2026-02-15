@@ -90,7 +90,6 @@ struct VocabularyTrainingView: View {
             viewModel.handleKeyPress(char)
             return .handled
         }
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.view)
         .onAppear {
             viewModel.configure(progressStore: progressStore, settingsStore: settingsStore)
@@ -191,7 +190,6 @@ private struct ReceiveVocabTrainingPhaseView: View {
                                 .accessibilityIdentifier(AccessibilityID.VocabTraining.userInputDisplay)
                         }
                     }
-                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.waitingIndicator)
                 } else {
                     VStack(spacing: Theme.Spacing.sm) {
@@ -203,7 +201,6 @@ private struct ReceiveVocabTrainingPhaseView: View {
                             .font(Typography.headline)
                             .foregroundColor(.secondary)
                     }
-                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.listeningIndicator)
                 }
 
@@ -251,7 +248,6 @@ private struct ReceiveVocabTrainingPhaseView: View {
             .accessibilityIdentifier(AccessibilityID.VocabTraining.pauseButton)
         }
         .padding(Theme.Spacing.lg)
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.receivePhaseView)
     }
 
@@ -375,7 +371,6 @@ private struct SendVocabTrainingPhaseView: View {
             .accessibilityIdentifier(AccessibilityID.VocabTraining.pauseButton)
         }
         .padding(Theme.Spacing.lg)
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.sendPhaseView)
     }
 
@@ -426,7 +421,6 @@ private struct VocabPausedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.pausedView)
     }
 }
@@ -464,7 +458,6 @@ private struct VocabCompletedView: View {
                     .foregroundColor(.secondary)
                     .accessibilityIdentifier(AccessibilityID.VocabTraining.setName)
             }
-            .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.VocabTraining.completedStats)
 
             Spacer()
@@ -478,7 +471,6 @@ private struct VocabCompletedView: View {
             Spacer()
         }
         .padding(Theme.Spacing.lg)
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.completedView)
     }
 }
@@ -520,7 +512,6 @@ private struct VocabFeedbackView: View {
                 .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackResult)
             }
         }
-        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.VocabTraining.feedbackView)
     }
 
