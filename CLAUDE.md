@@ -354,7 +354,7 @@ components.day = day + 1
 
 ## Issue Tracking with Beads
 
-This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendly issue tracker that lives in the `.beads/` directory.
+This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendly issue tracker that lives in the `.beads/` directory. If an issue discovered here affects multiple repos or requires a standards change, escalate to a [punt-kit bead](https://github.com/punt-labs/punt-kit) instead (see [bead placement scheme](../CLAUDE.md#where-to-create-a-bead)).
 
 ### When to Use Beads vs TodoWrite
 
