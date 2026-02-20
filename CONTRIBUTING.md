@@ -7,13 +7,17 @@ Thank you for your interest in contributing to Koch Trainer! This document provi
 1. Fork the repository
 2. Clone your fork locally
 3. Install dependencies:
+
    ```bash
    brew install xcodegen
    ```
+
 4. Generate the Xcode project:
+
    ```bash
    make generate
    ```
+
 5. Open `KochTrainer.xcodeproj` in Xcode
 
 ## Development Workflow
@@ -44,7 +48,7 @@ swiftformat . --lint
 
 ### Project Structure
 
-```
+```text
 KochTrainer/
 ├── App/           # App entry point and main views
 ├── Models/        # Data models
@@ -60,9 +64,11 @@ KochTrainerTests/  # Unit tests
 ### Adding New Features
 
 1. Create a feature branch from `main`:
+
    ```bash
    git checkout -b feature/my-feature-name
    ```
+
 2. Implement your feature with tests
 3. Run `make build` to format, lint, and compile
 4. Run `make test` to verify all tests pass

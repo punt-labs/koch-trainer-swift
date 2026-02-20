@@ -16,7 +16,7 @@ else
     CHECK_DIR="$CLAUDE_PROJECT_DIR"
 fi
 
-cd "$CHECK_DIR" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || cd "$(dirname "$0")/../.."
+cd "$CHECK_DIR" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || cd "$(dirname "$0")/../.." || exit 1
 
 BRANCH=$(git branch --show-current 2>/dev/null)
 

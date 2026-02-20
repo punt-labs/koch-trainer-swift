@@ -1,6 +1,6 @@
 # Z Specification Test Coverage Audit
 
-*Generated: 2026-01-25*
+Generated: 2026-01-25
 
 ## Summary
 
@@ -127,6 +127,7 @@ Two domain models were introduced to structurally enforce Z specification invari
 ### 2. Type-Level Direction Enforcement
 
 **Constraints**:
+
 - `AdvanceEarLevel: direction = receiveEar`
 - `RecordEarAttempt: direction = receiveEar`
 
@@ -145,6 +146,7 @@ Two domain models were introduced to structurally enforce Z specification invari
 ### 4. Model Bounds
 
 **Constraints**:
+
 - `receiveLevel ≤ MODEL_BOUND`
 - `sendLevel ≤ MODEL_BOUND`
 
@@ -169,6 +171,7 @@ Coverage improved from 71% to 87% through domain model enforcement:
 - Phase transition guards are tested in ViewModel tests
 
 The remaining uncovered constraints are either:
+
 - Type-level enforced (direction constraints)
 - Structurally enforced (idle phase implies zero attempts)
 - Low risk (bounds at initialization)

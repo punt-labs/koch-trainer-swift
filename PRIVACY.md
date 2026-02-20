@@ -9,6 +9,7 @@ Koch Trainer is committed to protecting your privacy. This policy explains what 
 **Koch Trainer does not collect, transmit, or share any personal data.**
 
 All data is stored locally on your device:
+
 - Practice progress and statistics
 - App settings and preferences
 - Practice streak history
@@ -17,6 +18,7 @@ All data is stored locally on your device:
 ### Callsign
 
 You may optionally enter your amateur radio callsign in Settings. This is used only for QSO practice simulations within the app. Your callsign:
+
 - Is stored locally on your device only
 - Is never transmitted to us or any third party
 - Can be deleted by clearing the field in Settings
