@@ -137,6 +137,7 @@ We built Koch Trainer because we wanted a simple, free, native iOS app focused p
 Traditional Morse learning starts slow and speeds up—but this creates bad habits. The Koch method, developed by German psychologist Ludwig Koch, teaches characters at full speed from the start. You learn to recognize the *sound pattern*, not count dots and dashes.
 
 **How it works:**
+
 1. Start with just 2 characters (K and M)
 2. Practice until you hit 90% accuracy with enough attempts
 3. Add one new character

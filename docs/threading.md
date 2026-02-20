@@ -139,7 +139,7 @@ final class Radio: @unchecked Sendable {
 
 ### Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                         USER INPUT                               │
 │  Button tap (SwiftUI) ─or─ Keyboard press (SwiftUI .onKeyPress) │
@@ -266,6 +266,7 @@ func resetInputTimer() {
 ```
 
 **Problem:** This pattern has a race:
+
 1. Set value to full
 2. Yield to event loop (Task)
 3. Start animation
@@ -288,6 +289,7 @@ func updatePaddle(dit: Bool, dah: Bool) {
 #### 4. Two Competing Timeout Mechanisms
 
 The failed keyer had both:
+
 - Keyer idle timeout (415ms at 13 WPM)
 - ViewModel input timer (variable, character-dependent)
 
@@ -299,7 +301,7 @@ The failed keyer had both:
 
 ### Current Send Training Flow
 
-```
+```text
 TIME        THREAD          EVENT                           STATE CHANGE
 ────────────────────────────────────────────────────────────────────────
 T+0ms       Main            Button tap detected             —
@@ -315,6 +317,7 @@ T+60ms      Audio RT        Next buffer sees flag           Tone stops
 ```
 
 **Latency Analysis:**
+
 - Touch to state update: <1ms (synchronous)
 - State update to UI: <16ms (next SwiftUI render)
 - State update to audio: <3ms (next audio buffer)
@@ -323,7 +326,7 @@ T+60ms      Audio RT        Next buffer sees flag           Tone stops
 
 ### Countdown Animation Flow
 
-```
+```text
 TIME        THREAD          EVENT                           STATE CHANGE
 ────────────────────────────────────────────────────────────────────────
 T+0ms       Main            showNextCharacter()             —
@@ -349,6 +352,7 @@ T+1ms       Main            Animation interpolates          60 FPS updates
 **Root Cause:** Race between setting `inputTimeRemaining = full` and SwiftUI reading it.
 
 **Fix Options:**
+
 1. **Synchronous animation start:** Don't use Task, call withAnimation directly
 2. **Two-phase update:** Set value, wait for render, then animate
 3. **Timer-driven animation:** Use a repeating timer to decrement, not withAnimation
@@ -467,7 +471,7 @@ private func selectNextElement() -> MorseElement {
 
 ### 6. Recommended Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                     PaddleInputManager                          │
 │  Handles touch events, manages paddle memory                    │

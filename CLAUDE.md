@@ -30,7 +30,7 @@ xcodebuild -scheme KochTrainer -destination 'platform=iOS Simulator,name=iPhone 
 
 ### Project Structure
 
-```
+```text
 KochTrainer/
 ├── Models/
 │   ├── StudentProgress.swift    # Levels, stats, session history, schedule
@@ -114,6 +114,7 @@ struct PracticeSchedule {
 ```
 
 **Interval Algorithm** (`IntervalCalculator`):
+
 | Accuracy | Interval Change |
 |----------|-----------------|
 | ≥90% | Double (max 30 days) |
@@ -124,6 +125,7 @@ struct PracticeSchedule {
 - Missed >2× interval: reset to 1 day
 
 **Streak Rules** (`StreakCalculator`):
+
 - Consecutive calendar days with at least one session
 - Same-day practice: streak unchanged
 - Next day: streak +1
@@ -141,6 +143,7 @@ struct PracticeSchedule {
 | Welcome Back | 7+ days inactive | `welcome.back` |
 
 **Anti-Nag Policy**:
+
 - Max 2 notifications/day
 - 4-hour minimum gap
 - Quiet hours: 10 PM - 8 AM (adjustable)
@@ -258,7 +261,7 @@ make build     # Format + Lint + Build (recommended)
 
 SwiftFormat and SwiftLint must be aligned. Key settings in `.swiftformat`:
 
-```
+```text
 --voidtype void                        # Use `Void` not `()` (matches SwiftLint void_return)
 --commas inline                        # No trailing commas (matches SwiftLint trailing_comma)
 --allman false                         # Braces on same line (matches SwiftLint opening_brace)
@@ -282,12 +285,14 @@ When approaching limits, split into multiple files or extract helper types/funct
 ### Force Unwrapping — NEVER Use
 
 **Banned:**
+
 ```swift
 let value = optionalValue!           // force_unwrapping
 let date = Calendar.current.date(...)!
 ```
 
 **Required patterns:**
+
 ```swift
 // In production code - use guard/if let
 guard let value = optionalValue else { return }
@@ -300,11 +305,13 @@ let value = try XCTUnwrap(optionalValue)
 ### Implicitly Unwrapped Optionals — NEVER Use
 
 **Banned:**
+
 ```swift
 private var manager: NotificationManager!  // implicitly_unwrapped_optional
 ```
 
 **Required patterns:**
+
 ```swift
 // Use lazy initialization
 private lazy var manager = NotificationManager()
@@ -316,6 +323,7 @@ private var manager: NotificationManager?
 ### Test File Patterns
 
 Always use `throws` for tests that unwrap optionals:
+
 ```swift
 func testSomething() throws {
     let value = try XCTUnwrap(optionalValue)
@@ -324,6 +332,7 @@ func testSomething() throws {
 ```
 
 For date arithmetic in tests:
+
 ```swift
 // BAD
 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
@@ -333,6 +342,7 @@ let tomorrow = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 1, to:
 ```
 
 For DateComponents manipulation:
+
 ```swift
 // BAD
 components.day! += 1
@@ -418,6 +428,7 @@ git status  # Must show "up to date with origin"
 ### Creating Issues for Discovered Work
 
 When you discover work that needs doing but isn't part of the current task:
+
 1. Create a beads issue immediately: `bd create --title="..." --type=task`
 2. Add dependencies if relevant: `bd dep add <new-issue> <blocking-issue>`
 3. Continue with current work
@@ -442,6 +453,7 @@ cd ~/Coding/koch-trainer-worktrees/feature-foo
 ### Working a Beads Issue
 
 **1. Find and claim work:**
+
 ```bash
 bd ready --limit=100                  # Show available work
 bd show <id>                          # Review issue details
@@ -449,6 +461,7 @@ bd update <id> --status=in_progress   # Claim it
 ```
 
 **2. Create worktree for feature branch:**
+
 ```bash
 # From main repo directory:
 make worktree-create BRANCH=feature/<short-description> NEW=1
@@ -456,17 +469,20 @@ cd ~/Coding/koch-trainer-worktrees/feature-<short-description>
 ```
 
 **3. Implement (in the worktree):**
+
 - Read relevant files, understand current implementation
 - Write code with corresponding unit tests
 - Run `make build` frequently (formats, lints, compiles)
 - Run `make test` before considering work complete
 
 **4. Update CHANGELOG.md:**
+
 - Add entry under `[Unreleased]` section
 - Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
 - Write user-facing descriptions, not technical jargon
 
 **5. Commit and push branch:**
+
 ```bash
 git add <files>
 git commit -m "feat: description"
@@ -477,12 +493,15 @@ git push -u origin feature/<short-description>
 Use `mcp__plugin_github_github__create_pull_request` with owner, repo, title, head branch, and base branch.
 
 **7. After PR merged:**
+
 ```bash
 # 1. Remove worktree FIRST (before deleting branch)
 cd ~/Coding/koch-trainer-swift
 make worktree-remove BRANCH=feature/<short-description>
 ```
+
 Then merge via `mcp__plugin_github_github__merge_pull_request` (squash, delete branch).
+
 ```bash
 # 2. Update local main
 git fetch --prune
@@ -524,6 +543,7 @@ make release  # Interactive: prompts for patch/minor/major, updates CHANGELOG, t
 ```
 
 The release target:
+
 1. Validates clean git state and main branch
 2. Bumps version in `project.yml`
 3. Moves `[Unreleased]` entries to new version section in CHANGELOG.md
@@ -534,7 +554,7 @@ For TestFlight archives: `make archive` computes build number from base + git co
 
 ### Commit Message Convention
 
-```
+```text
 type(scope): description
 
 feat:     New feature
@@ -627,18 +647,21 @@ This project uses formal Z specifications (`docs/koch_trainer.tex`) to model sta
 ### Workflow by Scenario
 
 **Adding new stateful behavior:**
+
 1. Edit spec to add schema (or propose changes for review)
 2. `/z check` to verify type-correctness
 3. `/z model2code` to generate implementation scaffold
 4. Write tests, then production code
 
 **Modifying existing behavior:**
+
 1. Propose spec change to clarify intent
 2. Review and edit spec together
 3. `/z check` to validate
 4. Update code to match spec
 
 **Verifying code-spec alignment:**
+
 1. `/z code2model` on changed files
 2. Compare generated spec against `koch_trainer.tex`
 3. Resolve discrepancies case-by-case

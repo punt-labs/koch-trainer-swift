@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.2] - 2026-02-11
 
 ### Fixed
+
 - Rapid dit/dah taps no longer overlap—tones are serialized with proper inter-element gaps
 - "We Miss You!" notification replaced with neutral "Practice Reminder" copy across all languages
 - Streak reminder threshold raised from 3 to 7 days—only nudges users with a meaningful streak at risk
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2026-02-03
 
 ### Fixed
+
 - Band conditions (noise, fading, interference) now play continuously throughout training sessions instead of resetting between characters
 - **Input lag during training**: Timer-driven countdown animation was updating 20×/second on main thread, competing with user input. Now uses SwiftUI's declarative animation (runs on render thread) with single-fire timeout timer.
 - **Countdown timer animation**: Timer started at 20% and behaved erratically due to both 0→100% and 100%→0% transitions being animated. Now uses explicit `withAnimation()` only for the countdown, ensuring the timer starts at 100% and smoothly decreases to 0%.
@@ -28,12 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Small screen scrolling**: Learn, Practice, Vocabulary, and Results screens now scroll on smaller devices like iPhone 13 mini where content may exceed screen height.
 
 ### Changed
+
 - Replaced inconsistent `print()` statements with `os.Logger` for consistent logging behavior
 - **Learn screen**: Moved Ear Training below Receive and Send to reflect its role as a supplementary activity for dit/dah recognition, not a primary learning activity.
 
 ## [1.0.0] - 2026-02-01
 
 ### Added
+
 - **Accessibility compliance**: VoiceOver labels with spoken Morse patterns ("dit dah" instead of ".-"), accessibility hints on training buttons, Dynamic Type support with `@ScaledMetric`, hidden decorative elements, and automated `performAccessibilityAudit()` tests
 - **Privacy manifest** (PrivacyInfo.xcprivacy): Declares UserDefaults API usage and no data collection
 - **Notification usage description**: Explains why practice reminders and streak alerts are sent
@@ -49,19 +53,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Locale-aware number formatting for decimal values
 
 ### Fixed
+
 - Software keyboard no longer covers dit/dah buttons on Send Training, Ear Training, QSO, and Vocabulary screens
 
 ### Changed
+
 - Minimum deployment target raised to iOS 17.0
 - Bundle identifier changed to com.puntlabs.kochtrainer
 
 ### Technical
+
 - 1,041 tests (973 unit + 68 UI)
 - SwiftLint warnings reduced to 0
 
 ## [0.9.0] - 2026-01-24
 
 ### Added
+
 - **Ear Training Mode**: New training mode for pattern recognition—hear Morse audio and reproduce the pattern using dit/dah buttons. Progression by pattern length (1-5 elements) rather than Koch order.
 - **Training Flow UI Tests**: Comprehensive UI test coverage for Receive, Send, and Ear training flows using page object pattern
 - **Data Migration Safety**: Progress data is now protected with rolling backups and graceful degradation. If data becomes corrupted, the app recovers from backups instead of losing all progress. Schema versioning enables safe future updates.
@@ -80,6 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **License view**: Full MIT license text in Settings
 
 ### Changed
+
 - Character grid cells now use circular backgrounds for visual consistency
 - QSO text reveal now syncs with audio playback (character appears as it plays)
 - **Realistic QSB fading**: Band conditions fading now uses filtered random noise instead of predictable sine wave, better simulating real ionospheric conditions
@@ -87,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Continuous band audio**: Background noise plays continuously with half-duplex radio behavior (noise fades during transmission)
 
 ### Fixed
+
 - **Accessibility identifier inheritance**: Training view elements now correctly expose their own identifiers in the accessibility tree (fixed by adding `.accessibilityElement(children: .contain)` to container views)
 - Custom and Vocabulary sessions no longer affect Learn mode spaced repetition schedule
 - CI workflow now uses iPhone 16 Pro simulator (available on GitHub runners)
@@ -98,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2026-01-19
 
 ### Added
+
 - **Koch Method Training**: Progressive character learning following the Koch method order (K, M, R, S, U, A, P, T, L, O, W, I, N, J, E, F, Y, V, G, Q, Z, H, B, C, D, X)
 - **Receive Training**: Listen to Morse code and identify characters with immediate feedback
 - **Send Training**: Key dit/dah patterns using on-screen paddles or keyboard (F/J keys)
@@ -114,13 +125,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dark Mode Support**: Full support for iOS light and dark appearance modes
 
 ### Technical
+
 - SwiftUI-based iOS app
 - XcodeGen for project configuration
 - SwiftLint and SwiftFormat for code quality
 - GitHub Actions CI pipeline
 
 
-[1.0.1]: https://github.com/punt-labs/koch-trainer-swift/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.9.0...v1.0.0
-[0.9.0]: https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...v0.9.0
-[0.7.0]: https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0
+[1.0.1]: <https://github.com/punt-labs/koch-trainer-swift/compare/v1.0.0...v1.0.1>
+[1.0.0]: <https://github.com/punt-labs/koch-trainer-swift/compare/v0.9.0...v1.0.0>
+[0.9.0]: <https://github.com/punt-labs/koch-trainer-swift/compare/v0.7.0...v0.9.0>
+[0.7.0]: <https://github.com/punt-labs/koch-trainer-swift/releases/tag/v0.7.0>

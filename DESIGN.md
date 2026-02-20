@@ -39,7 +39,7 @@ Koch Trainer teaches Morse code using the Koch method—a proven technique where
 
 ### Layer Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                      Views                          │
 │  (SwiftUI, declarative UI, minimal logic)           │
@@ -57,7 +57,7 @@ Koch Trainer teaches Morse code using the Koch method—a proven technique where
 
 ### Data Flow
 
-```
+```text
 User Input → View → ViewModel → Service → Model
                 ↓
             State Change
@@ -67,14 +67,15 @@ View ← ViewModel (Published properties)
 
 ### Key Architectural Decisions
 
-**1. Separate Receive/Send Levels**
+#### 1. Separate Receive/Send Levels
 
 Receive (listening) and send (keying) are distinct skills that progress independently:
+
 - Users may excel at one before the other
 - Separate tracking prevents frustration
 - Each has its own spaced repetition schedule
 
-**2. Session Types with Shared Infrastructure**
+#### 2. Session Types with Shared Infrastructure
 
 ```swift
 enum SessionType {
@@ -87,19 +88,20 @@ enum SessionType {
 
 Only `.receive` and `.send` can advance levels and affect the spaced repetition schedule. This prevents custom/vocabulary practice from interfering with the core learning progression.
 
-**3. Farnsworth Timing**
+#### 3. Farnsworth Timing
 
 Characters play at full speed (20 WPM) but with extended gaps between characters. This trains the ear to recognize patterns at speed while giving beginners time to process.
 
-```
+```text
 Character speed: 20 WPM (60ms dit, 180ms dah)
 Effective speed: User-selected 10-18 WPM
 Gap extension: Calculated to achieve effective WPM
 ```
 
-**4. Paused Session Persistence**
+#### 4. Paused Session Persistence
 
 Training sessions can be paused and resumed within 24 hours:
+
 - Stored in UserDefaults as JSON
 - Two slots: one for receive-direction, one for send-direction
 - Validates session type and custom characters on restore
@@ -120,12 +122,14 @@ The interval between practice sessions adapts based on performance:
 | <70% | Reset to 1 day |
 
 **Special rules:**
+
 - First 14 days: capped at 2 days (habit formation)
 - Missed >2× interval: reset to 1 day (skill decay)
 
 ### Streak Tracking
 
 Consecutive calendar days with at least one completed session:
+
 - Same-day practice: streak unchanged
 - Next calendar day: streak +1
 - Skipped day: streak resets to 1
@@ -166,6 +170,7 @@ func playElement(_ element: MorseElement) {
 ```
 
 **Timing constants (20 WPM):**
+
 | Element | Duration |
 |---------|----------|
 | Dit | 60ms |
@@ -189,6 +194,7 @@ func playElement(_ element: MorseElement) {
 - VoiceOver: "K, 95% proficiency, selected"
 
 **Files:**
+
 - `ProficiencyRingView.swift` - Ring overlay component
 - `CharacterGridView.swift` - Circular cells with ring integration
 - `PracticeView.swift` - Passes characterStats to grid
@@ -196,6 +202,7 @@ func playElement(_ element: MorseElement) {
 ### QSO Simulation
 
 **Design Philosophy**: Mirrors real ham radio operation
+
 - User sends their transmissions by keying dit/dah
 - User listens to remote station's Morse audio
 - No separate "receive mode"—this IS how real QSOs work
@@ -217,7 +224,8 @@ func playElement(_ element: MorseElement) {
    - Extended conversation: QTH, rig, weather
 
 **UI Flow:**
-```
+
+```text
 1. AI transmits: [Morse audio] "CQ CQ CQ DE W1AW K"
 2. Text reveals character-by-character with audio
    (or hidden in copy-by-ear mode)
@@ -231,6 +239,7 @@ func playElement(_ element: MorseElement) {
 ### Band Conditions Simulation
 
 **Implementation** (BandConditionsProcessor.swift):
+
 - **QRN (Noise)**: Pink noise filter for atmospheric simulation (more realistic than white noise)
 - **QSB (Fading)**: Filtered random noise modulation (replaced sine wave for irregular, natural fading)
 - **QRM (Interference)**: Random tones at offset frequencies
@@ -239,6 +248,7 @@ func playElement(_ element: MorseElement) {
 **Design rationale**: Real HF conditions have irregular fading patterns and frequency-shaped noise. Pure sine wave QSB and white noise sound artificial. Pink noise (1/f spectrum) better matches atmospheric noise characteristics, and filtered random modulation produces the gradual, unpredictable fading heard on real bands.
 
 **Files:**
+
 - `BandConditionsProcessor.swift` - DSP processing for band conditions
 - `ToneGenerator.swift` - Integrates via `processSample()`
 - Settings view provides "Preview Sound" button for tuning
@@ -254,6 +264,7 @@ Anti-nag policy prevents notification fatigue:
 | Quiet hours | 10 PM - 8 AM (adjustable) |
 
 **Notification Types:**
+
 - Practice Due: when nextDate reached
 - Streak Reminder: 8 PM if no practice today and streak ≥3
 - Level Review: 7 days after level-up
@@ -265,7 +276,7 @@ Anti-nag policy prevents notification fatigue:
 
 ### Test Pyramid
 
-```
+```text
         ┌─────────────┐
         │   UI Tests  │  ← Slow, integration-level
         │  (~70 tests)│    Tests full user flows
@@ -280,17 +291,20 @@ Anti-nag policy prevents notification fatigue:
 **Philosophy**: Test business logic in isolation. ViewModels and Services contain the logic; Views are thin wrappers.
 
 **What We Test:**
+
 - ViewModels: State transitions, input handling, calculated properties
 - Services: Persistence, calculations, audio timing
 - Models: Encoding/decoding, computed properties, validation
 
 **What We Don't Test:**
+
 - Views directly (tested via UI tests instead)
 - Third-party framework behavior
 - Trivial getters/setters
 
 **Test Organization:**
-```
+
+```text
 KochTrainerTests/
 ├── Models/
 │   ├── StudentProgressTests.swift
@@ -311,6 +325,7 @@ KochTrainerTests/
 **Philosophy**: Test user flows end-to-end. UI tests verify that views, view models, and services work together correctly.
 
 **What We Test:**
+
 - Navigation between screens
 - Training flow phases (intro → training → paused → completed)
 - Button interactions and state changes
@@ -349,7 +364,8 @@ func testCompleteTrainingFlow() throws {
 ```
 
 **Page Object Hierarchy:**
-```
+
+```text
 KochTrainerUITests/
 ├── Pages/
 │   ├── BasePage.swift           ← Common element accessors
@@ -423,6 +439,7 @@ override func setUpWithError() throws {
 ```
 
 The app checks this flag to:
+
 - Reset progress to level 1
 - Clear any paused sessions
 - Use predictable test data
@@ -449,10 +466,12 @@ This section contains design notes for planned features tracked in beads. Use `b
 **Why This Matters**: Morse code has historical significance for people with visual impairments. The app should be fully accessible.
 
 **Completed:**
+
 - Training feedback VoiceOver announcements (PR #17)
 - Accessibility identifiers on testable UI elements (PR #21)
 
 **iOS Accessibility Modifiers:**
+
 ```swift
 .accessibilityLabel(_:)      // Meaningful descriptions
 .accessibilityHint(_:)       // Context about actions
@@ -473,14 +492,17 @@ This section contains design notes for planned features tracked in beads. Use `b
 | Hide text from VoiceOver in copy-by-ear | `koch-trainer-swift-j3i` | Open (bug) |
 
 **VoiceOver Behaviors Already Implemented:**
+
 - Training feedback: Announces "Correct" or "Incorrect, the letter was K"
 
 **VoiceOver Behaviors Remaining:**
+
 - Character introduction pattern descriptions
 - Progress indicator announcements
 - Character grid proficiency descriptions
 
 **References:**
+
 - [iOS Accessibility Guidelines 2025](https://medium.com/@david-auerbach/ios-accessibility-guidelines-best-practices-for-2025-6ed0d256200e)
 - [SwiftUI Accessibility Best Practices](https://commitstudiogs.medium.com/accessibility-in-swiftui-apps-best-practices-a15450ebf554)
 - [CVS Health iOS Accessibility Techniques](https://github.com/cvs-health/ios-swiftui-accessibility-techniques)
@@ -512,14 +534,17 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 | StreakCalculator | `koch-trainer-swift-sdq` | Done |
 
 **UI Test Infrastructure (Completed):**
+
 - Page object base classes (PR #27)
 - Training-specific page objects (PR #28)
 - UITesting configuration with silent audio engine (PR #24)
 
 **Completed:**
+
 - `koch-trainer-swift-0nx`: UI test coverage for core flows (PR #41)
 
 **Remaining Work:**
+
 - `koch-trainer-swift-ae4`: Pause/resume tests
 - `koch-trainer-swift-atl`: Edge case UI tests
 

@@ -35,7 +35,7 @@ This document details the technical analysis and provides a reference specificat
 
 ### Component Diagram
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           USER INPUT                                     │
 │  Paddle Touch (UIKit) ─or─ Keyboard Press (SwiftUI)                     │
@@ -100,7 +100,7 @@ This document details the technical analysis and provides a reference specificat
 
 ### Complete Sequence: Paddle Press to Audio Output
 
-```
+```text
 TIME    THREAD          ACTION                                      STATE CHANGE
 ─────────────────────────────────────────────────────────────────────────────────
 T+0ms   UIKit           touchesBegan fires                          -
@@ -141,7 +141,7 @@ T+599ms Main            └─ handleKeyerPatternComplete(".")          isWaitin
 
 ### Critical Timing Windows
 
-```
+```text
 At 13 WPM:
 ├─ Dit duration:     92ms
 ├─ Dah duration:     277ms
@@ -174,7 +174,8 @@ For character "K" (-.-):
 When transitioning from idle to playing, `idleStartTime` is not reset. If the user pauses mid-character and resumes, the old timeout continues counting.
 
 **Reproduction:**
-```
+
+```text
 T=0ms:     Start pattern, send ".-"
 T=500ms:   Release paddle, go idle, idleStartTime = 500
 T=600ms:   Press paddle again (before 415ms timeout)
@@ -230,7 +231,8 @@ Two independent timers control input completion:
 2. **ViewModel input timer:** 1.0s + 0.8s per element, triggers `handleInputTimeout`
 
 Race scenario:
-```
+
+```text
 T=0ms:     showNextCharacter() starts inputTimer (e.g., 2.6s for 3 elements)
 T=100ms:   User sends single dit
 T=607ms:   Keyer idle timeout → onPatternComplete(".")
@@ -243,7 +245,8 @@ T=2600ms:  inputTimer fires → handleInputTimeout()
 ```
 
 Worse race:
-```
+
+```text
 T=0ms:     showNextCharacter() starts inputTimer (2.6s)
 T=2500ms:  User SLOWLY enters element, keyer in playing phase
 T=2600ms:  inputTimer fires → completeCurrentInput()
@@ -271,7 +274,7 @@ If called while keyer is in `.playing` phase, the tone continues but pattern is 
 
 ### Race 1: Paddle Release vs Display Link Tick
 
-```
+```text
 User quickly taps dit (press and release within one tick):
 
 T=0ms:    touchesBegan → updatePaddle(dit:true)
@@ -300,7 +303,7 @@ keyer wasn't idle (e.g., previous element still in gap phase), then:
 
 ### Race 2: Pattern Emission vs isWaitingForInput
 
-```
+```text
 T=0ms:    Keyer emits pattern: onPatternComplete(".-.")
 T=0ms:    Callback posts: Task { @MainActor in handleKeyerPatternComplete }
 T=0ms:    Meanwhile, inputTimer also fires: handleInputTimeout()
@@ -316,7 +319,7 @@ T+1ms:    Task runs: handleKeyerPatternComplete
 
 ### Race 3: UI Update vs Keyer State
 
-```
+```text
 SwiftUI body recomputes when @Published changes.
 But currentPattern is only synced in updatePaddle().
 
@@ -350,6 +353,7 @@ Real Mode B keyers have "dot and dash memory" introduced by the Curtis 8044 chip
 > "If you press the dit paddle during a dah, that press is remembered and serviced after the dah completes."
 
 Current implementation:
+
 - `updatePaddle()` just sets boolean state
 - No "latch" or "memory" mechanism
 - If paddle released before keyer checks, press is lost
@@ -361,6 +365,7 @@ Mode B's defining characteristic:
 > "When both paddles released during element, after current element completes, send one additional element opposite to the one just sent, then stop."
 
 Current implementation:
+
 - Checks `paddle.isPressed` at gap completion
 - If not pressed, goes to idle
 - No "send one more opposite" logic
@@ -381,7 +386,7 @@ Current implementation:
 
 ### State Machine (Correct Implementation)
 
-```
+```text
 States:
 - IDLE: Waiting for input
 - PREDOT: About to send dit (clears dot memory)
@@ -438,7 +443,7 @@ Memory is CLEARED when that element starts playing.
 
 ## Appendix: Files Changed in PR #68
 
-```
+```text
 KochTrainer/Services/Keyer/IambicKeyer.swift (NEW)
 KochTrainer/Services/Keyer/KeyerConfiguration.swift (NEW)
 KochTrainer/Services/Keyer/KeyerClock.swift (NEW)

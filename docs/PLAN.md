@@ -24,6 +24,7 @@ The audit identified 18 uncovered constraints. After analysis:
 ### 1. Radio/Tone Half-Duplex Invariants
 
 **Constraints**:
+
 - `¬(radioMode = receiving ∧ toneActive)`
 - `¬(radioMode = off ∧ toneActive)`
 
@@ -32,6 +33,7 @@ The audit identified 18 uncovered constraints. After analysis:
 **Recommendation**: **Encapsulated Radio type** — Create a proper domain model that enforces invariants.
 
 **Design**:
+
 ```swift
 /// Half-duplex radio state machine.
 /// Invariants:
@@ -90,6 +92,7 @@ final class Radio {
 ```
 
 **Why throwing over preconditions**:
+
 - Domain rule violations (not programmer errors) should be recoverable
 - Type signature documents that failure is possible
 - Callers forced to handle or propagate errors
@@ -97,6 +100,7 @@ final class Radio {
 - Testable: verify correct error is thrown
 
 **Benefits**:
+
 1. Invalid states become impossible to construct
 2. Throwing methods document and enforce invariants
 3. Domain model matches Z specification exactly
@@ -104,11 +108,13 @@ final class Radio {
 5. No crashes in production
 
 **Migration**:
+
 - `ToneGenerator` owns a `Radio` instance
 - Replace `setRadioMode(.transmitting)` + `activateTone()` with `radio.startTransmitting()` + `radio.key()`
 - Audio callback reads `radio.mode` and `radio.isKeying`
 
 **Files to modify**:
+
 - New: `KochTrainer/Models/Radio.swift`
 - Modify: `KochTrainer/Services/AudioEngine/ToneGenerator.swift`
 - Modify: `KochTrainer/Services/AudioEngine/MorseAudioEngine.swift`
@@ -119,11 +125,13 @@ final class Radio {
 ### 2. Phase Transition Guards
 
 **Constraints**:
+
 - `PauseTraining: phase = training`
 - `ResumeTraining: phase = paused`
 - `ResetSession: phase = completed`
 
 **Current enforcement**: Guards exist in ViewModels:
+
 ```swift
 func pause() {
     guard case .training = phase else { return }
@@ -140,6 +148,7 @@ func pause() {
 ### 3. Radio Mode Transitions
 
 **Constraints**:
+
 - `StartReceiving: radioMode = off`
 - `StartTransmitting: radioMode = off`
 - `StopRadio: radioMode ≠ off`
@@ -153,6 +162,7 @@ func pause() {
 ### 4. TrainingSession Counters
 
 **Constraints**:
+
 - `sessionCorrect ≤ sessionAttempts` (invariant)
 - `phase = idle ⇒ sessionAttempts = 0`
 
@@ -161,6 +171,7 @@ func pause() {
 **Recommendation**: **Extract SessionCounter type** — Encapsulate counter logic with invariant enforcement.
 
 **Design**:
+
 ```swift
 /// Training session attempt counter with invariant enforcement.
 /// Invariant: `correct ≤ attempts`
@@ -185,12 +196,14 @@ final class SessionCounter: ObservableObject {
 ```
 
 **Benefits**:
+
 1. Invariant `correct ≤ attempts` enforced by `recordAttempt()` API
 2. No way to increment correct without incrementing attempts
 3. Single source of truth for accuracy calculation
 4. ViewModels use `@StateObject var counter = SessionCounter()`
 
 **Why not extract full TrainingSession?**
+
 - `SessionPhase` differs across ViewModels (vocabulary has no introduction, completed payloads differ)
 - Phase transitions are tightly coupled to ViewModel-specific logic
 - Counter extraction provides most of the value with minimal disruption
@@ -200,6 +213,7 @@ final class SessionCounter: ObservableObject {
 ### 5. Ear Training Direction
 
 **Constraints**:
+
 - `AdvanceEarLevel: direction = receiveEar`
 - `RecordEarAttempt: direction = receiveEar`
 
@@ -236,7 +250,7 @@ The codebase uses two strategies with different appropriateness:
 
 **New approach for Radio**:
 
-3. **Throwing domain operations** (Radio type)
+1. **Throwing domain operations** (Radio type)
    - Operations like `key()` throw on constraint violations
    - Invalid states are impossible to construct
    - Callers handle errors explicitly (log, ignore, show UI)
@@ -244,6 +258,7 @@ The codebase uses two strategies with different appropriateness:
    - Audio callback still renders defensively as a safety net
 
 **Verdict**: Different strategies for different layers:
+
 - UI layer: Guard returns (graceful degradation for user actions)
 - Domain layer: Throwing methods (explicit constraint violations)
 - Audio layer: Defensive rendering (safety net only, not primary defense)
@@ -262,12 +277,14 @@ The codebase uses two strategies with different appropriateness:
 ### Formal Model Value Proposition
 
 **Benefits delivered**:
+
 1. **Explicit invariants**: Spec documents `correctCount ≤ totalAttempts` even though code enforces it structurally
 2. **Operation contracts**: `phase = training` precondition on `PauseSession` matches guard clause exactly
 3. **Gap identification**: Audit found missing invariant test that wouldn't have been noticed otherwise
 4. **Refactoring safety**: Tests against spec constraints catch regressions when code changes
 
 **Costs**:
+
 - Spec maintenance (low — focused on persistent state)
 - Learning curve (medium — Z notation)
 - Test additions (low — straightforward invariant tests)
@@ -411,6 +428,7 @@ Update protocol to use Radio operations instead of raw mode setting.
 ### Step 6: Update ViewModels
 
 **Modify**:
+
 - `MorseQSOViewModel.swift`: Use `audioEngine.startTransmitting()` + `audioEngine.key()` for keying
 - Other ViewModels: Use `startReceiving()` and `stop()` instead of `setRadioMode()`
 
@@ -463,6 +481,7 @@ func testReset_clearsCounters()
 ### Step 9: Integrate SessionCounter into ViewModels
 
 **Modify**:
+
 - `ReceiveTrainingViewModel.swift`: Replace `correctCount`/`totalAttempts` with `@StateObject var counter = SessionCounter()`
 - `SendTrainingViewModel.swift`: Same
 - `EarTrainingViewModel.swift`: Same
@@ -505,6 +524,7 @@ The Z specification audit revealed missing domain abstractions:
 **Key insight**: Both cases share a pattern — coupled state with invariants was scattered across implementation details. The formal model identified the abstractions that should exist.
 
 **The formal model's value**:
+
 - Identified missing domain abstractions (Radio, SessionCounter)
 - Provided the invariants each type must enforce
 - Guides API design (operations match Z spec schemas)
