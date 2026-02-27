@@ -1,5 +1,7 @@
 # Koch Trainer
 
+[![Working Backwards](https://img.shields.io/badge/Working_Backwards-hypothesis-lightgrey)](./prfaq.pdf)
+
 An iOS app for learning Morse code using the Koch method—a well-established approach that teaches characters at full speed from day one.
 
 <p align="center">
