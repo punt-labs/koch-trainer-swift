@@ -1,5 +1,9 @@
 # Koch Trainer
 
+[![License](https://img.shields.io/github/license/punt-labs/koch-trainer-swift)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/punt-labs/koch-trainer-swift/ci.yml?label=CI)](https://github.com/punt-labs/koch-trainer-swift/actions/workflows/ci.yml)
+[![Platform](https://img.shields.io/badge/platform-iOS_17+-blue)](https://developer.apple.com/ios/)
+[![Swift](https://img.shields.io/badge/swift-5.0-F05138)](https://www.swift.org)
 [![Working Backwards](https://img.shields.io/badge/Working_Backwards-hypothesis-lightgrey)](./prfaq.pdf)
 
 An iOS app for learning Morse code using the Koch method—a well-established approach that teaches characters at full speed from day one.
