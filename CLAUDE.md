@@ -475,9 +475,9 @@ cd ~/Coding/koch-trainer-worktrees/feature-<short-description>
 - Run `make build` frequently (formats, lints, compiles)
 - Run `make test` before considering work complete
 
-**4. Update CHANGELOG.md:**
+**4. Update CHANGELOG.md (in the PR branch, before merge):**
 
-- Add entry under `[Unreleased]` section
+- Add entry under `[Unreleased]` section — the entry must be part of the PR diff
 - Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
 - Write user-facing descriptions, not technical jargon
 
