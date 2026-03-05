@@ -66,17 +66,22 @@ final class ToneGenerator: @unchecked Sendable {
                     Thread.sleep(forTimeInterval: 0.005) // 5ms polling
                 }
 
-                // Start the tone on main thread (AVAudioEngine requirement)
-                DispatchQueue.main.sync {
-                    self.startToneInternal(frequency: frequency)
-                }
+                if Self.isSilenced {
+                    // Preserve sequential timing without starting the audio engine
+                    Thread.sleep(forTimeInterval: duration)
+                } else {
+                    // Start the tone on main thread (AVAudioEngine requirement)
+                    DispatchQueue.main.sync {
+                        self.startToneInternal(frequency: frequency)
+                    }
 
-                // Wait for the duration
-                Thread.sleep(forTimeInterval: duration)
+                    // Wait for the duration
+                    Thread.sleep(forTimeInterval: duration)
 
-                // Stop the tone on main thread
-                DispatchQueue.main.sync {
-                    self.stopTone()
+                    // Stop the tone on main thread
+                    DispatchQueue.main.sync {
+                        self.stopTone()
+                    }
                 }
 
                 continuation.resume()
@@ -86,6 +91,7 @@ final class ToneGenerator: @unchecked Sendable {
 
     /// Start continuous tone at the specified frequency (public API for external use).
     func startTone(frequency: Double) {
+        guard !Self.isSilenced else { return }
         startToneInternal(frequency: frequency)
     }
 
@@ -166,7 +172,7 @@ final class ToneGenerator: @unchecked Sendable {
 
     // MARK: Private
 
-    private static let baseVolume: Float = NSClassFromString("XCTestCase") != nil ? 0.0 : 0.5
+    private static let isSilenced: Bool = NSClassFromString("XCTestCase") != nil
 
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
     private let audioEngine = AVAudioEngine()
@@ -323,8 +329,8 @@ final class ToneGenerator: @unchecked Sendable {
                     currentPhase -= twoPi
                 }
 
-                // Apply base volume (0 during unit tests to silence audio)
-                value *= Self.baseVolume
+                // Apply base volume
+                value *= 0.5
 
                 // Apply band conditions processing (QRN, QSB, QRM)
                 value = processor.processSample(value, at: frame)
