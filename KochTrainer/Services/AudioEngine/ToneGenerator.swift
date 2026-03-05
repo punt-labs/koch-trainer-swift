@@ -66,22 +66,17 @@ final class ToneGenerator: @unchecked Sendable {
                     Thread.sleep(forTimeInterval: 0.005) // 5ms polling
                 }
 
-                if Self.isSilenced {
-                    // Preserve sequential timing without starting the audio engine
-                    Thread.sleep(forTimeInterval: duration)
-                } else {
-                    // Start the tone on main thread (AVAudioEngine requirement)
-                    DispatchQueue.main.sync {
-                        self.startToneInternal(frequency: frequency)
-                    }
+                // Start the tone on main thread (AVAudioEngine requirement)
+                DispatchQueue.main.sync {
+                    self.startToneInternal(frequency: frequency)
+                }
 
-                    // Wait for the duration
-                    Thread.sleep(forTimeInterval: duration)
+                // Wait for the duration
+                Thread.sleep(forTimeInterval: duration)
 
-                    // Stop the tone on main thread
-                    DispatchQueue.main.sync {
-                        self.stopTone()
-                    }
+                // Stop the tone on main thread
+                DispatchQueue.main.sync {
+                    self.stopTone()
                 }
 
                 continuation.resume()
@@ -91,7 +86,6 @@ final class ToneGenerator: @unchecked Sendable {
 
     /// Start continuous tone at the specified frequency (public API for external use).
     func startTone(frequency: Double) {
-        guard !Self.isSilenced else { return }
         startToneInternal(frequency: frequency)
     }
 
@@ -353,6 +347,9 @@ final class ToneGenerator: @unchecked Sendable {
 
         do {
             try audioEngine.start()
+            if Self.isSilenced {
+                audioEngine.mainMixerNode.outputVolume = 0
+            }
             isPlaying = true
         } catch {
             logger.error("Failed to start audio engine: \(error)")
@@ -441,6 +438,9 @@ final class ToneGenerator: @unchecked Sendable {
 
         do {
             try audioEngine.start()
+            if Self.isSilenced {
+                audioEngine.mainMixerNode.outputVolume = 0
+            }
             isPlaying = true
         } catch {
             logger.error("Failed to start continuous audio engine: \(error)")
