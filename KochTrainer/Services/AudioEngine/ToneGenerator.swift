@@ -166,6 +166,8 @@ final class ToneGenerator: @unchecked Sendable {
 
     // MARK: Private
 
+    private static let isSilenced: Bool = NSClassFromString("XCTestCase") != nil
+
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
     private let audioEngine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
@@ -345,6 +347,9 @@ final class ToneGenerator: @unchecked Sendable {
 
         do {
             try audioEngine.start()
+            if Self.isSilenced {
+                audioEngine.mainMixerNode.outputVolume = 0
+            }
             isPlaying = true
         } catch {
             logger.error("Failed to start audio engine: \(error)")
@@ -433,6 +438,9 @@ final class ToneGenerator: @unchecked Sendable {
 
         do {
             try audioEngine.start()
+            if Self.isSilenced {
+                audioEngine.mainMixerNode.outputVolume = 0
+            }
             isPlaying = true
         } catch {
             logger.error("Failed to start continuous audio engine: \(error)")
