@@ -166,6 +166,8 @@ final class ToneGenerator: @unchecked Sendable {
 
     // MARK: Private
 
+    private static let baseVolume: Float = NSClassFromString("XCTestCase") != nil ? 0.0 : 0.5
+
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
     private let audioEngine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
@@ -321,8 +323,8 @@ final class ToneGenerator: @unchecked Sendable {
                     currentPhase -= twoPi
                 }
 
-                // Apply base volume
-                value *= 0.5
+                // Apply base volume (0 during unit tests to silence audio)
+                value *= Self.baseVolume
 
                 // Apply band conditions processing (QRN, QSB, QRM)
                 value = processor.processSample(value, at: frame)
