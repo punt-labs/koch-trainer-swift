@@ -122,3 +122,6 @@ docs/*.tfm
 docs/*.sty
 docs/*.*pk
 .envrc
+
+# Scratch/temp directory (TMPDIR set via .envrc)
+.tmp/
