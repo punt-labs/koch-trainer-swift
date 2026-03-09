@@ -569,7 +569,7 @@ chore:    Build process, dependencies, CI
 
 Three documents must stay current. A PR that changes user-facing behavior is not ready to merge until the relevant docs are updated **in the PR branch**.
 
-**CHANGELOG.md** — Entries are written in the PR branch, before merge — not retroactively on main. If a PR changes user-facing behavior and the diff does not include a CHANGELOG entry, the PR is not ready to merge. Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format under `## [Unreleased]`. Categories: Added, Changed, Deprecated, Removed, Fixed, Security.
+**CHANGELOG.md** — Entries are written in the PR branch, before merge — not retroactively on main. If a PR changes user-facing behavior and the diff does not include a CHANGELOG entry, the PR is not ready to merge. Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format under `## [Unreleased]`, using the same headings already present in `CHANGELOG.md` (Added, Changed, Fixed, Technical, etc.).
 
 **README.md** — Update when user-facing behavior changes: new flags, commands, settings, defaults, UI flows, or configuration. The README is the first thing a new user reads — it must reflect the current state of the app.
 
@@ -579,14 +579,14 @@ Three documents must stay current. A PR that changes user-facing behavior is not
 
 Do **not** merge immediately after creating a PR. Expect **2–6 review cycles** before merging.
 
-1. **Create PR** — push branch, open PR via `mcp__github__create_pull_request`. Prefer MCP GitHub tools over `gh` CLI.
-2. **Request Copilot review** — use `mcp__github__request_copilot_review`.
-3. **Watch for feedback in the background** — `gh pr checks <number> --watch` (run in background). Do not stop waiting. Copilot and Bugbot may take 1–3 minutes after CI completes.
-4. **Read all feedback** via MCP: `mcp__github__pull_request_read` with `get_reviews` and `get_review_comments`.
+1. **Create PR** — push branch, open PR via `mcp__plugin_github_github__create_pull_request`. Use MCP GitHub tools; do **not** use the `gh` CLI.
+2. **Request Copilot review** — use `mcp__plugin_github_github__request_copilot_review`.
+3. **Watch for feedback without blocking your main shell** — run `gh pr checks <number> --watch` in a background task or separate session so it streams CI status while you work. Do not stop waiting. Copilot and Bugbot may take 1–3 minutes after CI completes.
+4. **Read all feedback** via MCP: `mcp__plugin_github_github__pull_request_read` with `get_reviews` and `get_review_comments`.
 5. **Take every comment seriously.** Do not dismiss feedback as "unrelated to the change" or "pre-existing." If you disagree, explain why in a reply.
 6. **Fix and re-push** — commit fixes, push, re-run quality gates.
 7. **Repeat steps 3–6** until the latest review is **uneventful** — zero new comments, all checks green.
-8. **Merge only when the last review was clean** — use `mcp__github__merge_pull_request` (not `gh pr merge`).
+8. **Merge only when the last review was clean** — use `mcp__plugin_github_github__merge_pull_request` (not `gh pr merge`).
 
 ### Pre-PR Checklist
 
