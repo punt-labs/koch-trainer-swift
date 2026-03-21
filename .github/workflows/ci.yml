@@ -12,6 +12,9 @@ on:
     # Run nightly at 6 AM UTC (10 PM PST / 1 AM EST)
     - cron: '0 6 * * *'
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
