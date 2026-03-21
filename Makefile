@@ -10,36 +10,10 @@ DESTINATION = platform=iOS Simulator,name=$(SIM_NAME)
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
 
-.PHONY: help generate build test ui-test clean run lint format coverage version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
+.PHONY: help generate build test check ui-test clean run lint format coverage all version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
-help:
-	@echo "Available commands:"
-	@echo ""
-	@echo "  Development:"
-	@echo "    make generate    - Regenerate Xcode project from project.yml"
-	@echo "    make format      - Run SwiftFormat to auto-format code"
-	@echo "    make lint        - Run SwiftLint on source files"
-	@echo "    make build       - Build the app (runs format + lint first)"
-	@echo "    make test        - Run unit tests"
-	@echo "    make ui-test     - Run UI tests"
-	@echo "    make coverage    - Run tests with code coverage report"
-	@echo "    make clean       - Clean build artifacts"
-	@echo "    make run         - Build and run in simulator"
-	@echo "    make all         - Generate, format, lint, build, and test"
-	@echo ""
-	@echo "  Versioning:"
-	@echo "    make version     - Show current version and build number"
-	@echo "    make bump-patch  - Bump patch version (0.7.0 -> 0.7.1)"
-	@echo "    make bump-minor  - Bump minor version (0.7.0 -> 0.8.0)"
-	@echo "    make bump-major  - Bump major version (0.7.0 -> 1.0.0)"
-	@echo "    make release     - Create a release (bump, tag, push, GitHub release)"
-	@echo "    make archive     - Build release archive with computed build number"
-	@echo ""
-	@echo "  Worktrees:"
-	@echo "    make worktree-create BRANCH=feature/foo       - Create worktree for branch"
-	@echo "    make worktree-create BRANCH=feature/foo NEW=1 - Create worktree with new branch"
-	@echo "    make worktree-remove BRANCH=feature/foo       - Remove worktree"
-	@echo "    make worktree-list                            - List active worktrees"
+help: ## Show available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 # Ensure branch-specific simulator exists (clones base if needed)
 ensure-sim:
@@ -49,11 +23,11 @@ ensure-sim:
 		(echo "Failed to clone simulator. Ensure '$(SIM_BASE)' exists." && exit 1); \
 	fi
 
-generate:
+generate: ## Regenerate Xcode project from project.yml
 	@echo "Generating Xcode project..."
 	xcodegen generate
 
-format:
+format: ## Auto-format code with SwiftFormat
 	@echo "Running SwiftFormat..."
 	@if command -v swiftformat >/dev/null 2>&1; then \
 		swiftformat . --quiet; \
@@ -63,7 +37,7 @@ format:
 		exit 1; \
 	fi
 
-lint:
+lint: ## Lint with SwiftLint (no mutations)
 	@echo "Running SwiftLint..."
 	@if command -v swiftlint >/dev/null 2>&1; then \
 		swiftlint lint --quiet || (echo "SwiftLint found violations. Fix them before continuing." && exit 1); \
@@ -73,7 +47,7 @@ lint:
 		exit 1; \
 	fi
 
-build: generate format lint ensure-sim
+build: generate format lint ensure-sim ## Build the app (format + lint + compile)
 	@echo "Building $(SCHEME) on $(SIM_NAME)..."
 	xcodebuild build \
 		-scheme $(SCHEME) \
@@ -81,7 +55,7 @@ build: generate format lint ensure-sim
 		-derivedDataPath $(DERIVED_DATA) \
 		-quiet
 
-test: generate ensure-sim
+test: generate ensure-sim ## Run unit tests
 	@echo "Running unit tests on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
@@ -90,7 +64,7 @@ test: generate ensure-sim
 		-only-testing:KochTrainerTests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
-ui-test: generate ensure-sim
+ui-test: generate ensure-sim ## Run UI tests (slow, nightly in CI)
 	@echo "Running UI tests on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
@@ -99,13 +73,13 @@ ui-test: generate ensure-sim
 		-only-testing:KochTrainerUITests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
-clean:
+clean: ## Remove build artifacts
 	@echo "Cleaning..."
 	xcodebuild clean -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA) -quiet 2>/dev/null || true
 	rm -rf $(DERIVED_DATA)
 	@echo "Clean complete."
 
-run: build
+run: build ## Build and run in simulator
 	@SIM_UDID=$$(xcrun simctl list devices | grep "$(SIM_NAME)" | head -1 | sed 's/.*(\([A-F0-9-]*\)).*/\1/'); \
 	echo "Launching simulator $(SIM_NAME) ($$SIM_UDID)..."; \
 	xcrun simctl boot "$$SIM_UDID" 2>/dev/null || true; \
@@ -115,7 +89,7 @@ run: build
 	echo "Launching app..."; \
 	xcrun simctl launch "$$SIM_UDID" com.puntlabs.kochtrainer
 
-coverage: generate ensure-sim
+coverage: generate ensure-sim ## Run tests with code coverage report
 	@echo "Running unit tests with coverage on $(SIM_NAME)..."
 	@xcodebuild test \
 		-scheme $(SCHEME) \
@@ -133,7 +107,9 @@ coverage: generate ensure-sim
 		cov=targets[0].get('lineCoverage',0)*100 if targets else 0; \
 		print(f'Line Coverage: {cov:.1f}%')" 2>/dev/null || echo "Could not parse coverage report."
 
-all: generate format lint build test
+check: build test ## Run all quality gates (format + lint + build + test)
+
+all: generate format lint build test ## Full pipeline including project generation
 	@echo "All steps complete."
 
 # =============================================================================
@@ -144,36 +120,35 @@ all: generate format lint build test
 VERSION := $(shell grep 'MARKETING_VERSION:' project.yml | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
 BUILD := $(shell grep 'CURRENT_PROJECT_VERSION:' project.yml | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
 
-version:
+version: ## Show current version and build number
 	@echo "Version: $(VERSION) (build $(BUILD))"
 	@echo "Git commits: $$(git rev-list --count HEAD)"
 
-bump-patch:
+bump-patch: ## Bump patch version (1.0.2 -> 1.0.3)
 	@echo "Bumping patch version..."
 	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2"."$$3+1}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
-bump-minor:
+bump-minor: ## Bump minor version (1.0.2 -> 1.1.0)
 	@echo "Bumping minor version..."
 	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2+1".0"}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
-bump-major:
+bump-major: ## Bump major version (1.0.2 -> 2.0.0)
 	@echo "Bumping major version..."
 	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1+1".0.0"}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
-# Increment build number (for TestFlight - must always increase)
-bump-build:
+bump-build: ## Increment build number (for TestFlight)
 	@echo "Bumping build number..."
 	@NEW_BUILD=$$(($(BUILD) + 1)); \
 	sed -i '' "s/CURRENT_PROJECT_VERSION: \"$(BUILD)\"/CURRENT_PROJECT_VERSION: \"$$NEW_BUILD\"/" project.yml; \
 	echo "Build: $(BUILD) -> $$NEW_BUILD"
 
-release:
+release: ## Create a release (bump, tag, push, GitHub release)
 	@echo "=== Release Workflow ==="
 	@# Validate clean state
 	@if [ -n "$$(git status --porcelain)" ]; then \
@@ -236,7 +211,7 @@ release:
 		echo "  git push origin main && git push origin v$$NEW_VERSION"; \
 	fi
 
-archive: generate
+archive: generate ## Build release archive with computed build number
 	@echo "Building release archive..."
 	@# Compute build number: base + git commits (ensures always increasing)
 	@COMPUTED_BUILD=$$(($(BUILD) + $$(git rev-list --count HEAD))); \
@@ -259,7 +234,7 @@ WORKTREE_DIR ?= $(HOME)/Coding/koch-trainer-worktrees
 # Create a worktree for a branch
 # Usage: make worktree-create BRANCH=feature/foo
 #        make worktree-create BRANCH=feature/new-thing NEW=1  (creates new branch)
-worktree-create:
+worktree-create: ## Create worktree (BRANCH=feature/foo [NEW=1])
 ifndef BRANCH
 	@echo "Error: BRANCH is required"
 	@echo "Usage: make worktree-create BRANCH=feature/foo"
@@ -296,7 +271,7 @@ endif
 
 # Remove a worktree
 # Usage: make worktree-remove BRANCH=feature/foo
-worktree-remove:
+worktree-remove: ## Remove worktree (BRANCH=feature/foo)
 ifndef BRANCH
 	@echo "Error: BRANCH is required"
 	@echo "Usage: make worktree-remove BRANCH=feature/foo"
@@ -313,6 +288,6 @@ endif
 	echo "Worktree removed."
 
 # List all worktrees
-worktree-list:
+worktree-list: ## List active worktrees
 	@echo "Active worktrees:"
 	@git worktree list
