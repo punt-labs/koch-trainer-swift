@@ -18,7 +18,6 @@
       "../koch-trainer-worktrees"
     ],
     "allow": [
-      "Bash(bash:*)",
       "Bash(bd:*)",
       "Bash(cat:*)",
       "Bash(chmod +x:*)",
