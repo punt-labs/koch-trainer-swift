@@ -34,7 +34,7 @@ The correct process is:
 The workflow includes:
 - Working a beads issue (bd ready, bd show, bd update)
 - Creating commits with proper messages
-- Creating PRs with gh pr create
+- Creating PRs via MCP GitHub tools
 - Session close protocol (git status, bd sync, git push)
 
 Direct edits to main are not allowed. Use worktrees for all feature work.
