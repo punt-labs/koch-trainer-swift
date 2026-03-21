@@ -12,7 +12,7 @@ iOS app implementing the Koch method for learning Morse code. Single-user, suppo
 
 ## GitHub Operations
 
-Use the GitHub MCP tools (`mcp__plugin_github_github__*`) for all GitHub operations: creating PRs, merging PRs, reading issues, searching, requesting reviews, etc. Do **not** use the `gh` CLI. MCP tools give structured output, avoid shell parsing, and work reliably across worktrees.
+Use the GitHub MCP tools (`mcp__plugin_github_github__*`) for all GitHub operations: creating PRs, merging PRs, reading issues, searching, requesting reviews, etc. Do **not** use the `gh` CLI except for `gh pr checks --watch` (streaming CI status has no MCP equivalent). MCP tools give structured output, avoid shell parsing, and work reliably across worktrees.
 
 ## Build & Run
 
