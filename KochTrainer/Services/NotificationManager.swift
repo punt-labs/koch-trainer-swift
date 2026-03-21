@@ -9,10 +9,10 @@ protocol NotificationSettingsProtocol: Sendable {
     var authorizationStatus: UNAuthorizationStatus { get }
 }
 
-// MARK: - UNNotificationSettings + NotificationSettingsProtocol
+// MARK: - UNNotificationSettings + @retroactive @unchecked Sendable, NotificationSettingsProtocol
 
 /// Make UNNotificationSettings conform to our protocol.
-extension UNNotificationSettings: NotificationSettingsProtocol {}
+extension UNNotificationSettings: @retroactive @unchecked Sendable, NotificationSettingsProtocol {}
 
 // MARK: - NotificationCenterProtocol
 
@@ -24,10 +24,10 @@ protocol NotificationCenterProtocol: Sendable {
     func removeAllPendingNotificationRequests()
 }
 
-// MARK: - UNUserNotificationCenter + NotificationCenterProtocol
+// MARK: - UNUserNotificationCenter + @retroactive @unchecked Sendable, NotificationCenterProtocol
 
 /// Default implementation using the real UNUserNotificationCenter.
-extension UNUserNotificationCenter: NotificationCenterProtocol {
+extension UNUserNotificationCenter: @retroactive @unchecked Sendable, NotificationCenterProtocol {
     func notificationSettings() async -> NotificationSettingsProtocol {
         await withCheckedContinuation { continuation in
             self.getNotificationSettings { settings in
