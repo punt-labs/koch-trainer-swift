@@ -29,11 +29,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Get XcodeGen version
-        id: xcodegen-version
+      - name: Get tool versions
+        id: tool-versions
         run: |
-          version=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "xcodegen=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')" >> "$GITHUB_OUTPUT"
+          echo "xcode=$(xcodebuild -version | head -1 | awk '{print $2}')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Homebrew packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -41,7 +41,7 @@ jobs:
           path: |
             ~/Library/Caches/Homebrew/downloads
             /opt/homebrew/Cellar/xcodegen
-          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.xcodegen-version.outputs.version }}
+          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.tool-versions.outputs.xcodegen }}
           restore-keys: |
             brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-
 
@@ -55,9 +55,9 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .deriveddata
-          key: deriveddata-${{ runner.os }}-${{ hashFiles('**/*.swift', 'project.yml') }}
+          key: deriveddata-${{ runner.os }}-xcode-${{ steps.tool-versions.outputs.xcode }}-${{ hashFiles('**/*.swift', 'project.yml') }}
           restore-keys: |
-            deriveddata-${{ runner.os }}-
+            deriveddata-${{ runner.os }}-xcode-${{ steps.tool-versions.outputs.xcode }}-
 
       - name: List Available Simulators
         run: xcrun simctl list devices available | grep iPhone | head -10
@@ -66,7 +66,7 @@ jobs:
         run: |
           xcodebuild build \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,arch=arm64' \
             -derivedDataPath .deriveddata \
             -quiet
 
@@ -74,7 +74,7 @@ jobs:
         run: |
           xcodebuild test \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,arch=arm64' \
             -derivedDataPath .deriveddata \
             -only-testing:KochTrainerTests \
             -resultBundlePath TestResults.xcresult \
@@ -98,11 +98,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Get XcodeGen version
-        id: xcodegen-version
+      - name: Get tool versions
+        id: tool-versions
         run: |
-          version=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "xcodegen=$(brew info xcodegen --json=v2 | jq -r '.formulae[0].versions.stable')" >> "$GITHUB_OUTPUT"
+          echo "xcode=$(xcodebuild -version | head -1 | awk '{print $2}')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Homebrew packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -110,7 +110,7 @@ jobs:
           path: |
             ~/Library/Caches/Homebrew/downloads
             /opt/homebrew/Cellar/xcodegen
-          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.xcodegen-version.outputs.version }}
+          key: brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-${{ steps.tool-versions.outputs.xcodegen }}
           restore-keys: |
             brew-${{ runner.os }}-${{ runner.arch }}-xcodegen-
 
@@ -124,9 +124,9 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .deriveddata
-          key: deriveddata-${{ runner.os }}-${{ hashFiles('**/*.swift', 'project.yml') }}
+          key: deriveddata-${{ runner.os }}-xcode-${{ steps.tool-versions.outputs.xcode }}-${{ hashFiles('**/*.swift', 'project.yml') }}
           restore-keys: |
-            deriveddata-${{ runner.os }}-
+            deriveddata-${{ runner.os }}-xcode-${{ steps.tool-versions.outputs.xcode }}-
 
       - name: List Available Simulators
         run: xcrun simctl list devices available | grep iPhone | head -10
@@ -135,7 +135,7 @@ jobs:
         run: |
           xcodebuild build \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,arch=arm64' \
             -derivedDataPath .deriveddata \
             -quiet
 
@@ -143,7 +143,7 @@ jobs:
         run: |
           xcodebuild test \
             -scheme KochTrainer \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,arch=arm64' \
             -derivedDataPath .deriveddata \
             -only-testing:KochTrainerUITests \
             -resultBundlePath UITestResults.xcresult \
