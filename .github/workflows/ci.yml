@@ -1,16 +1,13 @@
 name: CI
 # Caching: Homebrew packages (versioned) + DerivedData (source-hashed)
 # Unit tests run on all PRs and main pushes
-# UI tests run nightly only (they take ~25 minutes)
+# UI tests run on main pushes only (they take ~25 minutes)
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    # Run nightly at 6 AM UTC (10 PM PST / 1 AM EST)
-    - cron: '0 6 * * *'
 
 permissions:
   contents: read
@@ -88,11 +85,11 @@ jobs:
           path: TestResults.xcresult
 
   ui-tests:
-    name: UI Tests (Nightly)
+    name: UI Tests
     runs-on: macos-15
-    timeout-minutes: 30
-    # Only run on scheduled (nightly) builds
-    if: github.event_name == 'schedule'
+    timeout-minutes: 45
+    # Only run on pushes to main (not on PRs — too slow for PR feedback)
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout
