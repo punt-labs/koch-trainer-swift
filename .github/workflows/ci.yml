@@ -1,7 +1,7 @@
 name: CI
 # Caching: Homebrew packages (versioned) + DerivedData (source-hashed)
 # Unit tests run on all PRs and main pushes
-# UI tests run on main pushes only (they take ~25 minutes)
+# UI tests run on main pushes only (typically 35–40 min on GitHub runners; 45 min timeout)
 
 on:
   push:
