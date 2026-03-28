@@ -125,3 +125,4 @@ docs/*.*pk
 
 # Scratch/temp directory (TMPDIR set via .envrc)
 .tmp/
+.envrc.local
