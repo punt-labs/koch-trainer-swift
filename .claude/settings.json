@@ -18,13 +18,17 @@
       "../koch-trainer-worktrees"
     ],
     "allow": [
+      "Bash(bash:*)",
       "Bash(bd:*)",
       "Bash(cat:*)",
       "Bash(chmod +x:*)",
       "Bash(claude mcp:*)",
       "Bash(claude plugin:*)",
       "Bash(export:*)",
+      "Bash(find:*)",
+      "Bash(gh:*)",
       "Bash(gh pr checks:*)",
+      "Bash(sed:*)",
       "Bash(git:*)",
       "Bash(ls:*)",
       "Bash(pip index:*)",
