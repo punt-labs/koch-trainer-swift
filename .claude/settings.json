@@ -27,7 +27,6 @@
       "Bash(export:*)",
       "Bash(find:*)",
       "Bash(gh:*)",
-      "Bash(gh pr checks:*)",
       "Bash(sed:*)",
       "Bash(git:*)",
       "Bash(ls:*)",
