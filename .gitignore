@@ -98,10 +98,8 @@ Thumbs.db
 .env
 *.xcconfig.local
 
-# Claude Code local settings
-.claude/
-!.claude/hooks/
-!.claude/settings.json
+# Claude Code local settings (settings.json is tracked; only local overrides are excluded)
+.claude/settings.local.json
 
 # Local TODO/planning files
 .TODO.md
