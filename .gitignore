@@ -13,6 +13,7 @@ xcuserdata/
 ## Xcode build files
 build/
 DerivedData/
+.deriveddata/
 
 ## Obj-C/Swift specific
 *.hmap
@@ -122,4 +123,15 @@ docs/*.*pk
 
 # Scratch/temp directory (TMPDIR set via .envrc)
 .tmp/
-.envrc.local
+
+# Local-only files (machine-specific, per-user)
+*.local
+*.local.*
+
+# Entire-tool local state
+.entire/
+
+# LaTeX build artifacts (root-level prfaq sources)
+prfaq.aux
+prfaq.log
+prfaq.out
