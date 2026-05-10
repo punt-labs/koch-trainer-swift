@@ -13,6 +13,7 @@ xcuserdata/
 ## Xcode build files
 build/
 DerivedData/
+.deriveddata/
 
 ## Obj-C/Swift specific
 *.hmap
@@ -96,10 +97,6 @@ Thumbs.db
 
 # Environment
 .env
-*.xcconfig.local
-
-# Claude Code local settings (settings.json is tracked; only local overrides are excluded)
-.claude/settings.local.json
 
 # Local TODO/planning files
 .TODO.md
@@ -122,4 +119,15 @@ docs/*.*pk
 
 # Scratch/temp directory (TMPDIR set via .envrc)
 .tmp/
-.envrc.local
+
+# Local-only files (machine-specific, per-user)
+*.local
+*.local.*
+
+# Entire-tool local state
+.entire/
+
+# LaTeX build artifacts (root-level prfaq sources)
+prfaq.aux
+prfaq.log
+prfaq.out
