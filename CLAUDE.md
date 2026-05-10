@@ -356,6 +356,33 @@ let day = try XCTUnwrap(components.day)
 components.day = day + 1
 ```
 
+## Ethos & Delegation
+
+Identity: `agent: claude` per `.punt-labs/ethos.yaml`. Sub-agent calls (`Agent(subagent_type=…)`) match ethos identity handles; SessionStart and PreCompact hooks inject the persona block.
+
+The Swift specialists are the working core for this repo. Within each row, the worker and evaluator must be distinct handles. Claude is the leader, never the evaluator.
+
+| Task type | Worker | Evaluator |
+|-----------|--------|-----------|
+| Swift / SwiftUI implementation | `csl` (Lattner) | `srn` (Naroff) — Cocoa elder, runtime semantics |
+| Cocoa / Foundation / NS-* bridging | `srn` | `csl` |
+| Async / concurrency / `@MainActor` correctness | `csl` | `srn` |
+| Memory model — value vs reference, copy-on-write | `srn` | `csl` |
+| XcodeGen `project.yml` / build settings | `csl` | `adb` (Lovelace) — release/CI |
+| SwiftFormat / SwiftLint config | `csl` | `srn` |
+| Audio engine / `ToneGenerator` / queue safety | `csl` | `bwk` (Kernighan) — cross-language concurrency review |
+| Notification scheduling / anti-nag | `csl` | `dna` (Norman) — UX, cognitive overload |
+| Spaced repetition / streak algorithms | `csl` | `bwk` for algorithm review, `dna` for the user model |
+| Z-spec for state (levels, intervals, streaks) | `jms` (Spivey) | `jra` (Abrial) |
+| Z-spec ↔ Swift code refinement | `jms` | `csl` |
+| App Store release / TestFlight | `adb` | `kth` (Hightower) — operability of release pipeline |
+| Coverage / test-pyramid changes | `csl` | `srn` |
+| Onboarding flow / accessibility / signifiers | `claude` (leader) | `dna` (Norman) — affordances, mental models |
+
+The full org roster is available via `ethos identity list`. `csl`/`srn` are the only Swift specialists in the org — engage `bwk`/`rsc` (Go) only for cross-language correctness review when the question is genuinely about concurrency or data-structure semantics rather than Swift idiom.
+
+Use the `standard` pipeline for features (design → implement → test → review → document). Use the `formal` pipeline when the change affects state types covered by `docs/koch_trainer.tex`. Use `coe` when investigating a recurring failure (audio dropouts, streak regressions, notification storms).
+
 ## Issue Tracking with Beads
 
 This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendly issue tracker that lives in the `.beads/` directory. If an issue discovered here affects multiple repos or requires a standards change, escalate to a [punt-kit bead](https://github.com/punt-labs/punt-kit) instead (see [bead placement scheme](../CLAUDE.md#where-to-create-a-bead)).
