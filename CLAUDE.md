@@ -360,7 +360,7 @@ components.day = day + 1
 
 Identity: `agent: claude` per `.punt-labs/ethos.yaml`. Sub-agent calls (`Agent(subagent_type=…)`) match ethos identity handles; SessionStart and PreCompact hooks inject the persona block.
 
-The Swift specialists are the working core for this repo. Worker and evaluator must be distinct handles with no shared role. Claude is the leader, never the evaluator.
+The Swift specialists are the working core for this repo. Within each row, the worker and evaluator must be distinct handles. Claude is the leader, never the evaluator.
 
 | Task type | Worker | Evaluator |
 |-----------|--------|-----------|
