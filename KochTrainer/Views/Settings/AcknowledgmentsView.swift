@@ -25,7 +25,7 @@ struct AcknowledgmentsView: View {
                 AcknowledgmentSection(
                     title: "Inspirations",
                     description: """
-                    Koch Trainer was inspired by several excellent Morse code training programs:
+                    Koch CW Trainer was inspired by several excellent Morse code training programs:
 
                     • G4FON Koch Trainer — The classic Windows Koch method trainer
                     • Morse Runner — Contest simulation software
@@ -43,7 +43,7 @@ struct AcknowledgmentsView: View {
                 AcknowledgmentSection(
                     title: "Open Source",
                     description: """
-                    Koch Trainer is open source software released under the MIT License. \
+                    Koch CW Trainer is open source software released under the MIT License. \
                     The source code is available on GitHub.
 
                     This app uses no external dependencies — it's built entirely with \
@@ -66,7 +66,7 @@ struct AcknowledgmentsView: View {
                 Spacer(minLength: Theme.Spacing.lg)
 
                 // Footer
-                Text("73 de Koch Trainer")
+                Text("73 de Koch CW Trainer")
                     .font(Typography.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)

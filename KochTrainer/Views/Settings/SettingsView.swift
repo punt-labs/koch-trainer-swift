@@ -8,6 +8,7 @@ struct SettingsView: View {
 
     var body: some View {
         AccessibleForm {
+
             // MARK: - Profile Section
 
             AccessibleSection("Profile") {

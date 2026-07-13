@@ -2,6 +2,7 @@ import Foundation
 
 /// Shared timing constants for training sessions.
 enum TrainingTiming {
+
     // MARK: - Feedback Delays (nanoseconds)
 
     /// Delay before playing the correct character after a wrong answer (0.4s)

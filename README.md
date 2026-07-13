@@ -1,4 +1,4 @@
-# Koch Trainer
+# Koch CW Trainer
 
 [![License](https://img.shields.io/github/license/punt-labs/koch-trainer-swift)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/punt-labs/koch-trainer-swift/ci.yml?label=CI)](https://github.com/punt-labs/koch-trainer-swift/actions/workflows/ci.yml)
@@ -104,11 +104,11 @@ The app automatically uses your device language. All UI text, notifications, and
 
 ## Why This App?
 
-The iOS App Store has several excellent Morse code apps. Here's how Koch Trainer fits in:
+The iOS App Store has several excellent Morse code apps. Here's how Koch CW Trainer fits in:
 
 | App | Price | Focus | Best For |
 |-----|-------|-------|----------|
-| **Koch Trainer** (this app) | Free | Koch method fundamentals | Beginners learning their first 26 characters |
+| **Koch CW Trainer** (this app) | Free | Koch method fundamentals | Beginners learning their first 26 characters |
 | [Morse Trainer Pro](https://morsetrainerpro.com/) | Freemium | Advanced training, hardware integration | Operators with Morserino/WinKeyer who want contest simulation |
 | [Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) | $4.99 | Comprehensive drills, news feeds | Active hams maintaining proficiency |
 | [Morse-It](https://apps.apple.com/us/app/morse-it/id284942940) | $0.99 + IAP | Swiss-army-knife flexibility | Power users who want extensive customization |
@@ -116,7 +116,7 @@ The iOS App Store has several excellent Morse code apps. Here's how Koch Trainer
 
 ### Our Position
 
-**Koch Trainer is for people who haven't yet mastered CW.** Once you've learned all 26 characters and can copy at 15+ WPM, you'll likely outgrow this app—and that's the goal. Apps like Morse Trainer Pro and Ham Morse offer advanced features (contest simulation, hardware paddles, news feeds) that make more sense once you have the fundamentals.
+**Koch CW Trainer is for people who haven't yet mastered CW.** Once you've learned all 26 characters and can copy at 15+ WPM, you'll likely outgrow this app—and that's the goal. Apps like Morse Trainer Pro and Ham Morse offer advanced features (contest simulation, hardware paddles, news feeds) that make more sense once you have the fundamentals.
 
 ### What We Do Differently
 
@@ -134,7 +134,7 @@ The iOS App Store has several excellent Morse code apps. Here's how Koch Trainer
 
 [Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) by AA9PW has been a trusted tool in the ham community for years, with thoughtful features like news feed integration and QSO simulations.
 
-We built Koch Trainer because we wanted a simple, free, native iOS app focused purely on the Koch method fundamentals—and we think there's room for that alongside these excellent tools.
+We built Koch CW Trainer because we wanted a simple, free, native iOS app focused purely on the Koch method fundamentals—and we think there's room for that alongside these excellent tools.
 
 ---
 

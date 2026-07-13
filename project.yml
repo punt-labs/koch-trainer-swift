@@ -38,7 +38,7 @@ targets:
     info:
       path: KochTrainer/Info.plist
       properties:
-        CFBundleDisplayName: Koch Trainer
+        CFBundleDisplayName: Koch CW Trainer
         CFBundleLocalizations:
           - en
           - en-GB
@@ -46,7 +46,7 @@ targets:
           - fr
           - es
           - it
-        NSUserNotificationsUsageDescription: "Koch Trainer sends practice reminders and streak alerts to help you maintain a consistent learning schedule."
+        NSUserNotificationsUsageDescription: "Koch CW Trainer sends practice reminders and streak alerts to help you maintain a consistent learning schedule."
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:

@@ -1,7 +1,7 @@
 %
 % koch_trainer.tex
 %
-% Z Specification for Koch Trainer
+% Z Specification for Koch CW Trainer
 % Formal model of a Morse code learning application using the Koch method
 %
 
@@ -15,11 +15,11 @@
 
 \begin{document}
 
-\title{Koch Trainer: A Z Specification}
+\title{Koch CW Trainer: A Z Specification}
 \author{Formal Model of Morse Code Learning Progress}
 \date{January 2026}
 \hypersetup{
-  pdftitle={Koch Trainer: A Z Specification},
+  pdftitle={Koch CW Trainer: A Z Specification},
   pdfauthor={Formal Model of Morse Code Learning Progress},
   pdfsubject={Z Specification for Morse Code Learning},
   pdfcreator={fuzz/probcli}
@@ -33,7 +33,7 @@
 \section{Introduction}
 %==============================================================================
 
-Koch Trainer teaches Morse code using the \emph{Koch method}---a proven technique
+Koch CW Trainer teaches Morse code using the \emph{Koch method}---a proven technique
 developed by German psychologist Ludwig Koch in the 1930s. Rather than learning
 Morse at slow speeds and gradually increasing, students learn characters at full
 speed (20 words per minute) from the start, adding one new character at a time
@@ -416,7 +416,7 @@ has a default value but is operationally irrelevant since $phase = idle$ blocks
 all completion-dependent operations.
 
 %==============================================================================
-\section{Koch Trainer State}
+\section{Koch CW Trainer State}
 %==============================================================================
 
 The complete machine state combines persistent student progress with training
@@ -1249,7 +1249,7 @@ unbounded given sets (SESSIONID, TIMESTAMP) can be constrained using probcli's
 %==============================================================================
 
 This section documents the observed effects of maintaining a Z specification
-alongside the Swift implementation of Koch Trainer. The assessment is based on
+alongside the Swift implementation of Koch CW Trainer. The assessment is based on
 a systematic audit comparing specification constraints against test coverage.
 
 %------------------------------------------------------------------------------

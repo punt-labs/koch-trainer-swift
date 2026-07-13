@@ -15,7 +15,7 @@ import Foundation
 /// - Receive training → always receiving
 /// - Send training → receiving (waiting) or transmitting (keying)
 /// - transmitting requires direction = send
-enum RadioMode: Equatable, Sendable {
+enum RadioMode: Equatable {
     /// Radio not active (session not started, paused, or completed)
     case off
 

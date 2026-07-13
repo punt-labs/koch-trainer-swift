@@ -1,4 +1,4 @@
-# Koch Trainer - CLI Build Commands
+# Koch CW Trainer - CLI Build Commands
 # Usage: make <target>
 
 SCHEME = KochTrainer
@@ -40,7 +40,7 @@ format: ## Auto-format code with SwiftFormat
 lint: ## Lint with SwiftLint (no mutations)
 	@echo "Running SwiftLint..."
 	@if command -v swiftlint >/dev/null 2>&1; then \
-		swiftlint lint --quiet || (echo "SwiftLint found violations. Fix them before continuing." && exit 1); \
+		swiftlint lint --quiet || { echo "SwiftLint found violations. Fix them before continuing."; exit 1; }; \
 		echo "SwiftLint: No violations found."; \
 	else \
 		echo "SwiftLint not installed. Install with: brew install swiftlint"; \
