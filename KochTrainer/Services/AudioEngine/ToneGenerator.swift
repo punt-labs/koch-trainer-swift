@@ -342,18 +342,7 @@ final class ToneGenerator: @unchecked Sendable {
 
         guard let sourceNode else { return }
 
-        audioEngine.attach(sourceNode)
-        audioEngine.connect(sourceNode, to: audioEngine.mainMixerNode, format: format)
-
-        do {
-            try audioEngine.start()
-            if Self.isSilenced {
-                audioEngine.mainMixerNode.outputVolume = 0
-            }
-            isPlaying = true
-        } catch {
-            logger.error("Failed to start audio engine: \(error)")
-        }
+        attachAndStartEngine(sourceNode, format: format, context: "audio engine")
     }
 
     // MARK: - Continuous Audio (Private)
@@ -433,8 +422,13 @@ final class ToneGenerator: @unchecked Sendable {
 
         guard let sourceNode else { return }
 
-        audioEngine.attach(sourceNode)
-        audioEngine.connect(sourceNode, to: audioEngine.mainMixerNode, format: format)
+        attachAndStartEngine(sourceNode, format: format, context: "continuous audio engine")
+    }
+
+    /// Attach the source node, connect it to the mixer, and start the engine.
+    private func attachAndStartEngine(_ node: AVAudioSourceNode, format: AVAudioFormat, context: String) {
+        audioEngine.attach(node)
+        audioEngine.connect(node, to: audioEngine.mainMixerNode, format: format)
 
         do {
             try audioEngine.start()
@@ -443,7 +437,7 @@ final class ToneGenerator: @unchecked Sendable {
             }
             isPlaying = true
         } catch {
-            logger.error("Failed to start continuous audio engine: \(error)")
+            logger.error("Failed to start \(context): \(error)")
         }
     }
 

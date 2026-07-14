@@ -139,7 +139,9 @@ final class SessionHistoryPage: BasePage {
     private func scrollToElement(_ element: XCUIElement) {
         if !element.exists {
             for _ in 0 ..< 3 {
-                if element.exists { break }
+                if element.exists {
+                    break
+                }
                 app.swipeUp()
             }
         }

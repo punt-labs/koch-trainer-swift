@@ -102,9 +102,15 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Whether introduction phase has been completed
     var isIntroCompleted: Bool {
-        if case .training = phase { return true }
-        if case .paused = phase { return true }
-        if case .completed = phase { return true }
+        if case .training = phase {
+            return true
+        }
+        if case .paused = phase {
+            return true
+        }
+        if case .completed = phase {
+            return true
+        }
         return false
     }
 
@@ -419,7 +425,9 @@ extension EarTrainingViewModel {
             earTrainingCorrect: 0
         )
         stat.earTrainingAttempts += 1
-        if wasCorrect { stat.earTrainingCorrect += 1 }
+        if wasCorrect {
+            stat.earTrainingCorrect += 1
+        }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
@@ -459,7 +467,9 @@ extension EarTrainingViewModel {
             }
 
             checkForProficiency()
-            if isPlaying { playNextCharacter() }
+            if isPlaying {
+                playNextCharacter()
+            }
         }
     }
 

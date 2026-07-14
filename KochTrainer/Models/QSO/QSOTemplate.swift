@@ -268,12 +268,16 @@ enum ValidationResult: Equatable {
     // MARK: Internal
 
     var isValid: Bool {
-        if case .valid = self { return true }
+        if case .valid = self {
+            return true
+        }
         return false
     }
 
     var hint: String? {
-        if case let .invalid(hint) = self { return hint }
+        if case let .invalid(hint) = self {
+            return hint
+        }
         return nil
     }
 }

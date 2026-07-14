@@ -377,14 +377,18 @@ extension VocabularyTrainingViewModel {
         lastFeedback = nil
 
         recentWords.append(nextWord)
-        if recentWords.count > 3 { recentWords.removeFirst() }
+        if recentWords.count > 3 {
+            recentWords.removeFirst()
+        }
 
         if isReceiveMode {
             Task {
                 guard let engine = audioEngine as? MorseAudioEngine else { return }
                 engine.reset()
                 await engine.playGroup(currentWord)
-                if isPlaying { startResponseTimer() }
+                if isPlaying {
+                    startResponseTimer()
+                }
             }
         } else {
             isWaitingForResponse = true
@@ -417,10 +421,14 @@ extension VocabularyTrainingViewModel {
         var stat = wordStats[expected] ?? WordStat()
         if isReceiveMode {
             stat.receiveAttempts += 1
-            if wasCorrect { stat.receiveCorrect += 1 }
+            if wasCorrect {
+                stat.receiveCorrect += 1
+            }
         } else {
             stat.sendAttempts += 1
-            if wasCorrect { stat.sendCorrect += 1 }
+            if wasCorrect {
+                stat.sendCorrect += 1
+            }
         }
         stat.lastPracticed = Date()
         wordStats[expected] = stat
@@ -439,7 +447,9 @@ extension VocabularyTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playGroup(expected) }
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
+                    await engine.playGroup(expected)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

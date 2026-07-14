@@ -100,9 +100,15 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Whether introduction phase has been completed
     var isIntroCompleted: Bool {
-        if case .training = phase { return true }
-        if case .paused = phase { return true }
-        if case .completed = phase { return true }
+        if case .training = phase {
+            return true
+        }
+        if case .paused = phase {
+            return true
+        }
+        if case .completed = phase {
+            return true
+        }
         return false
     }
 
@@ -455,7 +461,9 @@ extension SendTrainingViewModel {
 
         var stat = characterStats[expected] ?? CharacterStat()
         stat.sendAttempts += 1
-        if wasCorrect { stat.sendCorrect += 1 }
+        if wasCorrect {
+            stat.sendCorrect += 1
+        }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
@@ -480,14 +488,18 @@ extension SendTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if isPlaying { await audioEngine.playCharacter(expected) }
+                if isPlaying {
+                    await audioEngine.playCharacter(expected)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
             checkForProficiency()
-            if isPlaying { showNextCharacter() }
+            if isPlaying {
+                showNextCharacter()
+            }
         }
     }
 
@@ -510,7 +522,9 @@ extension SendTrainingViewModel {
             availableCharacters: customCharacters
         )
 
-        if let char = group.first { targetCharacter = char }
+        if let char = group.first {
+            targetCharacter = char
+        }
         currentPattern = ""
         lastFeedback = nil
         isWaitingForInput = true

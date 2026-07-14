@@ -28,8 +28,12 @@ struct SendTrainingView: View {
     }
 
     var isTrainingActive: Bool {
-        if case .training = viewModel.phase { return true }
-        if case .paused = viewModel.phase { return true }
+        if case .training = viewModel.phase {
+            return true
+        }
+        if case .paused = viewModel.phase {
+            return true
+        }
         return false
     }
 
