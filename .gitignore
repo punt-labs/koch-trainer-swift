@@ -131,3 +131,6 @@ docs/*.*pk
 prfaq.aux
 prfaq.log
 prfaq.out
+
+# LanceDB vector store (quarry index cruft)
+lancedb/
