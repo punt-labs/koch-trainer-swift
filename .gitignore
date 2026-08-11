@@ -145,3 +145,6 @@ lancedb/
 # differ on the suffix — .CLAUDE.md.lock and .CLAUDE.md.punt-import.lock
 # both appear.
 .*.lock
+
+# Claude Code local settings (per-machine, may contain paths/tokens)
+.claude/settings.local.json
