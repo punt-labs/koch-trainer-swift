@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `actions/checkout` was labelled `# v4` on v7.0.1's SHA. The SHA is the
   security control, but the comment is the only part a human reads, so a
   wrong one hides a stale pin from every review. No SHA changed
+- `markdownlint-cli2-action` is repinned from an unreleased commit on the
+  action's default branch — ahead of every release tag including v24.2.0 —
+  to the v24.2.0 release commit, and its `# v22` comment corrected. The
+  workflow was already running code past v24.2.0 while the comment claimed
+  v22; the pin now names an immutable released artifact rather than a
+  moving branch head.
 
 ### Added
 
