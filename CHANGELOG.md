@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- The `.entire/` gitignore entry left over from the retired Entire CLI.
+
 ### Fixed
 
 - Action pin comments now state the version actually pinned:

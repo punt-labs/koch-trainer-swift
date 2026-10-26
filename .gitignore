@@ -124,9 +124,6 @@ docs/*.*pk
 *.local
 *.local.*
 
-# Entire-tool local state
-.entire/
-
 # LaTeX build artifacts (root-level prfaq sources)
 prfaq.aux
 prfaq.log
