@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- ethos config resolves layered again so the engineering team, seeded pipelines and the claude leader identity resolve alongside the vendored gstack team
+- Claude leads ethos sessions again, and the Swift, build and formal-methods specialists named in CLAUDE.md resolve alongside the vendored gstack team.
 - Action pin comments now state the version actually pinned:
   `actions/checkout` was labelled `# v4` on v7.0.1's SHA. The SHA is the
   security control, but the comment is the only part a human reads, so a
