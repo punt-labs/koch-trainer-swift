@@ -148,3 +148,8 @@ lancedb/
 
 # Claude Code local settings (per-machine, may contain paths/tokens)
 .claude/settings.local.json
+
+# ethos runtime (never track) — DES-058 live zone + mission locks
+.punt-labs/**/local/**
+.punt-labs/ethos/missions/**/*.lock
+.punt-labs/**/*.ethos-tmp*
