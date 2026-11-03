@@ -153,3 +153,6 @@ lancedb/
 .punt-labs/**/local/**
 .punt-labs/ethos/missions/**/*.lock
 .punt-labs/**/*.ethos-tmp*
+
+# Git worktrees created by agents
+.claude/worktrees/
