@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Agent files for handles not on the repo's ethos team were removed. The
+  repo now has its own `koch-trainer` team: the gstack roles plus `claude` and
+  the specialists CLAUDE.md delegates to (`adb`, `bwk`, `csl`, `dna`, `jms`,
+  `jra`, `kth`, `rsc`, `srn`), whose agent files stay.
 - Vendor the gstack ethos team under `.punt-labs/ethos/` and set
   `resolution: repo-only`, so a fresh clone resolves its ethos identities
   without the retired team-registry submodule or a global store.
