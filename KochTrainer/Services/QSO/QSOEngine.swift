@@ -27,10 +27,14 @@ final class QSOEngine: ObservableObject {
 
     // MARK: - Published State
 
-    @Published private(set) var state: QSOState
-    @Published private(set) var station: VirtualStation
-    @Published private(set) var isPlayingAudio: Bool = false
-    @Published private(set) var lastValidationResult: ValidationResult = .valid
+    @Published
+    private(set) var state: QSOState
+    @Published
+    private(set) var station: VirtualStation
+    @Published
+    private(set) var isPlayingAudio: Bool = false
+    @Published
+    private(set) var lastValidationResult: ValidationResult = .valid
 
     /// Configure audio settings
     func configureAudio(frequency: Double, effectiveSpeed: Int, settings: AppSettings) {

@@ -31,21 +31,33 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         let decodedCharacter: Character?
     }
 
-    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
-    @Published var isPlaying: Bool = false
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published
+    var phase: SessionPhase = .introduction(characterIndex: 0)
+    @Published
+    var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var characterStats: [Character: CharacterStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
-    @Published var introCharacters: [Character] = []
-    @Published var currentIntroCharacter: Character?
-    @Published var targetCharacter: Character = "K"
-    @Published var currentPattern: String = ""
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForInput: Bool = true
-    @Published var timerDeadline: Date = .distantPast
-    @Published var timerDuration: TimeInterval = 0
+    @Published
+    var introCharacters: [Character] = []
+    @Published
+    var currentIntroCharacter: Character?
+    @Published
+    var targetCharacter: Character = "K"
+    @Published
+    var currentPattern: String = ""
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForInput: Bool = true
+    @Published
+    var timerDeadline: Date = .distantPast
+    @Published
+    var timerDuration: TimeInterval = 0
 
     let proficiencyThreshold: Double = 0.90
 
@@ -100,9 +112,15 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Whether introduction phase has been completed
     var isIntroCompleted: Bool {
-        if case .training = phase { return true }
-        if case .paused = phase { return true }
-        if case .completed = phase { return true }
+        if case .training = phase {
+            return true
+        }
+        if case .paused = phase {
+            return true
+        }
+        if case .completed = phase {
+            return true
+        }
         return false
     }
 
@@ -455,7 +473,9 @@ extension SendTrainingViewModel {
 
         var stat = characterStats[expected] ?? CharacterStat()
         stat.sendAttempts += 1
-        if wasCorrect { stat.sendCorrect += 1 }
+        if wasCorrect {
+            stat.sendCorrect += 1
+        }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
@@ -480,14 +500,18 @@ extension SendTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if isPlaying { await audioEngine.playCharacter(expected) }
+                if isPlaying {
+                    await audioEngine.playCharacter(expected)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
             }
 
             checkForProficiency()
-            if isPlaying { showNextCharacter() }
+            if isPlaying {
+                showNextCharacter()
+            }
         }
     }
 
@@ -510,7 +534,9 @@ extension SendTrainingViewModel {
             availableCharacters: customCharacters
         )
 
-        if let char = group.first { targetCharacter = char }
+        if let char = group.first {
+            targetCharacter = char
+        }
         currentPattern = ""
         lastFeedback = nil
         isWaitingForInput = true

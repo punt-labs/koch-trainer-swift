@@ -29,10 +29,14 @@ struct SessionHistoryView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var progressStore: ProgressStore
-    @State private var showCleanupAlert = false
-    @State private var showRecalculateAlert = false
-    @State private var invalidSessionsDeleted = 0
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @State
+    private var showCleanupAlert = false
+    @State
+    private var showRecalculateAlert = false
+    @State
+    private var invalidSessionsDeleted = 0
 
     private var sessions: [SessionResult] {
         progressStore.progress.sessionHistory.sorted { $0.date > $1.date }
