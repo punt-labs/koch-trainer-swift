@@ -122,7 +122,12 @@ run: build ## Build and run in simulator
 	fi; \
 	echo "Launching simulator $(SIM_NAME) ($$SIM_UDID)..."; \
 	xcrun simctl boot "$$SIM_UDID" 2>/dev/null || true; \
-	open -a Simulator; \
+	SIM_APP="$$(xcode-select -p)/Applications/Simulator.app"; \
+	if [ -d "$$SIM_APP" ]; then \
+		open "$$SIM_APP"; \
+	elif ! open -a Simulator 2>/dev/null; then \
+		echo "Note: standalone Simulator.app not found (Xcode 26+ removed it); the device is booted — open it from Xcode > Window > Devices and Simulators if you need the GUI."; \
+	fi; \
 	echo "Installing app..."; \
 	xcrun simctl install "$$SIM_UDID" $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app; \
 	echo "Launching app..."; \
