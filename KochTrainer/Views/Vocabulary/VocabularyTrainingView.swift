@@ -142,15 +142,23 @@ struct VocabularyTrainingView: View {
 
     // MARK: Private
 
-    @StateObject private var viewModel: VocabularyTrainingViewModel
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+    @StateObject
+    private var viewModel: VocabularyTrainingViewModel
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @Environment(\.dismiss)
+    private var dismiss
+    @Environment(\.scenePhase)
+    private var scenePhase
 
-    @FocusState private var isKeyboardFocused: Bool
-    @FocusState private var isSendKeyboardFocused: Bool
-    @State private var textInput: String = ""
+    @FocusState
+    private var isKeyboardFocused: Bool
+    @FocusState
+    private var isSendKeyboardFocused: Bool
+    @State
+    private var textInput: String = ""
 
 }
 
@@ -160,8 +168,10 @@ private struct ReceiveVocabTrainingPhaseView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: VocabularyTrainingViewModel
-    @Binding var textInput: String
+    @ObservedObject
+    var viewModel: VocabularyTrainingViewModel
+    @Binding
+    var textInput: String
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -261,8 +271,10 @@ private struct ReceiveVocabTrainingPhaseView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var questionMarkSize: CGFloat = 80
-    @ScaledMetric(relativeTo: .title) private var inputSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var questionMarkSize: CGFloat = 80
+    @ScaledMetric(relativeTo: .title)
+    private var inputSize: CGFloat = 36
 
 }
 
@@ -272,7 +284,8 @@ private struct SendVocabTrainingPhaseView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: VocabularyTrainingViewModel
+    @ObservedObject
+    var viewModel: VocabularyTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -385,15 +398,18 @@ private struct SendVocabTrainingPhaseView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var wordSize: CGFloat = 48
-    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 24
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var wordSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .title)
+    private var patternSize: CGFloat = 24
 
 }
 
 // MARK: - VocabPausedView
 
 private struct VocabPausedView: View {
-    @ObservedObject var viewModel: VocabularyTrainingViewModel
+    @ObservedObject
+    var viewModel: VocabularyTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -438,7 +454,8 @@ private struct VocabPausedView: View {
 // MARK: - VocabCompletedView
 
 private struct VocabCompletedView: View {
-    @ObservedObject var viewModel: VocabularyTrainingViewModel
+    @ObservedObject
+    var viewModel: VocabularyTrainingViewModel
 
     let dismiss: DismissAction
 
@@ -530,7 +547,8 @@ private struct VocabFeedbackView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var wordSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var wordSize: CGFloat = 48
 
 }
 

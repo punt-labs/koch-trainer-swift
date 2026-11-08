@@ -70,10 +70,14 @@ struct QSOSessionView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @StateObject private var viewModel: QSOViewModel
-    @Environment(\.dismiss) private var dismiss
-    @FocusState private var isInputFocused: Bool
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @StateObject
+    private var viewModel: QSOViewModel
+    @Environment(\.dismiss)
+    private var dismiss
+    @FocusState
+    private var isInputFocused: Bool
 
     // MARK: - Status Bar
 

@@ -131,14 +131,21 @@ struct ReceiveTrainingView: View {
 
     // MARK: Private
 
-    @StateObject private var viewModel = ReceiveTrainingViewModel()
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+    @StateObject
+    private var viewModel = ReceiveTrainingViewModel()
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @Environment(\.dismiss)
+    private var dismiss
+    @Environment(\.scenePhase)
+    private var scenePhase
 
-    @FocusState private var isKeyboardFocused: Bool
-    @State private var hiddenInput: String = ""
+    @FocusState
+    private var isKeyboardFocused: Bool
+    @State
+    private var hiddenInput: String = ""
 
 }
 
@@ -148,7 +155,8 @@ struct TrainingPhaseView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: ReceiveTrainingViewModel
+    @ObservedObject
+    var viewModel: ReceiveTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
@@ -245,14 +253,16 @@ struct TrainingPhaseView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 80
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var characterSize: CGFloat = 80
 
 }
 
 // MARK: - PausedView
 
 struct PausedView: View {
-    @ObservedObject var viewModel: ReceiveTrainingViewModel
+    @ObservedObject
+    var viewModel: ReceiveTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -299,7 +309,8 @@ struct CompletedView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: ReceiveTrainingViewModel
+    @ObservedObject
+    var viewModel: ReceiveTrainingViewModel
 
     let didAdvance: Bool
     let newCharacter: Character?
@@ -394,7 +405,8 @@ struct CompletedView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var newCharacterSize: CGFloat = 80
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var newCharacterSize: CGFloat = 80
 
 }
 

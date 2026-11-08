@@ -31,21 +31,33 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
         let decodedCharacter: Character?
     }
 
-    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
-    @Published var isPlaying: Bool = false
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published
+    var phase: SessionPhase = .introduction(characterIndex: 0)
+    @Published
+    var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var characterStats: [Character: CharacterStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
-    @Published var introCharacters: [Character] = []
-    @Published var currentIntroCharacter: Character?
-    @Published var targetCharacter: Character = "K"
-    @Published var currentPattern: String = ""
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForInput: Bool = true
-    @Published var timerDeadline: Date = .distantPast
-    @Published var timerDuration: TimeInterval = 0
+    @Published
+    var introCharacters: [Character] = []
+    @Published
+    var currentIntroCharacter: Character?
+    @Published
+    var targetCharacter: Character = "K"
+    @Published
+    var currentPattern: String = ""
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForInput: Bool = true
+    @Published
+    var timerDeadline: Date = .distantPast
+    @Published
+    var timerDuration: TimeInterval = 0
 
     let proficiencyThreshold: Double = 0.90
 

@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Adopted the Punt Labs canonical `.envrc` and `.gitignore`. `.envrc` now
+  loads secrets from Proton Pass with a keyring-to-filesystem fallback and
+  sets the repo-local `TMPDIR`; `.gitignore` gains the shared canonical block
+  above a `# === Repo-specific ===` marker, with the existing Xcode, LaTeX,
+  and quarry entries preserved below it.
+- Reformatted the Swift sources so they match the project's `.swiftformat`
+  config. `make build` was silently reformatting ~36 files on every run
+  because the committed code had drifted from the formatter; the tree is now
+  format-clean and `make build` is a no-op on formatting.
+- Agent files for handles not on the repo's ethos team were removed. The
+  repo now has its own `koch-trainer` team: the gstack roles plus `claude` and
+  the specialists CLAUDE.md delegates to (`adb`, `bwk`, `csl`, `dna`, `jms`,
+  `jra`, `kth`, `rsc`, `srn`), whose agent files stay.
+- Vendor the gstack ethos team under `.punt-labs/ethos/` and set
+  `resolution: repo-only`, so a fresh clone resolves its ethos identities
+  without the retired team-registry submodule or a global store.
+
+### Fixed
+
+- `make build` and `make test` work on branches whose name contains a hyphen
+  (including `main`). The Makefile resolved the simulator by `name=`, which
+  xcodebuild could not match for a device named `iPhone 17 Pro - <branch>`,
+  so it fell back to an incompatible macOS destination and errored. It now
+  resolves the simulator's UDID and targets it by `id=`.
+- SwiftFormat and SwiftLint no longer fight each other. SwiftFormat's
+  `repeatedGuard` rule merged guard statements and pushed
+  `ToneGenerator.startContinuousAudio()` past SwiftLint's 60-line function
+  limit; the rule is disabled and the render loop's per-sample DSP is
+  extracted into a helper, so the function is within budget and SwiftLint
+  reports zero violations.
+- SwiftLint no longer scans the repo-local `.tmp/` directory, where Swift
+  macro expansions land during a build and produced hundreds of false
+  identifier- and type-name violations.
+- Claude leads ethos sessions again, and the Swift, build and formal-methods specialists named in CLAUDE.md resolve alongside the vendored gstack team.
+- Action pin comments now state the version actually pinned:
+  `actions/checkout` was labelled `# v4` on v7.0.1's SHA. The SHA is the
+  security control, but the comment is the only part a human reads, so a
+  wrong one hides a stale pin from every review. No SHA changed
+- `markdownlint-cli2-action` is repinned from an unreleased commit on the
+  action's default branch — ahead of every release tag including v24.2.0 —
+  to the v24.2.0 release commit, and its `# v22` comment corrected. The
+  workflow was already running code past v24.2.0 while the comment claimed
+  v22; the pin now names an immutable released artifact rather than a
+  moving branch head.
+
+### Added
+
+- `OPENROUTER_API_KEY` wired up in `.envrc` (canonical envrc rollout).
+
 ## [1.0.2] - 2026-02-11
 
 ### Fixed

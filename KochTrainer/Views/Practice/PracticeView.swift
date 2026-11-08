@@ -65,10 +65,14 @@ struct PracticeView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @State private var selectedCharacters: Set<Character> = []
-    @StateObject private var audioEngineWrapper = ObservableAudioEngine()
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @State
+    private var selectedCharacters: Set<Character> = []
+    @StateObject
+    private var audioEngineWrapper = ObservableAudioEngine()
 
     private func playCharacter(_ character: Character) {
         Task {

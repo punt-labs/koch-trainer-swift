@@ -121,13 +121,19 @@ struct SendTrainingView: View {
 
     // MARK: Private
 
-    @StateObject private var viewModel = SendTrainingViewModel()
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+    @StateObject
+    private var viewModel = SendTrainingViewModel()
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @Environment(\.dismiss)
+    private var dismiss
+    @Environment(\.scenePhase)
+    private var scenePhase
 
-    @FocusState private var isKeyboardFocused: Bool
+    @FocusState
+    private var isKeyboardFocused: Bool
 
 }
 
@@ -137,7 +143,8 @@ struct SendTrainingPhaseView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: SendTrainingViewModel
+    @ObservedObject
+    var viewModel: SendTrainingViewModel
 
     var body: some View {
         ScrollView {
@@ -262,15 +269,18 @@ struct SendTrainingPhaseView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 100
-    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var characterSize: CGFloat = 100
+    @ScaledMetric(relativeTo: .title)
+    private var patternSize: CGFloat = 36
 
 }
 
 // MARK: - SendPausedView
 
 struct SendPausedView: View {
-    @ObservedObject var viewModel: SendTrainingViewModel
+    @ObservedObject
+    var viewModel: SendTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -317,7 +327,8 @@ struct SendCompletedView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: SendTrainingViewModel
+    @ObservedObject
+    var viewModel: SendTrainingViewModel
 
     let didAdvance: Bool
     let newCharacter: Character?
@@ -412,7 +423,8 @@ struct SendCompletedView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var newCharacterSize: CGFloat = 80
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var newCharacterSize: CGFloat = 80
 
 }
 

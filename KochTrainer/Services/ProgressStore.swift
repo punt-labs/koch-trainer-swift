@@ -38,10 +38,14 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
 
     // MARK: Internal
 
-    @Published var progress: StudentProgress
-    @Published private(set) var pausedReceiveSession: PausedSession?
-    @Published private(set) var pausedSendSession: PausedSession?
-    @Published private(set) var pausedEarTrainingSession: PausedSession?
+    @Published
+    var progress: StudentProgress
+    @Published
+    private(set) var pausedReceiveSession: PausedSession?
+    @Published
+    private(set) var pausedSendSession: PausedSession?
+    @Published
+    private(set) var pausedEarTrainingSession: PausedSession?
 
     /// Overall accuracy as a whole percentage (0-100)
     var overallAccuracyPercentage: Int {
@@ -352,10 +356,12 @@ final class ProgressStore: ObservableObject, ProgressStoreProtocol {
         var currentInterval = progress.schedule.interval(for: sessionType)
 
         // Check if interval should reset due to missed practice
-        if let lastDate = progress.schedule.lastStreakDate {
-            if IntervalCalculator.shouldResetInterval(lastPractice: lastDate, interval: currentInterval, now: now) {
-                currentInterval = 1.0
-            }
+        if let lastDate = progress.schedule.lastStreakDate, IntervalCalculator.shouldResetInterval(
+            lastPractice: lastDate,
+            interval: currentInterval,
+            now: now
+        ) {
+            currentInterval = 1.0
         }
 
         // Calculate new interval based on session accuracy

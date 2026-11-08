@@ -42,9 +42,12 @@ struct ContentView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @EnvironmentObject private var notificationManager: NotificationManager
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @EnvironmentObject
+    private var notificationManager: NotificationManager
 
 }
 

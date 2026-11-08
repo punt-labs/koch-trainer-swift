@@ -42,25 +42,37 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published var phase: SessionPhase = .training
-    @Published var isPlaying: Bool = false
-    @Published private(set) var wordStats: [String: WordStat] = [:]
+    @Published
+    var phase: SessionPhase = .training
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var wordStats: [String: WordStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
 
-    // Training state
-    @Published var currentWord: String = ""
-    @Published var userInput: String = ""
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForResponse: Bool = false
-    @Published var responseDeadline: Date = .distantPast
-    @Published var responseDuration: TimeInterval = 0
+    /// Training state
+    @Published
+    var currentWord: String = ""
+    @Published
+    var userInput: String = ""
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForResponse: Bool = false
+    @Published
+    var responseDeadline: Date = .distantPast
+    @Published
+    var responseDuration: TimeInterval = 0
 
-    // Send mode state
-    @Published var currentPattern: String = ""
-    @Published var inputDeadline: Date = .distantPast
-    @Published var inputDuration: TimeInterval = 0
+    /// Send mode state
+    @Published
+    var currentPattern: String = ""
+    @Published
+    var inputDeadline: Date = .distantPast
+    @Published
+    var inputDuration: TimeInterval = 0
 
     // MARK: - Configuration
 

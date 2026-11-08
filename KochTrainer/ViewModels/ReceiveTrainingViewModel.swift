@@ -32,24 +32,35 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: - Published State
 
-    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
-    @Published var isPlaying: Bool = false
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published
+    var phase: SessionPhase = .introduction(characterIndex: 0)
+    @Published
+    var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var characterStats: [Character: CharacterStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
 
-    // Introduction state
-    @Published var introCharacters: [Character] = []
-    @Published var currentIntroCharacter: Character?
+    /// Introduction state
+    @Published
+    var introCharacters: [Character] = []
+    @Published
+    var currentIntroCharacter: Character?
 
-    // Training state
-    @Published var currentCharacter: Character?
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForResponse: Bool = false
-    @Published var timerDeadline: Date = .distantPast
-    @Published var timerDuration: TimeInterval = 0
+    /// Training state
+    @Published
+    var currentCharacter: Character?
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForResponse: Bool = false
+    @Published
+    var timerDeadline: Date = .distantPast
+    @Published
+    var timerDuration: TimeInterval = 0
 
     // MARK: - Configuration
 

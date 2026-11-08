@@ -34,25 +34,37 @@ final class EarTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: - Published State
 
-    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes
-    @Published var isPlaying: Bool = false
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published
+    var phase: SessionPhase = .introduction(characterIndex: 0)
+    @Published
+    var timeRemaining: TimeInterval = 300 // 5 minutes
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var characterStats: [Character: CharacterStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
 
-    // Introduction state
-    @Published var introCharacters: [Character] = []
-    @Published var currentIntroCharacter: Character?
+    /// Introduction state
+    @Published
+    var introCharacters: [Character] = []
+    @Published
+    var currentIntroCharacter: Character?
 
-    // Training state
-    @Published var targetCharacter: Character?
-    @Published var currentPattern: String = ""
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForInput: Bool = false
-    @Published var timerDeadline: Date = .distantPast
-    @Published var timerDuration: TimeInterval = 0
+    /// Training state
+    @Published
+    var targetCharacter: Character?
+    @Published
+    var currentPattern: String = ""
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForInput: Bool = false
+    @Published
+    var timerDeadline: Date = .distantPast
+    @Published
+    var timerDuration: TimeInterval = 0
 
     // MARK: - Configuration
 

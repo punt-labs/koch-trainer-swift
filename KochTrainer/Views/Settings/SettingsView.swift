@@ -355,17 +355,24 @@ struct SettingsView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var notificationManager: NotificationManager
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var notificationManager: NotificationManager
 
     /// Local copy of settings to isolate view from @EnvironmentObject observation during VoiceOver.
     /// Changes sync back to store immediately via onChange.
-    @State private var settings = AppSettings()
+    @State
+    private var settings = AppSettings()
 
-    @State private var showResetConfirmation = false
-    @State private var isPreviewingBandConditions = false
-    @StateObject private var previewAudioEngineWrapper = ObservableAudioEngine()
+    @State
+    private var showResetConfirmation = false
+    @State
+    private var isPreviewingBandConditions = false
+    @StateObject
+    private var previewAudioEngineWrapper = ObservableAudioEngine()
 
     /// Binding that converts between hour/minute Ints and Date for the DatePicker
     private var preferredTimeBinding: Binding<Date> {

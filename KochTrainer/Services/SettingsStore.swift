@@ -15,7 +15,8 @@ final class SettingsStore: ObservableObject {
 
     // MARK: Internal
 
-    @Published var settings: AppSettings {
+    @Published
+    var settings: AppSettings {
         didSet {
             save(settings)
         }
