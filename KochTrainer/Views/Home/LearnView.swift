@@ -7,7 +7,7 @@ struct LearnView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Theme.Spacing.lg) {
-                Text("Koch Trainer")
+                Text("Koch CW Trainer")
                     .font(Typography.largeTitle)
                     .accessibilityIdentifier(AccessibilityID.Learn.title)
 
@@ -163,7 +163,8 @@ struct LearnView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var progressStore: ProgressStore
 
     private var schedule: PracticeSchedule {
         progressStore.progress.schedule

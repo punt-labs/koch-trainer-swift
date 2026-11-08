@@ -34,11 +34,9 @@ enum VocabularyGroupGenerator {
             selected.append(word)
 
             // Remove selected word to avoid immediate repeats (if we have enough words)
-            if remainingWords.count > 1 {
-                if let index = remainingWords.firstIndex(of: word) {
-                    remainingWords.remove(at: index)
-                    remainingWeights.remove(at: index)
-                }
+            if remainingWords.count > 1, let index = remainingWords.firstIndex(of: word) {
+                remainingWords.remove(at: index)
+                remainingWeights.remove(at: index)
             }
         }
 

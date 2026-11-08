@@ -16,7 +16,7 @@ struct WhatsNewView: View {
                         .font(Typography.headline)
                         .accessibilityIdentifier(AccessibilityID.WhatsNew.versionLabel)
 
-                    Text("Koch Trainer for iOS")
+                    Text("Koch CW Trainer for iOS")
                         .font(Typography.body)
                         .foregroundColor(.secondary)
                 }

@@ -12,7 +12,7 @@
 "Settings" = "Einstellungen";
 
 // MARK: - LearnView (Home)
-"Koch Trainer" = "Koch Trainer";
+"Koch CW Trainer" = "Koch CW Trainer";
 "Ear Training" = "Gehörtraining";
 "Start Ear Training" = "Gehörtraining starten";
 "Characters: %@" = "Zeichen: %@";
@@ -186,7 +186,7 @@
 "nil" = "nil";
 
 // MARK: - WhatsNewView
-"Koch Trainer for iOS" = "Koch Trainer für iOS";
+"Koch CW Trainer for iOS" = "Koch CW Trainer für iOS";
 "Version %@" = "Version %@";
 "View Full Changelog" = "Vollständigen Changelog anzeigen";
 
@@ -211,7 +211,7 @@
 "MIT License" = "MIT-Lizenz";
 
 // MARK: - AcknowledgmentsView
-"73 de Koch Trainer" = "73 de Koch Trainer";
+"73 de Koch CW Trainer" = "73 de Koch CW Trainer";
 
 // MARK: - Enum Display Names (SessionType)
 "session.type.receive" = "Empfangen";

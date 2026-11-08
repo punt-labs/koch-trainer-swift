@@ -12,7 +12,7 @@
 "Settings" = "Settings";
 
 // MARK: - LearnView (Home)
-"Koch Trainer" = "Koch Trainer";
+"Koch CW Trainer" = "Koch CW Trainer";
 "Ear Training" = "Ear Training";
 // Format: Level X/Y - both are Int so %lld
 "Level %lld/%lld" = "Level %lld/%lld";
@@ -225,7 +225,7 @@
 "%lld/%lld" = "%lld/%lld";
 
 // MARK: - WhatsNewView
-"Koch Trainer for iOS" = "Koch Trainer for iOS";
+"Koch CW Trainer for iOS" = "Koch CW Trainer for iOS";
 "Version %@" = "Version %@";
 "View Full Changelog" = "View Full Changelog";
 
@@ -255,7 +255,7 @@
 "MIT License" = "MIT License";
 
 // MARK: - AcknowledgmentsView
-"73 de Koch Trainer" = "73 de Koch Trainer";
+"73 de Koch CW Trainer" = "73 de Koch CW Trainer";
 
 // MARK: - Enum Display Names (SessionType)
 "session.type.receive" = "Receive";

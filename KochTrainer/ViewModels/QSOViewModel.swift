@@ -27,9 +27,12 @@ final class QSOViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published var userInput: String = ""
-    @Published var showHint: Bool = false
-    @Published private(set) var isSessionActive: Bool = false
+    @Published
+    var userInput: String = ""
+    @Published
+    var showHint: Bool = false
+    @Published
+    private(set) var isSessionActive: Bool = false
 
     // MARK: - Engine
 

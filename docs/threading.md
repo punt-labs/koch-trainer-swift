@@ -2,7 +2,7 @@
 
 **Document Purpose:** Guide for implementing correct async/await patterns, protecting the UI thread, and ensuring fluid user experience in iOS applications.
 
-**Context:** This document analyzes the Koch Trainer codebase, identifies threading patterns used, evaluates strengths and weaknesses, and provides recommendations for implementing real-time features like an iambic keyer.
+**Context:** This document analyzes the Koch CW Trainer codebase, identifies threading patterns used, evaluates strengths and weaknesses, and provides recommendations for implementing real-time features like an iambic keyer.
 
 ---
 

@@ -1,4 +1,4 @@
-# Koch Trainer - CLI Build Commands
+# Koch CW Trainer - CLI Build Commands
 # Usage: make <target>
 
 SCHEME = KochTrainer
@@ -6,7 +6,26 @@ SCHEME = KochTrainer
 BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-')
 SIM_BASE = iPhone 17 Pro
 SIM_NAME = $(SIM_BASE) - $(BRANCH_NAME)
-DESTINATION = platform=iOS Simulator,name=$(SIM_NAME)
+# Target the simulator by UDID (id=), not name=. xcodebuild's `name=` matcher
+# fails to resolve a device whose name contains " - " (e.g.
+# "iPhone 17 Pro - main") even when `simctl list` and
+# `xcodebuild -showdestinations` both show it available, falling back to the
+# incompatible "My Mac" destination and erroring out. `id=` is unambiguous.
+#
+# RESOLVE_SIM_ID is a *shell command string*, not a resolved value. Recipes
+# invoke it with `$$($(RESOLVE_SIM_ID))` so it runs in the recipe shell at
+# execution time — after `ensure-sim` has cloned the device. A make-time
+# `$(shell ...)` variable is expanded once per recipe, before any line runs,
+# so it would resolve empty on a new branch's first build even though
+# ensure-sim creates the clone moments later. The literal single-quotes
+# survive into the recipe shell; `$$` escapes make's `$`.
+RESOLVE_SIM_ID = xcrun simctl list devices -j | SIM_NAME="$(SIM_NAME)" python3 -c 'import json,os,sys; d=json.load(sys.stdin); n=os.environ["SIM_NAME"]; print(next((dev["udid"] for devs in d["devices"].values() for dev in devs if dev["name"]==n and dev.get("isAvailable",True)), ""))'
+# A recipe resolves the UDID into $$SIM_ID once, then builds the destination.
+# eval this in a recipe before referencing $$DESTINATION:
+#   SIM_ID=$$($(RESOLVE_SIM_ID)); \
+#   [ -n "$$SIM_ID" ] || { echo "..."; exit 1; }; \
+#   DESTINATION="platform=iOS Simulator,id=$$SIM_ID"
+SIM_ID_GUARD = SIM_ID=$$($(RESOLVE_SIM_ID)); if [ -z "$$SIM_ID" ]; then echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)'. Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; exit 1; fi; DESTINATION="platform=iOS Simulator,id=$$SIM_ID"
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
 
@@ -15,12 +34,25 @@ DERIVED_DATA = ./DerivedData
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-# Ensure branch-specific simulator exists (clones base if needed)
+# Ensure branch-specific simulator exists (clones base if needed).
+# Existence is decided by the same resolver the destination uses — an
+# *available* device with a matching UDID — not a substring grep. A plain
+# `grep -q "$(SIM_NAME)"` also matches a device marked *unavailable* (simctl
+# keeps listing those after an Xcode/runtime upgrade); that would skip the
+# re-clone while the UDID still resolved empty, producing an opaque `id=`
+# failure downstream. The whole check runs in one shell so the post-clone
+# re-resolve sees the device just created (make would otherwise expand a
+# `$(SIM_ID)` variable only once, before the clone line ran).
 ensure-sim:
-	@if ! xcrun simctl list devices | grep -q "$(SIM_NAME)"; then \
+	@if [ -z "$$($(RESOLVE_SIM_ID))" ]; then \
 		echo "Creating simulator clone: $(SIM_NAME)"; \
 		xcrun simctl clone "$(SIM_BASE)" "$(SIM_NAME)" || \
-		(echo "Failed to clone simulator. Ensure '$(SIM_BASE)' exists." && exit 1); \
+		{ echo "Failed to clone simulator. Ensure '$(SIM_BASE)' exists."; exit 1; }; \
+	fi; \
+	if [ -z "$$($(RESOLVE_SIM_ID))" ]; then \
+		echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)' after ensure-sim."; \
+		echo "Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; \
+		exit 1; \
 	fi
 
 generate: ## Regenerate Xcode project from project.yml
@@ -40,7 +72,7 @@ format: ## Auto-format code with SwiftFormat
 lint: ## Lint with SwiftLint (no mutations)
 	@echo "Running SwiftLint..."
 	@if command -v swiftlint >/dev/null 2>&1; then \
-		swiftlint lint --quiet || (echo "SwiftLint found violations. Fix them before continuing." && exit 1); \
+		swiftlint lint --quiet || { echo "SwiftLint found violations. Fix them before continuing."; exit 1; }; \
 		echo "SwiftLint: No violations found."; \
 	else \
 		echo "SwiftLint not installed. Install with: brew install swiftlint"; \
@@ -49,26 +81,29 @@ lint: ## Lint with SwiftLint (no mutations)
 
 build: generate format lint ensure-sim ## Build the app (format + lint + compile)
 	@echo "Building $(SCHEME) on $(SIM_NAME)..."
+	@$(SIM_ID_GUARD); \
 	xcodebuild build \
 		-scheme $(SCHEME) \
-		-destination '$(DESTINATION)' \
+		-destination "$$DESTINATION" \
 		-derivedDataPath $(DERIVED_DATA) \
 		-quiet
 
 test: generate ensure-sim ## Run unit tests
 	@echo "Running unit tests on $(SIM_NAME)..."
-	@xcodebuild test \
+	@$(SIM_ID_GUARD); \
+	xcodebuild test \
 		-scheme $(SCHEME) \
-		-destination '$(DESTINATION)' \
+		-destination "$$DESTINATION" \
 		-derivedDataPath $(DERIVED_DATA) \
 		-only-testing:KochTrainerTests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
 ui-test: generate ensure-sim ## Run UI tests (slow, nightly in CI)
 	@echo "Running UI tests on $(SIM_NAME)..."
-	@xcodebuild test \
+	@$(SIM_ID_GUARD); \
+	xcodebuild test \
 		-scheme $(SCHEME) \
-		-destination '$(DESTINATION)' \
+		-destination "$$DESTINATION" \
 		-derivedDataPath $(DERIVED_DATA) \
 		-only-testing:KochTrainerUITests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
@@ -80,10 +115,19 @@ clean: ## Remove build artifacts
 	@echo "Clean complete."
 
 run: build ## Build and run in simulator
-	@SIM_UDID=$$(xcrun simctl list devices | grep "$(SIM_NAME)" | head -1 | sed 's/.*(\([A-F0-9-]*\)).*/\1/'); \
+	@SIM_UDID=$$($(RESOLVE_SIM_ID)); \
+	if [ -z "$$SIM_UDID" ]; then \
+		echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)'. Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; \
+		exit 1; \
+	fi; \
 	echo "Launching simulator $(SIM_NAME) ($$SIM_UDID)..."; \
 	xcrun simctl boot "$$SIM_UDID" 2>/dev/null || true; \
-	open -a Simulator; \
+	SIM_APP="$$(xcode-select -p)/Applications/Simulator.app"; \
+	if [ -d "$$SIM_APP" ]; then \
+		open "$$SIM_APP"; \
+	elif ! open -a Simulator 2>/dev/null; then \
+		echo "Note: standalone Simulator.app not found (Xcode 26+ removed it); the device is booted — open it from Xcode > Window > Devices and Simulators if you need the GUI."; \
+	fi; \
 	echo "Installing app..."; \
 	xcrun simctl install "$$SIM_UDID" $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/KochTrainer.app; \
 	echo "Launching app..."; \
@@ -91,9 +135,10 @@ run: build ## Build and run in simulator
 
 coverage: generate ensure-sim ## Run tests with code coverage report
 	@echo "Running unit tests with coverage on $(SIM_NAME)..."
-	@xcodebuild test \
+	@$(SIM_ID_GUARD); \
+	xcodebuild test \
 		-scheme $(SCHEME) \
-		-destination '$(DESTINATION)' \
+		-destination "$$DESTINATION" \
 		-derivedDataPath $(DERIVED_DATA) \
 		-only-testing:KochTrainerTests \
 		-enableCodeCoverage YES \
