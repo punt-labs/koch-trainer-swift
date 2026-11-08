@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   config. `make build` was silently reformatting ~36 files on every run
   because the committed code had drifted from the formatter; the tree is now
   format-clean and `make build` is a no-op on formatting.
+- Agent files for handles not on the repo's ethos team were removed. The
+  repo now has its own `koch-trainer` team: the gstack roles plus `claude` and
+  the specialists CLAUDE.md delegates to (`adb`, `bwk`, `csl`, `dna`, `jms`,
+  `jra`, `kth`, `rsc`, `srn`), whose agent files stay.
+- Vendor the gstack ethos team under `.punt-labs/ethos/` and set
+  `resolution: repo-only`, so a fresh clone resolves its ethos identities
+  without the retired team-registry submodule or a global store.
 
 ### Fixed
 
@@ -35,16 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SwiftLint no longer scans the repo-local `.tmp/` directory, where Swift
   macro expansions land during a build and produced hundreds of false
   identifier- and type-name violations.
-- Agent files for handles not on the repo's ethos team were removed. The
-  repo now has its own `koch-trainer` team: the gstack roles plus `claude` and
-  the specialists CLAUDE.md delegates to (`adb`, `bwk`, `csl`, `dna`, `jms`,
-  `jra`, `kth`, `rsc`, `srn`), whose agent files stay.
-- Vendor the gstack ethos team under `.punt-labs/ethos/` and set
-  `resolution: repo-only`, so a fresh clone resolves its ethos identities
-  without the retired team-registry submodule or a global store.
-
-### Fixed
-
 - Claude leads ethos sessions again, and the Swift, build and formal-methods specialists named in CLAUDE.md resolve alongside the vendored gstack team.
 - Action pin comments now state the version actually pinned:
   `actions/checkout` was labelled `# v4` on v7.0.1's SHA. The SHA is the
