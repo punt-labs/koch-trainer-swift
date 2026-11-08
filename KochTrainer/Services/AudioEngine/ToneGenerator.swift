@@ -435,12 +435,18 @@ final class ToneGenerator: @unchecked Sendable {
         sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
             guard let self else { return noErr }
 
-            // Read thread-safe state once at callback start (avoid lock contention in loop)
+            // Read thread-safe state once at callback start (avoid lock contention in loop).
+            // Order matters: read mode and tone-active state before frequency.
+            // activateTone(frequency:) writes the frequency first, then enables the
+            // tone; reading toneActive first means a tone seen as active was enabled
+            // against a frequency already visible here, never a stale default pitch.
+            let mode = radioMode
+            let toneActive = isToneActive
             let frequency = currentFrequency
             var phase = currentPhase
             let context = ContinuousRenderContext(
-                mode: radioMode,
-                toneActive: isToneActive,
+                mode: mode,
+                toneActive: toneActive,
                 phaseIncrement: twoPi * frequency / sampleRate,
                 twoPi: twoPi,
                 processor: processor

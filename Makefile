@@ -115,7 +115,11 @@ clean: ## Remove build artifacts
 	@echo "Clean complete."
 
 run: build ## Build and run in simulator
-	@SIM_UDID=$$(xcrun simctl list devices | grep "$(SIM_NAME)" | head -1 | sed 's/.*(\([A-F0-9-]*\)).*/\1/'); \
+	@SIM_UDID=$$($(RESOLVE_SIM_ID)); \
+	if [ -z "$$SIM_UDID" ]; then \
+		echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)'. Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; \
+		exit 1; \
+	fi; \
 	echo "Launching simulator $(SIM_NAME) ($$SIM_UDID)..."; \
 	xcrun simctl boot "$$SIM_UDID" 2>/dev/null || true; \
 	open -a Simulator; \
