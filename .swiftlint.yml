@@ -23,6 +23,7 @@ opt_in_rules:
   - unneeded_parentheses_in_closure_argument
 
 excluded:
+  - .tmp
   - DerivedData
   - .build
   - build

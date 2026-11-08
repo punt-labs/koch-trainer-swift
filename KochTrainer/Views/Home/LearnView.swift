@@ -7,7 +7,7 @@ struct LearnView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Theme.Spacing.lg) {
-                Text("Koch Trainer")
+                Text("Koch CW Trainer")
                     .font(Typography.largeTitle)
                     .accessibilityIdentifier(AccessibilityID.Learn.title)
 

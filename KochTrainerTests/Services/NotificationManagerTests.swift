@@ -5,7 +5,7 @@ import XCTest
 // MARK: - MockNotificationSettings
 
 /// Mock notification settings for testing.
-struct MockNotificationSettings: NotificationSettingsProtocol, Sendable {
+struct MockNotificationSettings: NotificationSettingsProtocol {
     var authorizationStatus: UNAuthorizationStatus
 }
 
