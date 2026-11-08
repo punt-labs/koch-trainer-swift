@@ -21,7 +21,8 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: ViewModel
+    @ObservedObject
+    var viewModel: ViewModel
 
     let startButtonKey: LocalizedStringKey
 
@@ -88,7 +89,9 @@ struct CharacterIntroductionView<ViewModel: CharacterIntroducing>: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .largeTitle) private var characterSize: CGFloat = 120
-    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .largeTitle)
+    private var characterSize: CGFloat = 120
+    @ScaledMetric(relativeTo: .title)
+    private var patternSize: CGFloat = 36
 
 }

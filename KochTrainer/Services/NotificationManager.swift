@@ -63,7 +63,8 @@ final class NotificationManager: ObservableObject {
 
     // MARK: Internal
 
-    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+    @Published
+    private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     /// Request notification authorization from the user.
     @discardableResult

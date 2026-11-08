@@ -25,9 +25,12 @@ struct KochTrainerApp: App {
 
     // MARK: Private
 
-    @StateObject private var progressStore = ProgressStore()
-    @StateObject private var settingsStore = SettingsStore()
-    @StateObject private var notificationManager = NotificationManager()
+    @StateObject
+    private var progressStore = ProgressStore()
+    @StateObject
+    private var settingsStore = SettingsStore()
+    @StateObject
+    private var notificationManager = NotificationManager()
 
     private func rescheduleNotifications(schedule: PracticeSchedule) {
         notificationManager.scheduleNotifications(

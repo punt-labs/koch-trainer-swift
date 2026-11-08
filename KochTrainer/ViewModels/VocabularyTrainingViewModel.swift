@@ -42,25 +42,37 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published var phase: SessionPhase = .training
-    @Published var isPlaying: Bool = false
-    @Published private(set) var wordStats: [String: WordStat] = [:]
+    @Published
+    var phase: SessionPhase = .training
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var wordStats: [String: WordStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
 
-    // Training state
-    @Published var currentWord: String = ""
-    @Published var userInput: String = ""
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForResponse: Bool = false
-    @Published var responseDeadline: Date = .distantPast
-    @Published var responseDuration: TimeInterval = 0
+    /// Training state
+    @Published
+    var currentWord: String = ""
+    @Published
+    var userInput: String = ""
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForResponse: Bool = false
+    @Published
+    var responseDeadline: Date = .distantPast
+    @Published
+    var responseDuration: TimeInterval = 0
 
-    // Send mode state
-    @Published var currentPattern: String = ""
-    @Published var inputDeadline: Date = .distantPast
-    @Published var inputDuration: TimeInterval = 0
+    /// Send mode state
+    @Published
+    var currentPattern: String = ""
+    @Published
+    var inputDeadline: Date = .distantPast
+    @Published
+    var inputDuration: TimeInterval = 0
 
     // MARK: - Configuration
 
@@ -377,14 +389,18 @@ extension VocabularyTrainingViewModel {
         lastFeedback = nil
 
         recentWords.append(nextWord)
-        if recentWords.count > 3 { recentWords.removeFirst() }
+        if recentWords.count > 3 {
+            recentWords.removeFirst()
+        }
 
         if isReceiveMode {
             Task {
                 guard let engine = audioEngine as? MorseAudioEngine else { return }
                 engine.reset()
                 await engine.playGroup(currentWord)
-                if isPlaying { startResponseTimer() }
+                if isPlaying {
+                    startResponseTimer()
+                }
             }
         } else {
             isWaitingForResponse = true
@@ -417,10 +433,14 @@ extension VocabularyTrainingViewModel {
         var stat = wordStats[expected] ?? WordStat()
         if isReceiveMode {
             stat.receiveAttempts += 1
-            if wasCorrect { stat.receiveCorrect += 1 }
+            if wasCorrect {
+                stat.receiveCorrect += 1
+            }
         } else {
             stat.sendAttempts += 1
-            if wasCorrect { stat.sendCorrect += 1 }
+            if wasCorrect {
+                stat.sendCorrect += 1
+            }
         }
         stat.lastPracticed = Date()
         wordStats[expected] = stat
@@ -439,7 +459,9 @@ extension VocabularyTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playGroup(expected) }
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
+                    await engine.playGroup(expected)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

@@ -122,9 +122,12 @@ struct QSOView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @State private var selectedStyle: QSOStyle = .firstContact
-    @State private var startMode: QSOStartMode = .answerCQ
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @State
+    private var selectedStyle: QSOStyle = .firstContact
+    @State
+    private var startMode: QSOStartMode = .answerCQ
 
     private var userCallsign: String {
         let callsign = settingsStore.settings.userCallsign

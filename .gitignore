@@ -1,110 +1,200 @@
-# Xcode
+# === Punt Labs canonical .gitignore ===
+# Source of truth: .bin/gitignore-canonical.template
+# Rollout:         .bin/gitignore-canonical-rollout.sh
+# Repo-specific additions belong BELOW the "# === Repo-specific ===" marker.
+# Everything above it is managed by the rollout script.
+
+# --- Secrets & local overrides ---
+.env
+.env.*
+.env*.local
+!.env.example
+.envrc.local
+.direnv
+.biff.local
+.claude/settings.local.json
+.claude/settings.local.*
+.claude/mcp.local.json
+.mcp.local.json
+*.local
+*.local.*
+.*.local
+.*.local.*
+
+# --- Punt Labs runtime state (never commit) ---
+.punt-labs/local/
+.punt-labs/**/local/**
+.punt-labs/**/*.local.*
+.punt-labs/quarry/captures/
+# Ethos vendored registry: sessions/ and mission lock files are per-run
+# runtime churn (0700 dirs / flocks), never committed. missions/ is NOT
+# blanket-ignored here -- vox's own .gitignore tracks durable mission
+# records (contract.yaml, results.yaml, reflections.yaml, log.jsonl)
+# under .punt-labs/ethos/missions/ by design; only its lock files are
+# runtime noise (the mission-wide .create.lock is already covered by the
+# global **/.create.lock below; missions/**/.lock catches a per-mission
+# lock at any nesting depth, not just one level down).
 #
-# gitignore contributors: remember to update Global Business Analyst Workflows.
-#
+# The rollout script's dedup exempts .punt-labs/ethos/ specifically
+# (unlike vox/quarry/lux, this policy is genuinely per-repo, not
+# universal -- see gitignore-canonical-rollout.sh) so a repo's own
+# broader or narrower .punt-labs/ethos/* rule survives rollout untouched.
+# This entry is only the minimal shared baseline for repos with no
+# custom policy of their own.
+.punt-labs/ethos/sessions/
+.punt-labs/ethos/missions/**/.lock
+.punt-labs/vox/ephemeral/
+.punt-labs/vox/vox.local.md
+.punt-labs/lux.md
 
-## User settings
-xcuserdata/
+# --- Claude Code runtime state ---
+.claude/*
+!.claude/settings.json
+!.claude/commands/
+!.claude/hooks/
+!.claude/agents/
+!.claude/rules/
+!.claude/skills/
+.claude/scheduled_tasks*
+.claude/worktrees/
+.claude/projects/
+.claude/beadle.poll.*
+*/**/.claude/
 
-## Xcode 8 and earlier
-*.xcscmblueprint
-*.xccheckout
+# --- Lock files (except uv.lock) ---
+.*.lock
+*.punt-import.lock
+.CLAUDE.md.lock
+.CLAUDE.md.punt-import.lock
+**/.create.lock
 
-## Xcode build files
-build/
-DerivedData/
-.deriveddata/
+# --- Beads runtime state ---
+.beads/bd.sock*
+.beads/beads.db*
+.beads/daemon-*
+.beads/daemon.log
+.beads/daemon-error
+.beads/.local_version
 
-## Obj-C/Swift specific
-*.hmap
+# --- Scratch / temp ---
+# .tmp/ is the repo-local TMPDIR (set via .envrc). We keep the directory but
+# ignore its contents. Do NOT add a bare `*.tmp` pattern here — it would match
+# the `.tmp` directory itself, preventing git from descending, and then the
+# `!.tmp/.gitkeep` negation could not re-include the tracked marker.
+.tmp/*
+!.tmp/.gitkeep
+CLAUDE.md.tmp
 
-## App packaging
-*.ipa
-*.dSYM.zip
-*.dSYM
+# --- Worktrees ---
+.worktrees/
 
-## Playgrounds
-timeline.xctimeline
-playground.xcworkspace
-
-# Swift Package Manager
-#
-# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-Packages/
-Package.pins
-Package.resolved
-# *.xcodeproj  # Uncomment if using SPM-only without Xcode project
-#
-# Xcode automatically generates this directory with a hierarchical structure of pure
-# Swift Package Manager managed dependencies.
-.swiftpm/xcode
-
-# CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
-Pods/
-#
-# Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
-
-# Carthage
-#
-# Add this line if you want to avoid checking in source code from Carthage dependencies.
-Carthage/Checkouts
-Carthage/Build/
-
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/#source-control
-
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output
-
-# Code Injection
-#
-# After new calculation and calculation session is over, the system will remove "injectionforxcode.com" from the whitelist.
-iOSInjectionProject/
-
-# Accio dependency management
-Dependencies/
-.accio/
-
-# SwiftPM
-.swiftpm/
-
-# OS generated files
+# --- OS junk ---
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
 Thumbs.db
+ehthumbs.db
 
-# IDE
+# --- Editors / IDEs ---
 .idea/
+.vscode/
+.cursor/
+.codex/
+.accio/
+.claude-flow/
 *.swp
 *.swo
 *~
 
-# Environment
-.env
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+dist/
+build/
+*.egg
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pyright/
+.pytest_cache/
+.pytest-work/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+uv.toml
+
+# --- Node / web ---
+node_modules/
+.astro/
+.vercel/
+
+# --- Go ---
+coverage.out
+*.test
+
+# --- Swift / Xcode ---
+# (Do NOT ignore *.xcodeproj / *.xcworkspace — those directories are tracked;
+# only ignore user-specific state INSIDE them.)
+xcuserdata/
+DerivedData/
+CoverageDerived/
+*.xccheckout
+*.xcresult
+*.xcscmblueprint
+*.hmap
+*.dSYM
+*.dSYM.zip
+*.ipa
+.swiftpm/
+Package.pin
+Package.resolved
+Carthage/Build/
+Carthage/Checkout
+Pods/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+iOSInjectionProject/
+playground.xcworkspace
+timeline.xctimeline
+
+# --- LaTeX build artifacts ---
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# === Repo-specific ===
+# Add repo-specific entries below this line. The rollout script preserves
+# everything from here down; everything above is regenerated from the canonical
+# template.
+
+# Xcode — additional packaging / SPM / tooling not in the canonical block
+.deriveddata/
+Packages/
+Package.pins
+.swiftpm/xcode
+Carthage/Checkouts
+Dependencies/
 
 # Local TODO/planning files
 .TODO.md
-*.xcresult
-CoverageDerived/
 
-# LaTeX build                                                                                                                                     
-  artifacts
+# LaTeX build artifacts (docs/ sources)
 docs/*.aux
 docs/*.fuzz
 docs/*.log
@@ -117,13 +207,6 @@ docs/*.tfm
 docs/*.sty
 docs/*.*pk
 
-# Scratch/temp directory (TMPDIR set via .envrc)
-.tmp/
-
-# Local-only files (machine-specific, per-user)
-*.local
-*.local.*
-
 # Entire-tool local state
 .entire/
 
@@ -134,25 +217,3 @@ prfaq.out
 
 # LanceDB vector store (quarry index cruft)
 lancedb/
-
-# Quarry session-transcript captures (pkit-kcps)
-.punt-labs/quarry/captures/
-
-# The mandated sibling lock every punt CLI takes before mutating a shared
-# host file (tool-enable-disable.md 2.4). Per-machine runtime state, and it
-# persists by design — unlinking a lock file races the next writer. The
-# pattern is broad because the lock's name is the host file's, and tools
-# differ on the suffix — .CLAUDE.md.lock and .CLAUDE.md.punt-import.lock
-# both appear.
-.*.lock
-
-# Claude Code local settings (per-machine, may contain paths/tokens)
-.claude/settings.local.json
-
-# ethos runtime (never track) — DES-058 live zone + mission locks
-.punt-labs/**/local/**
-.punt-labs/ethos/missions/**/*.lock
-.punt-labs/**/*.ethos-tmp*
-
-# Git worktrees created by agents
-.claude/worktrees/
