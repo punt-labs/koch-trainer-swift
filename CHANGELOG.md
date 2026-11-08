@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the app to **Koch CW Trainer** across the UI, localizations, and
+  documentation, to name the Morse/CW focus directly. No functional change.
 - Adopted the Punt Labs canonical `.envrc` and `.gitignore`. `.envrc` now
   loads secrets from Proton Pass with a keyring-to-filesystem fallback and
   sets the repo-local `TMPDIR`; `.gitignore` gains the shared canonical block
