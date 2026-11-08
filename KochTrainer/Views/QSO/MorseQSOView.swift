@@ -67,10 +67,14 @@ struct MorseQSOView: View {
 
     // MARK: Private
 
-    @StateObject private var viewModel: MorseQSOViewModel
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @FocusState private var isKeyboardFocused: Bool
+    @StateObject
+    private var viewModel: MorseQSOViewModel
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @Environment(\.dismiss)
+    private var dismiss
+    @FocusState
+    private var isKeyboardFocused: Bool
 
 }
 
@@ -80,7 +84,8 @@ private struct MorseQSOSessionView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: MorseQSOViewModel
+    @ObservedObject
+    var viewModel: MorseQSOViewModel
 
     var body: some View {
         VStack(spacing: 0) {

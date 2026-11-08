@@ -32,24 +32,35 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     // MARK: - Published State
 
-    @Published var phase: SessionPhase = .introduction(characterIndex: 0)
-    @Published var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
-    @Published var isPlaying: Bool = false
-    @Published private(set) var characterStats: [Character: CharacterStat] = [:]
+    @Published
+    var phase: SessionPhase = .introduction(characterIndex: 0)
+    @Published
+    var timeRemaining: TimeInterval = 300 // 5 minutes (fallback max)
+    @Published
+    var isPlaying: Bool = false
+    @Published
+    private(set) var characterStats: [Character: CharacterStat] = [:]
 
     /// Session attempt counter with invariant enforcement.
     let counter = SessionCounter()
 
-    // Introduction state
-    @Published var introCharacters: [Character] = []
-    @Published var currentIntroCharacter: Character?
+    /// Introduction state
+    @Published
+    var introCharacters: [Character] = []
+    @Published
+    var currentIntroCharacter: Character?
 
-    // Training state
-    @Published var currentCharacter: Character?
-    @Published var lastFeedback: Feedback?
-    @Published var isWaitingForResponse: Bool = false
-    @Published var timerDeadline: Date = .distantPast
-    @Published var timerDuration: TimeInterval = 0
+    /// Training state
+    @Published
+    var currentCharacter: Character?
+    @Published
+    var lastFeedback: Feedback?
+    @Published
+    var isWaitingForResponse: Bool = false
+    @Published
+    var timerDeadline: Date = .distantPast
+    @Published
+    var timerDuration: TimeInterval = 0
 
     // MARK: - Configuration
 
@@ -107,9 +118,15 @@ final class ReceiveTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     /// Whether introduction phase has been completed
     var isIntroCompleted: Bool {
-        if case .training = phase { return true }
-        if case .paused = phase { return true }
-        if case .completed = phase { return true }
+        if case .training = phase {
+            return true
+        }
+        if case .paused = phase {
+            return true
+        }
+        if case .completed = phase {
+            return true
+        }
         return false
     }
 
@@ -415,7 +432,9 @@ extension ReceiveTrainingViewModel {
         if currentGroupIndex >= currentGroup.count {
             Task {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)
-                if isPlaying { playNextGroup() }
+                if isPlaying {
+                    playNextGroup()
+                }
             }
             return
         }
@@ -428,7 +447,9 @@ extension ReceiveTrainingViewModel {
             guard let engine = audioEngine as? MorseAudioEngine else { return }
             engine.reset()
             await engine.playCharacter(char)
-            if isPlaying { startResponseTimer() }
+            if isPlaying {
+                startResponseTimer()
+            }
         }
     }
 
@@ -458,7 +479,9 @@ extension ReceiveTrainingViewModel {
 
         var stat = characterStats[expected] ?? CharacterStat()
         stat.receiveAttempts += 1
-        if wasCorrect { stat.receiveCorrect += 1 }
+        if wasCorrect {
+            stat.receiveCorrect += 1
+        }
         stat.lastPracticed = Date()
         characterStats[expected] = stat
     }
@@ -478,7 +501,9 @@ extension ReceiveTrainingViewModel {
         Task {
             if !wasCorrect {
                 try? await Task.sleep(nanoseconds: TrainingTiming.preReplayDelay)
-                if let engine = audioEngine as? MorseAudioEngine, isPlaying { await engine.playCharacter(expected) }
+                if let engine = audioEngine as? MorseAudioEngine, isPlaying {
+                    await engine.playCharacter(expected)
+                }
                 try? await Task.sleep(nanoseconds: TrainingTiming.postReplayDelay)
             } else {
                 try? await Task.sleep(nanoseconds: TrainingTiming.correctAnswerDelay)

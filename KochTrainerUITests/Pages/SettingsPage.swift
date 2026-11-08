@@ -56,7 +56,9 @@ final class SettingsPage: BasePage {
         if !link.exists {
             // Scroll down to find Session History by swiping on the main window
             for _ in 0 ..< 5 {
-                if link.exists { break }
+                if link.exists {
+                    break
+                }
                 app.swipeUp()
             }
         }

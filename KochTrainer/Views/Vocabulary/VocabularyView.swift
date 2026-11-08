@@ -85,8 +85,10 @@ struct VocabularyView: View {
         let sendId: String
     }
 
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
 
     private var callsignCard: some View {
         VStack(spacing: Theme.Spacing.sm) {

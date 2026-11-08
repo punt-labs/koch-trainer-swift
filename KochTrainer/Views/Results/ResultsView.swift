@@ -68,7 +68,8 @@ struct ResultsView: View {
 
     // MARK: Private
 
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)
+    private var dismiss
 
 }
 

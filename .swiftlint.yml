@@ -29,6 +29,11 @@ excluded:
   - Pods
   - Carthage
   - vendor
+  # .tmp is the repo-local TMPDIR (set via .envrc). Swift macro expansions land
+  # in .tmp/swift-generated-sources/ during a build; linting those compiler
+  # __swiftmacro_* files produces hundreds of false identifier/type-name
+  # violations. Never lint generated build output.
+  - .tmp
   - "*/DerivedSources/*"
   - "**/*.generated.swift"
 
