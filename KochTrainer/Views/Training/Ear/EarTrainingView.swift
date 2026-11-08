@@ -19,8 +19,12 @@ struct EarTrainingView: View {
     }
 
     var isTrainingActive: Bool {
-        if case .training = viewModel.phase { return true }
-        if case .paused = viewModel.phase { return true }
+        if case .training = viewModel.phase {
+            return true
+        }
+        if case .paused = viewModel.phase {
+            return true
+        }
         return false
     }
 
@@ -94,13 +98,19 @@ struct EarTrainingView: View {
 
     // MARK: Private
 
-    @StateObject private var viewModel = EarTrainingViewModel()
-    @EnvironmentObject private var progressStore: ProgressStore
-    @EnvironmentObject private var settingsStore: SettingsStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
+    @StateObject
+    private var viewModel = EarTrainingViewModel()
+    @EnvironmentObject
+    private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var settingsStore: SettingsStore
+    @Environment(\.dismiss)
+    private var dismiss
+    @Environment(\.scenePhase)
+    private var scenePhase
 
-    @FocusState private var isKeyboardFocused: Bool
+    @FocusState
+    private var isKeyboardFocused: Bool
 
 }
 
@@ -110,7 +120,8 @@ struct EarTrainingPhaseView: View {
 
     // MARK: Internal
 
-    @ObservedObject var viewModel: EarTrainingViewModel
+    @ObservedObject
+    var viewModel: EarTrainingViewModel
 
     var body: some View {
         ScrollView {
@@ -233,7 +244,8 @@ struct EarTrainingPhaseView: View {
 
     // MARK: Private
 
-    @ScaledMetric(relativeTo: .title) private var patternSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .title)
+    private var patternSize: CGFloat = 48
 
 }
 
@@ -271,7 +283,8 @@ struct EarFeedbackView: View {
 // MARK: - EarPausedView
 
 struct EarPausedView: View {
-    @ObservedObject var viewModel: EarTrainingViewModel
+    @ObservedObject
+    var viewModel: EarTrainingViewModel
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -317,7 +330,8 @@ struct EarPausedView: View {
 // MARK: - EarCompletedView
 
 struct EarCompletedView: View {
-    @ObservedObject var viewModel: EarTrainingViewModel
+    @ObservedObject
+    var viewModel: EarTrainingViewModel
 
     let didAdvance: Bool
     let newCharacters: [Character]?

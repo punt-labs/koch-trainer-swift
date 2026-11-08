@@ -8,7 +8,8 @@ struct CharacterGridView: View {
 
     // MARK: Internal
 
-    @Binding var selectedCharacters: Set<Character>
+    @Binding
+    var selectedCharacters: Set<Character>
 
     /// Per-character performance statistics. When provided, displays proficiency rings.
     var characterStats: [Character: CharacterStat] = [:]

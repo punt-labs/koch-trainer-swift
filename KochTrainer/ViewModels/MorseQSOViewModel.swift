@@ -31,29 +31,44 @@ final class MorseQSOViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published private(set) var turnState: TurnState = .idle
-    @Published private(set) var isSessionActive: Bool = false
+    @Published
+    private(set) var turnState: TurnState = .idle
+    @Published
+    private(set) var isSessionActive: Bool = false
 
-    // AI turn state
-    @Published private(set) var aiMessage: String = ""
-    @Published private(set) var revealedText: String = ""
-    @Published private(set) var isPlayingAudio: Bool = false
-    @Published var isAITextVisible: Bool = false
+    /// AI turn state
+    @Published
+    private(set) var aiMessage: String = ""
+    @Published
+    private(set) var revealedText: String = ""
+    @Published
+    private(set) var isPlayingAudio: Bool = false
+    @Published
+    var isAITextVisible: Bool = false
 
-    // User turn state
-    @Published private(set) var currentScript: String = ""
-    @Published private(set) var currentPattern: String = ""
-    @Published private(set) var scriptIndex: Int = 0
-    @Published private(set) var inputTimeRemaining: TimeInterval = 0
+    /// User turn state
+    @Published
+    private(set) var currentScript: String = ""
+    @Published
+    private(set) var currentPattern: String = ""
+    @Published
+    private(set) var scriptIndex: Int = 0
+    @Published
+    private(set) var inputTimeRemaining: TimeInterval = 0
 
-    // Accuracy tracking
-    @Published private(set) var totalCharactersKeyed: Int = 0
-    @Published private(set) var correctCharactersKeyed: Int = 0
-    @Published private(set) var lastKeyedCharacter: Character?
-    @Published private(set) var lastKeyedWasCorrect: Bool = false
+    /// Accuracy tracking
+    @Published
+    private(set) var totalCharactersKeyed: Int = 0
+    @Published
+    private(set) var correctCharactersKeyed: Int = 0
+    @Published
+    private(set) var lastKeyedCharacter: Character?
+    @Published
+    private(set) var lastKeyedWasCorrect: Bool = false
 
     /// Speed tracking for current user turn
-    @Published private(set) var currentBlockCharactersKeyed: Int = 0
+    @Published
+    private(set) var currentBlockCharactersKeyed: Int = 0
 
     // Session info
     let style: QSOStyle

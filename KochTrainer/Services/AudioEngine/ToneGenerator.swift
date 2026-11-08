@@ -166,6 +166,21 @@ final class ToneGenerator: @unchecked Sendable {
 
     // MARK: Private
 
+    // MARK: - Continuous Audio (Private)
+
+    /// Per-callback-invariant inputs for continuous-audio rendering.
+    ///
+    /// Captured once at the start of each `AVAudioSourceNode` callback and passed
+    /// to `renderContinuousSample(_:phase:frame:)` so the per-sample helper stays
+    /// under the parameter-count limit. Only `phase` varies within the loop.
+    private struct ContinuousRenderContext {
+        let mode: RadioMode
+        let toneActive: Bool
+        let phaseIncrement: Double
+        let twoPi: Double
+        let processor: BandConditionsProcessor
+    }
+
     private static let isSilenced: Bool = NSClassFromString("XCTestCase") != nil
 
     private let logger = Logger(subsystem: "com.kochtrainer", category: "ToneGenerator")
@@ -356,7 +371,58 @@ final class ToneGenerator: @unchecked Sendable {
         }
     }
 
-    // MARK: - Continuous Audio (Private)
+    /// Render one audio frame for continuous-audio mode, advancing `phase` in place.
+    ///
+    /// Pure per-sample DSP extracted from the `AVAudioSourceNode` render closure
+    /// so `startContinuousAudio()` stays within the function-length budget.
+    /// - Returns: the clamped sample value for this frame.
+    private func renderContinuousSample(
+        _ context: ContinuousRenderContext,
+        phase: inout Double,
+        frame: Int
+    ) -> Float {
+        var value: Float
+
+        switch context.mode {
+        case .off:
+            // Radio off: silence
+            value = 0.0
+
+        case .receiving:
+            // Radio receiving: noise + optional incoming signal + band conditions
+            if context.toneActive {
+                // Generate tone
+                value = Float(sin(phase))
+                phase += context.phaseIncrement
+                if phase >= context.twoPi {
+                    phase -= context.twoPi
+                }
+                value *= 0.5
+            } else {
+                // No tone, just noise floor
+                value = 0.0
+            }
+            // Apply band conditions (noise, fading, interference)
+            value = context.processor.processSample(value, at: frame)
+
+        case .transmitting:
+            // Radio transmitting: sidetone only (no band conditions)
+            if context.toneActive {
+                value = Float(sin(phase))
+                phase += context.phaseIncrement
+                if phase >= context.twoPi {
+                    phase -= context.twoPi
+                }
+                value *= 0.5
+            } else {
+                value = 0.0
+            }
+            // No band conditions processing - clean sidetone
+        }
+
+        // Clamp to prevent distortion
+        return max(-1.0, min(1.0, value))
+    }
 
     /// Start continuous audio with radio-mode-aware rendering.
     private func startContinuousAudio() {
@@ -370,55 +436,19 @@ final class ToneGenerator: @unchecked Sendable {
             guard let self else { return noErr }
 
             // Read thread-safe state once at callback start (avoid lock contention in loop)
-            let mode = radioMode
-            let toneActive = isToneActive
             let frequency = currentFrequency
             var phase = currentPhase
-            let phaseIncrement = twoPi * frequency / sampleRate
+            let context = ContinuousRenderContext(
+                mode: radioMode,
+                toneActive: isToneActive,
+                phaseIncrement: twoPi * frequency / sampleRate,
+                twoPi: twoPi,
+                processor: processor
+            )
 
             let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
             for frame in 0 ..< Int(frameCount) {
-                var value: Float
-
-                switch mode {
-                case .off:
-                    // Radio off: silence
-                    value = 0.0
-
-                case .receiving:
-                    // Radio receiving: noise + optional incoming signal + band conditions
-                    if toneActive {
-                        // Generate tone
-                        value = Float(sin(phase))
-                        phase += phaseIncrement
-                        if phase >= twoPi {
-                            phase -= twoPi
-                        }
-                        value *= 0.5
-                    } else {
-                        // No tone, just noise floor
-                        value = 0.0
-                    }
-                    // Apply band conditions (noise, fading, interference)
-                    value = processor.processSample(value, at: frame)
-
-                case .transmitting:
-                    // Radio transmitting: sidetone only (no band conditions)
-                    if toneActive {
-                        value = Float(sin(phase))
-                        phase += phaseIncrement
-                        if phase >= twoPi {
-                            phase -= twoPi
-                        }
-                        value *= 0.5
-                    } else {
-                        value = 0.0
-                    }
-                    // No band conditions processing - clean sidetone
-                }
-
-                // Clamp to prevent distortion
-                value = max(-1.0, min(1.0, value))
+                let value = renderContinuousSample(context, phase: &phase, frame: frame)
 
                 for buffer in ablPointer {
                     let buf = buffer.mData?.assumingMemoryBound(to: Float.self)

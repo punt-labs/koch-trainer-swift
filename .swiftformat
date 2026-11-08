@@ -37,6 +37,12 @@
 --disable blankLinesAtStartOfScope
 --disable trailingCommas
 --disable wrapMultilineStatementBraces
+# repeatedGuard merges consecutive `guard` statements into one comma-delimited
+# guard. That inflates function bodies past SwiftLint's function_body_length
+# warning (60 lines) — e.g. ToneGenerator.startContinuousAudio() goes to 62.
+# Keeping guards separate is the established style here; disable the rule so
+# SwiftFormat and SwiftLint agree instead of fighting each run.
+--disable repeatedGuard
 
 # Exclusions
 --exclude DerivedData,Pods,.build,Carthage

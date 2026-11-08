@@ -163,7 +163,8 @@ struct LearnView: View {
 
     // MARK: Private
 
-    @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject
+    private var progressStore: ProgressStore
 
     private var schedule: PracticeSchedule {
         progressStore.progress.schedule

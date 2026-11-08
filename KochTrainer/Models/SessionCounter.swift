@@ -17,11 +17,13 @@ import Foundation
 final class SessionCounter: ObservableObject {
 
     /// Total number of attempts in the session.
-    @Published private(set) var attempts: Int = 0
+    @Published
+    private(set) var attempts: Int = 0
 
     /// Number of correct attempts in the session.
     /// Invariant: `correct ≤ attempts`
-    @Published private(set) var correct: Int = 0
+    @Published
+    private(set) var correct: Int = 0
 
     /// Accuracy as a ratio (0.0 to 1.0).
     /// Returns 0 if no attempts have been made.
