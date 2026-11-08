@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Contributors now find the development prerequisites and optional `.envrc`
+  secret setup together in the contributing guide, while the README keeps only
+  the build steps.
 - Renamed the app to **Koch CW Trainer** across the UI, localizations, and
   documentation, to name the Morse/CW focus directly. No functional change.
 - Adopted the Punt Labs canonical `.envrc` and `.gitignore`. `.envrc` now

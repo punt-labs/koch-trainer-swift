@@ -170,29 +170,16 @@ This app implements Koch's method for both receiving (copying) and sending (keyi
 
 ## Building from Source
 
-### Prerequisites
-
-- **XcodeGen** — `brew install xcodegen`
-- **SwiftFormat** and **SwiftLint** — `brew install swiftformat swiftlint` (`make build` runs both)
-- **python3** — on `PATH`; `make build`/`make test`/`make run` use it to resolve the simulator UDID
-- **pass-cli** and **jq** — only if you use this repo's `.envrc` (direnv). It loads
-  secrets (API keys, GitHub token) from the Proton Pass `dev` vault:
-  - `brew install jq`
-  - Proton Pass CLI: `curl -fsSL https://proton.me/download/pass-cli/install.sh | bash`
-  - Log in once to the punt-labs account:
-    `PROTON_PASS_SESSION_DIR=~/.punt-labs/pass-sessions/puntlabs pass-cli login`
-  - Optional: set `PUNTLABS_GIT_IDENTITY=<handle>` to load that identity's GitHub
-    token; set `PROTON_PASS_KEY_PROVIDER=fs` on a host with no usable keyring.
-
-  Without `pass-cli`/`jq`, `.envrc` prints a one-line reason per missing secret and
-  continues — building and testing the app does not require them.
-
 ```bash
-# Generate Xcode project and build
-make generate  # Regenerate xcodeproj from project.yml
-make build     # Build the app
-make test      # Run all tests
+brew install xcodegen swiftformat swiftlint   # one-time
+make generate   # Regenerate xcodeproj from project.yml
+make build      # Format, lint, and build the app
+make test       # Run all tests
 ```
+
+Setting up a full development environment — contributing, project
+conventions, and this repo's `.envrc` secret loading — is covered in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

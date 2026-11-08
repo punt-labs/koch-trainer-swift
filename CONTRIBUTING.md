@@ -9,8 +9,11 @@ Thank you for your interest in contributing to Koch Trainer! This document provi
 3. Install dependencies:
 
    ```bash
-   brew install xcodegen
+   brew install xcodegen swiftformat swiftlint
    ```
+
+   `make build` runs SwiftFormat and SwiftLint, and `make build`/`make test`/`make run`
+   use `python3` (already on macOS) to resolve the simulator UDID.
 
 4. Generate the Xcode project:
 
@@ -19,6 +22,27 @@ Thank you for your interest in contributing to Koch Trainer! This document provi
    ```
 
 5. Open `KochTrainer.xcodeproj` in Xcode
+
+### Secrets and `.envrc` (optional)
+
+This repo ships an `.envrc` (direnv) that loads secrets — API keys and a GitHub
+token — from the punt-labs Proton Pass `dev` vault. It is only needed for tasks
+that use those secrets; **building and testing the app do not require it**, and
+without the tools below `.envrc` prints a one-line reason per missing secret and
+continues.
+
+To enable it:
+
+```bash
+brew install jq
+# Proton Pass CLI:
+curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+# Log in once to the punt-labs account:
+PROTON_PASS_SESSION_DIR=~/.punt-labs/pass-sessions/puntlabs pass-cli login
+```
+
+- Set `PUNTLABS_GIT_IDENTITY=<handle>` to load that identity's GitHub token.
+- Set `PROTON_PASS_KEY_PROVIDER=fs` on a host with no usable keyring.
 
 ## Development Workflow
 
