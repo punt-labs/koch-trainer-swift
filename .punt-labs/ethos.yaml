@@ -1,2 +1,3 @@
 agent: claude
 team: koch-trainer
+resolution: repo-only
