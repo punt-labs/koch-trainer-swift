@@ -2,15 +2,42 @@
 # verify this set is complete under `resolution: repo-only`.
 # Do not edit by hand — re-run `ethos vendor --apply` instead.
 version: 1
-generated_at: 2026-11-03T14:29:56Z
+generated_at: 2026-11-09T01:46:17Z
 seeds:
+    - adb
+    - bwk
+    - claude
+    - csl
+    - dna
     - gstack-architect
     - gstack-implementer
     - gstack-product
     - gstack-qa
     - gstack-reviewer
     - gstack-security
+    - jms
+    - jra
+    - kth
+    - rsc
+    - srn
 identities:
+    - handle: adb
+      ext:
+        - quarry.yaml
+    - handle: bwk
+      ext:
+        - quarry.yaml
+    - handle: claude
+      ext:
+        - beadle.yaml
+        - quarry.yaml
+        - vox.yaml
+    - handle: csl
+      ext:
+        - quarry.yaml
+    - handle: dna
+      ext:
+        - quarry.yaml
     - handle: gstack-architect
       ext:
         - quarry.yaml
@@ -29,30 +56,104 @@ identities:
     - handle: gstack-security
       ext:
         - quarry.yaml
+    - handle: jms
+      ext:
+        - quarry.yaml
+    - handle: jra
+      ext:
+        - quarry.yaml
+    - handle: kth
+      ext:
+        - quarry.yaml
+    - handle: rsc
+      ext:
+        - quarry.yaml
+    - handle: srn
+      ext:
+        - quarry.yaml
 personalities:
+    - abrial
+    - cox
+    - friendly-direct
     - gstack-architect
     - gstack-implementer
     - gstack-product
     - gstack-qa
     - gstack-reviewer
     - gstack-security
+    - hightower
+    - kernighan
+    - lattner
+    - lovelace
+    - naroff
+    - norman
+    - spivey
 writing_styles:
+    - abrial-prose
+    - cox-prose
+    - direct-with-quips
     - gstack-builder
     - gstack-decisive
     - gstack-product
     - gstack-reviewer
     - gstack-security
     - gstack-tester
+    - hightower-prose
+    - kernighan-prose
+    - lattner-prose
+    - lovelace-prose
+    - naroff-prose
+    - norman-prose
+    - spivey-prose
 talents:
+    - apple-platforms
+    - b-method
+    - cloud-native
+    - cocoa
+    - cognitive-engineering
+    - compilers
+    - dependency-management
+    - design
+    - devops
     - engineering
+    - event-b
+    - formal-methods
+    - foundation
+    - go
+    - infrastructure
+    - kubernetes
+    - language-design
+    - llvm
+    - management
+    - objective-c
+    - operations
     - product-development
+    - refinement
     - security
+    - supply-chain-security
+    - swift
+    - tooling
+    - type-systems
+    - usability
+    - ux
+    - z-notation
 roles:
     - architect
+    - b-specialist
+    - cloud-native-engineer
+    - coo
+    - go-specialist
+    - go-toolchain
     - implementer
+    - infra-engineer
     - product-lead
     - qa-engineer
     - reviewer
     - security-reviewer
+    - swift-platforms
+    - swift-specialist
+    - ux-cognitive
+    - z-specialist
 teams:
     - gstack
+    - koch-trainer
