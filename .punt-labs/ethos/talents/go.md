@@ -291,9 +291,10 @@ func TestOutput(t *testing.T) {
     got := render()
     golden := filepath.Join("testdata", t.Name()+".golden")
     if *update {
-        os.WriteFile(golden, got, 0o644)
+        require.NoError(t, os.WriteFile(golden, got, 0o644))
     }
-    want, _ := os.ReadFile(golden)
+    want, err := os.ReadFile(golden)
+    require.NoError(t, err)
     assert.Equal(t, string(want), string(got))
 }
 ```

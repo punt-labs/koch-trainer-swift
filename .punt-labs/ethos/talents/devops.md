@@ -417,9 +417,12 @@ not need database admin credentials.
 
 ### Lock Files
 
-Every project commits its lock file: `go.sum`, `uv.lock`,
+Every project commits its lock file: `uv.lock`,
 `package-lock.json`, `Cargo.lock`. Lock files ensure reproducible
 builds -- every developer and every CI run resolves the same versions.
+(Go is different: `go.mod` pins the requirement graph and Go selects
+versions by Minimum Version Selection; `go.sum` records checksums for
+integrity, not a single resolved set. Commit and review both.)
 
 - Never gitignore lock files for applications. (Libraries are different;
   some ecosystems intentionally omit locks for libraries.)
@@ -503,19 +506,19 @@ Declare all non-file targets as `.PHONY`:
 .PHONY: build test lint check clean
 
 build:
-    go build -o ethos ./cmd/ethos
+	go build -o ethos ./cmd/ethos
 
 test:
-    go test -race -count=1 ./...
+	go test -race -count=1 ./...
 
 lint:
-    go vet ./...
-    staticcheck ./...
+	go vet ./...
+	staticcheck ./...
 
 check: lint test
 
 clean:
-    rm -f ethos
+	rm -f ethos
 ```
 
 Without `.PHONY`, a directory named `test` would prevent `make test`
@@ -531,8 +534,8 @@ Make it the default:
 
 .PHONY: help
 help: ## Show available targets
-    @grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
-        awk 'BEGIN {FS = ":.*## "}; {printf "  %-15s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
+	    awk 'BEGIN {FS = ":.*## "}; {printf "  %-15s %s\n", $$1, $$2}'
 ```
 
 Annotate each target with `## Description` on the same line as the
