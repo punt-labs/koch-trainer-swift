@@ -25,6 +25,8 @@ collaborations:
   - from: security-reviewer
     to: architect
     type: reports_to
+  # product-lead reports_to architect (was collaborates_with, unsupported by
+  # the agent generator); architect is this bundle's apex (no coo member).
   - from: product-lead
     to: architect
-    type: collaborates_with
+    type: reports_to
