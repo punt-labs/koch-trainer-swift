@@ -506,23 +506,25 @@ Declare all non-file targets as `.PHONY`:
 .PHONY: build test lint check clean
 
 build:
-	go build -o ethos ./cmd/ethos
+    go build -o ethos ./cmd/ethos
 
 test:
-	go test -race -count=1 ./...
+    go test -race -count=1 ./...
 
 lint:
-	go vet ./...
-	staticcheck ./...
+    go vet ./...
+    staticcheck ./...
 
 check: lint test
 
 clean:
-	rm -f ethos
+    rm -f ethos
 ```
 
 Without `.PHONY`, a directory named `test` would prevent `make test`
-from running.
+from running. (Recipe lines above are shown indented with spaces for the
+docs linter; in a real Makefile each recipe line must begin with a literal
+tab, or make fails with `missing separator`.)
 
 ### Help Text
 
@@ -534,8 +536,8 @@ Make it the default:
 
 .PHONY: help
 help: ## Show available targets
-	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
-	    awk 'BEGIN {FS = ":.*## "}; {printf "  %-15s %s\n", $$1, $$2}'
+    @grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
+        awk 'BEGIN {FS = ":.*## "}; {printf "  %-15s %s\n", $$1, $$2}'
 ```
 
 Annotate each target with `## Description` on the same line as the
