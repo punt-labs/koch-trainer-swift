@@ -747,3 +747,4 @@ This project uses formal Z specifications (`docs/koch_trainer.tex`) to model sta
 
 Use `.tmp/` at the project root for scratch and temporary files — never `/tmp`. The `TMPDIR` environment variable is set via `.envrc` so that `tempfile` and subprocesses automatically use it. Contents are gitignored; only `.gitkeep` is tracked.
 @.punt-labs/ethos/CLAUDE.md
+@.punt-labs/punt/CLAUDE.md
