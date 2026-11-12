@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Linear is the tracker of record (Punt Labs team, label `repo:koch`);
+  beads is a scoped local mirror. `.beads/config.yaml` carries
+  `issue-prefix` and `linear.pull_label`, the App Store Preparation epic is
+  a Linear project, and the agent instructions no longer tell a session to
+  run `bd sync` or edit beads locally.
 - Contributors now find the development prerequisites and optional `.envrc`
   secret setup together in the contributing guide, while the README keeps only
   the build steps.

@@ -32,10 +32,10 @@ The correct process is:
 3. Make your changes in the worktree
 
 The workflow includes:
-- Working a beads issue (bd ready, bd show, bd update)
+- Working a Linear issue (bd ready --label-any repo:koch, bd show; claim in Linear)
 - Creating commits with proper messages
 - Creating PRs via MCP GitHub tools
-- Session close protocol (git status, bd sync, git push)
+- Session close protocol (git status, git push; status written in Linear)
 
 Direct edits to main are not allowed. Use worktrees for all feature work.
 EOF

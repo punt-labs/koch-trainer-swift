@@ -383,54 +383,43 @@ The full org roster is available via `ethos identity list`. `csl`/`srn` are the 
 
 Use the `standard` pipeline for features (design → implement → test → review → document). Use the `formal` pipeline when the change affects state types covered by `docs/koch_trainer.tex`. Use `coe` when investigating a recurring failure (audio dropouts, streak regressions, notification storms).
 
-## Issue Tracking with Beads
+## Issue Tracking
 
-This project uses **beads** (`bd`) for issue tracking—a git-native, AI-friendly issue tracker that lives in the `.beads/` directory. If an issue discovered here affects multiple repos or requires a standards change, escalate to a [punt-kit bead](https://github.com/punt-labs/punt-kit) instead (see [bead placement scheme](../CLAUDE.md#where-to-create-a-bead)).
+Linear is the tracker of record: the Punt Labs team, issues labelled `repo:koch`, listed in the shared `koch-trainer-swift` view. Epics are Linear projects (App Store Preparation is the first). Beads (`bd`) is a read-mostly local mirror; `.punt-labs/punt/CLAUDE.md` (imported below) has the rules for which tracker to write to, and `.beads/README.md` has the mirror commands and the required `bd` build. If an issue discovered here affects multiple repos or requires a standards change, file it against punt-kit instead (see [bead placement scheme](../.docs/CLAUDE.md#where-to-create-a-bead)).
 
-### When to Use Beads vs TodoWrite
+### When to Use the Tracker vs TodoWrite
 
-| Use Beads (`bd`) | Use TodoWrite |
-|------------------|---------------|
+| Use the tracker | Use TodoWrite |
+|-----------------|---------------|
 | Multi-session work | Single-session tasks |
 | Work with dependencies | Simple linear execution |
 | Discovered work to track | Immediate TODO items |
 | Strategic planning | Tactical execution |
 | Handoff to future sessions | Current session tracking |
 
-**Rule of thumb**: If you might not finish it this session, or if it blocks/is blocked by other work, use beads.
+**Rule of thumb**: If you might not finish it this session, or if it blocks/is blocked by other work, file a Linear issue.
 
 ### Essential Commands
 
 ```bash
-# Finding work
-bd ready                    # Show issues ready to work (default: 10 results)
-bd ready --limit=100        # Show more results
-bd list --status=open       # All open issues
-bd show <id>                # View issue details with dependencies
-
-# Working on issues
-bd create --title="..." --type=task --priority=2   # Create issue (priority 0-4)
-bd update <id> --status=in_progress                # Claim work
-bd close <id>                                      # Mark complete
-bd close <id1> <id2> ...                           # Close multiple at once
-
-# Dependencies
-bd dep add <child> <parent>  # child depends on parent (parent blocks child)
-bd blocked                   # Show all blocked issues
-
-# Sync
-bd sync                      # Sync with git remote
+# Finding work (local reads of the mirror; refresh it first)
+bd linear sync --pull-if-stale --relations --team c1dfbb2c-985e-40cf-b004-5127646efc9d
+bd ready --label-any repo:koch --exclude-label deferred   # Ready work in this repo
+bd list --label-any repo:koch --status=open               # Open issues in this repo
+bd show <id>                                              # Details with dependencies
 ```
+
+Create, claim (In Progress), finish (Done) and cancel issues in Linear, with the `repo:koch` label plus a type label (`Bug`, `Feature`, `Improvement`, `Epic`). A local `bd update`, `bd close` or `bd create` is undone by the next pull. Blockers are `blocks` relations in Linear, mirrored with `bd dep add <bead> <blocker>` when the refresh ran without `--relations`.
 
 ### Priority Levels
 
-| Priority | Meaning |
-|----------|---------|
-| P0 | Critical - drop everything |
-| P1 | High - do soon |
-| P2 | Medium (default) |
-| P3 | Low - when time permits |
-| P4 | Backlog |
+| Priority | Linear | Meaning |
+|----------|--------|---------|
+| P0 | Urgent | Critical - drop everything |
+| P1 | High | Do soon |
+| P2 | Medium (default) | Normal |
+| P3 | Low | When time permits |
+| P4 | No priority | Backlog |
 
 ### Session Close Protocol
 
@@ -444,15 +433,14 @@ git status
 git add <files>
 git commit -m "..."
 
-# 3. Sync beads changes
-bd sync
-
-# 4. Push everything
+# 3. Push everything
 git push
 
-# 5. Verify
+# 4. Verify
 git status  # Must show "up to date with origin"
 ```
+
+Issue status is written in Linear, never with a local `bd` edit; there is no beads sync step.
 
 **Work is NOT complete until `git push` succeeds.** Never leave work stranded locally.
 
@@ -460,8 +448,8 @@ git status  # Must show "up to date with origin"
 
 When you discover work that needs doing but isn't part of the current task:
 
-1. Create a beads issue immediately: `bd create --title="..." --type=task`
-2. Add dependencies if relevant: `bd dep add <new-issue> <blocking-issue>`
+1. Create a Linear issue immediately, with `repo:koch` and a type label
+2. Add a `blocks` relation in Linear if relevant, and mirror it with `bd dep add <new-bead> <blocking-bead>` after the next pull
 3. Continue with current work
 
 This prevents losing track of discovered issues across session boundaries.
@@ -481,15 +469,16 @@ make worktree-create BRANCH=feature/foo NEW=1
 cd ~/Coding/koch-trainer-worktrees/feature-foo
 ```
 
-### Working a Beads Issue
+### Working a Linear Issue
 
 **1. Find and claim work:**
 
 ```bash
-bd ready --limit=100                  # Show available work
-bd show <id>                          # Review issue details
-bd update <id> --status=in_progress   # Claim it
+bd ready --label-any repo:koch --exclude-label deferred   # Show available work
+bd show <id>                                              # Review issue details
 ```
+
+Claim it in Linear (state In Progress), then refresh the bead with `bd linear sync --pull --issues <PL id> --team c1dfbb2c-985e-40cf-b004-5127646efc9d`.
 
 **2. Create worktree for feature branch:**
 
@@ -537,13 +526,9 @@ Then merge via `mcp__plugin_github_github__merge_pull_request` (squash, delete b
 # 2. Update local main
 git fetch --prune
 git pull origin main
-
-# 3. Sync beads (requires --no-verify for main commits)
-bd close <id>
-git add .beads/issues.jsonl
-git commit --no-verify -m "chore(beads): sync after merge"
-git push
 ```
+
+Then mark the issue Done in Linear and refresh the bead with a scoped pull (`bd linear sync --pull --issues <PL id> --team <id>`). Nothing under `.beads/` is committed.
 
 ### Branch Naming Convention
 
@@ -556,13 +541,10 @@ git push
 
 ### If Blocked or Discovering New Work
 
-```bash
-# Create issue for discovered work
-bd create --title="..." --type=task --priority=2
+Create the discovered issue in Linear (`repo:koch` plus a type label). If the current issue is blocked by another, set it back to Backlog in Linear and add the `blocks` relation there; after the next pull, mirror it locally:
 
-# If current issue is blocked by another
-bd update <id> --status=open          # Unclaim
-bd dep add <id> <blocking-id>         # Mark dependency
+```bash
+bd dep add <id> <blocking-id>         # Mirror the Linear relation so bd ready sees it
 ```
 
 ### Release Workflow
@@ -648,14 +630,14 @@ git worktree add -b feature/new-thing ~/Coding/koch-trainer-worktrees/new-thing 
 
 ```bash
 cd ~/Coding/koch-trainer-worktrees/feature-foo
-bd list    # Same issues as main repo (beads auto-redirects)
+bd list --label-any repo:koch    # Same issues as main repo (beads auto-redirects)
 make build
 make test
 ```
 
 ### Beads Redirect Behavior
 
-When you create a worktree, beads automatically creates a redirect file in the worktree's `.beads/` that points to the main repo's `.beads/` database. All worktrees share the same issue database—no manual configuration needed.
+When you create a worktree, beads automatically creates a redirect file in the worktree's `.beads/` that points to the main repo's `.beads/` database. All worktrees share the same issue database—no manual configuration needed. The redirect also means `bd` reads the main checkout's `.beads/config.yaml`, so a worktree's own copy of that file (its `linear.pull_label`) is not what a pull uses; keep main current before pulling.
 
 ### Listing Worktrees
 
@@ -674,9 +656,9 @@ git worktree remove ~/Coding/koch-trainer-worktrees/feature-foo
 git worktree remove --force ~/Coding/koch-trainer-worktrees/feature-foo  # If uncommitted changes
 ```
 
-### Syncing Beads Across Branches
+### Refreshing the Mirror Across Branches
 
-Run `bd sync` before and after merging or switching contexts to ensure issue state is consistent across all worktrees.
+Run `bd linear sync --pull-if-stale --relations --team c1dfbb2c-985e-40cf-b004-5127646efc9d` before planning in any worktree; every worktree shares the one mirror, so one refresh serves them all.
 
 ### Optional: External Beads with direnv
 

@@ -3,10 +3,14 @@
 # All settings can also be set via environment variables (BD_* prefix)
 # or overridden with command-line flags
 
-# Issue prefix for this repository (used by bd init)
-# If not set, bd init will auto-detect from directory name
-# Example: issue-prefix: "myproject" creates issues like "myproject-1", "myproject-2", etc.
-# issue-prefix: ""
+# Issue prefix for this repository. It is also set in .beads/metadata.json;
+# bd reads one `issue-prefix` key, this value when set, else the
+# metadata.json value copied in at startup, so this key wins for every
+# reader (`bd create` and `bd linear sync --pull` alike) and the two must
+# stay equal. `linear.pull_label` keeps that pull inside this repo's Linear
+# issues; Linear is the tracker of record (see .punt-labs/punt/CLAUDE.md).
+issue-prefix: koch
+linear.pull_label: repo:koch
 
 # Use no-db mode: load from JSONL, no SQLite, write back after each command
 # When true, bd will use .beads/issues.jsonl as the source of truth
