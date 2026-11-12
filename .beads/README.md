@@ -4,9 +4,9 @@ Linear is the tracker of record for Koch CW Trainer: the Punt Labs team
 (key `PL`), issues labelled `repo:koch`. **bd** (beads) is a read-mostly
 local mirror of those issues in the punt-labs central Hosted DoltDB
 instance. There is **no per-repo issue store** — all beads live in one
-shared database, distinguished by `issue_prefix` set in
-`.beads/metadata.json`. The operating rules are in
-`.punt-labs/punt/CLAUDE.md`.
+shared database, distinguished by this repo's `issue-prefix` (set in
+`.beads/config.yaml`, mirrored in `.beads/metadata.json`). The operating
+rules are in `.punt-labs/punt/CLAUDE.md`.
 
 ## Source of truth
 
@@ -17,8 +17,12 @@ shared database, distinguished by `issue_prefix` set in
   `issue_prefix`.
 - `.beads/config.yaml` scopes `bd linear sync --pull` to this repo:
   `linear.pull_label` selects the issues, and `issue-prefix` names the
-  beads a pull creates. `bd` reads one prefix key, this one when set and
-  the `metadata.json` value as the fallback, so keep the two equal.
+  beads a pull creates. For the prefix, `bd` reads the `BD_ISSUE_PREFIX`
+  environment variable when set, else this `issue-prefix`, else the
+  `metadata.json` value; keep the two files equal. Every pull resolves the
+  prefix the same way, a by-id pull included; `bd linear sync --pull
+  --issues` takes Linear identifiers (`PL-123`) because that is what it
+  asks Linear for, and the beads it creates still carry this prefix.
 - `.beads/issues.jsonl` and `.beads/interactions.jsonl` are local
   export views. Auto-export is disabled (`export.auto: false`);
   run `bd export` manually if needed. They are **gitignored** and
@@ -54,11 +58,12 @@ no pull removes one: a blocker added in Linear also needs `bd dep add
 and a blocker cleared in Linear needs `bd dep remove <bead> <blocker>`.
 Epics are Linear projects (App Store Preparation is the first); the epic
 bead stays in the mirror as the project's marker. The guide's "Never" list
-applies here in full: no bare `bd linear sync`, no `bd config set linear.*`
-(shared by every repo), and never remove `issue-prefix` or
-`linear.pull_label` from `config.yaml`. A pull is a beads write: before
-running one, `bd config get linear.pull_label` on the main checkout must
-print `repo:koch`, or the pull imports the whole Punt Labs team.
+applies here in full: no bare `bd linear sync`, no unscoped `--push`, no
+`bd config set linear.*` (shared by every repo), and never remove
+`issue-prefix` or `linear.pull_label` from `config.yaml`. A pull is a beads
+write: `bd` reads the `config.yaml` of the checkout it runs in, so before
+running one, `bd config get linear.pull_label` there must print
+`repo:koch`, or the pull imports the whole Punt Labs team.
 
 ## bd version
 
