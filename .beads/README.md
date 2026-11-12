@@ -53,7 +53,12 @@ no pull removes one: a blocker added in Linear also needs `bd dep add
 <bead> <blocker>` here when the mirror was refreshed without `--relations`,
 and a blocker cleared in Linear needs `bd dep remove <bead> <blocker>`.
 Epics are Linear projects (App Store Preparation is the first); the epic
-bead stays in the mirror as the project's marker.
+bead stays in the mirror as the project's marker. The guide's "Never" list
+applies here in full: no bare `bd linear sync`, no `bd config set linear.*`
+(shared by every repo), and never remove `issue-prefix` or
+`linear.pull_label` from `config.yaml`. A pull is a beads write: before
+running one, `bd config get linear.pull_label` on the main checkout must
+print `repo:koch`, or the pull imports the whole Punt Labs team.
 
 ## bd version
 

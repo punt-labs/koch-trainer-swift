@@ -459,9 +459,9 @@ The app checks this flag to:
 
 ## Outstanding Work: Design Notes
 
-This section contains design notes for planned features tracked in beads. Use `bd show <id>` for current status.
+This section holds the design notes behind two epics that are now complete: Accessibility Compliance (bead koch-cem, closed, implemented in PR #49) and the Test Coverage Plan (bead koch-jto, closed, coverage goal revised to 85%). The notes stay as the record of what was decided; current work is tracked in Linear (see `.punt-labs/punt/CLAUDE.md`).
 
-### Accessibility Compliance (beads: koch-trainer-swift-cem)
+### Accessibility Compliance (bead koch-cem, closed)
 
 **Why This Matters**: Morse code has historical significance for people with visual impairments. The app should be fully accessible.
 
@@ -481,15 +481,15 @@ This section contains design notes for planned features tracked in beads. Use `b
 .accessibilityHidden(_:)     // Hide decorative/hidden elements
 ```
 
-**Remaining Work:**
+**Work items (all closed):**
 
 | Task | Issue | Status |
 |------|-------|--------|
-| Full view accessibility audit | `koch-trainer-swift-mfr` | Open |
-| Image-only button labels | `koch-trainer-swift-v0x` | Open |
-| VoiceOver navigation testing | `koch-trainer-swift-5ge` | Open |
-| Dynamic Type support | `koch-trainer-swift-qc3` | Open |
-| Hide text from VoiceOver in copy-by-ear | `koch-trainer-swift-j3i` | Open (bug) |
+| Full view accessibility audit | `koch-mfr` | Closed |
+| Image-only button labels | `koch-v0x` | Closed |
+| VoiceOver navigation testing | `koch-5ge` | Closed |
+| Dynamic Type support | `koch-qc3` | Closed |
+| Hide text from VoiceOver in copy-by-ear | `koch-j3i` | Closed (bug) |
 
 **VoiceOver Behaviors Already Implemented:**
 
@@ -509,7 +509,7 @@ This section contains design notes for planned features tracked in beads. Use `b
 
 ---
 
-### Test Coverage Plan (beads: koch-trainer-swift-jto)
+### Test Coverage Plan (bead koch-jto, closed)
 
 **Current**: ~1,020 tests (950 unit + 70 UI)
 **Target**: 90%+ on non-View code (Views tested via XCUITest)
@@ -524,14 +524,14 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 | NotificationManager | — | Done (97%+) |
 | Models (WordStat, QSOState, etc.) | — | Done (100%) |
 | ReceiveTrainingViewModel | — | Done |
-| VocabularyTrainingViewModel | `koch-trainer-swift-bzx` | Done |
-| SendTrainingViewModel | `koch-trainer-swift-g1g` | Done |
-| StudentProgress | `koch-trainer-swift-eho` | Done |
-| AppSettings | `koch-trainer-swift-819` | Done |
-| QSOEngine | `koch-trainer-swift-69q` | Done |
-| MorseDecoder | `koch-trainer-swift-2h5` | Done |
-| MorseAudioEngine | `koch-trainer-swift-82u` | Done |
-| StreakCalculator | `koch-trainer-swift-sdq` | Done |
+| VocabularyTrainingViewModel | `koch-bzx` | Done |
+| SendTrainingViewModel | `koch-g1g` | Done |
+| StudentProgress | `koch-eho` | Done |
+| AppSettings | `koch-819` | Done |
+| QSOEngine | `koch-69q` | Done |
+| MorseDecoder | `koch-2h5` | Done |
+| MorseAudioEngine | `koch-82u` | Done |
+| StreakCalculator | `koch-sdq` | Done |
 
 **UI Test Infrastructure (Completed):**
 
@@ -541,12 +541,12 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 
 **Completed:**
 
-- `koch-trainer-swift-0nx`: UI test coverage for core flows (PR #41)
+- `koch-0nx`: UI test coverage for core flows (PR #41)
 
 **Remaining Work:**
 
-- `koch-trainer-swift-ae4`: Pause/resume tests
-- `koch-trainer-swift-atl`: Edge case UI tests
+- `koch-ae4`: Pause/resume tests
+- `koch-atl`: Edge case UI tests
 
 ---
 

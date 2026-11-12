@@ -403,6 +403,7 @@ Linear is the tracker of record: the Punt Labs team, issues labelled `repo:koch`
 
 ```bash
 # Finding work (local reads of the mirror; refresh it first)
+bd config get linear.pull_label   # Must print repo:koch; if not, pull main and re-run before any pull
 bd linear sync --pull-if-stale --relations --team c1dfbb2c-985e-40cf-b004-5127646efc9d
 bd ready --label-any repo:koch --exclude-label deferred   # Ready work in this repo
 bd list --label-any repo:koch --status=open               # Open issues in this repo
@@ -630,14 +631,14 @@ git worktree add -b feature/new-thing ~/Coding/koch-trainer-worktrees/new-thing 
 
 ```bash
 cd ~/Coding/koch-trainer-worktrees/feature-foo
-bd list --label-any repo:koch    # Same issues as main repo (beads auto-redirects)
+bd list --label-any repo:koch    # Same issues as main repo (bd resolves to its .beads)
 make build
 make test
 ```
 
 ### Beads Redirect Behavior
 
-When you create a worktree, beads automatically creates a redirect file in the worktree's `.beads/` that points to the main repo's `.beads/` database. All worktrees share the same issue database—no manual configuration needed. The redirect also means `bd` reads the main checkout's `.beads/config.yaml`, so a worktree's own copy of that file (its `linear.pull_label`) is not what a pull uses; keep main current before pulling.
+`bd` resolves a worktree to the main checkout's `.beads/` through git's common directory, with or without a redirect file in the worktree's own `.beads/`. All worktrees share the same issue database—no manual configuration needed. It also means `bd` reads the main checkout's `.beads/config.yaml`, so a worktree's own copy of that file (its `linear.pull_label`) is not what a pull uses. Before any pull, the main checkout must carry `linear.pull_label` (`bd config get linear.pull_label` prints `repo:koch`); a branch that adds the key does not scope pulls until it merges and main pulls it, and the guide forbids writing to beads in that window.
 
 ### Listing Worktrees
 
@@ -658,7 +659,7 @@ git worktree remove --force ~/Coding/koch-trainer-worktrees/feature-foo  # If un
 
 ### Refreshing the Mirror Across Branches
 
-Run `bd linear sync --pull-if-stale --relations --team c1dfbb2c-985e-40cf-b004-5127646efc9d` before planning in any worktree; every worktree shares the one mirror, so one refresh serves them all.
+Before planning in any worktree, confirm `bd config get linear.pull_label` prints `repo:koch` (it reads the main checkout's config; if it does not, pull main first and do not pull from Linear), then run `bd linear sync --pull-if-stale --relations --team c1dfbb2c-985e-40cf-b004-5127646efc9d`. Every worktree shares the one mirror, so one refresh serves them all.
 
 ### Optional: External Beads with direnv
 
