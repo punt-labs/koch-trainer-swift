@@ -479,7 +479,7 @@ bd ready --label-any repo:koch --exclude-label deferred   # Show available work
 bd show <id>                                              # Review issue details
 ```
 
-Claim it in Linear (state In Progress), then refresh the bead with `bd linear sync --pull --issues <PL id> --team c1dfbb2c-985e-40cf-b004-5127646efc9d`.
+Claim it in Linear (state In Progress), then refresh the bead with `bd linear sync --pull --issues <PL id> --team c1dfbb2c-985e-40cf-b004-5127646efc9d` (the PL id must carry `repo:koch`; a by-id pull fetches only the named issue, so this is the one check it needs).
 
 **2. Create worktree for feature branch:**
 
@@ -529,7 +529,7 @@ git fetch --prune
 git pull origin main
 ```
 
-Then mark the issue Done in Linear and refresh the bead with a scoped pull (`bd linear sync --pull --issues <PL id> --team <id>`). Nothing under `.beads/` is committed.
+Then mark the issue Done in Linear and refresh the bead with a by-id pull (`bd linear sync --pull --issues <PL id> --team <id>`; the PL id must carry `repo:koch`). Nothing under `.beads/` is committed.
 
 ### Branch Naming Convention
 

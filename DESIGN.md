@@ -512,7 +512,7 @@ This section holds the design notes behind two epics that are now complete: Acce
 ### Test Coverage Plan (bead koch-jto, closed)
 
 **Current**: ~1,020 tests (950 unit + 70 UI)
-**Target**: 90%+ on non-View code (Views tested via XCUITest)
+**Target**: 85% adjusted coverage, excluding static views (the original 90%+ non-View goal was revised in PR #50; `CLAUDE.md` carries the current figures)
 
 **Strategy Decision (Completed):**
 View testing uses XCUITest integration tests rather than unit-level ViewInspector or snapshot testing. This provides comprehensive end-to-end coverage of user flows.
@@ -542,11 +542,8 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 **Completed:**
 
 - `koch-0nx`: UI test coverage for core flows (PR #41)
-
-**Remaining Work:**
-
-- `koch-ae4`: Pause/resume tests
-- `koch-atl`: Edge case UI tests
+- `koch-ae4`: Pause/resume tests (closed as already covered by the Receive, Send, Ear and Vocabulary training UI tests)
+- `koch-atl`: Edge case UI tests (closed when the coverage goal was revised to 85% adjusted, at 88.78%)
 
 ---
 
