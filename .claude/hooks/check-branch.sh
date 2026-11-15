@@ -32,7 +32,7 @@ The correct process is:
 3. Make your changes in the worktree
 
 The workflow includes:
-- Working a Linear issue (bd ready --label-any repo:koch, bd show; claim in Linear)
+- Working a Linear issue (pick a repo:koch issue in Linear and claim it)
 - Creating commits with proper messages
 - Creating PRs via MCP GitHub tools
 - Session close protocol (git status, git push; status written in Linear)
