@@ -1,12 +1,52 @@
 # Koch CW Trainer
 
+> An iPhone app for learning Morse code with the Koch method.
+
 [![License](https://img.shields.io/github/license/punt-labs/koch-trainer-swift)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/punt-labs/koch-trainer-swift/ci.yml?label=CI)](https://github.com/punt-labs/koch-trainer-swift/actions/workflows/ci.yml)
-[![Platform](https://img.shields.io/badge/platform-iOS_17+-blue)](https://developer.apple.com/ios/)
-[![Swift](https://img.shields.io/badge/swift-5.0-F05138)](https://www.swift.org)
 [![Working Backwards](https://img.shields.io/badge/Working_Backwards-hypothesis-lightgrey)](./prfaq.pdf)
 
-An iOS app for learning Morse code using the Koch method—a well-established approach that teaches characters at full speed from day one.
+Koch CW Trainer teaches Morse code (called CW, for "continuous wave", in amateur radio) using the Koch method: you hear each character at full speed from the first lesson, starting with two characters and adding one at a time. It is for beginners learning their first 26 letters, including new amateur ("ham") radio operators who want to use Morse code on the air. The app trains receiving (copying what you hear) and sending (keying characters yourself) as separate skills. It runs entirely offline, with no account.
+
+**Platforms:** iPhone, iOS 17 or later
+
+## Quick Start
+
+The app is not distributed through the App Store. To install it, build it from source on a Mac with [Xcode](https://developer.apple.com/xcode/) installed.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/punt-labs/koch-trainer-swift.git
+```
+
+Open the Xcode project:
+
+```bash
+open koch-trainer-swift/KochTrainer.xcodeproj
+```
+
+In Xcode, choose an iPhone simulator or a connected iPhone as the run destination, then choose **Product > Run**.
+
+To run on your own iPhone, select your Apple developer team under **Signing & Capabilities** for the KochTrainer target. If Xcode reports that the bundle identifier `com.puntlabs.kochtrainer` is unavailable, change it to one of your own.
+
+## Features
+
+- **Receive Training** — hear a character and type it; 3-second time limit
+- **Send Training** — see a character and key it with dit and dah buttons or the keyboard
+- **Ear Training** — hear a pattern and tap it back, grouped by pattern length (1 to 5 elements)
+- **Koch progression** — a new character unlocks at 90% accuracy over 20 or more attempts
+- **Separate receive and send levels** — each skill advances on its own
+- **Custom practice** — drill any letters you choose, without changing your level
+- **Vocabulary** — practice common amateur radio words, sample callsigns, and your own callsign
+- **QSO simulation** — practice scripted on-air conversations with a simulated station
+- **Band conditions** — add simulated noise, fading, and interference to the audio
+- **Spaced repetition and streaks** — the next practice date depends on your accuracy
+- **Reminders** — local notifications, at most 2 per day
+- **Accessibility** — VoiceOver reads patterns as "dit dah" and announces feedback; text follows Dynamic Type
+- **Six languages** — English (US and UK), German, French, Spanish, and Italian, following your device language
+
+## What It Looks Like
 
 <p align="center">
   <img src="docs/screenshot-learn.png" alt="Learn" width="180">
@@ -20,167 +60,150 @@ An iOS app for learning Morse code using the Koch method—a well-established ap
   <img src="docs/screenshot-settings.png" alt="Settings" width="180">
 </p>
 
-## Features
+## Using the App
 
-### Learn (Koch Method)
+The app has four tabs: **Learn**, **Practice**, **Vocab**, and **Settings**.
 
-Progressive character training following the Koch order (K M R S U A P T L O W I N J E F Y V G Q Z H B C D X).
+### Learn
 
-- **Receive Training** — Listen to Morse code, type what you hear. 3-second timeout with visual countdown.
-- **Send Training** — See a character, tap dit/dah buttons or use keyboard shortcuts (`.`/`F` = dit, `-`/`J` = dah) to send it.
-- **Ear Training** — Hear a Morse pattern and reproduce it with dit/dah taps. Progresses by pattern length (1-5 elements), building the ear-to-hand reflex essential for sending.
-- **Adaptive Difficulty** — Advance to the next character when you hit 90% accuracy over 20+ attempts
-- **Separate Progression** — Track receive and send skills independently with per-character proficiency rings
+Learn is where you progress through the 26 letters in Koch order:
 
-### Practice (Custom Characters)
+```text
+K M R S U A P T L O W I N J E F Y V G Q Z H B C D X
+```
 
-Drill specific characters you find challenging.
+It has three activities. Each session begins by showing every unlocked character with its pattern and playing its sound.
 
-- Select any combination of the 26 letters
-- Practice in receive or send mode
-- Hear each character's sound when you select it
-- Stats tracked but no level progression (won't advance you past characters you haven't learned)
+- **Receive Training** plays a character. Type the letter you heard before the 3-second countdown ends. If you answer wrongly, the app replays the correct character.
+- **Send Training** shows a character without its pattern. Key it with the dit (short) and dah (long) buttons, or with a hardware keyboard: `.` or `F` for dit, `-` or `J` for dah. The app plays a tone for each element and checks the pattern when you stop keying.
+- **Ear Training** plays a pattern for you to tap back with the dit and dah buttons. It works up from 1-element patterns to 5-element patterns. It does not change your receive or send level.
 
-### Vocabulary (Words & Callsigns)
+Receive and send each start with K and M. When you reach 90% accuracy over at least 20 attempts in a session, the next character unlocks.
 
-Practice real words and callsigns used in amateur radio.
+The Learn tab shows your daily streak once you have one. The Receive and Send rows show when each is next due for practice, or "Due now".
 
-- **Built-in Sets:**
-  - Common QSO words (CQ, DE, K, AR, SK, 73, RST, QTH, QSL...)
-  - Sample callsign patterns (W1AW, K0ABC, VE3XYZ...)
-- **Your Callsign** — Enter your callsign in Settings to practice it
-- Tracks accuracy per word with weighted selection toward weak spots
+### Practice
 
-### QSO Training (Conversations)
+Practice lets you choose any letters from a grid (at least 2) and train them in receive or send mode. Each letter in the grid shows a ring for your accuracy with it. Your accuracy is recorded, but practice sessions never advance your level.
 
-Practice realistic ham radio QSO exchanges by keying Morse code.
+### Vocab
 
-- **Progressive Styles:**
-  - First Contact — Simple signal reports (beginner)
-  - Signal Report — Reports with names
-  - Contest — Fast serial number exchanges
-  - Rag Chew — Full conversational QSOs
-- **Two Modes:**
-  - Call CQ — You call, AI responds
-  - Answer CQ — AI calls, you respond
-- **Features:**
-  - Real-time WPM display while keying
-  - Text reveal synced with audio playback
-  - Hide AI text to practice copying by ear
-  - Full number support (0-9) for callsigns and RST reports
+Vocab trains whole words in receive or send mode. Words you get wrong more often come up more often. The built-in sets are:
+
+- **Common Words** — amateur radio abbreviations and Q codes such as CQ, DE, RST, QTH, QSL, 73, and TNX
+- **Callsign Patterns** — sample callsigns from the US, Canada, Europe, and elsewhere, such as W1AW and VE3ABC
+- **Your Callsign** — appears when you enter your callsign in Settings
+
+Vocab also opens **QSO Simulation**. A QSO is a two-way radio contact. You key your side of the conversation in Morse code, and a simulated station answers with scripted replies; no network or language model is involved. Choose how the contact starts:
+
+- **Call CQ** — you call CQ ("calling any station") and the simulated station answers
+- **Answer CQ** — the simulated station calls CQ and you answer
+
+Then choose a style:
+
+| Style | Exchange |
+|-------|----------|
+| First Contact | Callsigns, signal report, 73 (best regards) |
+| Signal Report | Callsigns, signal report, names, 73 |
+| Contest | Signal report and serial number |
+| Rag Chew | Names, locations, weather, and equipment |
+
+While you key, the screen shows your speed in words per minute (WPM). The simulated station's text appears as its audio plays, and you can hide it to copy by ear. Callsigns and signal reports use the digits 0–9.
 
 ### Settings
 
-- **Your Callsign** — For personalized vocabulary and QSO practice
-- **Tone Frequency** — Adjustable 400-800 Hz
-- **Effective Speed** — Farnsworth spacing 10-18 WPM (character speed fixed at 20 WPM)
-- **Band Conditions** — Simulate realistic HF conditions: QRN (atmospheric noise), QSB (signal fading), QRM (interference). Presets for good conditions, contest pileup, and difficult bands.
-- **Notifications** — Practice-due and streak reminders. Anti-nag policy: max 2 per day, 4-hour minimum gap, quiet hours 10 PM–8 AM.
-- **Session History** — Review past practice sessions and accuracy statistics
+| Setting | What it does |
+|---------|--------------|
+| Your Callsign | Used in Vocab and QSO simulation |
+| Tone Frequency | 400–800 Hz; default 600 Hz |
+| Effective Speed | 10–18 WPM; characters always play at 20 WPM (see [Audio Timing](#audio-timing)) |
+| Band Conditions | Adds atmospheric noise (QRN), signal fading (QSB), and interference from another station (QRM); presets for good conditions, a contest pileup, and difficult conditions |
+| Notifications | Practice reminders, streak reminders, and quiet hours (10 PM to 8 AM) |
 
-### Streaks & Spaced Repetition
+Settings also shows your current level, overall accuracy, current and longest streaks, and the number of sessions you have completed. It has a button to reset all progress.
 
-- Daily streak tracking with personal best indicator
-- Spaced repetition scheduling: accuracy ≥90% doubles your interval (up to 30 days), <70% resets to daily
-- Practice due indicators on the home screen show when each skill needs attention
-- First 14 days capped at 2-day intervals to build the practice habit
+### Practice Schedule
 
-### Accessibility
+After each session, the app sets the next practice date for that skill:
 
-Full VoiceOver support: spoken Morse patterns ("dit dah" instead of ".-"), training feedback announcements, Dynamic Type support, and accessibility hints on all interactive elements.
+| Session accuracy | Next interval |
+|------------------|---------------|
+| 90% or higher | Doubles, up to 30 days |
+| 70–89% | Unchanged |
+| Below 70% | Resets to 1 day |
 
-### Language Support
+During your first 14 days, the interval is capped at 2 days. If you miss practice for more than twice the interval, it resets to 1 day. Your streak counts consecutive calendar days with at least one session.
 
-Fully localized in 6 languages:
-
-- English (US)
-- English (UK)
-- German (Deutsch)
-- French (Français)
-- Spanish (Español)
-- Italian (Italiano)
-
-The app automatically uses your device language. All UI text, notifications, and pluralization rules are translated.
+Notifications are local; nothing is sent from a server. The app sends at most 2 per day, at least 4 hours apart, and none during quiet hours (10 PM to 8 AM) while that setting is on. It is on by default.
 
 ## Why This App?
 
-The iOS App Store has several excellent Morse code apps. Here's how Koch CW Trainer fits in:
+The iOS App Store has several Morse code apps. This table shows how Koch CW Trainer compares:
 
 | App | Price | Focus | Best For |
 |-----|-------|-------|----------|
-| **Koch CW Trainer** (this app) | Free | Koch method fundamentals | Beginners learning their first 26 characters |
+| **Koch CW Trainer** (this app) | Free (build from source) | Koch method fundamentals | Beginners learning their first 26 characters |
 | [Morse Trainer Pro](https://morsetrainerpro.com/) | Freemium | Advanced training, hardware integration | Operators with Morserino/WinKeyer who want contest simulation |
 | [Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) | $4.99 | Comprehensive drills, news feeds | Active hams maintaining proficiency |
-| [Morse-It](https://apps.apple.com/us/app/morse-it/id284942940) | $0.99 + IAP | Swiss-army-knife flexibility | Power users who want extensive customization |
-| [Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) | Freemium | Gamified progression | Casual learners who enjoy game-style apps |
+| [Morse-It](https://apps.apple.com/us/app/morse-it/id284942940) | $0.99 + IAP | Translation, practice, and many options | Users who want extensive customization |
+| [Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) | Freemium | Gamified progression | Learners who enjoy game-style apps |
 
-### Our Position
+### Scope
 
-**Koch CW Trainer is for people who haven't yet mastered CW.** Once you've learned all 26 characters and can copy at 15+ WPM, you'll likely outgrow this app—and that's the goal. Apps like Morse Trainer Pro and Ham Morse offer advanced features (contest simulation, hardware paddles, news feeds) that make more sense once you have the fundamentals.
+Koch CW Trainer is designed for people who have not yet learned Morse code. It covers the 26 letters and stops there. Once you know all 26 and can copy at around 15 WPM, apps such as Morse Trainer Pro and Ham Morse offer features this app does not, such as contest simulation, hardware paddles, and news feeds.
 
-### What We Do Differently
+### Differences
 
-- **Ear Training mode** — Inspired by language learning apps, you hear a pattern and reproduce it with dit/dah taps. This builds the ear-to-hand reflex that's essential for sending.
-- **Completely free** — No ads, no subscriptions, no locked features. MIT licensed and open source.
-- **Native SwiftUI** — Clean, modern iOS interface that feels at home on your device.
-- **Lightweight** — ~3 MB download, no tracking SDKs, no analytics, works fully offline. Just Morse code training.
-- **Focused scope** — We do one thing well: teach the Koch method for the first 26 characters.
+- **Ear Training** — modeled on listen-and-repeat drills in language-learning apps: you hear a pattern and tap it back.
+- **No cost** — no ads, subscriptions, or in-app purchases. The source is open under the MIT license.
+- **Native SwiftUI** — built with Apple's SwiftUI framework, with no web views or third-party libraries.
+- **Offline and private** — the app makes no network requests and has no analytics or tracking SDKs.
 
 ### Respect for the Ecosystem
 
-[Morse Trainer Pro](https://morsetrainerpro.com/) deserves special mention—it's a comprehensive platform with features we don't attempt: Morserino integration, CW Rooms for real-time practice with other operators, and contest simulation with realistic pileups. If you're serious about contesting or have hardware keyers, it's worth exploring.
+[Morse Trainer Pro](https://morsetrainerpro.com/) is a comprehensive platform with features this app does not attempt: Morserino integration, CW Rooms for real-time practice with other operators, and contest simulation with pileups. If you are interested in contesting or use a hardware keyer, it is worth exploring.
 
-[Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) (4.9★, 7,000+ reviews) has done excellent work making Morse code learning feel like a game. Their 270-level progression system is impressive.
+[Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) turns Morse code learning into a game with a level-based progression.
 
-[Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) by AA9PW has been a trusted tool in the ham community for years, with thoughtful features like news feed integration and QSO simulations.
+[Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) by AA9PW has been used in the ham community for years, with features such as news feed integration and QSO simulations.
 
-We built Koch CW Trainer because we wanted a simple, free, native iOS app focused purely on the Koch method fundamentals—and we think there's room for that alongside these excellent tools.
-
----
+Koch CW Trainer exists to offer a free, native iOS app focused only on Koch method fundamentals, alongside these tools.
 
 ## The Koch Method
 
-Traditional Morse learning starts slow and speeds up—but this creates bad habits. The Koch method, developed by German psychologist Ludwig Koch, teaches characters at full speed from the start. You learn to recognize the *sound pattern*, not count dots and dashes.
+The German psychologist Ludwig Koch argued that learning Morse code at slow speed teaches students to count dots and dashes, a habit they must unlearn to copy at practical speeds. His method plays every character at full speed from the start, so you learn to recognize each character's sound as a whole.
 
-**How it works:**
+The method works like this:
 
-1. Start with just 2 characters (K and M)
-2. Practice until you hit 90% accuracy with enough attempts
-3. Add one new character
-4. Repeat until all 26 letters are mastered
+1. Start with 2 characters (K and M).
+2. Practice until you reach 90% accuracy over enough attempts.
+3. Add one new character.
+4. Repeat until you know all 26 letters.
 
-This app implements Koch's method for both receiving (copying) and sending (keying) Morse code.
+This app applies the method to both receiving (copying) and sending (keying).
 
 ## Audio Timing
 
-- **Character speed:** 20 WPM (60ms dit, 180ms dah)
-- **Effective speed:** Adjustable 10-18 WPM via Farnsworth spacing
-- **Tone:** 600 Hz default (configurable 400-800 Hz)
+- **Character speed:** 20 WPM (60 ms dit, 180 ms dah)
+- **Effective speed:** 10–18 WPM, using Farnsworth spacing: each character plays at 20 WPM, and the gaps between characters and words are stretched to slow the overall rate
+- **Tone:** 600 Hz by default, adjustable from 400 to 800 Hz
 
 ## Privacy
 
-- All data stored locally on your device
-- No accounts, no cloud sync, no tracking
-- Notifications are local (not push)
+- All data is stored on your device.
+- No accounts, cloud sync, or tracking.
+- Notifications are scheduled on the device, not pushed from a server.
 
-## Requirements
+See the [privacy policy](PRIVACY.md) for details.
 
-- iOS 17.0 or later
-- iPhone
+## Documentation
 
-## Building from Source
-
-```bash
-brew install xcodegen swiftformat swiftlint   # one-time
-make generate   # Regenerate xcodeproj from project.yml
-make build      # Format, lint, and build the app
-make test       # Run all tests
-```
-
-Setting up a full development environment — contributing, project
-conventions, and this repo's `.envrc` secret loading — is covered in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[Privacy](PRIVACY.md) |
+[Design Decisions](DESIGN.md) |
+[Formal Specification](docs/koch_trainer.pdf) |
+[Contributing](CONTRIBUTING.md) |
+[Changelog](CHANGELOG.md)
 
 ## License
 
-MIT License
+MIT
