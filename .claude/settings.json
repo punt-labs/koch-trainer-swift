@@ -19,7 +19,6 @@
     ],
     "allow": [
       "Bash(bash:*)",
-      "Bash(bd:*)",
       "Bash(cat:*)",
       "Bash(chmod +x:*)",
       "Bash(claude mcp:*)",
