@@ -144,7 +144,7 @@ The iOS App Store has several Morse code apps. This table shows how Koch CW Trai
 |-----|-------|-------|----------|
 | **Koch CW Trainer** (this app) | Free (build from source) | Koch method fundamentals | Beginners learning their first 26 characters |
 | [Morse Trainer Pro](https://morsetrainerpro.com/) | Freemium | Advanced training, hardware integration | Operators with Morserino/WinKeyer who want contest simulation |
-| [Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) | $4.99 | Comprehensive drills, news feeds | Active hams maintaining proficiency |
+| [Ham Morse](https://apps.apple.com/us/app/ham-morse/id315980140) | $4.99 | Many drill types, news feeds | Active hams maintaining proficiency |
 | [Morse-It](https://apps.apple.com/us/app/morse-it/id284942940) | $0.99 + IAP | Translation, practice, and many options | Users who want extensive customization |
 | [Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) | Freemium | Gamified progression | Learners who enjoy game-style apps |
 
@@ -161,7 +161,7 @@ Koch CW Trainer is designed for people who have not yet learned Morse code. It c
 
 ### Respect for the Ecosystem
 
-[Morse Trainer Pro](https://morsetrainerpro.com/) is a comprehensive platform with features this app does not attempt: Morserino integration, CW Rooms for real-time practice with other operators, and contest simulation with pileups. If you are interested in contesting or use a hardware keyer, it is worth exploring.
+[Morse Trainer Pro](https://morsetrainerpro.com/) is a larger platform with features this app does not have: Morserino integration, CW Rooms for real-time practice with other operators, and contest simulation with pileups. If you are interested in contesting or use a hardware keyer, it is worth exploring.
 
 [Morse Mania](https://apps.apple.com/us/app/morse-mania-learn-morse-code/id1511042196) turns Morse code learning into a game with a level-based progression.
 
