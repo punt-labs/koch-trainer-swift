@@ -40,24 +40,6 @@ struct SecondaryButtonStyle: ButtonStyle {
     }
 }
 
-// MARK: - DestructiveButtonStyle
-
-/// Destructive button style for dangerous actions.
-struct DestructiveButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(Typography.headline)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Theme.Spacing.md)
-            .padding(.horizontal, Theme.Spacing.lg)
-            .background(Theme.Colors.error)
-            .cornerRadius(Theme.CornerRadius.large)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
 #Preview {
     VStack(spacing: Theme.Spacing.md) {
         Button("Primary Button") {}
@@ -65,9 +47,6 @@ struct DestructiveButtonStyle: ButtonStyle {
 
         Button("Secondary Button") {}
             .buttonStyle(SecondaryButtonStyle())
-
-        Button("Destructive Button") {}
-            .buttonStyle(DestructiveButtonStyle())
     }
     .padding()
 }

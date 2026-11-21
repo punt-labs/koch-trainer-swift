@@ -6,9 +6,6 @@ enum Theme {
         /// Primary accent color - adapts to light/dark mode
         static let primary = Color.accentColor
 
-        /// Main background - uses system grouped background for accessibility compliance
-        static let background = Color(uiColor: .systemGroupedBackground)
-
         /// Secondary background for cards and sections - uses system color for WCAG contrast compliance
         static let secondaryBackground = Color(uiColor: .secondarySystemGroupedBackground)
 
@@ -31,8 +28,6 @@ enum Theme {
     }
 
     enum CornerRadius {
-        static let small: CGFloat = 4
-        static let medium: CGFloat = 8
         static let large: CGFloat = 12
     }
 }
