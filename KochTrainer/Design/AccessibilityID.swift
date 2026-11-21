@@ -243,17 +243,6 @@ enum AccessibilityID {
         static let sessionCount = "session-history-session-count"
     }
 
-    // MARK: - Results View
-
-    enum Results {
-        static let view = "results-view"
-        static let levelUpTitle = "results-level-up-title"
-        static let sessionCompleteTitle = "results-session-complete-title"
-        static let statsCard = "results-stats-card"
-        static let doneButton = "results-done-button"
-        static let feedbackText = "results-feedback-text"
-    }
-
     // MARK: - What's New View
 
     enum WhatsNew {
