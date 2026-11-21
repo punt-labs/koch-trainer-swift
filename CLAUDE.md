@@ -238,16 +238,13 @@ These views are purely presentational with no business logic. They are excluded 
 
 | File | Lines | Reason |
 |------|-------|--------|
-| QSOSessionView.swift | 451 | QSO UI (needs dedicated UI tests) |
-| QSOCompletedView.swift | 389 | QSO completion display |
 | WhatsNewView.swift | 357 | Static release notes |
 | AcknowledgmentsView.swift | 220 | Static attribution text |
 | CharacterGridView.swift | 174 | Character display grid |
-| ResultsView.swift | 116 | Session results display |
 | LicenseView.swift | 94 | Static license text |
 | ProficiencyRingView.swift | 22 | Simple ring visualization |
 
-**Total excluded:** 1,823 lines
+**Total excluded:** 867 lines
 
 ## SwiftFormat & SwiftLint Compliance
 
