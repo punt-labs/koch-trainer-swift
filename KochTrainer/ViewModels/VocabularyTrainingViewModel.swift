@@ -295,7 +295,6 @@ final class VocabularyTrainingViewModel: ObservableObject {
 
     private let audioEngine: AudioEngineProtocol
     private let announcer: AccessibilityAnnouncer
-    private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
 
