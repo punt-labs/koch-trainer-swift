@@ -60,7 +60,8 @@ class MakeGateTests(unittest.TestCase):
         self.assertIn('xcodegen', log)
 
     def test_clean_checkout(self):
-        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+        (ROOT / '.tmp').mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=ROOT / '.tmp') as directory:
             checkout = Path(directory)
             for name in ['Makefile', 'project.yml']:
                 (checkout / name).write_bytes((ROOT / name).read_bytes())
