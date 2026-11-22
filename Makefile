@@ -35,7 +35,7 @@ DERIVED_DATA = ./DerivedData
 .PHONY: help generate build test check ui-test clean run lint format format-check coverage all version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
 help: ## Show available targets
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@set -o pipefail; grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 # Ensure branch-specific simulator exists (clones base if needed).
 # Existence is decided by the same resolver the destination uses — an
@@ -47,7 +47,7 @@ help: ## Show available targets
 # re-resolve sees the device just created (make would otherwise expand a
 # `$(SIM_ID)` variable only once, before the clone line ran).
 ensure-sim:
-	@if [ -z "$$($(RESOLVE_SIM_ID))" ]; then \
+	@set -o pipefail; if [ -z "$$($(RESOLVE_SIM_ID))" ]; then \
 		echo "Creating simulator clone: $(SIM_NAME)"; \
 		xcrun simctl clone "$(SIM_BASE)" "$(SIM_NAME)" || \
 		{ echo "Failed to clone simulator. Ensure '$(SIM_BASE)' exists."; exit 1; }; \
@@ -87,7 +87,7 @@ lint: ## Lint with SwiftLint (no mutations)
 
 build: generate format lint ensure-sim ## Build the app (format + lint + compile)
 	@echo "Building $(SCHEME) on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild build \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
@@ -96,7 +96,7 @@ build: generate format lint ensure-sim ## Build the app (format + lint + compile
 
 test: generate ensure-sim ## Run unit tests
 	@echo "Running unit tests on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
@@ -106,7 +106,7 @@ test: generate ensure-sim ## Run unit tests
 
 ui-test: generate ensure-sim ## Run UI tests (slow, nightly in CI)
 	@echo "Running UI tests on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
@@ -121,7 +121,7 @@ clean: ## Remove build artifacts
 	@echo "Clean complete."
 
 run: build ## Build and run in simulator
-	@SIM_UDID=$$($(RESOLVE_SIM_ID)); \
+	@set -o pipefail; SIM_UDID=$$($(RESOLVE_SIM_ID)); \
 	if [ -z "$$SIM_UDID" ]; then \
 		echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)'. Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; \
 		exit 1; \
@@ -141,7 +141,7 @@ run: build ## Build and run in simulator
 
 coverage: generate ensure-sim ## Run tests with code coverage report
 	@echo "Running unit tests with coverage on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
@@ -152,7 +152,7 @@ coverage: generate ensure-sim ## Run tests with code coverage report
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 	@echo ""
 	@echo "Extracting coverage data..."
-	@xcrun xccov view --report --json ./build/TestResults.xcresult 2>/dev/null | \
+	@set -o pipefail; xcrun xccov view --report --json ./build/TestResults.xcresult 2>/dev/null | \
 		python3 -c "import json,sys; d=json.load(sys.stdin); \
 		targets=[t for t in d.get('targets',[]) if t.get('name')=='KochTrainer.app']; \
 		cov=targets[0].get('lineCoverage',0)*100 if targets else 0; \
@@ -160,14 +160,14 @@ coverage: generate ensure-sim ## Run tests with code coverage report
 
 check: format-check lint ensure-sim ## Check formatting, lint, build, and test without regenerating project or formatting source
 	@echo "Building $(SCHEME) on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild build \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
 		-derivedDataPath $(DERIVED_DATA) \
 		-quiet
 	@echo "Running unit tests on $(SIM_NAME)..."
-	@$(SIM_ID_GUARD); \
+	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
@@ -192,19 +192,19 @@ version: ## Show current version and build number
 
 bump-patch: ## Bump patch version (1.0.2 -> 1.0.3)
 	@echo "Bumping patch version..."
-	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2"."$$3+1}'); \
+	@set -o pipefail; NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2"."$$3+1}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
 bump-minor: ## Bump minor version (1.0.2 -> 1.1.0)
 	@echo "Bumping minor version..."
-	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2+1".0"}'); \
+	@set -o pipefail; NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1"."$$2+1".0"}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
 bump-major: ## Bump major version (1.0.2 -> 2.0.0)
 	@echo "Bumping major version..."
-	@NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1+1".0.0"}'); \
+	@set -o pipefail; NEW_VERSION=$$(echo $(VERSION) | awk -F. '{print $$1+1".0.0"}'); \
 	sed -i '' "s/MARKETING_VERSION: \"$(VERSION)\"/MARKETING_VERSION: \"$$NEW_VERSION\"/" project.yml; \
 	echo "Version: $(VERSION) -> $$NEW_VERSION"
 
@@ -228,7 +228,7 @@ release: ## Create a release (bump, tag, push, GitHub release)
 		exit 1; \
 	fi
 	@# Validate version doesn't already exist as tag
-	@if git tag -l | grep -q "^v$(VERSION)$$"; then \
+	@if [ -n "$$(git tag -l "v$(VERSION)")" ]; then \
 		echo "Error: Tag v$(VERSION) already exists. Bump version first."; \
 		exit 1; \
 	fi
@@ -247,7 +247,7 @@ release: ## Create a release (bump, tag, push, GitHub release)
 		exit 1; \
 	fi
 	@# Re-read version after potential bump and continue release
-	@NEW_VERSION=$$(grep 'MARKETING_VERSION:' project.yml | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/'); \
+	@set -o pipefail; NEW_VERSION=$$(grep 'MARKETING_VERSION:' project.yml | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/'); \
 	echo ""; \
 	echo "Preparing release v$$NEW_VERSION..."; \
 	DATE=$$(date +%Y-%m-%d); \
@@ -307,7 +307,7 @@ ifndef BRANCH
 	@echo "       make worktree-create BRANCH=feature/new-thing NEW=1"
 	@exit 1
 endif
-	@WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
+	@set -o pipefail; WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
 	WORKTREE_PATH="$(WORKTREE_DIR)/$$WORKTREE_NAME"; \
 	if [ -d "$$WORKTREE_PATH" ]; then \
 		if git worktree list --porcelain | awk '/^worktree / {print $$2}' | grep -qx "$$WORKTREE_PATH"; then \
@@ -343,7 +343,7 @@ ifndef BRANCH
 	@echo "Usage: make worktree-remove BRANCH=feature/foo"
 	@exit 1
 endif
-	@WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
+	@set -o pipefail; WORKTREE_NAME=$$(echo "$(BRANCH)" | sed 's|/|-|g'); \
 	WORKTREE_PATH="$(WORKTREE_DIR)/$$WORKTREE_NAME"; \
 	if [ ! -d "$$WORKTREE_PATH" ]; then \
 		echo "Error: Worktree not found at $$WORKTREE_PATH"; \
