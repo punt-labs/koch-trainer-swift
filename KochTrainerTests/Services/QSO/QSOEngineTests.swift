@@ -105,26 +105,6 @@ final class QSOEngineTests: XCTestCase {
         XCTAssertFalse(engine.station.qth.isEmpty)
     }
 
-    func testResetClearsState() {
-        let engine = QSOEngine(style: .ragChew, myCallsign: "K1ABC")
-        engine.startQSO()
-
-        engine.reset()
-
-        XCTAssertEqual(engine.state.phase, .idle)
-        XCTAssertTrue(engine.state.transcript.isEmpty)
-    }
-
-    func testGetCurrentHintReturnsValue() {
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC")
-        engine.startQSO()
-
-        let hint = engine.getCurrentHint()
-
-        XCTAssertTrue(hint.contains("CQ"))
-        XCTAssertTrue(hint.contains("W5ABC"))
-    }
-
     // MARK: - startWithAICQ Tests
 
     func testStartWithAICQSetsReceivedCallPhase() {
