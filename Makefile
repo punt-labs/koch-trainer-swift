@@ -1,6 +1,9 @@
 # Koch CW Trainer - CLI Build Commands
 # Usage: make <target>
 
+SHELL := /bin/bash
+.SHELLFLAGS := -eo pipefail -c
+
 SCHEME = KochTrainer
 # Derive unique simulator name from branch to avoid worktree contention
 BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-')
@@ -29,7 +32,7 @@ SIM_ID_GUARD = SIM_ID=$$($(RESOLVE_SIM_ID)); if [ -z "$$SIM_ID" ]; then echo "Er
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
 
-.PHONY: help generate build test check ui-test clean run lint format coverage all version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
+.PHONY: help generate build test check ui-test clean run lint format format-check coverage all version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
@@ -68,6 +71,9 @@ format: ## Auto-format code with SwiftFormat
 		echo "SwiftFormat not installed. Install with: brew install swiftformat"; \
 		exit 1; \
 	fi
+
+format-check: ## Check Swift formatting without modifying source
+	swiftformat --lint .
 
 lint: ## Lint with SwiftLint (no mutations)
 	@echo "Running SwiftLint..."
@@ -152,7 +158,22 @@ coverage: generate ensure-sim ## Run tests with code coverage report
 		cov=targets[0].get('lineCoverage',0)*100 if targets else 0; \
 		print(f'Line Coverage: {cov:.1f}%')" 2>/dev/null || echo "Could not parse coverage report."
 
-check: build test ## Run all quality gates (format + lint + build + test)
+check: format-check lint ensure-sim ## Check formatting, lint, build, and test without regenerating project or formatting source
+	@echo "Building $(SCHEME) on $(SIM_NAME)..."
+	@$(SIM_ID_GUARD); \
+	xcodebuild build \
+		-scheme $(SCHEME) \
+		-destination "$$DESTINATION" \
+		-derivedDataPath $(DERIVED_DATA) \
+		-quiet
+	@echo "Running unit tests on $(SIM_NAME)..."
+	@$(SIM_ID_GUARD); \
+	xcodebuild test \
+		-scheme $(SCHEME) \
+		-destination "$$DESTINATION" \
+		-derivedDataPath $(DERIVED_DATA) \
+		-only-testing:KochTrainerTests \
+		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 
 all: generate format lint build test ## Full pipeline including project generation
 	@echo "All steps complete."
