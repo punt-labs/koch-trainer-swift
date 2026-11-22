@@ -144,48 +144,6 @@ final class SessionCounterTests: XCTestCase {
         XCTAssertEqual(counter.accuracy, 0.75, accuracy: 0.001)
     }
 
-    // MARK: - Reset
-
-    func testReset_clearsAttempts() {
-        let counter = SessionCounter()
-        counter.recordAttempt(wasCorrect: true)
-        counter.recordAttempt(wasCorrect: false)
-
-        counter.reset()
-
-        XCTAssertEqual(counter.attempts, 0)
-    }
-
-    func testReset_clearsCorrect() {
-        let counter = SessionCounter()
-        counter.recordAttempt(wasCorrect: true)
-        counter.recordAttempt(wasCorrect: true)
-
-        counter.reset()
-
-        XCTAssertEqual(counter.correct, 0)
-    }
-
-    func testReset_resetsAccuracy() {
-        let counter = SessionCounter()
-        counter.recordAttempt(wasCorrect: true)
-
-        counter.reset()
-
-        XCTAssertEqual(counter.accuracy, 0)
-    }
-
-    func testReset_canRecordAfterReset() {
-        let counter = SessionCounter()
-        counter.recordAttempt(wasCorrect: true)
-        counter.reset()
-
-        counter.recordAttempt(wasCorrect: false)
-
-        XCTAssertEqual(counter.attempts, 1)
-        XCTAssertEqual(counter.correct, 0)
-    }
-
     // MARK: - Restore
 
     func testRestore_setsAttempts() {

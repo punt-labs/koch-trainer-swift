@@ -43,12 +43,6 @@ final class SessionCounter: ObservableObject {
         }
     }
 
-    /// Reset counters to zero.
-    func reset() {
-        attempts = 0
-        correct = 0
-    }
-
     /// Restore counters from saved state.
     /// - Parameters:
     ///   - correct: Number of correct attempts to restore.

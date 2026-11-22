@@ -186,42 +186,6 @@ final class QSOEnginePhaseTests: XCTestCase {
         XCTAssertTrue(mockAudio.bandConditionsConfigured)
     }
 
-    // MARK: - addTranscriptMessage Tests
-
-    func testAddTranscriptMessageFromUser() {
-        let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
-
-        engine.addTranscriptMessage(from: .user, text: "TEST MESSAGE")
-
-        XCTAssertEqual(engine.state.transcript.count, 1)
-        XCTAssertEqual(engine.state.transcript.first?.sender, .user)
-        XCTAssertEqual(engine.state.transcript.first?.text, "TEST MESSAGE")
-    }
-
-    func testAddTranscriptMessageFromStation() {
-        let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
-
-        engine.addTranscriptMessage(from: .station, text: "AI RESPONSE")
-
-        XCTAssertEqual(engine.state.transcript.count, 1)
-        XCTAssertEqual(engine.state.transcript.first?.sender, .station)
-        XCTAssertEqual(engine.state.transcript.first?.text, "AI RESPONSE")
-    }
-
-    // MARK: - stopAudio Tests
-
-    func testStopAudioCallsStop() {
-        let mockAudio = MockAudioEngine()
-        let engine = QSOEngine(style: .contest, myCallsign: "W5ABC", audioEngine: mockAudio, aiResponseDelay: 0)
-
-        engine.stopAudio()
-
-        XCTAssertTrue(mockAudio.stopCalled)
-        XCTAssertFalse(engine.isPlayingAudio)
-    }
-
     // MARK: - Validation Result Tests
 
     func testValidationResultValidForCorrectInput() async {

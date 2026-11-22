@@ -103,18 +103,6 @@ final class QSOEngine: ObservableObject {
         }
     }
 
-    /// Get hint for current phase
-    func getCurrentHint() -> String {
-        QSOTemplate.userHint(for: state)
-    }
-
-    /// Reset for a new QSO with the same settings
-    func reset() {
-        state = QSOState(style: state.style, myCallsign: state.myCallsign)
-        station = VirtualStation.randomOrPreset()
-        lastValidationResult = .valid
-    }
-
     /// Start QSO with AI calling CQ (Answer CQ mode)
     /// Returns the CQ call text for display/audio coordination
     func startWithAICQ() -> String {
@@ -134,17 +122,6 @@ final class QSOEngine: ObservableObject {
         state.phase = .receivedCall
 
         return cqCall
-    }
-
-    /// Add a message to the transcript (for external coordination)
-    func addTranscriptMessage(from sender: QSOSender, text: String) {
-        state.addMessage(from: sender, text: text)
-    }
-
-    /// Stop any ongoing audio playback
-    func stopAudio() {
-        audioEngine.stop()
-        isPlayingAudio = false
     }
 
     // MARK: Private
