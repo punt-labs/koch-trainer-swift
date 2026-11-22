@@ -68,7 +68,6 @@ KochTrainer/
 │   ├── IntervalCalculator.swift  # Spaced repetition intervals
 │   ├── StreakCalculator.swift    # Consecutive day tracking
 │   ├── NotificationManager.swift # Local notification scheduling
-│   ├── MorseDecoder.swift
 │   └── GroupGenerator.swift
 └── Resources/
     └── Assets.xcassets/

@@ -367,7 +367,6 @@ final class SendTrainingViewModel: ObservableObject, CharacterIntroducing {
 
     private let audioEngine: AudioEngineProtocol
     private let announcer: AccessibilityAnnouncer
-    private let decoder = MorseDecoder()
     private var progressStore: ProgressStore?
     private var settingsStore: SettingsStore?
     private var sessionTimer: Timer?

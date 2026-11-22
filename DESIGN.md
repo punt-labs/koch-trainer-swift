@@ -529,7 +529,6 @@ View testing uses XCUITest integration tests rather than unit-level ViewInspecto
 | StudentProgress | `koch-eho` | Done |
 | AppSettings | `koch-819` | Done |
 | QSOEngine | `koch-69q` | Done |
-| MorseDecoder | `koch-2h5` | Done |
 | MorseAudioEngine | `koch-82u` | Done |
 | StreakCalculator | `koch-sdq` | Done |
 
