@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Agent edits now receive advisory Swift formatting/lint and shell feedback
+  through configurable ethos checks, with staged Swift checks and a full
+  quality gate at handoff.
+- `make check` checks formatting without changing source or regenerating the
+  tracked Xcode project. Build and test pipelines now preserve failures on
+  macOS Make as well as newer GNU Make versions.
 - Linear is the sole issue tracker (Punt Labs team, label `repo:koch`); the
   local beads tracker, its `.envrc` settings, and its agent instructions are
   removed, and the App Store Preparation epic is a Linear project.

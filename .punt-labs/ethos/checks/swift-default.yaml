@@ -1,0 +1,40 @@
+name: swift-default
+description: Advisory edit feedback, staged Swift gates, and the full read-only gate at handoff.
+checks:
+  - name: swiftformat
+    stage: edit
+    files: ["**/*.swift"]
+    run: [swiftformat, --lint, "{file}"]
+    on_fail: advisory
+    timeout: 10s
+  - name: swiftlint
+    stage: edit
+    files: ["**/*.swift"]
+    run: [swiftlint, lint, --strict, "{file}"]
+    on_fail: advisory
+    timeout: 10s
+  - name: shellcheck
+    stage: edit
+    files: ["**/*.sh"]
+    run: [shellcheck, "{file}"]
+    on_fail: advisory
+    timeout: 10s
+  - name: swiftlint-staged
+    stage: commit
+    files: ["**/*.swift"]
+    run: [swiftlint, lint, --strict, "{files}"]
+    on_fail: block
+    timeout: 120s
+  - name: swiftformat-staged
+    stage: commit
+    files: ["**/*.swift"]
+    run: [swiftformat, --lint, "{files}"]
+    on_fail: block
+    timeout: 120s
+  - name: full-gate
+    stage: handoff
+    files: all
+    adapter: make
+    target: check
+    on_fail: block
+    timeout: 25m
