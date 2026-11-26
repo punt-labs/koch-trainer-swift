@@ -6,7 +6,7 @@ if CommandLine.arguments.count == 2, CommandLine.arguments[1] == "id" {
     exit(0)
 }
 
-guard CommandLine.arguments.count >= 4,
+guard CommandLine.arguments.count >= 4, CommandLine.arguments[1] == "run",
       let since = FSEventStreamEventId(CommandLine.arguments[2]) else {
     exit(2)
 }
@@ -24,13 +24,28 @@ let callback: FSEventStreamCallback = { _, _, count, eventPaths, flags, ids in
     fflush(stdout)
 }
 
-let roots = Array(CommandLine.arguments.dropFirst(3)) as CFArray
+var roots = Array(CommandLine.arguments.dropFirst(3))
+var exclusion: String?
+if let option = roots.firstIndex(of: "--exclude") {
+    guard option > 0, roots.count == option + 2 else { exit(2) }
+    exclusion = roots.removeLast()
+    roots.removeLast()
+}
+
 let flags = FSEventStreamCreateFlags(
     kFSEventStreamCreateFlagUseCFTypes | kFSEventStreamCreateFlagFileEvents |
         kFSEventStreamCreateFlagWatchRoot | kFSEventStreamCreateFlagNoDefer
 )
-guard let stream = FSEventStreamCreate(nil, callback, nil, roots, since, 0.05, flags) else {
+guard let stream = FSEventStreamCreate(nil, callback, nil, roots as CFArray, since, 0.05, flags) else {
     exit(3)
+}
+
+if let exclusion,
+   !FSEventStreamSetExclusionPaths(stream, [exclusion] as CFArray) {
+    fputs("FSEvents could not exclude replay scratch\n", stderr)
+    FSEventStreamInvalidate(stream)
+    FSEventStreamRelease(stream)
+    exit(6)
 }
 
 FSEventStreamSetDispatchQueue(stream, DispatchQueue(label: "koch.fsevents"))

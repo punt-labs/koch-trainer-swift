@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import time
 
-from replay import HERE, finish_watch, git_path, key, read_watcher_line, through_cutoff, verdict
+from replay import HERE, finish_watch, git_path, key, read_watcher_line, through_cutoff, verdict, watch_command
 from vnode_guard import VnodeGuard
 
 
@@ -47,9 +47,8 @@ def trial(root, git_dir, scratch, kind):
         guard.arm()
         before = key(root)
         guard.check_opening_paths(before["paths"])
-        since = subprocess.check_output([HERE / "watch", "id"], text=True).strip()
         with subprocess.Popen(
-            [HERE / "watch", "run", since, root, git_dir],
+            watch_command(root, git_dir, guard.keyed),
             stdin=subprocess.PIPE, stdout=raw, stderr=subprocess.PIPE, text=True
         ) as watcher:
             try:

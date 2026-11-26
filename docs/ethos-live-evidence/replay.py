@@ -34,6 +34,20 @@ def git_path(root, value):
     ).strip()).resolve()
 
 
+def watch_command(root, git_dir, keyed):
+    binary = HERE / "watch"
+    since = subprocess.check_output([binary, "id"], text=True).strip()
+    command = [binary, "run", since, *sorted({root, git_dir})]
+    if (HERE != root and HERE.is_relative_to(root)
+            and not git_dir.is_relative_to(HERE) and not HERE.is_relative_to(git_dir)
+            and not any(path.is_relative_to(HERE) for path in keyed)):
+        status = subprocess.run(["git", "check-ignore", "-q", "--", str(HERE) + "/"], cwd=root)
+        if status.returncode != 1:
+            status.check_returncode()
+            command.extend(["--exclude", HERE])
+    return command
+
+
 def relevant(paths, git_dir, event):
     flags = event["flags"]
     if flags & AMBIGUOUS:
@@ -97,9 +111,8 @@ def run(root, name, touch, probe_drops, gate_write):
         guard.arm()
         before = key(root)
         guard.check_opening_paths(before["paths"])
-        since = subprocess.check_output([HERE / "watch", "id"], text=True).strip()
         watcher = subprocess.Popen(
-            [HERE / "watch", "run", since, *sorted({root, git_dir})],
+            watch_command(root, git_dir, guard.keyed),
             stdin=subprocess.PIPE, stdout=events, stderr=subprocess.PIPE, text=True
         )
         timer = None

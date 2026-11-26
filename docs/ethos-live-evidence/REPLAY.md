@@ -94,7 +94,9 @@ git -C "$koch" worktree remove "$proof/koch-race-checkout"
 ```
 
 The watcher subscribes to the checkout and its Git directory, resolved by
-`git rev-parse --git-dir`, not the shared store. It filters ordinary events
+`git rev-parse --git-dir`, not the shared store. The FSEvents stream excludes
+the Git-ignored proof subtree before delivery if it contains no keyed paths.
+It still filters ordinary events
 to the keyed paths and their ancestors plus the worktree's `HEAD` and
 `index`. Coverage flags defer regardless of the cutoff.
 
