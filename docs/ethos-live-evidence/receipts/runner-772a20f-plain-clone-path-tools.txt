@@ -1,0 +1,53 @@
+Ethos runner: 772a20fb067df2eb29b41f175c01c3debc73c6c7
+Koch plain clone base: 9d4caa9dba4652198fab00d7601b8baabe6d347b
+Koch local test commit: ac19f6a6d9d842f6382d0b0d3c360ca88d2fb434
+Workstation paths redacted as <repo>.
+
+Sidecar retained isolation: live-verified and added:
+  path: [/opt/homebrew/bin]
+  system:
+    tools: [swiftformat, swiftlint]
+
+Ethos accepted both fields. The Mac test VM acted as stand-in operator in
+an interactive TTY outside Claude Code and OpenCode and answered yes.
+Approved swift-default at dd72943792178e7bc46edf12504d0834919804791ed708bd57b28d8a4e0e49c1
+Approval did not modify .gitignore. The clean replay started from an empty
+git status --porcelain. No caller PATH was inherited by the gate.
+
+Clean tree (session replay-hostpath-clean)
+clean HOOK_EXIT=0
+Hook response: decision=block, full-gate: exit status 2
+0/128 files require formatting, 13 files skipped.
+SourceKittenFramework/library_wrapper.swift:63: Fatal error: Loading sourcekitdInProc.framework/Versions/A/sourcekitdInProc failed. Tried:
+make: *** [lint] Error 1
+real 0.86
+stage=handoff check=full-gate outcome=launched duration_ms=1 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=failed duration_ms=761 isolation=live-verified dir=.
+
+Deliberate SwiftFormat break (session replay-hostpath-broken)
+broken HOOK_EXIT=0
+Hook response: decision=block, full-gate: exit status 2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+1/129 files require formatting, 13 files skipped.
+make: *** [format-check] Error 1
+real 1.13
+stage=handoff check=full-gate outcome=launched duration_ms=4 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=failed duration_ms=1034 isolation=live-verified dir=.
+
+Keyed write (session replay-plain-keyed)
+A fresh keyed seed forced a launch without clearing the cache.
+Wrote LiveVerifiedGateProbe.txt after outcome=launched.
+PLAIN_KEYED_HOOK_EXIT=0
+{"systemMessage":"handoff checks deferred (full-gate): checkout input set changed during the live-verified check. Run the explicit project gate: (cd <repo> && make check)"}
+real 0.66
+stage=handoff check=full-gate outcome=launched duration_ms=1 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=deferred duration_ms=556 isolation=live-verified dir=.
+This was an input-set mismatch, not an independent watcher veto.
+
+Direct SwiftLint controls (no hook): env -i with the same PATH, isolated
+HOME/TMPDIR, and different DEVELOPER_DIR values; swiftlint lint --quiet.
+/Library/Developer/CommandLineTools:
+clt swiftlint exit=133
+SourceKittenFramework/library_wrapper.swift:63: Fatal error: Loading sourcekitdInProc.framework/Versions/A/sourcekitdInProc failed. Tried:
+/Applications/Xcode.app/Contents/Developer:
+xcode swiftlint exit=0

@@ -261,3 +261,18 @@ Leave both files present until the hook returns, then remove them and
 check that the clone is clean. Do not substitute `make check` for the hook
 in this probe. For the direct clean baseline, run `/usr/bin/time -p make check`
 on the clean clone using the normal host PATH.
+
+### Plain-clone replay with Homebrew tools
+
+The sidecar now declares `path: [/opt/homebrew/bin]` and fingerprints
+`swiftformat` and `swiftlint` through `system.tools`. Ethos `772a20f`
+accepted both fields in live-verified mode and ran both tools. The broken
+run blocked with the expected SwiftFormat exit `2`, and a write after
+launch deferred because the checkout input set changed.
+
+**Clean parity still waits for the runner to keep full Xcode selected.**
+This runner set `DEVELOPER_DIR` to the Command Line Tools directory for
+`make`. SwiftFormat passed, but SwiftLint could not load `sourcekitdInProc`.
+The [path/tools receipt](receipts/runner-772a20f-plain-clone-path-tools.txt)
+records the hook timings and the direct SwiftLint control: CLT reproduced
+the crash; full Xcode passed. The hook did not reach the simulator tests.
