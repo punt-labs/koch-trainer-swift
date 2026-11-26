@@ -387,3 +387,114 @@ Remove only the probe you created after the hook returns, then verify
   run_8d5e529 replay-plain-keyed
 )
 ```
+
+### Darwin runner `4c24606`: DerivedData in runner scratch
+
+Koch `04febee7966718ae50ab49833c72a40a2f8023bf` sets
+`CHECK_DERIVED_DATA: "{scratch}/DerivedData"` in the live-verified sidecar.
+Both the build and test recipes in `make check` use that directory for
+`-derivedDataPath`. Without the sidecar override they still use
+`./DerivedData`. The gate and its test selection are unchanged. Ethos
+watches ignored paths, so ignoring `DerivedData` is not a substitute for
+moving it outside the checkout. The runner creates and removes its own
+scratch directory.
+
+Build from the exact runner revision (use an existing scratch directory
+outside the checkouts for `proof`):
+
+```sh
+ref=devin/1795658354-darwin-worktree-runner
+git -C "$ethos_repo" ls-remote origin "refs/heads/$ref"
+git -C "$ethos_repo" fetch origin "$ref"
+git -C "$ethos_repo" worktree add --detach "$proof/ethos-darwin-4c24606" \
+  4c246062490ab201d0666a20bd2742eb0df5bd37
+runner="$proof/ethos-darwin-4c24606-bin"
+(cd "$proof/ethos-darwin-4c24606" && go build -o "$runner" ./cmd/ethos)
+```
+
+Use a linked worktree and a separate ordinary clone. Set `checkout` to
+each absolute path in turn and `layout` to `linked` or `plain`. Check
+out the exact Koch revision above in each checkout first. Run the
+following in an interactive TTY outside Claude Code and OpenCode, type
+`yes` at the approval prompt, and stop if any clean-tree guard fails:
+
+```sh
+clean_checkout() {
+  local tree_status
+  tree_status=$(git --no-optional-locks status --porcelain) || return 1
+  test -z "$tree_status" || { printf '%s\n' "$tree_status" >&2; return 1; }
+}
+
+run_4c24606() {
+  printf '{"session_id":"%s","agent_id":"worker","agent_type":"implementer"}\n' "$1" |
+    /usr/bin/time -p env ETHOS_SESSION="$1" ETHOS_AGENT_ID=worker \
+      CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
+}
+
+(
+  cd "$checkout" || exit 1
+  test "$(git rev-parse HEAD)" = 04febee7966718ae50ab49833c72a40a2f8023bf || exit 1
+  clean_checkout || exit 1
+  "$runner" handoff approve-live swift-default || exit 1
+  clean_checkout || exit 1
+  run_4c24606 "replay-4c24606-$layout-clean" || exit 1
+  clean_checkout || exit 1
+  (
+    probe=KochTrainer/HandoffParityProbe.swift
+    (set -C; printf 'let handoffParityProbe    = 1\n' >"$probe") || exit 1
+    trap 'rm -- "$probe"' EXIT
+    run_4c24606 "replay-4c24606-$layout-broken"
+  ) || exit 1
+  clean_checkout
+)
+```
+
+For the keyed-write case, start tailing new lines in
+`~/.punt-labs/ethos/logs/ethos.log` before starting the block. From a
+second shell in the same checkout, run
+`(set -C; printf 'keyed probe\n' >LiveVerifiedGateProbe.txt)` when the
+handoff diagnostic for `replay-plain-keyed` reports `outcome=launched`.
+After the hook returns, remove only the probe you created, then check
+that the tree is clean:
+
+```sh
+(
+  cd "$checkout" || exit 1
+  clean_checkout || exit 1
+  seed=LiveVerifiedGateSeed.txt
+  (set -C; uuidgen >"$seed") || exit 1
+  trap 'rm -- "$seed"' EXIT
+  run_4c24606 replay-plain-keyed
+)
+```
+
+```sh
+(cd "$checkout" && clean_checkout)
+```
+
+The `stage=handoff` diagnostic distinguishes a retained `completed`
+verdict from `failed` (block) or `deferred`, and records
+`developer_fingerprint`. The hook process can exit zero for any of
+those outcomes; inspect the verdict rather than the process exit alone.
+
+Both checkouts retained the clean verdict with no FSEvents budget defer.
+Both blocked on the deliberate SwiftFormat violation and deferred on
+the keyed write with the same advisory:
+
+> handoff checks deferred (full-gate): checkout input set changed during
+> the live-verified check at "LiveVerifiedGateProbe.txt".
+
+The runner appended the manual `make check` command for the checkout.
+This was an input-set mismatch, not an independent watcher veto.
+No `.gitignore` change occurred during approval or any hook run.
+
+| Case | [Linked worktree](receipts/runner-4c24606-linked-worktree.txt) | [Plain clone](receipts/runner-4c24606-plain-clone.txt) |
+| --- | --- | --- |
+| Clean | 63.25 s: retained pass | 64.75 s: retained pass; 915 XCTest tests, zero failures |
+| SwiftFormat break | 1.44 s: blocked, gate exit 2, `consecutiveSpaces` | 1.03 s: blocked, gate exit 2, `consecutiveSpaces` |
+| Keyed write after launch | 70.63 s: deferred at `LiveVerifiedGateProbe.txt` | 58.87 s: deferred at `LiveVerifiedGateProbe.txt` |
+
+Both clean runs invoked `xcodebuild build` and `xcodebuild test` with
+the scratch path. The plain-clone test count was captured from the
+scratch `.xcresult` before removal. The linked run retained its pass
+but its scratch result was gone before the test count could be captured.

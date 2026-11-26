@@ -1,0 +1,51 @@
+Ethos runner: 4c246062490ab201d0666a20bd2742eb0df5bd37
+Koch test revision: 04febee7966718ae50ab49833c72a40a2f8023bf
+Checkout: plain clone; .git is a directory.
+Selected developer dir: /Applications/Xcode.app/Contents/Developer
+Xcode 26.6
+Build version 17F113
+
+The Mac VM acted as stand-in operator in an interactive TTY outside
+Claude Code and OpenCode and answered yes to:
+  "$runner" handoff approve-live swift-default
+Approved swift-default at b07b08ee7c2cc9843068c6792a4ba3b9df537e4c655c74b6d02000b0a03e1022
+git --no-optional-locks status --porcelain was empty before and after
+approval, after the clean run, and after removing the broken and keyed
+probes. No .gitignore changes.
+
+Timed hook command (see REPLAY.md for the probes):
+  printf '{"session_id":"%s","agent_id":"worker","agent_type":"implementer"}\n' "$session" |
+    /usr/bin/time -p env ETHOS_SESSION="$session" ETHOS_AGENT_ID=worker \
+      CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
+
+Clean (replay-4c24606-plain-clean)
+Observed /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
+build and test both using -derivedDataPath
+  /private/tmp/eh-live-4211780519.ethos-tmp/DerivedData
+The test process used -only-testing:KochTrainerTests. Ethos retained
+the pass; no hook stdout and no FSEvents budget defer.
+real 64.75
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=completed duration_ms=64633 isolation=live-verified developer_fingerprint=2cbf058ee2e7e6490f8d0d50045e522626743ececfa4606634f41a6076200528
+Scratch xcresult action log: Executed 915 tests, with 0 failures (0 unexpected) in 32.948 (33.390) seconds
+xcresulttool summary: {"result":"Passed","passedTests":916,"failedTests":0,"skippedTests":0}
+
+Broken (replay-4c24606-plain-broken)
+decision=block; full-gate: exit status 2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+make: *** [format-check] Error 1
+real 1.03
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=failed duration_ms=932 isolation=live-verified developer_fingerprint=2cbf058ee2e7e6490f8d0d50045e522626743ececfa4606634f41a6076200528
+
+Keyed write (replay-plain-keyed)
+Wrote LiveVerifiedGateProbe.txt after outcome=launched.
+handoff checks deferred (full-gate): checkout input set changed during the live-verified check at "LiveVerifiedGateProbe.txt". Run the explicit project gate: (cd <repo> && make check)
+real 58.87
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=deferred duration_ms=58787 isolation=live-verified developer_fingerprint=2cbf058ee2e7e6490f8d0d50045e522626743ececfa4606634f41a6076200528
+
+The hook exited 0 in all three cases. The synthetic replay sessions
+were not registered, so stderr also reported that they could not be left.
+Verdicts are from the hook response and stage=handoff diagnostics.
+Workstation checkout paths redacted as <repo>.
