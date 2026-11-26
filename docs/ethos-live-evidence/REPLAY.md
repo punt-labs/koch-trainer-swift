@@ -498,3 +498,61 @@ Both clean runs invoked `xcodebuild build` and `xcodebuild test` with
 the scratch path. The plain-clone test count was captured from the
 scratch `.xcresult` before removal. The linked run retained its pass
 but its scratch result was gone before the test count could be captured.
+
+#### Transient tracked-file probe: matching key, watcher veto
+
+The keyed-write case above leaves a new input in place until the hook
+returns. To test the watchers independently, replay Koch
+`618e9a7ea5de3ebf6805a3c49f9d476630599b88` with the same approved
+`4c24606` runner. This time briefly append to tracked `README.md`
+after an actual `xcodebuild` recipe starts, then restore the bytes and
+mode before the gate returns.
+
+In the first terminal run:
+
+```sh
+(
+  cd "$checkout" || exit 1
+  clean_checkout || exit 1
+  seed=LiveVerifiedGateSeed.txt
+  (set -C; uuidgen >"$seed") || exit 1
+  trap 'rm -- "$seed"' EXIT
+  run_4c24606 "replay-4c24606-$layout-transient"
+)
+```
+
+In a second terminal, wait for `outcome=launched` for that session in
+the hook diagnostics. Use `ps -axo pid=,ppid=,ucomm=` to confirm an
+`xcodebuild` descendant of that hook process, not just a running
+`make`. Then run this while the recipe is still running. `proof` must
+be outside the checkout:
+
+```sh
+(
+  cd "$checkout" || exit 1
+  git ls-files --error-unmatch -- README.md >/dev/null || exit 1
+  test "$(git --no-optional-locks status --porcelain)" = '?? LiveVerifiedGateSeed.txt' || exit 1
+  backup=$(mktemp "$proof/README.XXXXXX") || exit 1
+  cp -p README.md "$backup" || exit 1
+  printf 'Recovery copy: %s\n' "$backup"
+  if ! printf '\ntransient live-verified probe\n' >> README.md; then
+    cp -p "$backup" README.md
+    exit 1
+  fi
+  cp -p "$backup" README.md || exit 1
+  cmp "$backup" README.md || exit 1
+  test "$(stat -f '%Lp' "$backup")" = "$(stat -f '%Lp' README.md)" || exit 1
+  shasum -a 256 README.md
+  rm -- "$backup" || exit 1
+  test "$(git --no-optional-locks status --porcelain)" = '?? LiveVerifiedGateSeed.txt'
+)
+```
+
+After the first terminal finishes, require `clean_checkout` again in
+the checkout. The [transient receipt](receipts/runner-4c24606-transient.txt)
+records **66.94 s** for the plain clone and **71.94 s** for the linked
+worktree. Both runs reported `FSEvents observed a change` and
+`live-verified vetoed by vnode note 0xe` at `README.md`. Neither
+reported an input-set or key mismatch. The runner checks those first,
+so reaching the watcher veto also establishes that the closing key
+matched.

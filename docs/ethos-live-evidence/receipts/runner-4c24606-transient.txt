@@ -1,0 +1,38 @@
+Ethos runner: 4c246062490ab201d0666a20bd2742eb0df5bd37
+Koch revision in both checkouts: 618e9a7ea5de3ebf6805a3c49f9d476630599b88
+Existing approved policy: b07b08ee7c2cc9843068c6792a4ba3b9df537e4c655c74b6d02000b0a03e1022
+The sidecar and check YAML were unchanged since the Mac VM operator's approval.
+
+Timed hook command:
+  printf '{"session_id":"%s","agent_id":"worker","agent_type":"implementer"}\n' "$session" |
+    /usr/bin/time -p env ETHOS_SESSION="$session" ETHOS_AGENT_ID=worker \
+      CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
+
+Each run used a fresh UUID seed left unchanged across the opening and
+closing keys. After outcome=launched and with a descendant xcodebuild
+process running, the probe appended and flushed bytes to tracked
+README.md, truncated back to its original length, and restored its
+mtime. It verified the bytes and mode directly. The only git status
+entry after restoration was the original seed. git --no-optional-locks
+status --porcelain was empty before each run and after seed removal.
+
+Plain clone (replay-4c24606-plain-transient)
+Observed recipe pid=11732 command=xcodebuild after outcome=launched
+README.md: opening and restored sha256=f03ead4b07ef44f817c2d5aa0480db0b3baefc9bcde829ad893f8405f157ab1b mode=644
+handoff checks deferred (full-gate): FSEvents observed a change at "<repo>/README.md"
+live-verified vetoed by vnode note 0xe at "<repo>/README.md". Run the explicit project gate: (cd <repo> && make check)
+outcome=deferred duration_ms=66849 isolation=live-verified developer_fingerprint=2cbf058ee2e7e6490f8d0d50045e522626743ececfa4606634f41a6076200528
+HOOK_EXIT=0
+real 66.94
+
+Linked worktree (replay-4c24606-linked-transient)
+Observed recipe pid=11947 command=xcodebuild after outcome=launched
+README.md: opening and restored sha256=f03ead4b07ef44f817c2d5aa0480db0b3baefc9bcde829ad893f8405f157ab1b mode=644
+handoff checks deferred (full-gate): FSEvents observed a change at "<repo>/README.md"
+live-verified vetoed by vnode note 0xe at "<repo>/README.md". Run the explicit project gate: (cd <repo> && make check)
+outcome=deferred duration_ms=71459 isolation=live-verified developer_fingerprint=2cbf058ee2e7e6490f8d0d50045e522626743ececfa4606634f41a6076200528
+HOOK_EXIT=0
+real 71.94
+
+Paths to the worktree and clone are redacted as <repo>. Git status
+confirmed no .gitignore changes.
