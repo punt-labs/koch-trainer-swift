@@ -181,9 +181,9 @@ replay_stop() {
 
 replay_live_pair() (
   cd "$koch" || exit 1
-  status=$(git --no-optional-locks status --porcelain) || exit 1
-  if [ -n "$status" ]; then
-    printf 'Approval left a dirty checkout; stop before replaying:\n%s\n' "$status" >&2
+  tree_status=$(git --no-optional-locks status --porcelain) || exit 1
+  if [ -n "$tree_status" ]; then
+    printf 'Approval left a dirty checkout; stop before replaying:\n%s\n' "$tree_status" >&2
     exit 1
   fi
   replay_stop
@@ -348,8 +348,8 @@ run_8d5e529() {
   cd "$checkout" || exit 1
   test "$(git rev-parse HEAD)" = be5f1ca21c7dd80ae238092a3c83fd42ac3e7cd2 || exit 1
   "$runner" handoff approve-live swift-default || exit 1
-  status=$(git --no-optional-locks status --porcelain) || exit 1
-  test -z "$status" || { printf '%s\n' "$status" >&2; exit 1; }
+  tree_status=$(git --no-optional-locks status --porcelain) || exit 1
+  test -z "$tree_status" || { printf '%s\n' "$tree_status" >&2; exit 1; }
   run_8d5e529 "replay-8d5e529-$layout-clean"
   (
     probe=KochTrainer/HandoffParityProbe.swift
@@ -379,8 +379,8 @@ Remove only the probe you created after the hook returns, then verify
 ```sh
 (
   cd "$checkout" || exit 1
-  status=$(git --no-optional-locks status --porcelain) || exit 1
-  test -z "$status" || { printf '%s\n' "$status" >&2; exit 1; }
+  tree_status=$(git --no-optional-locks status --porcelain) || exit 1
+  test -z "$tree_status" || { printf '%s\n' "$tree_status" >&2; exit 1; }
   seed=LiveVerifiedGateSeed.txt
   (set -C; uuidgen >"$seed") || exit 1
   trap 'rm -- "$seed"' EXIT
