@@ -1,0 +1,6 @@
+# Provisional DES-086 live-verified profile; pending approval and Ethos support.
+checks:
+  full-gate:
+    profile: darwin-live-verified-v1
+    epoch: koch-live-v1
+    sources: {mode: worktree}
