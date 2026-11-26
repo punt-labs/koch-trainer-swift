@@ -232,18 +232,23 @@ The mutation shows the runner discards the gate result when the input set
 changes in-flight. It does not demonstrate a watcher veto or a successful
 915-test run under Ethos.
 
-Clone outside existing worktrees, then use the same interactive approval,
-clean-tree guard, and clean/broken commands above with `koch` set to the
-plain clone. The Mac VM acted as the stand-in operator again because the
-clone has a different Git directory. The same storage-upgrade delta was
-restored before either gate was run.
+Reuse the runner binary and `replay_live_pair` function from the build
+block above; do not rerun the linked-worktree setup. This block enters
+the plain clone and selects it for interactive approval and replay.
+The Mac VM acted as the stand-in operator again because the clone has
+a different Git directory. The same storage-upgrade delta was restored
+before either gate was run.
 
 ```sh
-git clone https://github.com/punt-labs/koch-trainer-swift.git \
-  "$HOME/repos/koch-plain-parity-9d4caa9"
-koch="$HOME/repos/koch-plain-parity-9d4caa9"
-git -C "$koch" switch --detach 9d4caa9dba4652198fab00d7601b8baabe6d347b
-test -d "$koch/.git" || exit 1
+clone="$HOME/repos/koch-plain-parity-9d4caa9"
+if git clone https://github.com/punt-labs/koch-trainer-swift.git "$clone" &&
+   cd "$clone" &&
+   git switch --detach 9d4caa9dba4652198fab00d7601b8baabe6d347b &&
+   test -d .git; then
+  koch="$(pwd -P)"
+  runner="$proof/ethos"
+  "$runner" handoff approve-live swift-default && replay_live_pair
+fi
 ```
 
 For the keyed case, use a fresh synthetic session. Create an untracked,
