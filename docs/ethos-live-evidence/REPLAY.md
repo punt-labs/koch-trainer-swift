@@ -524,26 +524,38 @@ In the first terminal run:
 In a second terminal, wait for `outcome=launched` for that session in
 the hook diagnostics. Use `ps -axo pid=,ppid=,ucomm=` to confirm an
 `xcodebuild` descendant of that hook process, not just a running
-`make`. Then run this while the recipe is still running. `proof` must
-be outside the checkout:
+`make`. Then run this while the recipe is still running:
 
 ```sh
 (
   cd "$checkout" || exit 1
   git ls-files --error-unmatch -- README.md >/dev/null || exit 1
   test "$(git --no-optional-locks status --porcelain)" = '?? LiveVerifiedGateSeed.txt' || exit 1
-  backup=$(mktemp "$proof/README.XXXXXX") || exit 1
-  cp -p README.md "$backup" || exit 1
-  printf 'Recovery copy: %s\n' "$backup"
-  if ! printf '\ntransient live-verified probe\n' >> README.md; then
-    cp -p "$backup" README.md
-    exit 1
-  fi
-  cp -p "$backup" README.md || exit 1
-  cmp "$backup" README.md || exit 1
-  test "$(stat -f '%Lp' "$backup")" = "$(stat -f '%Lp' README.md)" || exit 1
-  shasum -a 256 README.md
-  rm -- "$backup" || exit 1
+  python3 - <<'PY' || exit 1
+import hashlib
+import os
+from pathlib import Path
+import stat
+
+tracked = Path("README.md")
+before = tracked.stat()
+raw = tracked.read_bytes()
+mode = stat.S_IMODE(before.st_mode)
+with tracked.open("r+b") as f:
+    try:
+        f.seek(0, os.SEEK_END)
+        f.write(b"\ntransient live-verified probe\n")
+        f.flush()
+        os.fsync(f.fileno())
+    finally:
+        f.truncate(len(raw))
+        f.flush()
+        os.fsync(f.fileno())
+os.utime(tracked, ns=(before.st_atime_ns, before.st_mtime_ns))
+if tracked.read_bytes() != raw or stat.S_IMODE(tracked.stat().st_mode) != mode:
+    raise RuntimeError("tracked input not restored")
+print(f"{tracked}: opening and restored sha256={hashlib.sha256(raw).hexdigest()} mode={mode:o}", flush=True)
+PY
   test "$(git --no-optional-locks status --porcelain)" = '?? LiveVerifiedGateSeed.txt'
 )
 ```
