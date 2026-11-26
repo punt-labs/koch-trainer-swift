@@ -1,0 +1,49 @@
+Ethos runner: 772a20fb067df2eb29b41f175c01c3debc73c6c7
+Koch plain clone HEAD: 9d4caa9dba4652198fab00d7601b8baabe6d347b
+Workstation paths redacted as <repo>.
+
+Approval in an interactive TTY (Mac VM acting as stand-in operator)
+Repository: "<repo>/.git"
+Checkset: swift-default
+Approve this policy to run without sandboxing? Type yes to approve: yes
+Approved swift-default at cd758a21f3bec775279d41a501f492714c822b1d5b58985c9c6487265847285b
+Storage upgrade removed .punt-labs/ethos/sessions/ from .gitignore.
+Restored that entry; git --no-optional-locks status --porcelain was empty
+before the clean run. No policy files were changed.
+
+Clean tree (session replay-plain-clean)
+PLAIN_CLEAN_HOOK_EXIT=0
+{"decision":"block","reason":"full-gate: exit status 2\nswiftformat --lint .\n\nmake: swiftformat: No such file or directory\nmake: *** [format-check] Error 1\n"}
+real 0.45
+stage=handoff check=full-gate outcome=launched duration_ms=1 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=failed duration_ms=361 isolation=live-verified dir=.
+
+Deliberate SwiftFormat break (session replay-plain-broken)
+PLAIN_BROKEN_HOOK_EXIT=0
+{"decision":"block","reason":"full-gate: exit status 2\nswiftformat --lint .\n\nmake: swiftformat: No such file or directory\nmake: *** [format-check] Error 1\n"}
+real 0.44
+stage=handoff check=full-gate outcome=launched duration_ms=1 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=failed duration_ms=326 isolation=live-verified dir=.
+PLAIN_BROKEN_MANUAL_EXIT=2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+Source input did not pass lint check.
+1/129 files require formatting, 13 files skipped.
+make: *** [format-check] Error 1
+real 0.40
+
+Keyed write (session replay-plain-keyed)
+First attempt reused the clean failure; no launch or write (real 0.33).
+A fresh key seeded before the retry forced a launch without clearing cache.
+Wrote LiveVerifiedGateProbe.txt after outcome=launched.
+PLAIN_KEYED_HOOK_EXIT=0
+{"systemMessage":"handoff checks deferred (full-gate): checkout input set changed during the live-verified check. Run the explicit project gate: (cd <repo> && make check)"}
+real 0.53
+stage=handoff check=full-gate outcome=miss duration_ms=238 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=launched duration_ms=1 isolation=live-verified dir=.
+stage=handoff check=full-gate outcome=deferred duration_ms=306 isolation=live-verified dir=.
+
+Clean direct gate, without Ethos's restricted PATH
+PLAIN_CLEAN_MANUAL_EXIT=0
+Executed 915 tests, with 0 failures (0 unexpected)
+** TEST SUCCEEDED **
+real 67.09

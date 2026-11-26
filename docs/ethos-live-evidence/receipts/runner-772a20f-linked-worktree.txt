@@ -1,0 +1,36 @@
+Ethos runner: 772a20fb067df2eb29b41f175c01c3debc73c6c7
+Koch linked worktree HEAD: e9658b6c518b49a2c28fa8063bc2a93f24f5184a
+Workstation paths redacted.
+
+Approval (the Mac test VM acted as the stand-in operator)
+Repository: "<common-git-dir>"
+Checkset: swift-default
+Policy SHA-256: cd758a21f3bec775279d41a501f492714c822b1d5b58985c9c6487265847285b
+Approve this policy to run without sandboxing? Type yes to approve: yes
+Approved swift-default at cd758a21f3bec775279d41a501f492714c822b1d5b58985c9c6487265847285b
+
+Clean linked worktree
+CLEAN_HOOK_EXIT=0
+{"systemMessage":"handoff checks deferred (full-gate): live-verified FSEvents unavailable: live-verified sentinel needs a local .git directory. Run the explicit project gate: (cd <repo> && make check)"}
+real 0.24
+stage=handoff check=full-gate outcome=deferred duration_ms=42 isolation=live-verified dir=.
+
+Linked worktree with deliberate SwiftFormat break
+BROKEN_HOOK_EXIT=0
+{"systemMessage":"handoff checks deferred (full-gate): live-verified FSEvents unavailable: live-verified sentinel needs a local .git directory. Run the explicit project gate: (cd <repo> && make check)"}
+real 0.28
+stage=handoff check=full-gate outcome=deferred duration_ms=41 isolation=live-verified dir=.
+
+Both hooks also reported that synthetic session "replay" was not found
+when trying to leave the session after returning the gate advisory.
+
+Manual gate with the same SwiftFormat break
+BROKEN_MANUAL_EXIT=2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+Source input did not pass lint check.
+1/129 files require formatting, 13 files skipped.
+make: *** [format-check] Error 1
+real 0.09
+
+The clean live baseline is in fsevents-excluded-clean.gate.txt and
+fsevents-excluded-clean.json: 915 tests, zero failures, gate 51.35 s.

@@ -1,0 +1,35 @@
+{
+  "isolation": "live-verified",
+  "verdict": "passed",
+  "gate_exit": 0,
+  "gate_seconds": 52.26,
+  "total_seconds": 53.2,
+  "key_before": [
+    "sha256:2be1045c05852d05ae3020fc9ff34a9865f0c549a75fb7b4ba7f0d73cd256681",
+    "9b7d3493f0f24a33592a73bc4ec38f690a0a5e113998481b8f441827cc271e0a"
+  ],
+  "key_after": [
+    "sha256:2be1045c05852d05ae3020fc9ff34a9865f0c549a75fb7b4ba7f0d73cd256681",
+    "9b7d3493f0f24a33592a73bc4ec38f690a0a5e113998481b8f441827cc271e0a"
+  ],
+  "same_key": true,
+  "events": 5852,
+  "fsevents_cutoff": 5211883,
+  "fsevents_and_keys_only_exit": 0,
+  "keyed_or_ambiguous_events": [],
+  "vnode_events": [],
+  "vnode_access_events": [
+    {
+      "path": "<git-dir>/index",
+      "notes": 8,
+      "atime_before": 1795660927901366029,
+      "atime_after": 1795660980437241962
+    }
+  ],
+  "vnode_fds": 436,
+  "vnode_fd_limits": [
+    65536,
+    9223372036854775807
+  ],
+  "watched_git_dir": "<git-dir>"
+}

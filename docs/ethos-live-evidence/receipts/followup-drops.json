@@ -1,0 +1,143 @@
+{
+  "isolation": "live-verified",
+  "verdict": "deferred",
+  "gate_exit": 0,
+  "gate_seconds": 54.78,
+  "total_seconds": 55.89,
+  "key_before": [
+    "sha256:2be1045c05852d05ae3020fc9ff34a9865f0c549a75fb7b4ba7f0d73cd256681",
+    "9b7d3493f0f24a33592a73bc4ec38f690a0a5e113998481b8f441827cc271e0a"
+  ],
+  "key_after": [
+    "sha256:2be1045c05852d05ae3020fc9ff34a9865f0c549a75fb7b4ba7f0d73cd256681",
+    "9b7d3493f0f24a33592a73bc4ec38f690a0a5e113998481b8f441827cc271e0a"
+  ],
+  "same_key": true,
+  "events": 20827,
+  "keyed_or_ambiguous_events": [
+    {
+      "id": 4748530,
+      "path": "<git-dir>",
+      "flags": 3
+    },
+    {
+      "id": 4748530,
+      "path": "<repo>",
+      "flags": 3
+    },
+    {
+      "flags": 3,
+      "id": 4757241,
+      "path": "<git-dir>"
+    },
+    {
+      "path": "<repo>",
+      "flags": 3,
+      "id": 4757241
+    },
+    {
+      "flags": 3,
+      "id": 4757292,
+      "path": "<git-dir>"
+    },
+    {
+      "path": "<repo>",
+      "flags": 3,
+      "id": 4757292
+    },
+    {
+      "flags": 3,
+      "id": 4757343,
+      "path": "<git-dir>"
+    },
+    {
+      "path": "<repo>",
+      "flags": 3,
+      "id": 4757343
+    },
+    {
+      "flags": 3,
+      "id": 4770732,
+      "path": "<git-dir>"
+    },
+    {
+      "path": "<repo>",
+      "flags": 3,
+      "id": 4770732
+    },
+    {
+      "flags": 3,
+      "id": 4770750,
+      "path": "<git-dir>"
+    },
+    {
+      "path": "<repo>",
+      "flags": 3,
+      "id": 4770750
+    },
+    {
+      "path": "<git-dir>",
+      "id": 4796407,
+      "flags": 3
+    },
+    {
+      "path": "<repo>",
+      "id": 4796407,
+      "flags": 3
+    },
+    {
+      "id": null,
+      "path": "<repo>/DerivedData",
+      "flags": 4
+    },
+    {
+      "id": null,
+      "path": "<repo>/DerivedData",
+      "flags": 32
+    }
+  ],
+  "watched_git_dir": "<git-dir>",
+  "real_events_only_exit": 75,
+  "flag_probes": {
+    "MustScanSubDirs": {
+      "source": "real",
+      "exit": 75,
+      "event_matched": true,
+      "event": {
+        "id": 4748530,
+        "path": "<git-dir>",
+        "flags": 3
+      }
+    },
+    "UserDropped": {
+      "source": "real",
+      "exit": 75,
+      "event_matched": true,
+      "event": {
+        "id": 4748530,
+        "path": "<git-dir>",
+        "flags": 3
+      }
+    },
+    "KernelDropped": {
+      "source": "injected",
+      "exit": 75,
+      "event_matched": true,
+      "event": {
+        "id": null,
+        "path": "<repo>/DerivedData",
+        "flags": 4
+      }
+    },
+    "RootChanged": {
+      "source": "injected",
+      "exit": 75,
+      "event_matched": true,
+      "event": {
+        "id": null,
+        "path": "<repo>/DerivedData",
+        "flags": 32
+      }
+    }
+  }
+}

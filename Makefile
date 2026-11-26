@@ -31,6 +31,7 @@ RESOLVE_SIM_ID = xcrun simctl list devices -j | SIM_NAME="$(SIM_NAME)" python3 -
 SIM_ID_GUARD = SIM_ID=$$($(RESOLVE_SIM_ID)); if [ -z "$$SIM_ID" ]; then echo "Error: could not resolve a UDID for simulator '$(SIM_NAME)'. Inspect 'xcrun simctl list devices' and verify python3 is on PATH."; exit 1; fi; DESTINATION="platform=iOS Simulator,id=$$SIM_ID"
 # Use local DerivedData to isolate parallel worktree builds/tests
 DERIVED_DATA = ./DerivedData
+CHECK_DERIVED_DATA ?= $(DERIVED_DATA)
 
 .PHONY: help generate build test check ui-test clean run lint format format-check coverage all version bump-patch bump-minor bump-major bump-build release archive worktree-create worktree-remove worktree-list ensure-sim
 
@@ -164,14 +165,14 @@ check: format-check lint ensure-sim ## Check formatting, lint, build, and test w
 	xcodebuild build \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
-		-derivedDataPath $(DERIVED_DATA) \
+		-derivedDataPath "$(CHECK_DERIVED_DATA)" \
 		-quiet
 	@echo "Running unit tests on $(SIM_NAME)..."
 	@set -o pipefail; $(SIM_ID_GUARD); \
 	xcodebuild test \
 		-scheme $(SCHEME) \
 		-destination "$$DESTINATION" \
-		-derivedDataPath $(DERIVED_DATA) \
+		-derivedDataPath "$(CHECK_DERIVED_DATA)" \
 		-only-testing:KochTrainerTests \
 		2>&1 | grep -E "(Executed|TEST SUCCEEDED|TEST FAILED)" | tail -3
 

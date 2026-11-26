@@ -1,0 +1,41 @@
+{
+  "isolation": "live-verified",
+  "verdict": "failed",
+  "gate_exit": 2,
+  "gate_seconds": 0.15,
+  "total_seconds": 0.47,
+  "key_before": [
+    "sha256:7306eeb4833093dd209e27037ca50a982f3daf14914811037a155e2ceec1df1e",
+    "0c1dcd656e87dfe788096a2a97864cd0ee7306f8fe060a507f441e8019bf2ea7"
+  ],
+  "key_after": [
+    "sha256:7306eeb4833093dd209e27037ca50a982f3daf14914811037a155e2ceec1df1e",
+    "0c1dcd656e87dfe788096a2a97864cd0ee7306f8fe060a507f441e8019bf2ea7"
+  ],
+  "same_key": true,
+  "events": 1,
+  "fsevents_cutoff": 5211947,
+  "fsevents_and_keys_only_exit": 2,
+  "keyed_or_ambiguous_events": [],
+  "vnode_events": [],
+  "vnode_access_events": [
+    {
+      "path": "<git-dir>/index",
+      "notes": 8,
+      "atime_before": 1795660981157041560,
+      "atime_after": 1795660981549487811
+    },
+    {
+      "path": "<repo>/KochTrainer/HandoffParityProbe.swift",
+      "notes": 8,
+      "atime_before": 1795660981065487087,
+      "atime_after": 1795660981495513092
+    }
+  ],
+  "vnode_fds": 437,
+  "vnode_fd_limits": [
+    65536,
+    9223372036854775807
+  ],
+  "watched_git_dir": "<git-dir>"
+}

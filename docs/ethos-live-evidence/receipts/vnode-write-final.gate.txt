@@ -1,0 +1,14 @@
+swiftformat --lint .
+Running SwiftFormat...
+(lint mode - no files will be changed.)
+Reading config file at <repo>/.swiftformat
+SwiftFormat completed in 0.04s.
+0/127 files require formatting, 12 files skipped.
+Running SwiftLint...
+SwiftLint: No violations found.
+Building KochTrainer on iPhone 17 Pro - devin-1795656533-ethos-snapshot-profile...
+Running unit tests on iPhone 17 Pro - devin-1795656533-ethos-snapshot-profile...
+	 Executed 915 tests, with 0 failures (0 unexpected) in 32.769 (33.192) seconds
+	 Executed 915 tests, with 0 failures (0 unexpected) in 32.769 (33.193) seconds
+** TEST SUCCEEDED **
+Gate wrapper wrote LiveVerifiedGateProbe.txt

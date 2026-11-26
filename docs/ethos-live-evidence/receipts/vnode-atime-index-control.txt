@@ -1,0 +1,2 @@
+index atime: 1795660967718278692 1795660967734162200 veto: [] access: [{'path': '<atime-fixture>/.git/index', 'notes': 8, 'atime_before': 1795660967685394137, 'atime_after': 1795660967734162200}]
+Real Git index read-side NOTE_ATTRIB recorded separately; chmod NOTE_ATTRIB retained as a mutation.

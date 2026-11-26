@@ -1,0 +1,41 @@
+Ethos runner: 8d5e529e5f1012703e775b968faabc709014acc3
+Koch test revision: be5f1ca21c7dd80ae238092a3c83fd42ac3e7cd2
+Selected developer dir: /Applications/Xcode.app/Contents/Developer
+Xcode 26.6
+Build version 17F113
+
+The Mac VM acted as the stand-in operator in an interactive TTY
+outside Claude Code and OpenCode and answered yes.
+Approved swift-default at dd72943792178e7bc46edf12504d0834919804791ed708bd57b28d8a4e0e49c1
+git --no-optional-locks status --porcelain was empty after approval and
+after all probes were removed. No policy or Makefile changes.
+Workstation paths redacted as <repo>.
+
+Checkout: plain clone; .git is a directory.
+
+Clean (replay-8d5e529-plain-clean)
+Hook stdout empty (no block or deferral).
+real 54.81
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=completed duration_ms=54714 isolation=live-verified
+New xcresult action log: Executed 915 tests, with 0 failures (0 unexpected) in 32.526 (33.014) seconds
+xcresulttool summary: {"result":"Passed","passedTests":916,"failedTests":0,"skippedTests":0}
+
+Broken (replay-8d5e529-plain-broken)
+decision=block; full-gate: exit status 2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+make: *** [format-check] Error 1
+real 1.09
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=failed duration_ms=981 isolation=live-verified
+
+Keyed write (replay-plain-keyed)
+Wrote LiveVerifiedGateProbe.txt after outcome=launched.
+handoff checks deferred (full-gate): checkout input set changed during the live-verified check at "LiveVerifiedGateProbe.txt". Run the explicit project gate: (cd <repo> && make check)
+real 50.85
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=deferred duration_ms=50756 isolation=live-verified
+
+The hook exited 0 in all three cases. The synthetic replay sessions
+were not registered, so stderr also reported that they could not be left.
+Verdicts are from the hook response and stage=handoff diagnostics.

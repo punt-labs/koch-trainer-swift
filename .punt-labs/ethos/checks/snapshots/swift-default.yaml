@@ -1,0 +1,13 @@
+# The DES-086 handoff runner discovers this sidecar alongside checks/swift-default.yaml.
+# Current Ethos main ignores it. Jim approved live-verified; merge waits for runner support.
+checks:
+  full-gate:
+    profile: linux-worktree-v1
+    isolation: live-verified
+    path: [/opt/homebrew/bin]
+    env:
+      CHECK_DERIVED_DATA: "{scratch}/DerivedData"
+    system:
+      tools: [swiftformat, swiftlint]
+    epoch: koch-live-v1
+    sources: {mode: worktree}
