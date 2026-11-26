@@ -172,14 +172,6 @@ git -C "$ethos_repo" worktree add --detach "$proof/ethos-source" \
   772a20fb067df2eb29b41f175c01c3debc73c6c7
 runner="$proof/ethos"
 (cd "$proof/ethos-source" && go build -o "$runner" ./cmd/ethos)
-(cd "$koch" && "$runner" handoff approve-live swift-default) || exit 1
-
-cd "$koch" || exit 1
-status=$(git --no-optional-locks status --porcelain) || exit 1
-if [ -n "$status" ]; then
-  printf 'Approval left a dirty checkout; stop before replaying:\n%s\n' "$status" >&2
-  exit 1
-fi
 
 replay_stop() {
   printf '%s\n' '{"session_id":"replay","agent_id":"worker","agent_type":"implementer"}' |
@@ -187,23 +179,37 @@ replay_stop() {
       CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
 }
 
-replay_stop
-(
-  probe=KochTrainer/HandoffParityProbe.swift
-  (set -C; printf 'let handoffParityProbe    = 1\n' >"$probe") || exit
-  trap 'rm -- "$probe"' EXIT
+replay_live_pair() (
+  cd "$koch" || exit 1
+  status=$(git --no-optional-locks status --porcelain) || exit 1
+  if [ -n "$status" ]; then
+    printf 'Approval left a dirty checkout; stop before replaying:\n%s\n' "$status" >&2
+    exit 1
+  fi
   replay_stop
-  /usr/bin/time -p make check
+  (
+    probe=KochTrainer/HandoffParityProbe.swift
+    (set -C; printf 'let handoffParityProbe    = 1\n' >"$probe") || exit
+    trap 'rm -- "$probe"' EXIT
+    replay_stop
+    /usr/bin/time -p make check
+  )
 )
+```
+
+Approve and replay in the linked worktree:
+
+```sh
+(cd "$koch" && "$runner" handoff approve-live swift-default) && replay_live_pair
 ```
 
 The diagnostic log at `~/.punt-labs/ethos/logs/ethos.log` distinguishes
 `outcome=deferred` from a completed gate. On the test VM, approval also
 triggered a storage upgrade that removed the tracked
 `.punt-labs/ethos/sessions/` entry from `.gitignore`. Inspect and undo
-that specific migration delta before resuming at the clean-tree guard.
-We restored the entry before both runs so the clean replay used the
-committed Koch tree.
+that specific migration delta, then run `replay_live_pair` again in the same
+shell. The clean-tree guard exits only its subshell, so `koch` and `runner`
+remain set. We restored the entry before both runs.
 
 ### Plain-clone replay
 
