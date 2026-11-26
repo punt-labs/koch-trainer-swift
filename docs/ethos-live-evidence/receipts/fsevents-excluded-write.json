@@ -2,8 +2,8 @@
   "isolation": "live-verified",
   "verdict": "deferred",
   "gate_exit": 0,
-  "gate_seconds": 52.93,
-  "total_seconds": 54.01,
+  "gate_seconds": 50.07,
+  "total_seconds": 51.19,
   "key_before": [
     "sha256:424f6a7acba6e00631c6edeb6e356842ec10da547004592a972f1260435a875b",
     "c7fba360cd03fc52941de60efac78a47fac572b76a8806b194e8fe7f03774162"
@@ -13,8 +13,8 @@
     "2c64750c1d00f73795c89dcf1b37390a60fdc5a2125cc13e6ceb4d17a7deabaf"
   ],
   "same_key": false,
-  "events": 3979,
-  "fsevents_cutoff": 6329464,
+  "events": 7716,
+  "fsevents_cutoff": 6406098,
   "fsevents_exclusion_paths": [
     "<repo>/.tmp/<proof>"
   ],
@@ -23,8 +23,8 @@
   "keyed_or_ambiguous_events": [
     {
       "path": "<repo>/LiveVerifiedGateProbe.txt",
-      "id": 6269185,
-      "flags": 69888
+      "flags": 69888,
+      "id": 6332145
     }
   ],
   "vnode_events": [
@@ -37,8 +37,8 @@
     {
       "path": "<git-dir>/index",
       "notes": 8,
-      "atime_before": 1795664038591928395,
-      "atime_after": 1795664091805335495
+      "atime_before": 1795664217715207390,
+      "atime_after": 1795664268056721573
     }
   ],
   "vnode_fds": 458,
