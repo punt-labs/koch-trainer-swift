@@ -2,13 +2,13 @@ swiftformat --lint .
 Running SwiftFormat...
 (lint mode - no files will be changed.)
 Reading config file at <repo>/.swiftformat
+Gate wrapper wrote LiveVerifiedGateProbe.txt after starting recipe pid=34639 command=swiftformat
 SwiftFormat completed in 0.05s.
 0/128 files require formatting, 13 files skipped.
 Running SwiftLint...
-Gate wrapper wrote LiveVerifiedGateProbe.txt after starting recipe pid=33451 command=(swiftformat)
 SwiftLint: No violations found.
 Building KochTrainer on iPhone 17 Pro - HEAD...
 Running unit tests on iPhone 17 Pro - HEAD...
-	 Executed 915 tests, with 0 failures (0 unexpected) in 32.751 (33.137) seconds
-	 Executed 915 tests, with 0 failures (0 unexpected) in 32.751 (33.137) seconds
+	 Executed 915 tests, with 0 failures (0 unexpected) in 32.550 (33.024) seconds
+	 Executed 915 tests, with 0 failures (0 unexpected) in 32.550 (33.025) seconds
 ** TEST SUCCEEDED **

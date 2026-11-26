@@ -65,8 +65,9 @@ python3 -B "$proof/replay.py" "$koch" clean >"$proof/clean.json"
   trap 'rm -- "$probe"' EXIT
   python3 -B "$proof/replay.py" "$koch" gate-write --gate-write >"$proof/gate-write.json"
 )
-# Exit 75. The wrapper waits for a make check child recipe, then writes the
-# unignored file and logs the observed child. Cleanup follows the closing key.
+# Exit 75. The wrapper waits for a swiftformat, swiftlint, or xcodebuild
+# descendant, then writes the unignored file and logs the recipe PID and
+# command. Cleanup follows the closing key.
 
 python3 -B "$proof/replay.py" "$koch" overflow --probe-drops >"$proof/overflow.json"
 # Exit 75. Inspect flag_probes to distinguish real from injected events.
@@ -125,7 +126,7 @@ Workstation paths are redacted.
 | --- | ---: | ---: | --- |
 | Guarded clean with proof exclusion; all 915 tests passed | 0 | 51.35 s / 52.53 s | [JSON](receipts/fsevents-excluded-clean.json), [gate](receipts/fsevents-excluded-clean.gate.txt) |
 | Consecutive spaces; gate failed | 2 | 0.15 s / 0.47 s | [JSON](receipts/vnode-broken.json), [gate](receipts/vnode-broken.gate.txt) |
-| Keyed write after a gate recipe started with proof exclusion; key and both watchers caught it | 75 | 50.07 s / 51.19 s | [JSON](receipts/fsevents-excluded-write.json), [gate](receipts/fsevents-excluded-write.gate.txt) |
+| Keyed write after the SwiftFormat recipe started with proof exclusion; key and both watchers caught it | 75 | 50.82 s / 51.85 s | [JSON](receipts/fsevents-excluded-write.json), [gate](receipts/fsevents-excluded-write.gate.txt) |
 | FSEvents overflow (before adding kqueue); gate passed, key unchanged | 75 | 54.78 s / 55.89 s | [JSON](receipts/followup-drops.json), [gate](receipts/followup-drops.gate.txt), [14 real coverage records](receipts/overflow-coverage-events.jsonl) |
 
 The overflow records contained real `MustScanSubDirs | UserDropped`.
