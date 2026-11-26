@@ -172,7 +172,14 @@ git -C "$ethos_repo" worktree add --detach "$proof/ethos-source" \
   772a20fb067df2eb29b41f175c01c3debc73c6c7
 runner="$proof/ethos"
 (cd "$proof/ethos-source" && go build -o "$runner" ./cmd/ethos)
-(cd "$koch" && "$runner" handoff approve-live swift-default)
+(cd "$koch" && "$runner" handoff approve-live swift-default) || exit 1
+
+cd "$koch" || exit 1
+status=$(git --no-optional-locks status --porcelain) || exit 1
+if [ -n "$status" ]; then
+  printf 'Approval left a dirty checkout; stop before replaying:\n%s\n' "$status" >&2
+  exit 1
+fi
 
 replay_stop() {
   printf '%s\n' '{"session_id":"replay","agent_id":"worker","agent_type":"implementer"}' |
@@ -180,8 +187,6 @@ replay_stop() {
       CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
 }
 
-cd "$koch"
-git --no-optional-locks status --porcelain
 replay_stop
 (
   probe=KochTrainer/HandoffParityProbe.swift
@@ -194,6 +199,54 @@ replay_stop
 
 The diagnostic log at `~/.punt-labs/ethos/logs/ethos.log` distinguishes
 `outcome=deferred` from a completed gate. On the test VM, approval also
-triggered an unrelated storage upgrade that removed an obsolete
-`.gitignore` line. We restored that line before both runs so the clean
-replay used the committed Koch tree.
+triggered a storage upgrade that removed the tracked
+`.punt-labs/ethos/sessions/` entry from `.gitignore`. Inspect and undo
+that specific migration delta before resuming at the clean-tree guard.
+We restored the entry before both runs so the clean replay used the
+committed Koch tree.
+
+### Plain-clone replay
+
+Ethos `772a20f` passed the Git-directory sentinel in a plain clone of Koch
+`9d4caa9`, but **clean/broken parity is still blocked**. The live runner
+sets `PATH=/usr/local/bin:/usr/bin:/bin` when the sidecar declares no path.
+SwiftFormat and SwiftLint are installed in `/opt/homebrew/bin` on the Mac
+VM. The unchanged gate failed at `make: swiftformat: No such file or directory`
+on both trees; exit `2` on the broken tree did not come from SwiftFormat.
+We did not change the sidecar or install tools into the runner's path.
+
+| Case | Hook result | Hook wall time | Direct `make check` |
+| --- | --- | --- | --- |
+| Clean | Block: SwiftFormat not found | 0.45 s | Pass: 915 tests, 0 failures, 67.09 s |
+| SwiftFormat break | Block: SwiftFormat not found | 0.44 s | Exit 2: `consecutiveSpaces`, 0.40 s |
+| Keyed write after launch | Deferred: checkout input set changed | 0.53 s | Not run |
+
+See the [plain-clone receipt](receipts/runner-772a20f-plain-clone.txt).
+The mutation shows the runner discards the gate result when the input set
+changes in-flight. It does not demonstrate a watcher veto or a successful
+915-test run under Ethos.
+
+Clone outside existing worktrees, then use the same interactive approval,
+clean-tree guard, and clean/broken commands above with `koch` set to the
+plain clone. The Mac VM acted as the stand-in operator again because the
+clone has a different Git directory. The same storage-upgrade delta was
+restored before either gate was run.
+
+```sh
+git clone https://github.com/punt-labs/koch-trainer-swift.git \
+  "$HOME/repos/koch-plain-parity-9d4caa9"
+koch="$HOME/repos/koch-plain-parity-9d4caa9"
+git -C "$koch" switch --detach 9d4caa9dba4652198fab00d7601b8baabe6d347b
+test -d "$koch/.git" || exit 1
+```
+
+For the keyed case, use a fresh synthetic session. Create an untracked,
+unignored seed containing a UUID before the hook so there is no cached
+verdict to reuse. In parallel with the hook, tail new lines in
+`~/.punt-labs/ethos/logs/ethos.log` from before its invocation. When the
+log records `outcome=launched` for that session, run
+`(set -C; printf 'keyed probe\n' >LiveVerifiedGateProbe.txt)` in the checkout.
+Leave both files present until the hook returns, then remove them and
+check that the clone is clean. Do not substitute `make check` for the hook
+in this probe. For the direct clean baseline, run `/usr/bin/time -p make check`
+on the clean clone using the normal host PATH.
