@@ -4,5 +4,8 @@ checks:
   full-gate:
     profile: linux-worktree-v1
     isolation: live-verified
+    path: [/opt/homebrew/bin]
+    system:
+      tools: [swiftformat, swiftlint]
     epoch: koch-live-v1
     sources: {mode: worktree}
