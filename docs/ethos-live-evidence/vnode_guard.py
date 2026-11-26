@@ -1,3 +1,4 @@
+import errno
 import os
 from pathlib import Path
 import resource
@@ -8,6 +9,8 @@ import subprocess
 NOTES = (select.KQ_NOTE_WRITE | select.KQ_NOTE_EXTEND | select.KQ_NOTE_ATTRIB |
          select.KQ_NOTE_DELETE | select.KQ_NOTE_LINK | select.KQ_NOTE_RENAME | select.KQ_NOTE_REVOKE)
 REPLACED = select.KQ_NOTE_DELETE | select.KQ_NOTE_RENAME | select.KQ_NOTE_REVOKE
+FD_RAISE_CAP = 8192
+FD_HEADROOM = 32
 NON_ACCESS_STAT = ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns", "st_ctime_ns",
                    "st_uid", "st_gid", "st_flags", "st_nlink")
 
@@ -59,11 +62,35 @@ class VnodeGuard:
         for fd in self.descriptors:
             os.close(fd)
 
+    def ensure_fd_capacity(self, watch_count):
+        required = watch_count + FD_HEADROOM
+        if self.soft_limit == resource.RLIM_INFINITY or self.soft_limit >= required:
+            return
+        target = min(required, FD_RAISE_CAP)
+        if self.hard_limit != resource.RLIM_INFINITY:
+            target = min(target, self.hard_limit)
+        message = (f"cannot arm {watch_count} vnode watches: need fd limit {required} "
+                   f"(soft={self.soft_limit}, hard={self.hard_limit}, raise cap={FD_RAISE_CAP})")
+        if target < required:
+            raise RuntimeError(message)
+        try:
+            resource.setrlimit(resource.RLIMIT_NOFILE, (target, self.hard_limit))
+        except (OSError, ValueError) as error:
+            raise RuntimeError(f"{message}: {error}") from error
+        self.soft_limit, self.hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+
     def arm(self):
         self.keyed, paths = watch_paths(self.root, self.git_dir)
+        self.ensure_fd_capacity(len(paths))
         changes = []
         for path, notes in sorted(paths.items()):
-            fd = os.open(path, os.O_EVTONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+            try:
+                fd = os.open(path, os.O_EVTONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+            except OSError as error:
+                if error.errno in (errno.EMFILE, errno.ENFILE):
+                    raise RuntimeError(f"not enough descriptors to arm {len(paths)} vnode watches "
+                                       f"(soft fd limit {self.soft_limit}): {error}") from error
+                raise
             self.descriptors[fd] = path
             changes.append(select.kevent(fd, filter=select.KQ_FILTER_VNODE,
                                          flags=select.KQ_EV_ADD | select.KQ_EV_CLEAR, fflags=notes))

@@ -95,7 +95,10 @@ catch a transient unignored child absent from both keys. As these events
 do not name the child, a write on a watched directory is a conservative
 veto; existing ignored output subtrees are not watched. An isolated
 `NOTE_ATTRIB` with a changed atime and no other measured metadata changes
-is recorded as a read, not a mutation. Failure to arm or drain defers.
+is recorded as a read, not a mutation. Before arming, the replay raises a
+low soft descriptor limit as needed, up to the hard limit and an automatic
+raise cap of 8,192. If the watched files plus descriptor headroom do not
+fit, or arming or draining fails, the replay defers.
 
 ## Recorded results
 
