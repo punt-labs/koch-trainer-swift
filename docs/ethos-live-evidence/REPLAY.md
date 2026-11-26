@@ -541,6 +541,7 @@ tracked = Path("README.md")
 before = tracked.stat()
 raw = tracked.read_bytes()
 mode = stat.S_IMODE(before.st_mode)
+print(f"Opening README.md sha256: {hashlib.sha256(raw).hexdigest()}", flush=True)
 with tracked.open("r+b") as f:
     try:
         f.seek(0, os.SEEK_END)
@@ -562,8 +563,32 @@ PY
 
 After the first terminal finishes, run `git status --porcelain` in
 the checkout. If the probe was interrupted and left `README.md`
-modified, recover with `git restore -- README.md` there. The probe
-starts from a clean checkout, so this discards only its own write.
+modified, stop other edits to that file and set `opening_sha` to the
+hash printed before the append. Run this in the same checkout. It
+removes exactly the probe suffix only if the remaining bytes match
+the opening hash:
+
+```sh
+(
+  cd "$checkout" || exit 1
+  python3 - "${opening_sha:?Set opening_sha to the printed hash}" <<'PY'
+import hashlib
+import os
+import sys
+
+suffix = b"\ntransient live-verified probe\n"
+with open("README.md", "r+b") as f:
+    current = f.read()
+    original = current.removesuffix(suffix)
+    if original == current or hashlib.sha256(original).hexdigest() != sys.argv[1]:
+        sys.exit("Warning: README.md is not the original plus exactly the probe suffix; left unchanged.")
+    f.truncate(len(original))
+    f.flush()
+    os.fsync(f.fileno())
+PY
+)
+```
+
 Then require `clean_checkout` again.
 
 The [transient receipt](receipts/runner-4c24606-transient.txt)
