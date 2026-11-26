@@ -1,9 +1,9 @@
 # Koch Darwin live-verified prototype
 
-This is standalone evidence, not an integrated Ethos runner or snapshot
-isolation. The sidecar uses the approved live-verified schema; integrated
-execution still requires Ethos support. Replays run the existing
-`make check` on the real checkout without changing the gate.
+The prototype runs the existing `make check` on the real checkout
+without changing the gate or claiming snapshot isolation. The
+[real-runner probe](#real-runner-parity) below records the current
+linked-worktree blocker.
 
 ## Setup
 
@@ -141,3 +141,59 @@ watched descriptors.
 Per-trial events are in [vnode-race-final.jsonl](receipts/vnode-race-final.jsonl).
 The controls show the [index read/chmod distinction](receipts/vnode-atime-index-control.txt)
 and [sibling-worktree index isolation](receipts/watch-scope.txt).
+
+## Real runner parity
+
+**Blocked on linked worktrees.** On Koch `e9658b6`, the real Darwin runner
+at Ethos `772a20fb067df2eb29b41f175c01c3debc73c6c7` selected
+`isolation=live-verified` but deferred both runs before launching the gate:
+`live-verified FSEvents unavailable: live-verified sentinel needs a local .git directory`.
+In a linked worktree, `.git` is a file; the actual worktree Git directory
+reported by `git rev-parse --absolute-git-dir` exists. This runner's
+FSEvents sentinel checks the former and does not use the latter.
+
+The [receipt](receipts/runner-772a20f-linked-worktree.txt) contains the
+approval, hook output, timings, and manual gate results. Hook exit `0`
+here means that the hook returned an advisory, not that the gate passed.
+There is no clean/broken real-runner parity verdict at this SHA.
+
+Build from a separate Ethos worktree. From the clean Koch linked worktree,
+use an interactive terminal outside Claude Code and OpenCode for the
+approval; the Mac VM acted as the stand-in operator and typed `yes`.
+Changing the check YAML or sidecar invalidates that approval.
+
+```sh
+koch="$(git rev-parse --show-toplevel)"
+mkdir -p "$koch/.tmp"
+proof="$(mktemp -d "$koch/.tmp/koch-live-runner.XXXXXX")"
+: "${ethos_repo:?Set ethos_repo to your local Ethos clone}"
+git -C "$ethos_repo" fetch origin devin/1795658354-darwin-worktree-runner
+git -C "$ethos_repo" worktree add --detach "$proof/ethos-source" \
+  772a20fb067df2eb29b41f175c01c3debc73c6c7
+runner="$proof/ethos"
+(cd "$proof/ethos-source" && go build -o "$runner" ./cmd/ethos)
+(cd "$koch" && "$runner" handoff approve-live swift-default)
+
+replay_stop() {
+  printf '%s\n' '{"session_id":"replay","agent_id":"worker","agent_type":"implementer"}' |
+    /usr/bin/time -p env ETHOS_SESSION=replay ETHOS_AGENT_ID=worker \
+      CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
+}
+
+cd "$koch"
+git --no-optional-locks status --porcelain
+replay_stop
+(
+  probe=KochTrainer/HandoffParityProbe.swift
+  (set -C; printf 'let handoffParityProbe    = 1\n' >"$probe") || exit
+  trap 'rm -- "$probe"' EXIT
+  replay_stop
+  /usr/bin/time -p make check
+)
+```
+
+The diagnostic log at `~/.punt-labs/ethos/logs/ethos.log` distinguishes
+`outcome=deferred` from a completed gate. On the test VM, approval also
+triggered an unrelated storage upgrade that removed an obsolete
+`.gitignore` line. We restored that line before both runs so the clean
+replay used the committed Koch tree.
