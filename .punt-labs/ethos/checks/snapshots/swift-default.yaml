@@ -1,4 +1,4 @@
-# Provisional DES-086 live-verified profile; pending approval and Ethos support.
+# Jim approved live-verified; merge waits for Ethos support.
 checks:
   full-gate:
     profile: darwin-live-verified-v1
