@@ -598,3 +598,16 @@ worktree. Both runs reported `FSEvents observed a change` and
 reported an input-set or key mismatch. The runner checks those first,
 so reaching the watcher veto also establishes that the closing key
 matched.
+
+### SwiftPM workspace directory on fresh checkouts
+
+On the first build, Xcode 26.6 creates
+`KochTrainer.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/configuration`
+even though Koch declares no package dependencies. Moving DerivedData,
+cloned source packages, and the package cache outside the checkout
+doesn't stop this workspace write. The Darwin live-verified runner
+correctly defers when it sees the directory created during the gate.
+
+The tracked `configuration/.gitkeep` gives fresh checkouts that directory
+before the gate starts. It does not change the build or test commands,
+store generated package state, or exempt any path from the watchers.
