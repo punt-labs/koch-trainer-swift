@@ -560,8 +560,13 @@ PY
 )
 ```
 
-After the first terminal finishes, require `clean_checkout` again in
-the checkout. The [transient receipt](receipts/runner-4c24606-transient.txt)
+After the first terminal finishes, run `git status --porcelain` in
+the checkout. If the probe was interrupted and left `README.md`
+modified, recover with `git restore -- README.md` there. The probe
+starts from a clean checkout, so this discards only its own write.
+Then require `clean_checkout` again.
+
+The [transient receipt](receipts/runner-4c24606-transient.txt)
 records **66.94 s** for the plain clone and **71.94 s** for the linked
 worktree. Both runs reported `FSEvents observed a change` and
 `live-verified vetoed by vnode note 0xe` at `README.md`. Neither
