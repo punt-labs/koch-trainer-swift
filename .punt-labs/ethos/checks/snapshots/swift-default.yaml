@@ -1,6 +1,7 @@
 # Jim approved live-verified; merge waits for Ethos support.
 checks:
   full-gate:
-    profile: darwin-live-verified-v1
+    profile: linux-worktree-v1
+    isolation: live-verified
     epoch: koch-live-v1
     sources: {mode: worktree}
