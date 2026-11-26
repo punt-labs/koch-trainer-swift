@@ -1,8 +1,9 @@
 # Koch Darwin live-verified prototype
 
 This is standalone evidence, not an integrated Ethos runner or snapshot
-isolation. The sidecar is provisional. Replays run the existing `make check`
-on the real checkout without changing the gate.
+isolation. The sidecar uses the approved live-verified schema; integrated
+execution still requires Ethos support. Replays run the existing
+`make check` on the real checkout without changing the gate.
 
 ## Setup
 
@@ -16,13 +17,15 @@ tree key or modify the Ethos checkout.
 ```sh
 koch="$(git rev-parse --show-toplevel)"
 evidence="$koch/docs/ethos-live-evidence"
-proof="$(mktemp -d "$(dirname "$koch")/koch-live-replay.XXXXXX")"
+mkdir -p "$koch/.tmp"
+proof="$(mktemp -d "$koch/.tmp/koch-live-replay.XXXXXX")"
 source="$proof/ethos-source"
 ethos_sha=44f6c96c6ed3c432a4856eb7466080fdc8783673
 : "${ethos_repo:?Set ethos_repo to your local Ethos clone}"
 
-# Keep binaries and new logs outside the watched Koch checkout.
-cp "$evidence"/{ethos_key_test.go,watch.swift,replay.py,vnode_guard.py,vnode_race.py,gate_write.py} "$proof/"
+# The proof subtree is Git-ignored and excluded from keyed paths and vnode watches.
+git -C "$koch" check-ignore -q -- "$proof/" || exit 1
+cp "$evidence"/{ethos_key_test.go,replay.py,vnode_guard.py,vnode_race.py,gate_write.py} "$proof/"
 git -C "$ethos_repo" worktree add --detach "$source" "$ethos_sha"
 python3 -c 'import json, sys; from pathlib import Path
 s, p = map(Path, sys.argv[1:])
@@ -30,7 +33,7 @@ print(json.dumps({"Replace": {str(s / "internal/hook/koch_live_key_test.go"): st
 ' "$source" "$proof" >"$proof/overlay.json"
 (cd "$source" && go test -vet=off -overlay "$proof/overlay.json" -c \
   -o "$proof/ethos-key" ./internal/hook)
-/usr/bin/swiftc "$proof/watch.swift" -o "$proof/watch"
+/usr/bin/swiftc "$evidence/watch.swift" -o "$proof/watch"
 git -C "$koch" --no-optional-locks status --porcelain
 ```
 
