@@ -1,4 +1,5 @@
-# Jim approved live-verified; merge waits for Ethos support.
+# The DES-086 handoff runner discovers this sidecar alongside checks/swift-default.yaml.
+# Current Ethos main ignores it. Jim approved live-verified; merge waits for runner support.
 checks:
   full-gate:
     profile: linux-worktree-v1
