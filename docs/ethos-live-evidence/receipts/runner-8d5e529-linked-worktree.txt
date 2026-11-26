@@ -1,0 +1,42 @@
+Ethos runner: 8d5e529e5f1012703e775b968faabc709014acc3
+Koch test revision: be5f1ca21c7dd80ae238092a3c83fd42ac3e7cd2
+Selected developer dir: /Applications/Xcode.app/Contents/Developer
+Xcode 26.6
+Build version 17F113
+
+The Mac VM acted as the stand-in operator in an interactive TTY
+outside Claude Code and OpenCode and answered yes.
+Approved swift-default at dd72943792178e7bc46edf12504d0834919804791ed708bd57b28d8a4e0e49c1
+git --no-optional-locks status --porcelain was empty after approval and
+after all probes were removed. No policy or Makefile changes.
+Workstation paths redacted as <repo>.
+
+Checkout: linked worktree; .git is a file.
+
+Clean (replay-8d5e529-linked-clean)
+handoff checks deferred (full-gate): FSEvents path budget exceeded at "<repo>/DerivedData/Logs/Test/Test-KochTrainer-2026.11.26_05-35-21-+0000.xcresult/Data/data.0~5v1myHtTImFh_SXA_pTe4lDsKs-TLcDv6ll0TlysioQk0NyXdXHchNzddv8_omLg2xfOn8__ThhBnxJm2u1I0w==". Run the explicit project gate: (cd <repo> && make check)
+real 65.34
+outcome=launched duration_ms=0 isolation=live-verified
+outcome=deferred duration_ms=65085 isolation=live-verified
+New xcresult action log: Executed 915 tests, with 0 failures (0 unexpected) in 32.468 (32.906) seconds
+xcresulttool summary: {"result":"Passed","passedTests":916,"failedTests":0,"skippedTests":0}
+git check-ignore -v on the named path matched .gitignore:136:DerivedData/.
+
+Broken (replay-8d5e529-linked-broken)
+decision=block; full-gate: exit status 2
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+make: *** [format-check] Error 1
+real 1.57
+outcome=launched duration_ms=0 isolation=live-verified
+outcome=failed duration_ms=1384 isolation=live-verified
+
+Keyed write (replay-plain-keyed)
+Wrote LiveVerifiedGateProbe.txt after outcome=launched.
+handoff checks deferred (full-gate): checkout input set changed during the live-verified check at "LiveVerifiedGateProbe.txt". Run the explicit project gate: (cd <repo> && make check)
+real 54.14
+outcome=launched duration_ms=1 isolation=live-verified
+outcome=deferred duration_ms=53962 isolation=live-verified
+
+The hook exited 0 in all three cases. The synthetic replay sessions
+were not registered, so stderr also reported that they could not be left.
+Verdicts are from the hook response and stage=handoff diagnostics.

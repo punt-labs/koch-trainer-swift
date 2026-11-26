@@ -297,3 +297,93 @@ This runner set `DEVELOPER_DIR` to the Command Line Tools directory for
 The [path/tools receipt](receipts/runner-772a20f-plain-clone-path-tools.txt)
 records the hook timings and the direct SwiftLint control: CLT reproduced
 the crash; full Xcode passed. The hook did not reach the simulator tests.
+
+### Darwin runner `8d5e529`: linked and plain checkout parity
+
+Tested Koch `be5f1ca21c7dd80ae238092a3c83fd42ac3e7cd2` with the Homebrew
+sidecar and Xcode 26.6 (build `17F113`) selected by `xcode-select -p`.
+The Mac VM re-approved both checkouts as stand-in operator. Both trees
+were clean after approval and after the probes were removed.
+
+| Case | [Linked worktree](receipts/runner-8d5e529-linked-worktree.txt) | [Plain clone](receipts/runner-8d5e529-plain-clone.txt) |
+| --- | --- | --- |
+| Clean | 65.34 s: 915 XCTest tests, zero failures; FSEvents path-budget deferral | 54.81 s: 915 XCTest tests, zero failures; verdict retained |
+| SwiftFormat break | 1.57 s: blocked, gate exit 2, `consecutiveSpaces` | 1.09 s: blocked, gate exit 2, `consecutiveSpaces` |
+| Keyed write after launch | 54.14 s: deferred, input set changed at `LiveVerifiedGateProbe.txt` | 50.85 s: deferred, input set changed at `LiveVerifiedGateProbe.txt` |
+
+Both checkouts reached the unchanged gate with full Xcode. In the linked
+worktree, the clean run reported `FSEvents path budget exceeded` at a
+file in `DerivedData/Logs/Test/`; `git check-ignore -v` confirmed that
+the exact path is ignored. The runner counted paths toward its 8,192-path
+budget before applying the ignore check. Plain-clone parity is demonstrated;
+retaining the clean verdict in a linked worktree is not. The keyed-write
+deferrals were input-set mismatches, not independent watcher vetoes.
+
+Build the runner from its pinned ref. Set `proof` to an existing scratch
+directory and `ethos_repo` to a local Ethos clone:
+
+```sh
+ref=devin/1795658354-darwin-worktree-runner
+git -C "$ethos_repo" ls-remote origin "refs/heads/$ref"
+git -C "$ethos_repo" fetch origin "$ref"
+git -C "$ethos_repo" worktree add --detach "$proof/ethos-darwin-8d5e529" \
+  8d5e529e5f1012703e775b968faabc709014acc3
+runner="$proof/ethos-darwin-8d5e529-bin"
+(cd "$proof/ethos-darwin-8d5e529" && go build -o "$runner" ./cmd/ethos)
+```
+
+Run this block once per checkout, setting `checkout` to its absolute path
+and `layout` to `linked` or `plain`. Check out the tested Koch revision
+first. Use an interactive TTY outside Claude Code and OpenCode and type
+`yes` at the approval prompt:
+
+```sh
+run_8d5e529() {
+  printf '{"session_id":"%s","agent_id":"worker","agent_type":"implementer"}\n' "$1" |
+    /usr/bin/time -p env ETHOS_SESSION="$1" ETHOS_AGENT_ID=worker \
+      CLAUDE_AGENT_TYPE=implementer "$runner" hook subagent-stop
+}
+
+(
+  cd "$checkout" || exit 1
+  test "$(git rev-parse HEAD)" = be5f1ca21c7dd80ae238092a3c83fd42ac3e7cd2 || exit 1
+  "$runner" handoff approve-live swift-default || exit 1
+  status=$(git --no-optional-locks status --porcelain) || exit 1
+  test -z "$status" || { printf '%s\n' "$status" >&2; exit 1; }
+  run_8d5e529 "replay-8d5e529-$layout-clean"
+  (
+    probe=KochTrainer/HandoffParityProbe.swift
+    (set -C; printf 'let handoffParityProbe    = 1\n' >"$probe") || exit 1
+    trap 'rm -- "$probe"' EXIT
+    run_8d5e529 "replay-8d5e529-$layout-broken"
+  )
+)
+```
+
+Record the newly created clean `.xcresult` bundle from
+`DerivedData/Logs/Test/` before starting the keyed probe:
+
+```sh
+xcrun xcresulttool get test-results summary --path "$result"
+xcrun xcresulttool get log --type action --path "$result"
+```
+
+For the keyed run, start tailing new lines in
+`~/.punt-labs/ethos/logs/ethos.log` before running this block. When
+session `replay-plain-keyed` logs `outcome=launched`, run
+`(set -C; printf 'keyed probe\n' >LiveVerifiedGateProbe.txt)` in the
+same checkout from a second shell. The UUID seed avoids a cache hit.
+Remove only the probe you created after the hook returns, then verify
+`git --no-optional-locks status --porcelain` is empty:
+
+```sh
+(
+  cd "$checkout" || exit 1
+  status=$(git --no-optional-locks status --porcelain) || exit 1
+  test -z "$status" || { printf '%s\n' "$status" >&2; exit 1; }
+  seed=LiveVerifiedGateSeed.txt
+  (set -C; uuidgen >"$seed") || exit 1
+  trap 'rm -- "$seed"' EXIT
+  run_8d5e529 replay-plain-keyed
+)
+```
