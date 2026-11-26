@@ -1,0 +1,50 @@
+{
+  "isolation": "live-verified",
+  "verdict": "deferred",
+  "gate_exit": 0,
+  "gate_seconds": 52.93,
+  "total_seconds": 54.01,
+  "key_before": [
+    "sha256:424f6a7acba6e00631c6edeb6e356842ec10da547004592a972f1260435a875b",
+    "c7fba360cd03fc52941de60efac78a47fac572b76a8806b194e8fe7f03774162"
+  ],
+  "key_after": [
+    "sha256:b915017121b12a3e2cc0a38b7cc103d6c1b418903861ae1fd71f94574086d63c",
+    "2c64750c1d00f73795c89dcf1b37390a60fdc5a2125cc13e6ceb4d17a7deabaf"
+  ],
+  "same_key": false,
+  "events": 3979,
+  "fsevents_cutoff": 6329464,
+  "fsevents_exclusion_paths": [
+    "<repo>/.tmp/<proof>"
+  ],
+  "fsevents_excluded_path_events": 0,
+  "fsevents_and_keys_only_exit": 75,
+  "keyed_or_ambiguous_events": [
+    {
+      "path": "<repo>/LiveVerifiedGateProbe.txt",
+      "id": 6269185,
+      "flags": 69888
+    }
+  ],
+  "vnode_events": [
+    {
+      "path": "<repo>",
+      "notes": 2
+    }
+  ],
+  "vnode_access_events": [
+    {
+      "path": "<git-dir>/index",
+      "notes": 8,
+      "atime_before": 1795664038591928395,
+      "atime_after": 1795664091805335495
+    }
+  ],
+  "vnode_fds": 458,
+  "vnode_fd_limits": [
+    490,
+    9223372036854775807
+  ],
+  "watched_git_dir": "<git-dir>"
+}

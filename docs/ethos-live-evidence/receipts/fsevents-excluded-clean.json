@@ -1,0 +1,63 @@
+{
+  "isolation": "live-verified",
+  "verdict": "passed",
+  "gate_exit": 0,
+  "gate_seconds": 51.35,
+  "total_seconds": 52.53,
+  "key_before": [
+    "sha256:424f6a7acba6e00631c6edeb6e356842ec10da547004592a972f1260435a875b",
+    "c7fba360cd03fc52941de60efac78a47fac572b76a8806b194e8fe7f03774162"
+  ],
+  "key_after": [
+    "sha256:424f6a7acba6e00631c6edeb6e356842ec10da547004592a972f1260435a875b",
+    "c7fba360cd03fc52941de60efac78a47fac572b76a8806b194e8fe7f03774162"
+  ],
+  "same_key": true,
+  "events": 3979,
+  "fsevents_cutoff": 6269142,
+  "fsevents_exclusion_paths": [
+    "<repo>/.tmp/<proof>"
+  ],
+  "fsevents_excluded_path_events": 0,
+  "fsevents_and_keys_only_exit": 0,
+  "keyed_or_ambiguous_events": [],
+  "vnode_events": [],
+  "vnode_access_events": [
+    {
+      "path": "<git-dir>/index",
+      "notes": 8,
+      "atime_before": 1795663985954454340,
+      "atime_after": 1795664037620276777
+    },
+    {
+      "path": "<repo>/docs/ethos-live-evidence/vnode_race.py",
+      "notes": 8,
+      "atime_before": 1795663985824055859,
+      "atime_after": 1795663986327831715
+    },
+    {
+      "path": "<repo>/docs/ethos-live-evidence/replay.py",
+      "notes": 8,
+      "atime_before": 1795663985823892358,
+      "atime_after": 1795663986328116257
+    },
+    {
+      "path": "<repo>/docs/ethos-live-evidence/watch.swift",
+      "notes": 8,
+      "atime_before": 1795663985824197025,
+      "atime_after": 1795663986330558135
+    },
+    {
+      "path": "<repo>/docs/ethos-live-evidence/REPLAY.md",
+      "notes": 8,
+      "atime_before": 1795663985823683192,
+      "atime_after": 1795663986333418098
+    }
+  ],
+  "vnode_fds": 458,
+  "vnode_fd_limits": [
+    490,
+    9223372036854775807
+  ],
+  "watched_git_dir": "<git-dir>"
+}

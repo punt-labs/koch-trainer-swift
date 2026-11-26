@@ -65,8 +65,8 @@ python3 -B "$proof/replay.py" "$koch" clean >"$proof/clean.json"
   trap 'rm -- "$probe"' EXIT
   python3 -B "$proof/replay.py" "$koch" gate-write --gate-write >"$proof/gate-write.json"
 )
-# Exit 75. The wrapper runs make check, then writes the unignored file
-# before exiting. Cleanup occurs after the closing key.
+# Exit 75. The wrapper writes the unignored file while make check is
+# running. Cleanup occurs after the closing key.
 
 python3 -B "$proof/replay.py" "$koch" overflow --probe-drops >"$proof/overflow.json"
 # Exit 75. Inspect flag_probes to distinguish real from injected events.
@@ -96,8 +96,9 @@ git -C "$koch" worktree remove "$proof/koch-race-checkout"
 The watcher subscribes to the checkout and its Git directory, resolved by
 `git rev-parse --git-dir`, not the shared store. The FSEvents stream excludes
 the Git-ignored proof subtree before delivery if it contains no keyed paths.
-It still filters ordinary events
-to the keyed paths and their ancestors plus the worktree's `HEAD` and
+Replays record the active exclusions and the raw event count within them.
+The verdict still filters ordinary events to the keyed paths and their
+ancestors plus the worktree's `HEAD` and
 `index`. Coverage flags defer regardless of the cutoff.
 
 The kqueue guard arms `EVFILT_VNODE` before the opening key and drains
@@ -114,24 +115,28 @@ fit, or arming or draining fails, the replay defers.
 
 ## Recorded results
 
-These are the original Mac receipts at Koch `de2778a` (before this evidence
-directory was added), with workstation paths redacted. New replays produce
-new keys, event IDs, and timings.
+The clean and keyed-write receipts use the proof exclusion on Koch
+`51e81a8`. Both recorded an active exclusion and zero raw events from the
+proof directory. The other receipts are from the original Mac replays at
+`de2778a`, before this evidence directory and the exclusion were added.
+Workstation paths are redacted.
 
 | Scenario | Replay exit | Gate / total | Receipt |
 | --- | ---: | ---: | --- |
-| Guarded clean; all 915 tests passed | 0 | 52.26 s / 53.20 s | [JSON](receipts/vnode-clean-final.json), [gate](receipts/vnode-clean-final.gate.txt) |
+| Guarded clean with proof exclusion; all 915 tests passed | 0 | 51.35 s / 52.53 s | [JSON](receipts/fsevents-excluded-clean.json), [gate](receipts/fsevents-excluded-clean.gate.txt) |
 | Consecutive spaces; gate failed | 2 | 0.15 s / 0.47 s | [JSON](receipts/vnode-broken.json), [gate](receipts/vnode-broken.gate.txt) |
-| Gate wrote a keyed file; key and both watchers caught it | 75 | 53.82 s / 54.70 s | [JSON](receipts/vnode-write-final.json), [gate](receipts/vnode-write-final.gate.txt) |
+| Keyed write during the gate with proof exclusion; key and both watchers caught it | 75 | 52.93 s / 54.01 s | [JSON](receipts/fsevents-excluded-write.json), [gate](receipts/fsevents-excluded-write.gate.txt) |
 | FSEvents overflow (before adding kqueue); gate passed, key unchanged | 75 | 54.78 s / 55.89 s | [JSON](receipts/followup-drops.json), [gate](receipts/followup-drops.gate.txt), [14 real coverage records](receipts/overflow-coverage-events.jsonl) |
 
 The overflow records contained real `MustScanSubDirs | UserDropped`.
-`KernelDropped` and `RootChanged` were injected only. The [race
+`KernelDropped` and `RootChanged` were injected only. Race replays
+watch a disposable checkout inside the proof directory, so there is no
+proof subtree to exclude from that stream. The original [race
 receipt](receipts/vnode-race-final.txt) records 20/20 catches by kqueue and
 0/20 by FSEvents through the cutoff in each of the keyed-write, HEAD
 replacement, and index replacement groups. The transient create/remove
 also fired only on the parent vnode. The 61 trials took 19.32 s with 434
-watched descriptors; the gate runs used 436–437 of the 65,536 soft limit.
+watched descriptors.
 Per-trial events are in [vnode-race-final.jsonl](receipts/vnode-race-final.jsonl).
 The controls show the [index read/chmod distinction](receipts/vnode-atime-index-control.txt)
 and [sibling-worktree index isolation](receipts/watch-scope.txt).

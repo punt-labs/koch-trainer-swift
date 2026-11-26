@@ -38,6 +38,7 @@ def watch_command(root, git_dir, keyed):
     binary = HERE / "watch"
     since = subprocess.check_output([binary, "id"], text=True).strip()
     command = [binary, "run", since, *sorted({root, git_dir})]
+    exclusions = []
     if (HERE != root and HERE.is_relative_to(root)
             and not git_dir.is_relative_to(HERE) and not HERE.is_relative_to(git_dir)
             and not any(path.is_relative_to(HERE) for path in keyed)):
@@ -45,7 +46,8 @@ def watch_command(root, git_dir, keyed):
         if status.returncode != 1:
             status.check_returncode()
             command.extend(["--exclude", HERE])
-    return command
+            exclusions.append(HERE)
+    return command, exclusions
 
 
 def relevant(paths, git_dir, event):
@@ -111,8 +113,9 @@ def run(root, name, touch, probe_drops, gate_write):
         guard.arm()
         before = key(root)
         guard.check_opening_paths(before["paths"])
+        watch_args, exclusions = watch_command(root, git_dir, guard.keyed)
         watcher = subprocess.Popen(
-            watch_command(root, git_dir, guard.keyed),
+            watch_args,
             stdin=subprocess.PIPE, stdout=events, stderr=subprocess.PIPE, text=True
         )
         timer = None
@@ -175,6 +178,10 @@ def run(root, name, touch, probe_drops, gate_write):
         "same_key": same_key,
         "events": len(raw_events),
         "fsevents_cutoff": cutoff,
+        "fsevents_exclusion_paths": [str(path) for path in exclusions],
+        "fsevents_excluded_path_events": sum(
+            any(Path(event["path"]).is_relative_to(path) for path in exclusions) for event in raw_events
+        ),
         "fsevents_and_keys_only_exit": 75 if fsevents_deferred else gate.returncode,
         "keyed_or_ambiguous_events": keyed,
         "vnode_events": vnode_events,

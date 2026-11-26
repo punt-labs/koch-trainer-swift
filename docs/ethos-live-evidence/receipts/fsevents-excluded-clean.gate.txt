@@ -1,0 +1,13 @@
+swiftformat --lint .
+Running SwiftFormat...
+(lint mode - no files will be changed.)
+Reading config file at <repo>/.swiftformat
+SwiftFormat completed in 0.06s.
+0/128 files require formatting, 13 files skipped.
+Running SwiftLint...
+SwiftLint: No violations found.
+Building KochTrainer on iPhone 17 Pro - HEAD...
+Running unit tests on iPhone 17 Pro - HEAD...
+	 Executed 915 tests, with 0 failures (0 unexpected) in 33.049 (33.454) seconds
+	 Executed 915 tests, with 0 failures (0 unexpected) in 33.049 (33.455) seconds
+** TEST SUCCEEDED **

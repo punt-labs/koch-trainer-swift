@@ -47,8 +47,9 @@ def trial(root, git_dir, scratch, kind):
         guard.arm()
         before = key(root)
         guard.check_opening_paths(before["paths"])
+        watch_args, exclusions = watch_command(root, git_dir, guard.keyed)
         with subprocess.Popen(
-            watch_command(root, git_dir, guard.keyed),
+            watch_args,
             stdin=subprocess.PIPE, stdout=raw, stderr=subprocess.PIPE, text=True
         ) as watcher:
             try:
@@ -69,6 +70,7 @@ def trial(root, git_dir, scratch, kind):
     assert guarded and any(event["path"] == str(path) and event["notes"] & note
                            for event in vnode_events), (kind, vnode_events)
     return {"kind": kind, "cutoff": cutoff, "fsevents_only_deferred": fsevents_only,
+            "fsevents_exclusion_paths": [str(path) for path in exclusions],
             "guarded_deferred": guarded, "relevant_fsevents": relevant,
             "vnode_events": vnode_events, "vnode_fds": len(guard.descriptors)}
 
