@@ -42,10 +42,12 @@ git -C "$koch" --no-optional-locks status --porcelain
 The replay creates the Git-ignored `DerivedData/` directory before arming
 the watches and taking the opening key. This avoids a root directory event
 when Xcode first creates its output directory on a fresh checkout.
-Other cold-build events still veto the verdict. For example, Xcode can
-create its workspace's `swiftpm/` directory, and a busy event stream can
-drop events. If a cold build passes but the replay defers on either, retry
-on the warmed checkout.
+Before Koch tracked `swiftpm/configuration/.gitkeep`, Xcode created its
+workspace's `swiftpm/` directory during the first build, which vetoed the
+verdict. Fresh checkouts now have the directory, so its creation no longer
+vetoes the first run. A busy event stream can still cause a deferral; if
+the cold build passes but the replay reports dropped events, retry on the
+warmed checkout.
 
 ```sh
 python3 -B "$proof/replay.py" "$koch" clean >"$proof/clean.json"
@@ -601,13 +603,15 @@ matched.
 
 ### SwiftPM workspace directory on fresh checkouts
 
-On the first build, Xcode 26.6 creates
+Before Koch tracked the directory, Xcode 26.6 created
 `KochTrainer.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/configuration`
-even though Koch declares no package dependencies. Moving DerivedData,
-cloned source packages, and the package cache outside the checkout
-doesn't stop this workspace write. The Darwin live-verified runner
-correctly defers when it sees the directory created during the gate.
+on the first build even though Koch declares no package dependencies.
+Moving DerivedData, cloned source packages, and the package cache outside
+the checkout did not stop this write. The Darwin live-verified runner
+correctly deferred when it saw the directory created during the gate.
 
-The tracked `configuration/.gitkeep` gives fresh checkouts that directory
-before the gate starts. It does not change the build or test commands,
-store generated package state, or exempt any path from the watchers.
+With `configuration/.gitkeep` tracked, fresh checkouts already have the
+directory. Ethos `ee23f84` retained the first clean pass in both a fresh
+linked worktree and a fresh plain clone. The marker does not change the
+build or test commands, store generated package state, or exempt any path
+from the watchers.
