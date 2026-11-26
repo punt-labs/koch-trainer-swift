@@ -36,6 +36,14 @@ git -C "$koch" --no-optional-locks status --porcelain
 
 ## Gate replays
 
+The replay creates the Git-ignored `DerivedData/` directory before arming
+the watches and taking the opening key. This avoids a root directory event
+when Xcode first creates its output directory on a fresh checkout.
+Other cold-build events still veto the verdict. For example, Xcode can
+create its workspace's `swiftpm/` directory, and a busy event stream can
+drop events. If a cold build passes but the replay defers on either, retry
+on the warmed checkout.
+
 ```sh
 python3 -B "$proof/replay.py" "$koch" clean >"$proof/clean.json"
 # Exit 0.
@@ -57,7 +65,6 @@ python3 -B "$proof/replay.py" "$koch" clean >"$proof/clean.json"
 # Exit 75. The wrapper runs make check, then writes the unignored file
 # before exiting. Cleanup occurs after the closing key.
 
-# This scenario requires the ignored DerivedData directory from the clean run.
 python3 -B "$proof/replay.py" "$koch" overflow --probe-drops >"$proof/overflow.json"
 # Exit 75. Inspect flag_probes to distinguish real from injected events.
 git -C "$koch" --no-optional-locks status --porcelain

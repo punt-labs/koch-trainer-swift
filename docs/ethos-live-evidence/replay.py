@@ -85,6 +85,11 @@ def run(root, name, touch, probe_drops, gate_write):
     started = time.monotonic()
     git_dir = git_path(root, "--git-dir")
     command = [sys.executable, HERE / "gate_write.py"] if gate_write else ["make", "check"]
+    derived_data = root / "DerivedData"
+    subprocess.run(["git", "check-ignore", "-q", "--", "DerivedData/"], cwd=root, check=True)
+    derived_data.mkdir(exist_ok=True)
+    if derived_data.is_symlink():
+        raise RuntimeError("expected DerivedData to be a checkout-local directory")
 
     with VnodeGuard(root, git_dir) as guard, \
          (HERE / f"{name}.events.jsonl").open("w") as events, \
