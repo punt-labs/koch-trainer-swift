@@ -1,0 +1,2 @@
+Scoped real stream: own HEAD and index matched; sibling index absent.
+Shared-store control stream: sibling index event observed and rejected by classifier.

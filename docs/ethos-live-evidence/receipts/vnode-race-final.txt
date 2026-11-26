@@ -1,0 +1,5 @@
+keyed: FSEvents only deferred 0/20; vnode guarded 20/20; 434 vnode FDs; 6.26 s
+HEAD: FSEvents only deferred 0/20; vnode guarded 20/20; 434 vnode FDs; 6.04 s
+index: FSEvents only deferred 0/20; vnode guarded 20/20; 434 vnode FDs; 6.62 s
+transient: FSEvents only deferred 0/1; vnode guarded 1/1; 434 vnode FDs; 0.40 s
+total: 19.32 s

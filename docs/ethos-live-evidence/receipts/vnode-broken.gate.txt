@@ -1,0 +1,9 @@
+swiftformat --lint .
+Running SwiftFormat...
+(lint mode - no files will be changed.)
+Reading config file at <repo>/.swiftformat
+<repo>/KochTrainer/HandoffParityProbe.swift:1:1: error: (consecutiveSpaces) Replace consecutive spaces with a single space.
+SwiftFormat completed in 0.05s.
+Source input did not pass lint check.
+1/128 files require formatting, 12 files skipped.
+make: *** [format-check] Error 1
