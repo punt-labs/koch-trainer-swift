@@ -5,6 +5,8 @@ checks:
     profile: linux-worktree-v1
     isolation: live-verified
     path: [/opt/homebrew/bin]
+    env:
+      CHECK_DERIVED_DATA: "{scratch}/DerivedData"
     system:
       tools: [swiftformat, swiftlint]
     epoch: koch-live-v1
