@@ -270,6 +270,27 @@ accepted both fields in live-verified mode and ran both tools. The broken
 run blocked with the expected SwiftFormat exit `2`, and a write after
 launch deferred because the checkout input set changed.
 
+Reuse the `772a20f` build and `replay_live_pair` function above. In the
+clean plain clone, switch to the revision that added the Homebrew fields
+and approve again in an interactive terminal. The pin from the earlier
+plain-clone replay does not cover this policy.
+
+```sh
+clone="$HOME/repos/koch-plain-parity-9d4caa9"
+revision=549de7a1829be0478c1c4a33ac522aec1228e846
+if cd "$clone" &&
+   test -d .git &&
+   git fetch origin "$revision" &&
+   git switch --detach "$revision"; then
+  koch="$(pwd -P)"
+  runner="$proof/ethos"
+  "$runner" handoff approve-live swift-default && replay_live_pair
+fi
+```
+
+For the keyed-write case, repeat the probe above from this same checkout
+after the clean and broken runs.
+
 **Clean parity still waits for the runner to keep full Xcode selected.**
 This runner set `DEVELOPER_DIR` to the Command Line Tools directory for
 `make`. SwiftFormat passed, but SwiftLint could not load `sourcekitdInProc`.
